@@ -1,10 +1,16 @@
 {
   "name": "seismic",
   "version": "1.0.0",
+  "description": "Typescript interface for Seismic",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "keywords": [
+    "Seismic"
+  ],
+  "license": "MIT",
+  "author": "Seismic Systems",
   "exports": {
     ".": {
       "require": "./dist/index.js",
@@ -17,8 +23,10 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit; rm tsconfig.tsbuildinfo"
+    "typecheck": "tsc --noEmit; rm tsconfig.tsbuildinfo",
+    "build": "bun build ./src/index.ts --target node --outdir dist --format esm,cjs && bun run build:declaration",
+    "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json",
+    "postbuild": "rimraf tsconfig.types.tsbuildinfo"
   },
   "dependencies": {
     "viem": "^2.21.50"

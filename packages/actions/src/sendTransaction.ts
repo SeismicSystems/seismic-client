@@ -100,7 +100,7 @@ export type SendSeismicTransactionErrorType =
  * taking in `seismicInput` as the (ciphered) input
  * to the node.
  */
-export async function seismicSendTransaction<
+export async function sendShieldedTransaction<
   TChain extends Chain | undefined,
   TAccount extends Account | undefined,
   const TRequest extends SendSeismicTransactionRequest<TChain, TChainOverride>,

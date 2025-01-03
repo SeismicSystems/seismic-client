@@ -7,7 +7,7 @@ import {
 } from 'viem'
 import type { Hex, Signature, TransactionSerializable } from 'viem'
 
-import { toYParitySignatureArray } from './viem/signature'
+import { toYParitySignatureArray } from '@actions/viem/signature'
 
 export const serializeSeismicTransaction = (
   transaction: TransactionSerializable & { seismicInput?: Hex | undefined },
@@ -31,8 +31,12 @@ export const serializeSeismicTransaction = (
     seismicInput,
   } = transaction
 
+  if (!chainId) {
+    throw new Error('Seismic transactions require chainId argument')
+  }
+
   const rlpEncoded = toRlp([
-    chainId ? toHex(chainId) : '0x',
+    toHex(chainId),
     nonce ? toHex(nonce) : '0x',
     gasPrice ? toHex(gasPrice) : '0x',
     gas ? toHex(gas) : '0x',
@@ -49,7 +53,7 @@ export const serializeSeismicTransaction = (
   return encodedTx
 }
 
-export const seismicChain = /*#__PURE__*/ defineChain({
+export const seismicDevnet = /*#__PURE__*/ defineChain({
   // TODO
   id: 1337,
   name: 'Seismic',

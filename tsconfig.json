@@ -1,8 +1,8 @@
 {
   "extends": "./tsconfig.base.json",
   "references": [
-    { "path": "./packages/actions" }
-    // { "path": "./tests/actions" }
+    { "path": "./packages/actions" },
+    { "path": "./tests/actions" }
   ],
   "include": [],
   "exclude": ["node_modules", "dist", "packages/**/dist"]

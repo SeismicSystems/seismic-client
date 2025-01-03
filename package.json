@@ -2,13 +2,15 @@
   "name": "seismic-client",
   "private": true,
   "workspaces": [
-    "packages/**"
+    "packages/**",
+    "tests/**"
   ],
   "scripts": {
     "typecheck": "bun run --cwd packages/actions typecheck",
     "lint": "eslint packages/actions tests/actions",
-    "test:seismictx:anvil": "CHAIN=anvil bun test --cwd tests/actions ./src/index.ts",
-    "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/actions ./src/index.ts"
+    "clean": "bun run --cwd packages/actions clean",
+    "test:seismictx:anvil": "CHAIN=anvil bun test --cwd tests/actions contract",
+    "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/actions contract"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.1",
@@ -18,9 +20,9 @@
     "dotenv": "^16.4.7",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-typescript": "^3.7.0",
-    "eslint-plugin-import-x": "^4.6.1",
+    "eslint-plugin-import": "^2.31.0",
     "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
     "terminate": "^2.8.0"
   },
   "peerDependencies": {

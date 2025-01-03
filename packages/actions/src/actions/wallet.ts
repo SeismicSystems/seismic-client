@@ -10,7 +10,7 @@ import type {
   SendSeismicTransactionRequest,
   SendSeismicTransactionReturnType,
 } from '@actions/sendTransaction.js'
-import { seismicSendTransaction } from '@actions/sendTransaction.js'
+import { sendShieldedTransaction } from '@actions/sendTransaction.js'
 import { signedCall } from '@actions/signedCall'
 import type { SignedCall } from '@actions/signedCall'
 
@@ -21,7 +21,7 @@ export type ShieldedWalletActions<
   writeContract: SeismicWriteContract<TChain, TAccount>
   readContract: SignedReadContract
   signedCall: SignedCall<TChain>
-  seismicSendTransaction: <
+  sendShieldedTransaction: <
     const request extends SendSeismicTransactionRequest<TChain, TChainOverride>,
     TChainOverride extends Chain | undefined = undefined,
   >(
@@ -47,8 +47,8 @@ export const shieldedWalletActions = <
     writeContract: (args) => shieldedWriteContract(client, args as any),
     readContract: (args) => signedReadContract(client, args as any),
     signedCall: (args) => signedCall(client, args as any),
-    seismicSendTransaction: (args) =>
-      seismicSendTransaction(client, args as any),
+    sendShieldedTransaction: (args) =>
+      sendShieldedTransaction(client, args as any),
     getEncryption: () => encryption,
   }
 }

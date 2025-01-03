@@ -21,7 +21,7 @@ import type { ShieldedWalletClient } from '@actions/client'
 import { hasShieldedInputs, remapSeismicAbiInputs } from '@actions/contract/abi'
 import { AesGcmCrypto } from '@actions/crypto/aes'
 import type { SendSeismicTransactionParameters } from '@actions/sendTransaction.js'
-import { seismicSendTransaction } from '@actions/sendTransaction.js'
+import { sendShieldedTransaction } from '@actions/sendTransaction.js'
 
 /**
   Determine whether the contract has shielded parameters.
@@ -140,7 +140,7 @@ export async function shieldedWriteContract<
     gasPrice: gasPrice!,
     nonce: nonce!,
   }
-  return seismicSendTransaction(client, request)
+  return sendShieldedTransaction(client, request)
 }
 
 export type SeismicWriteContract<

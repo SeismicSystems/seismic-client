@@ -1,6 +1,6 @@
 import { Chain, anvil } from 'viem/chains'
 
-import { seismicChain } from '@actions/chain'
+import { seismicDevnet } from '@actions/chain'
 import { setupAnvilNode } from '@test/process/chains/anvil'
 import { setupRethNode } from '@test/process/chains/reth'
 import { ServerProcess } from '@test/process/manage'
@@ -28,7 +28,7 @@ const nameToChain = (name: ChainName): Chain => {
     case ChainName.Anvil:
       return anvil
     case ChainName.Devnet:
-      return seismicChain
+      return seismicDevnet
     default:
       throw new Error(`Unable to map ${name} to Chain`)
   }
@@ -46,7 +46,7 @@ export const setupNode = async (chain: Chain): Promise<SpawnedNode> => {
   switch (chain.id) {
     case anvil.id:
       return setupAnvilNode()
-    case seismicChain.id:
+    case seismicDevnet.id:
       return setupRethNode()
     default:
       throw new Error(`Unable to map Chain ${chain.id} to Backend`)
