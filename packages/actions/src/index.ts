@@ -11,3 +11,8 @@ export {
   createShieldedPublicClient,
   createShieldedWalletClient,
 } from '@actions/client'
+
+export type {
+  ShieldedPublicClient,
+  ShieldedWalletClient,
+} from '@actions/client'

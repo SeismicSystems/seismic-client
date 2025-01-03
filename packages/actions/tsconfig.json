@@ -4,9 +4,14 @@
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "composite": true,
-    "outDir": "dist",
-    "rootDir": "src",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": ".",
+    "downlevelIteration": true,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "types": ["bun-types"],
     "paths": {
       "@actions/*": ["src/*"]
     }

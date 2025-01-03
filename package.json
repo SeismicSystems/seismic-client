@@ -6,6 +6,7 @@
     "tests/**"
   ],
   "scripts": {
+    "build:actions": "bun run --cwd packages/actions build",
     "typecheck": "bun run --cwd packages/actions typecheck",
     "lint": "eslint packages/actions tests/actions",
     "clean": "bun run --cwd packages/actions clean",
@@ -17,6 +18,7 @@
     "@types/bun": "^1.1.14",
     "@typescript-eslint/eslint-plugin": "^8.19.0",
     "@typescript-eslint/parser": "^8.19.0",
+    "bun-types": "^1.1.42",
     "dotenv": "^16.4.7",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
