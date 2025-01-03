@@ -1,0 +1,169 @@
+import type {
+  Abi,
+  AbiFunction,
+  AbiItemName,
+  Account,
+  Chain,
+  Client,
+  ContractFunctionArgs,
+  ContractFunctionName,
+  GetAbiItemParameters,
+  Hex,
+  Transport,
+  WriteContractParameters,
+  WriteContractReturnType,
+} from 'viem'
+import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
+import { writeContract } from 'viem/actions'
+import { formatAbiItem } from 'viem/utils'
+
+import type { ShieldedWalletClient } from '@actions/client'
+import { hasShieldedInputs, remapSeismicAbiInputs } from '@actions/contract/abi'
+import { AesGcmCrypto } from '@actions/crypto/aes'
+import type { SendSeismicTransactionParameters } from '@actions/sendTransaction.js'
+import { seismicSendTransaction } from '@actions/sendTransaction.js'
+
+/**
+  Determine whether the contract has shielded parameters.
+  If so, we will encrypt the entire payload;
+  If not, we will send a normal Ethereum transaction
+  */
+export function useSeismicWrite<
+  const abi extends Abi | readonly unknown[],
+  name extends AbiItemName<abi>,
+>(parameters: GetAbiItemParameters<abi, name, undefined>): boolean {
+  const { abi, name } = parameters as unknown as GetAbiItemParameters
+  const abiItem = getAbiItem({ abi, name }) as AbiFunction
+  return hasShieldedInputs(abiItem)
+}
+
+/**
+ * Executes a write function on a contract.
+ *
+ * - Docs: https://viem.sh/docs/contract/writeContract
+ * - Examples: https://stackblitz.com/github/wevm/viem/tree/main/examples/contracts/writing-to-contracts
+ *
+ * A "write" function on a Solidity contract modifies the state of the blockchain. These types of functions require gas to be executed, and hence a [Transaction](https://viem.sh/docs/glossary/terms) is needed to be broadcast in order to change the state.
+ *
+ * Internally, uses a [Wallet Client](https://viem.sh/docs/clients/wallet) to call the [`sendTransaction` action](https://viem.sh/docs/actions/wallet/sendTransaction) with [ABI-encoded `data`](https://viem.sh/docs/contract/encodeFunctionData).
+ *
+ * __Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.__
+ *
+ * @param client - Client to use
+ * @param parameters - {@link WriteContractParameters}
+ * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link WriteContractReturnType}
+ *
+ * @example
+ * import { createWalletClient, custom, parseAbi } from 'viem'
+ * import { mainnet } from 'viem/chains'
+ * import { writeContract } from 'viem/contract'
+ *
+ * const client = createWalletClient({
+ *   chain: mainnet,
+ *   transport: custom(window.ethereum),
+ * })
+ * const hash = await writeContract(client, {
+ *   address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+ *   abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
+ *   functionName: 'mint',
+ *   args: [69420],
+ * })
+ *
+ * @example
+ * // With Validation
+ * import { createWalletClient, http, parseAbi } from 'viem'
+ * import { mainnet } from 'viem/chains'
+ * import { simulateContract, writeContract } from 'viem/contract'
+ *
+ * const client = createWalletClient({
+ *   chain: mainnet,
+ *   transport: http(),
+ * })
+ * const { request } = await simulateContract(client, {
+ *   address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+ *   abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
+ *   functionName: 'mint',
+ *   args: [69420],
+ * }
+ * const hash = await writeContract(client, request)
+ */
+export async function shieldedWriteContract<
+  TTransport extends Transport,
+  TChain extends Chain | undefined,
+  TAccount extends Account | undefined,
+  const TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
+  chainOverride extends Chain | undefined = undefined,
+>(
+  client: ShieldedWalletClient<TTransport, TChain, TAccount>,
+  parameters: WriteContractParameters<
+    TAbi,
+    TFunctionName,
+    TArgs,
+    TChain,
+    TAccount,
+    chainOverride
+  >
+): Promise<WriteContractReturnType> {
+  const { abi, functionName, args = [] } = parameters as WriteContractParameters
+  if (!args || !useSeismicWrite({ abi, name: functionName })) {
+    return writeContract(client, parameters)
+  }
+
+  const { address, nonce, gas, gasPrice } =
+    parameters as WriteContractParameters
+  if (!nonce) {
+    throw new Error('Must specify nonce with seismic transaction')
+  }
+
+  const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
+  const selector = toFunctionSelector(formatAbiItem(seismicAbi))
+  const ethAbi = remapSeismicAbiInputs(seismicAbi)
+  const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
+  const encodedData = `${selector}${encodedParams}` as `0x${string}`
+
+  const aesKey = client.getEncryption()
+  const aesCipher = new AesGcmCrypto(aesKey)
+
+  const data = aesCipher.encrypt(encodedData, nonce).ciphertext
+
+  const request: SendSeismicTransactionParameters<TChain, TAccount> = {
+    to: address,
+    seismicInput: data,
+    // data,
+    gas: gas!,
+    gasPrice: gasPrice!,
+    nonce: nonce!,
+  }
+  return seismicSendTransaction(client, request)
+}
+
+export type SeismicWriteContract<
+  TChain extends Chain | undefined,
+  TAccount extends Account | undefined,
+  abi extends Abi | readonly unknown[] = Abi | readonly unknown[],
+  functionName extends ContractFunctionName<
+    abi,
+    'payable' | 'nonpayable'
+  > = ContractFunctionName<abi, 'payable' | 'nonpayable'>,
+  args extends ContractFunctionArgs<
+    abi,
+    'payable' | 'nonpayable',
+    functionName
+  > = ContractFunctionArgs<abi, 'payable' | 'nonpayable', functionName>,
+  TChainOverride extends Chain | undefined = undefined,
+> = (
+  args: WriteContractParameters<
+    abi,
+    functionName,
+    args,
+    TChain,
+    TAccount,
+    TChainOverride
+  >
+) => Promise<WriteContractReturnType>

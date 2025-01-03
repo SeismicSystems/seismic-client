@@ -1,0 +1,29 @@
+{
+  "name": "seismic",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "bun run --cwd packages/actions typecheck",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "viem": "^2.21.50"
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-no-relative-import-paths": "^1.5.5"
+  }
+}

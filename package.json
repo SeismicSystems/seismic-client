@@ -1,0 +1,33 @@
+{
+  "name": "seismic-client",
+  "private": true,
+  "workspaces": [
+    "packages/**",
+    "tests/**"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint packages/actions tests/actions",
+    "test:seismictx:anvil": "CHAIN=anvil bun test --cwd tests/actions ./src/index.ts",
+    "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/actions ./src/index.ts"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.1",
+    "@types/bun": "^1.1.14",
+    "@typescript-eslint/eslint-plugin": "^8.19.0",
+    "@typescript-eslint/parser": "^8.19.0",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-import-x": "^4.6.1",
+    "prettier": "^3.4.2",
+    "terminate": "^2.8.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "noble": "^1.9.1"
+  }
+}

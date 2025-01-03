@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "test_dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@actions/*": ["../../packages/actions/src/*"],
+      "@test/*": ["src/*"]
+    }
+  }
+}

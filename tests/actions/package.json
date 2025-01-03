@@ -1,0 +1,5 @@
+{
+  "name": "seismic-client-tests",
+  "private": true,
+  "type": "module"
+}
