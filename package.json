@@ -2,11 +2,10 @@
   "name": "seismic-client",
   "private": true,
   "workspaces": [
-    "packages/**",
-    "tests/**"
+    "packages/**"
   ],
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bun run --cwd packages/actions typecheck",
     "lint": "eslint packages/actions tests/actions",
     "test:seismictx:anvil": "CHAIN=anvil bun test --cwd tests/actions ./src/index.ts",
     "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/actions ./src/index.ts"

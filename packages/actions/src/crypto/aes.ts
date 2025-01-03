@@ -42,9 +42,9 @@ export class AesGcmCrypto {
    * RLP encodes the input data
    * @param data - The hex data to encode
    */
-  private rlpEncodeInput(data: Hex): Buffer {
+  private rlpEncodeInput(data: Hex): Uint8Array {
     const rlpEncoded = hexToRlp(data)
-    return Buffer.from(rlpEncoded.slice(2), 'hex')
+    return new Uint8Array(Buffer.from(rlpEncoded.slice(2), 'hex'))
   }
 
   /**
@@ -76,27 +76,24 @@ export class AesGcmCrypto {
     ciphertext: Hex
   } {
     // Handle the nonce based on its type
-    const nonceBuffer =
+    const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
         ? this.validateAndConvertNonce(nonce as Hex)
         : this.numberToNonce(nonce)
+    )
 
     // TODO: remove this, it already gets RLP encoded when serializing
     // RLP encode the input data
     const rlpEncodedData = this.rlpEncodeInput(plaintext)
 
-    // Create cipher with key and nonce
-    const cipher = createCipheriv(
-      this.ALGORITHM,
-      Buffer.from(this.key.slice(2), 'hex'),
-      nonceBuffer
-    )
+    const key = new Uint8Array(Buffer.from(this.key.slice(2), 'hex'))
+    const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
 
     // Encrypt the RLP encoded data
     const ciphertext = Buffer.concat([
-      cipher.update(rlpEncodedData),
-      cipher.final(),
-      cipher.getAuthTag(), // Append the auth tag to match Rust's behavior
+      new Uint8Array(cipher.update(rlpEncodedData)),
+      new Uint8Array(cipher.final()),
+      new Uint8Array(cipher.getAuthTag()),
     ])
 
     return {
@@ -109,32 +106,33 @@ export class AesGcmCrypto {
    */
   public decrypt(ciphertext: Hex, nonce: number | bigint | Hex): Hex {
     // Handle the nonce based on its type
-    const nonceBuffer =
+    const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
         ? this.validateAndConvertNonce(nonce as Hex)
         : this.numberToNonce(nonce)
+    )
 
-    const ciphertextBuffer = Buffer.from(ciphertext.slice(2), 'hex')
+    const ciphertextBuffer = new Uint8Array(
+      Buffer.from(ciphertext.slice(2), 'hex')
+    )
 
     // Extract the tag from the end (last 16 bytes)
     const tag = ciphertextBuffer.slice(-this.TAG_LENGTH)
     const encryptedData = ciphertextBuffer.slice(0, -this.TAG_LENGTH)
 
-    // Create decipher with key and nonce
-    const decipher = createDecipheriv(
-      this.ALGORITHM,
-      Buffer.from(this.key.slice(2), 'hex'),
-      nonceBuffer
-    )
+    const key = new Uint8Array(Buffer.from(this.key.slice(2), 'hex'))
+    const decipher = createDecipheriv(this.ALGORITHM, key, nonceBuffer)
 
     // Set the auth tag
     decipher.setAuthTag(tag)
 
     // Decrypt the data
-    const decrypted = Buffer.concat([
-      decipher.update(encryptedData),
-      decipher.final(),
-    ])
+    const decrypted = new Uint8Array(
+      Buffer.concat([
+        new Uint8Array(decipher.update(encryptedData)),
+        new Uint8Array(decipher.final()),
+      ])
+    )
 
     // Remove RLP prefix from decrypted data
     const decoded = Buffer.from(decrypted.slice(1))
@@ -153,10 +151,9 @@ const generateSharedKey = ({
     ? privateKey.slice(2)
     : privateKey
   const walletKey = createECDH('secp256k1')
-  walletKey.setPrivateKey(Buffer.from(privateKeyHex, 'hex'))
-  const sharedSecret = walletKey.computeSecret(
-    Buffer.from(networkPublicKey, 'hex')
-  )
+  walletKey.setPrivateKey(new Uint8Array(Buffer.from(privateKeyHex, 'hex')))
+  const key = new Uint8Array(Buffer.from(networkPublicKey, 'hex'))
+  const sharedSecret = walletKey.computeSecret(key)
 
   // Get the last byte (index 63) and apply the bitwise operations
   const version = (sharedSecret[63] & 0x01) | 0x02
@@ -175,7 +172,7 @@ const generateSharedKey = ({
 const deriveAesKey = (sharedSecret: string): Hex => {
   const derivedKey = hkdf(
     sha256, // Hash function
-    Buffer.from(sharedSecret, 'hex'), // Input key material (IKM) - shared secret
+    new Uint8Array(Buffer.from(sharedSecret, 'hex')), // Input key material (IKM) - shared secret
     new Uint8Array(0), // Salt
     new TextEncoder().encode('aes-gcm key'), // Info (optional context string)
     32 // Output length (32 bytes for AES-256)

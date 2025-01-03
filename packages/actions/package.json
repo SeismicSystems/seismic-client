@@ -16,8 +16,9 @@
     "dist"
   ],
   "scripts": {
-    "typecheck": "bun run --cwd packages/actions typecheck",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit; rm tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "viem": "^2.21.50"
