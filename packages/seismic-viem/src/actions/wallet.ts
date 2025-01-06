@@ -1,18 +1,18 @@
 import type { Account, Chain, Hex, Transport } from 'viem'
 
-import { ShieldedWalletClient } from '@actions/client'
-import type { SignedReadContract } from '@actions/contract/read'
-import { signedReadContract } from '@actions/contract/read'
-import type { SeismicWriteContract } from '@actions/contract/write'
-import { shieldedWriteContract } from '@actions/contract/write'
+import { ShieldedWalletClient } from '@sviem/client'
+import type { SignedReadContract } from '@sviem/contract/read'
+import { signedReadContract } from '@sviem/contract/read'
+import type { SeismicWriteContract } from '@sviem/contract/write'
+import { shieldedWriteContract } from '@sviem/contract/write'
 import type {
   SendSeismicTransactionParameters,
   SendSeismicTransactionRequest,
   SendSeismicTransactionReturnType,
-} from '@actions/sendTransaction.js'
-import { sendShieldedTransaction } from '@actions/sendTransaction.js'
-import { signedCall } from '@actions/signedCall'
-import type { SignedCall } from '@actions/signedCall'
+} from '@sviem/sendTransaction.js'
+import { sendShieldedTransaction } from '@sviem/sendTransaction.js'
+import { signedCall } from '@sviem/signedCall'
+import type { SignedCall } from '@sviem/signedCall'
 
 export type ShieldedWalletActions<
   TChain extends Chain | undefined = Chain | undefined,

@@ -6,13 +6,19 @@
     "tests/**"
   ],
   "scripts": {
-    "clean": "bun run --cwd packages/actions clean",
-    "lint": "eslint packages/actions tests/actions",
-    "typecheck": "bun run --cwd packages/actions typecheck",
-    "build:actions": "bun run --cwd packages/actions build",
-    "publish:actions": "npm publish -w packages/actions",
-    "test:seismictx:anvil": "CHAIN=anvil bun test --cwd tests/actions contract",
-    "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/actions contract"
+    "clean": "bun run --cwd packages/seismic-viem clean",
+    "lint": "eslint packages/seismic-viem tests/seismic-viem",
+    "typecheck": "bun run --cwd packages/seismic-viem typecheck",
+    "build:viem": "bun run --cwd packages/seismic-viem build",
+    "publish:viem": "npm publish -w packages/seismic-viem",
+    "test:seismictx:anvil": "CHAIN=anvil bun test --cwd tests/seismic-viem contract",
+    "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/seismic-viem contract"
+  },
+  "dependencies": {
+    "noble": "^1.9.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.2"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.1",
@@ -28,11 +34,5 @@
     "rimraf": "^6.0.1",
     "terminate": "^2.8.0",
     "tsc-alias": "^1.8.10"
-  },
-  "peerDependencies": {
-    "typescript": "^5.7.2"
-  },
-  "dependencies": {
-    "noble": "^1.9.1"
   }
 }

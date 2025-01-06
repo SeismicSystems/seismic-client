@@ -4,15 +4,15 @@
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "composite": true,
-    "rootDir": ".",
-    "baseUrl": ".",
     "downlevelIteration": true,
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
     "types": ["bun-types"],
+    "rootDir": "./src",
+    "baseUrl": "src",
     "paths": {
-      "@actions/*": ["./src/*"]
+      "@sviem/*": ["./*"]
     }
   }
 }

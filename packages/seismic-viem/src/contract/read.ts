@@ -20,9 +20,9 @@ import {
 import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
-import { remapSeismicAbiInputs } from '@actions/contract/abi'
-import type { SignedCallParameters } from '@actions/signedCall'
-import { signedCall } from '@actions/signedCall'
+import { remapSeismicAbiInputs } from '@sviem/contract/abi'
+import type { SignedCallParameters } from '@sviem/signedCall'
+import { signedCall } from '@sviem/signedCall'
 
 export async function signedReadContract<
   TChain extends Chain | undefined,

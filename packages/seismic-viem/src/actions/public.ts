@@ -11,7 +11,7 @@ import type {
   Transport,
 } from 'viem'
 
-import type { ShieldedPublicClient } from '@actions/client'
+import type { ShieldedPublicClient } from '@sviem/client'
 
 export type ShieldedPublicActions<
   TChain extends Chain | undefined = Chain | undefined,

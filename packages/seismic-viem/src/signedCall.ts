@@ -20,8 +20,8 @@ import {
 import { prepareTransactionRequest } from 'viem/actions'
 import { extract, getCallError, parseAccount } from 'viem/utils'
 
-import { serializeSeismicTransaction } from '@actions/chain'
-import type { ScheduleMulticallParameters } from '@actions/viem-internal/call'
+import { serializeSeismicTransaction } from '@sviem/chain'
+import type { ScheduleMulticallParameters } from '@sviem/viem-internal/call'
 import {
   getRevertErrorData,
   scheduleMulticall,
@@ -29,9 +29,9 @@ import {
   shouldPerformMulticall,
   toDeploylessCallViaBytecodeData,
   toDeploylessCallViaFactoryData,
-} from '@actions/viem-internal/call'
-import type { ErrorType } from '@actions/viem-internal/error'
-import type { AssertRequestParameters } from '@actions/viem-internal/request'
+} from '@sviem/viem-internal/call'
+import type { ErrorType } from '@sviem/viem-internal/error'
+import type { AssertRequestParameters } from '@sviem/viem-internal/request'
 
 export type SignedCallParameters<chain extends Chain | undefined> =
   CallParameters<chain> & { seismicInput?: Hex | undefined }

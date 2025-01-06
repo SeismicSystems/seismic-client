@@ -5,8 +5,8 @@ import { parseGwei } from 'viem/utils'
 import {
   createShieldedPublicClient,
   createShieldedWalletClient,
-} from '@actions/client'
-import { getShieldedContract } from '@actions/contract/contract'
+} from '@sviem/client'
+import { getShieldedContract } from '@sviem/contract/contract'
 import { contractABI } from '@test/contract/abi'
 import { bytecode } from '@test/contract/bytecode'
 import { loadDotenv } from '@test/env'

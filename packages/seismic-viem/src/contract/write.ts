@@ -17,11 +17,11 @@ import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
 import { writeContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
-import type { ShieldedWalletClient } from '@actions/client'
-import { hasShieldedInputs, remapSeismicAbiInputs } from '@actions/contract/abi'
-import { AesGcmCrypto } from '@actions/crypto/aes'
-import type { SendSeismicTransactionParameters } from '@actions/sendTransaction.js'
-import { sendShieldedTransaction } from '@actions/sendTransaction.js'
+import type { ShieldedWalletClient } from '@sviem/client'
+import { hasShieldedInputs, remapSeismicAbiInputs } from '@sviem/contract/abi'
+import { AesGcmCrypto } from '@sviem/crypto/aes'
+import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.js'
+import { sendShieldedTransaction } from '@sviem/sendTransaction.js'
 
 /**
   Determine whether the contract has shielded parameters.

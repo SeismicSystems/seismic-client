@@ -1,6 +1,6 @@
 import { Chain, anvil } from 'viem/chains'
 
-import { seismicDevnet } from '@actions/chain'
+import { seismicDevnet } from '@sviem/chain'
 import { setupAnvilNode } from '@test/process/chains/anvil'
 import { setupRethNode } from '@test/process/chains/reth'
 import { ServerProcess } from '@test/process/manage'

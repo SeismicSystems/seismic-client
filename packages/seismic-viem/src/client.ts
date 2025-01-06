@@ -21,11 +21,11 @@ import type { PublicClientConfig } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { anvil } from 'viem/chains'
 
-import type { ShieldedPublicActions } from '@actions/actions/public'
-import { shieldedPublicActions } from '@actions/actions/public'
-import type { ShieldedWalletActions } from '@actions/actions/wallet'
-import { shieldedWalletActions } from '@actions/actions/wallet'
-import { generateAesKey } from '@actions/crypto/aes'
+import type { ShieldedPublicActions } from '@sviem/actions/public'
+import { shieldedPublicActions } from '@sviem/actions/public'
+import type { ShieldedWalletActions } from '@sviem/actions/wallet'
+import { shieldedWalletActions } from '@sviem/actions/wallet'
+import { generateAesKey } from '@sviem/crypto/aes'
 
 export type ShieldedPublicClient<
   transport extends Transport = Transport,

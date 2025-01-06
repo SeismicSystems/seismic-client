@@ -42,18 +42,18 @@ import {
   getTransactionError,
 } from 'viem/utils'
 
-import { serializeSeismicTransaction } from '@actions/chain'
+import { serializeSeismicTransaction } from '@sviem/chain'
 import type {
   AccountNotFoundErrorType,
   AccountTypeNotSupportedErrorType,
-} from '@actions/error/account'
+} from '@sviem/error/account'
 import {
   AccountNotFoundError,
   AccountTypeNotSupportedError,
-} from '@actions/error/account'
-import type { GetAccountParameter } from '@actions/viem-internal/account'
-import type { ErrorType } from '@actions/viem-internal/error'
-import type { AssertRequestParameters } from '@actions/viem-internal/request'
+} from '@sviem/error/account'
+import type { GetAccountParameter } from '@sviem/viem-internal/account'
+import type { ErrorType } from '@sviem/viem-internal/error'
+import type { AssertRequestParameters } from '@sviem/viem-internal/request'
 
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
