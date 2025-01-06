@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist/_types",
+    "rootDir": "./src",
+    "baseUrl": "src",
+    "paths": {
+      "@sviem/*": ["./*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

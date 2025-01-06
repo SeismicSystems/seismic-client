@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "references": [
+    { "path": "./packages/seismic-viem" },
+    { "path": "./tests/seismic-viem" }
+  ],
+  "include": [],
+  "exclude": ["node_modules", "dist", "packages/**/dist"]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "seismic-client",
+  "private": true,
+  "workspaces": [
+    "packages/**",
+    "tests/**"
+  ],
+  "scripts": {
+    "clean": "bun run --cwd packages/seismic-viem clean",
+    "lint": "eslint packages/seismic-viem tests/seismic-viem",
+    "typecheck": "bun run --cwd packages/seismic-viem typecheck",
+    "build:viem": "bun run --cwd packages/seismic-viem build",
+    "publish:viem": "npm publish -w packages/seismic-viem",
+    "test:seismictx:anvil": "CHAIN=anvil bun test --cwd tests/seismic-viem contract",
+    "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/seismic-viem contract"
+  },
+  "dependencies": {
+    "noble": "^1.9.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.1",
+    "@types/bun": "^1.1.14",
+    "@typescript-eslint/eslint-plugin": "^8.19.0",
+    "@typescript-eslint/parser": "^8.19.0",
+    "bun-types": "^1.1.42",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "terminate": "^2.8.0",
+    "tsc-alias": "^1.8.10"
+  }
+}
