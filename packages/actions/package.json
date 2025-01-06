@@ -16,7 +16,8 @@
   "files": [
     "dist/_cjs/*.js",
     "dist/_esm/*.js",
-    "dist/_types/*.d.ts"
+    "dist/_types/**/*.d.ts",
+    "README.md"
   ],
   "keywords": [
     "Seismic"
@@ -29,7 +30,7 @@
     "build": "bun build:cjs && bun build:esm && bun build:types",
     "build:cjs": "bun build src/index.ts --outdir dist/_cjs --target node --format cjs",
     "build:esm": "bun build src/index.ts --outdir dist/_esm --target browser --format esm",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist/_types",
+    "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "rimraf tsconfig.types.tsbuildinfo"
   },
   "dependencies": {

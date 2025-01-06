@@ -51,9 +51,9 @@ import {
   AccountNotFoundError,
   AccountTypeNotSupportedError,
 } from '@actions/error/account'
-import type { GetAccountParameter } from '@actions/viem/account'
-import type { ErrorType } from '@actions/viem/error'
-import type { AssertRequestParameters } from '@actions/viem/request'
+import type { GetAccountParameter } from '@actions/viem-internal/account'
+import type { ErrorType } from '@actions/viem-internal/error'
+import type { AssertRequestParameters } from '@actions/viem-internal/request'
 
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,

@@ -4,8 +4,13 @@
     "noEmit": false,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "declarationMap": true,
+    "outDir": "./dist/_types",
+    "rootDir": "./src",
+    "baseUrl": "src",
+    "paths": {
+      "@actions/*": ["./*"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

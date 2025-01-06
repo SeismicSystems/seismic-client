@@ -9,7 +9,7 @@
     "rootDir": "../..",
     "paths": {
       "@actions/*": ["../../packages/actions/src/*"],
-      "@test/*": ["src/*"]
+      "@test/*": ["./src/*"]
     }
   }
 }

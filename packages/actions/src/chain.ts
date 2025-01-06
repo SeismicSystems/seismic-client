@@ -7,7 +7,7 @@ import {
 } from 'viem'
 import type { Hex, Signature, TransactionSerializable } from 'viem'
 
-import { toYParitySignatureArray } from '@actions/viem/signature'
+import { toYParitySignatureArray } from '@actions/viem-internal/signature'
 
 export const serializeSeismicTransaction = (
   transaction: TransactionSerializable & { seismicInput?: Hex | undefined },

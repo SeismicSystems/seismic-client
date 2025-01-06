@@ -23,9 +23,9 @@ import { getContract } from 'viem'
 import type { ShieldedWalletClient } from '@actions/client'
 import { signedReadContract } from '@actions/contract/read'
 import { shieldedWriteContract } from '@actions/contract/write'
-import type { KeyedClient } from '@actions/viem/client'
-import type { GetReadFunction } from '@actions/viem/function'
-import { getFunctionParameters } from '@actions/viem/function'
+import type { KeyedClient } from '@actions/viem-internal/client'
+import type { GetReadFunction } from '@actions/viem-internal/function'
+import { getFunctionParameters } from '@actions/viem-internal/function'
 
 type SignedReadContractReturnType<
   TAbi extends Abi | readonly unknown[],
