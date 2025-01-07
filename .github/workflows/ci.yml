@@ -1,0 +1,47 @@
+name: Test seismic-client against sanvil and reth
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: self-hosted
+    env:
+      SEISMIC_ROOT: /home/azureuser/seismic/seismic-reth
+      PRIVATE_KEY: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+      RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
+      RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
+      SEISMIC_RETH_FILES: /home/azureuser/.seismic-reth
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: Build reth
+        run: |
+          cd "$SEISMIC_ROOT"
+          cargo build --release --bin reth
+
+      - name: Return to main repo
+        run: cd "$GITHUB_WORKSPACE"
+
+      - name: Create .env
+        run: |
+          echo "SEISMIC_ROOT=$SEISMIC_ROOT" > .env
+          echo "PRIVATE_KEY=$PRIVATE_KEY" >> .env
+          echo "RETH_DATA_DIR=$RETH_DATA_DIR" >> .env
+          echo "RETH_STATIC_FILES=$RETH_STATIC_FILES" >> .env
+          # Not adding SEISMIC_RETH_FILES to .env as per requirement
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Test devnet
+        run: bun test:seismictx:devnet
+
+      - name: Remove reth files
+        run: rm -rf "$SEISMIC_RETH_FILES"
+
+      - name: Test anvil
+        run: bun test:seismictx:anvil
