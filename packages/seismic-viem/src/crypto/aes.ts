@@ -4,18 +4,14 @@ import { hexToRlp } from 'viem'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
-declare const Bun: any
-
-const crypto = (() => {
-  if (typeof Bun !== 'undefined') {
-    // Bun environment
-    return require('node:crypto')
-  }
-  // Node environment
-  return require('crypto')
-})()
-
-const { createCipheriv, createDecipheriv, createECDH } = crypto
+const { createECDH, createCipheriv, createDecipheriv } = require('node:crypto')
+// export const getCrypto = async () => {
+//   if (typeof window === 'undefined') {
+//     return await import('node:crypto')
+//   }
+//   // Browser fallback if needed
+//   throw new Error('Crypto functions not available in this environment')
+// }
 
 export class AesGcmCrypto {
   private readonly ALGORITHM = 'aes-256-gcm'
@@ -81,12 +77,11 @@ export class AesGcmCrypto {
   /**
    * Encrypts data using either a number-based nonce or hex nonce
    */
-  public encrypt(
+  public async encrypt(
     plaintext: Hex,
     nonce: number | bigint | Hex
-  ): {
-    ciphertext: Hex
-  } {
+  ): Promise<{ ciphertext: Hex }> {
+    // const { createCipheriv } = await getCrypto()
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -116,7 +111,11 @@ export class AesGcmCrypto {
   /**
    * Decrypts data using either a number-based nonce or hex nonce
    */
-  public decrypt(ciphertext: Hex, nonce: number | bigint | Hex): Hex {
+  public async decrypt(
+    ciphertext: Hex,
+    nonce: number | bigint | Hex
+  ): Promise<Hex> {
+    // const { createDecipheriv } = await getCrypto()
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -155,13 +154,16 @@ export class AesGcmCrypto {
 
 type AesInputKeys = { privateKey: Hex; networkPublicKey: string }
 
-const generateSharedKey = ({
+const generateSharedKey = async ({
   privateKey,
   networkPublicKey,
-}: AesInputKeys): string => {
+}: AesInputKeys): Promise<string> => {
+  // const { createECDH } = await getCrypto()
+
   const privateKeyHex = privateKey.startsWith('0x')
     ? privateKey.slice(2)
     : privateKey
+
   const walletKey = createECDH('secp256k1')
   walletKey.setPrivateKey(new Uint8Array(Buffer.from(privateKeyHex, 'hex')))
   const key = new Uint8Array(Buffer.from(networkPublicKey, 'hex'))
@@ -193,7 +195,7 @@ const deriveAesKey = (sharedSecret: string): Hex => {
   return `0x${derivedKeyBuffer.toString('hex')}`
 }
 
-export const generateAesKey = (aesKeys: AesInputKeys): Hex => {
-  const sharedSecret = generateSharedKey(aesKeys)
+export const generateAesKey = async (aesKeys: AesInputKeys): Promise<Hex> => {
+  const sharedSecret = await generateSharedKey(aesKeys)
   return deriveAesKey(sharedSecret)
 }

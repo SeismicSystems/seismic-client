@@ -103,7 +103,7 @@ const getSeismicClients = async ({
 > => {
   const publicClient = createShieldedPublicClient({ chain, transport })
   const networkPublicKey = await publicClient.getTeePublicKey()
-  const encryption = generateAesKey({ privateKey, networkPublicKey })
+  const encryption = await generateAesKey({ privateKey, networkPublicKey })
   const account = privateKeyToAccount(privateKey)
   const wallet = createClient({ account, chain, transport })
     .extend(publicActions)
