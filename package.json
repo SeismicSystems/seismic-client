@@ -15,6 +15,7 @@
     "test:seismictx:devnet": "CHAIN=devnet bun test --cwd tests/seismic-viem contract"
   },
   "dependencies": {
+    "crypto-browserify": "^3.12.1",
     "noble": "^1.9.1"
   },
   "peerDependencies": {
