@@ -61,7 +61,7 @@ export async function signedReadContract<
 
   // NOTE: can't encrypt calls because there's no nonce
   // const aesCipher = new AesGcmCrypto(aesKey)
-  // const data = await aesCipher.encrypt(encodedData, nonce).ciphertext
+  // const data = aesCipher.encrypt(encodedData, nonce).ciphertext
   const calldata = encodedData
 
   const request: SignedCallParameters<TChain> = {
