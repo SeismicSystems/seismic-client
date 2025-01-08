@@ -4,14 +4,7 @@ import { hexToRlp } from 'viem'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
-const { createECDH, createCipheriv, createDecipheriv } = require('node:crypto')
-// export const getCrypto = async () => {
-//   if (typeof window === 'undefined') {
-//     return await import('node:crypto')
-//   }
-//   // Browser fallback if needed
-//   throw new Error('Crypto functions not available in this environment')
-// }
+const { createECDH, createCipheriv, createDecipheriv } = require('crypto-browserify')
 
 export class AesGcmCrypto {
   private readonly ALGORITHM = 'aes-256-gcm'
