@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
     env:
       SEISMIC_ROOT: /home/azureuser/seismic/seismic
-      PRIVATE_KEY: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+      PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
       SEISMIC_RETH_FILES: /home/azureuser/.seismic-reth
