@@ -145,10 +145,10 @@ export class AesGcmCrypto {
 
 type AesInputKeys = { privateKey: Hex; networkPublicKey: string }
 
-const generateSharedKey = async ({
+const generateSharedKey = ({
   privateKey,
   networkPublicKey,
-}: AesInputKeys): Promise<string> => {
+}: AesInputKeys): string => {
   const privateKeyHex = privateKey.startsWith('0x')
     ? privateKey.slice(2)
     : privateKey
@@ -184,7 +184,7 @@ const deriveAesKey = (sharedSecret: string): Hex => {
   return `0x${derivedKeyBuffer.toString('hex')}`
 }
 
-export const generateAesKey = async (aesKeys: AesInputKeys): Promise<Hex> => {
-  const sharedSecret = await generateSharedKey(aesKeys)
+export const generateAesKey = (aesKeys: AesInputKeys): Hex => {
+  const sharedSecret = generateSharedKey(aesKeys)
   return deriveAesKey(sharedSecret)
 }
