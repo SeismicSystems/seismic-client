@@ -2,7 +2,7 @@ name: Test seismic-client against sanvil and reth
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "ameya/self-hosted-runner" ]
 
 jobs:
   build-and-test:
