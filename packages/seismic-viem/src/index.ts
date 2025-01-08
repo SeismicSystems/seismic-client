@@ -13,4 +13,3 @@ export {
 } from '@sviem/client'
 
 export type { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
-// export { getCrypto } from '@sviem/crypto/aes'

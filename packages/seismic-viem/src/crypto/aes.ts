@@ -73,7 +73,9 @@ export class AesGcmCrypto {
   public encrypt(
     plaintext: Hex,
     nonce: number | bigint | Hex
-  ): { ciphertext: Hex } {
+  ): { 
+    ciphertext: Hex
+  } {
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -103,10 +105,7 @@ export class AesGcmCrypto {
   /**
    * Decrypts data using either a number-based nonce or hex nonce
    */
-  public decrypt(
-    ciphertext: Hex,
-    nonce: number | bigint | Hex
-  ): Hex {
+  public decrypt(ciphertext: Hex, nonce: number | bigint | Hex): Hex {
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
