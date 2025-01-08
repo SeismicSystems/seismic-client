@@ -6,6 +6,3 @@ semicolons = false
 [install]
 # This ensures Bun installs packages in a way compatible with workspaces
 hoistingLimits = "workspaces"
-
-[build]
-external = ["node:crypto"]

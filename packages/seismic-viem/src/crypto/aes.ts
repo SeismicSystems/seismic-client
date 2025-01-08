@@ -74,7 +74,6 @@ export class AesGcmCrypto {
     plaintext: Hex,
     nonce: number | bigint | Hex
   ): Promise<{ ciphertext: Hex }> {
-    // const { createCipheriv } = await getCrypto()
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -108,7 +107,6 @@ export class AesGcmCrypto {
     ciphertext: Hex,
     nonce: number | bigint | Hex
   ): Promise<Hex> {
-    // const { createDecipheriv } = await getCrypto()
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -151,8 +149,6 @@ const generateSharedKey = async ({
   privateKey,
   networkPublicKey,
 }: AesInputKeys): Promise<string> => {
-  // const { createECDH } = await getCrypto()
-
   const privateKeyHex = privateKey.startsWith('0x')
     ? privateKey.slice(2)
     : privateKey
