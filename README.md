@@ -1,5 +1,5 @@
 # Seismic Client
-Seismic's typescript client using Viem actions.
+Seismic's typescript client using Viem actions
 
 ## Install
 
