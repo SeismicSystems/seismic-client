@@ -3,6 +3,8 @@ name: Test seismic-client against sanvil and reth
 on:
   push:
     branches: [ "main"]
+  pull_request:
+    branches: [ "main"]
 
 jobs:
   build-and-test:
