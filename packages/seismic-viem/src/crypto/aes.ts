@@ -73,7 +73,7 @@ export class AesGcmCrypto {
   public encrypt(
     plaintext: Hex,
     nonce: number | bigint | Hex
-  ): { 
+  ): {
     ciphertext: Hex
   } {
     // Handle the nonce based on its type
@@ -151,7 +151,6 @@ const generateSharedKey = ({
   const privateKeyHex = privateKey.startsWith('0x')
     ? privateKey.slice(2)
     : privateKey
-
   const walletKey = createECDH('secp256k1')
   walletKey.setPrivateKey(new Uint8Array(Buffer.from(privateKeyHex, 'hex')))
   const key = new Uint8Array(Buffer.from(networkPublicKey, 'hex'))
