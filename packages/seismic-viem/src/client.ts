@@ -38,8 +38,8 @@ export type ShieldedPublicClient<
     chain,
     accountOrAddress,
     rpcSchema extends RpcSchema
-    ? [...PublicRpcSchema, ...rpcSchema]
-    : PublicRpcSchema,
+      ? [...PublicRpcSchema, ...rpcSchema]
+      : PublicRpcSchema,
     PublicActions<transport, chain> & ShieldedPublicActions<chain>
   >
 >
@@ -54,8 +54,8 @@ export type ShieldedWalletClient<
   account,
   RpcSchema,
   PublicActions<transport, chain, account> &
-  WalletActions<chain, account> &
-  ShieldedWalletActions<chain, account>
+    WalletActions<chain, account> &
+    ShieldedWalletActions<chain, account>
 >
 
 type SeismicClients<
