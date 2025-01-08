@@ -4,18 +4,7 @@ import { hexToRlp } from 'viem'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
-declare const Bun: any
-
-const crypto = (() => {
-  if (typeof Bun !== 'undefined') {
-    // Bun environment
-    return require('node:crypto')
-  }
-  // Node environment
-  return require('crypto')
-})()
-
-const { createCipheriv, createDecipheriv, createECDH } = crypto
+const { createECDH, createCipheriv, createDecipheriv } = require('crypto-browserify')
 
 export class AesGcmCrypto {
   private readonly ALGORITHM = 'aes-256-gcm'
