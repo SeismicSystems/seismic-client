@@ -38,8 +38,8 @@ export type ShieldedPublicClient<
     chain,
     accountOrAddress,
     rpcSchema extends RpcSchema
-      ? [...PublicRpcSchema, ...rpcSchema]
-      : PublicRpcSchema,
+    ? [...PublicRpcSchema, ...rpcSchema]
+    : PublicRpcSchema,
     PublicActions<transport, chain> & ShieldedPublicActions<chain>
   >
 >
@@ -54,8 +54,8 @@ export type ShieldedWalletClient<
   account,
   RpcSchema,
   PublicActions<transport, chain, account> &
-    WalletActions<chain, account> &
-    ShieldedWalletActions<chain, account>
+  WalletActions<chain, account> &
+  ShieldedWalletActions<chain, account>
 >
 
 type SeismicClients<
@@ -103,7 +103,7 @@ const getSeismicClients = async ({
 > => {
   const publicClient = createShieldedPublicClient({ chain, transport })
   const networkPublicKey = await publicClient.getTeePublicKey()
-  const encryption = await generateAesKey({ privateKey, networkPublicKey })
+  const encryption = generateAesKey({ privateKey, networkPublicKey })
   const account = privateKeyToAccount(privateKey)
   const wallet = createClient({ account, chain, transport })
     .extend(publicActions)
