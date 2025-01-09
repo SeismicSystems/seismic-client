@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "vocs.config.ts"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
@@ -13,7 +13,7 @@
     "emitDeclarationOnly": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "types": ["bun-types"],
-    "rootDir": "./src",
+    "rootDir": ".",
     "baseUrl": "src"
   }
 }

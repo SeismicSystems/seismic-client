@@ -29,7 +29,8 @@
     "postbuild": "rimraf ./dist/tsconfig.types.tsbuildinfo",
     "docs:dev": "vocs dev",
     "docs:build": "vocs build",
-    "docs:preview": "vocs preview"
+    "docs:preview": "vocs preview",
+    "docs:gen": "typedoc src/index.ts --json ../../docs/seismic-viem.json"
   },
   "dependencies": {
     "viem": "^2.21.50",

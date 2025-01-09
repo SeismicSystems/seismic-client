@@ -9,6 +9,7 @@
     "clean": "rimraf packages/*/dist -g; rimraf tests/*/dist -g; ",
     "lint": "eslint packages; eslint tests",
     "typecheck": "tsc -b --noEmit",
+    "viem:docs:gen": "bun run --cwd packages/seismic-viem docs:gen",
     "viem:build": "bun run --cwd packages/seismic-viem build",
     "viem:publish": "npm publish -w packages/seismic-viem",
     "viem:test:anvil": "bun run --cwd tests/seismic-viem test:anvil",
@@ -33,6 +34,8 @@
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",
+    "typedoc": "^0.27.6",
+    "typedoc-to-mdx": "^0.2.0",
     "vocs": "^1.0.0-alpha.62"
   }
 }
