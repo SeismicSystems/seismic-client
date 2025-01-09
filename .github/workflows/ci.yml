@@ -1,4 +1,5 @@
-name: Test seismic-client against sanvil and reth
+name: CI
+
 on:
   push:
     branches: ['main']
