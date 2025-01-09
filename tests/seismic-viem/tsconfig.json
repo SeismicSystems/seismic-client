@@ -3,13 +3,13 @@
   "include": ["src/**/*", "../../packages/seismic-viem/src/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    "composite": true,
-    "outDir": "dist",
-    "baseUrl": ".",
-    "rootDir": "../..",
     "paths": {
       "@sviem/*": ["../../packages/seismic-viem/src/*"],
       "@test/*": ["./src/*"]
-    }
+    },
+    "composite": true,
+    "baseUrl": ".",
+    "rootDir": "../..",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   }
 }

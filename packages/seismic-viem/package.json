@@ -21,19 +21,20 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "typecheck": "tsc --noEmit; rm tsconfig.tsbuildinfo",
+    "typecheck": "tsc --noEmit",
     "build": "bun build:cjs && bun build:esm && bun build:types",
     "build:cjs": "bun build src/index.ts --outdir dist/_cjs --target browser --format cjs",
     "build:esm": "bun build src/index.ts --outdir dist/_esm --target browser --format esm",
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
-    "postbuild": "rimraf ./dist/tsconfig.types.tsbuildinfo"
+    "postbuild": "rimraf ./dist/tsconfig.types.tsbuildinfo",
+    "docs:dev": "vocs dev",
+    "docs:build": "vocs build",
+    "docs:preview": "vocs preview"
   },
   "dependencies": {
-    "viem": "^2.21.50"
-  },
-  "devDependencies": {
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-no-relative-import-paths": "^1.5.5"
+    "viem": "^2.21.50",
+    "crypto-browserify": "^3.12.1",
+    "noble": "^1.9.1"
   },
   "license": "MIT",
   "author": "Seismic Systems",

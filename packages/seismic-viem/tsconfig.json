@@ -3,16 +3,17 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
+    "paths": {
+      "@sviem/*": ["./*"]
+    },
     "composite": true,
     "downlevelIteration": true,
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "types": ["bun-types"],
     "rootDir": "./src",
-    "baseUrl": "src",
-    "paths": {
-      "@sviem/*": ["./*"]
-    }
+    "baseUrl": "src"
   }
 }
