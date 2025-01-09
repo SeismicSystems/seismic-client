@@ -36,6 +36,7 @@
     "crypto-browserify": "^3.12.1",
     "noble": "^1.9.1"
   },
+  "devDependencies": {},
   "license": "MIT",
   "author": "Seismic Systems",
   "homepage": "https://seismic.systems",
