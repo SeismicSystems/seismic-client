@@ -1,0 +1,16 @@
+---
+custom_edit_url: null
+---
+
+# ShieldedWriteContract
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/contract/write.ts#L189)
+
+</div>
+</div>
+
+```ts
+type ShieldedWriteContract<TChain extends Chain | undefined, TAccount extends Account | undefined, abi extends Abi | readonly unknown[] = Abi | readonly unknown[], functionName extends ContractFunctionName<abi, "payable" | "nonpayable"> = ContractFunctionName<abi, "payable" | "nonpayable">, args extends ContractFunctionArgs<abi, "payable" | "nonpayable", functionName> = ContractFunctionArgs<abi, "payable" | "nonpayable", functionName>, TChainOverride extends Chain | undefined = undefined> = ((args: WriteContractParameters<abi, functionName, args, TChain, TAccount, TChainOverride>) => Promise<WriteContractReturnType>)
+```

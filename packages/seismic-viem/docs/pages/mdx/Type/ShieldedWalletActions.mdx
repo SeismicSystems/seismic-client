@@ -1,0 +1,38 @@
+---
+custom_edit_url: null
+---
+
+# ShieldedWalletActions
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/actions/wallet.ts#L45)
+
+</div>
+</div>
+
+<div className="doc-subtitle">
+
+Defines the actions available for a shielded wallet client.
+
+These actions provide functionality for interacting with shielded contracts,
+making signed calls, sending shielded transactions, and retrieving encryption keys.
+
+</div>
+
+```ts
+type ShieldedWalletActions<TChain extends Chain | undefined = Chain | undefined, TAccount extends Account | undefined = Account | undefined> = {
+  getEncryption: (() => Hex);
+  readContract: SignedReadContract;
+  sendShieldedTransaction: (<request,TChainOverride>(args: SendSeismicTransactionParameters<TChain, TAccount, TChainOverride, request>) => Promise<SendSeismicTransactionReturnType>);
+  signedCall: SignedCall<TChain>;
+  writeContract: ShieldedWriteContract<TChain, TAccount>
+}
+```
+
+<h4 className="doc-comment-title">Returns</h4>
+
+A promise that resolves to the result of the shielded transaction.
+<h4 className="doc-comment-title">Returns</h4>
+
+The encryption key in hexadecimal format.

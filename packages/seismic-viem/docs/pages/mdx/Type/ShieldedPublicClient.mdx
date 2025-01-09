@@ -6,11 +6,37 @@ custom_edit_url: null
 <div className="doc-side">
 <div className="doc-main-source">
 
-[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/client.ts#L30)
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/client.ts#L62)
 
 </div>
+</div>
+
+<div className="doc-subtitle">
+
+Represents a shielded public client with extended functionality for interacting
+with a blockchain network. This client type combines public RPC schema actions
+with shielded-specific actions.
+
 </div>
 
 ```ts
 type ShieldedPublicClient<transport extends Transport = Transport, chain extends Chain | undefined = Chain | undefined, accountOrAddress extends Account | undefined = undefined, rpcSchema extends RpcSchema | undefined = undefined> = Prettify<Client>
 ```
+
+<h4 className="doc-comment-title">Remarks</h4>
+
+This client is designed to support both standard public actions and shielded-specific actions.
+If an additional `rpcSchema` is provided, it is appended to the default `PublicRpcSchema`.
+:::info Example
+
+```typescript
+const client: ShieldedPublicClient<HttpTransport, SeismicChain, LocalAccount> = createShieldedClient({
+  transport: httpTransport,
+  chain: seismicChain,
+});
+
+// Use the client for shielded actions
+const result = await client.shieldedAction(...);
+```
+
+:::

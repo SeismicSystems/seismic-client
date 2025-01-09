@@ -4,9 +4,9 @@ import type {
   Account,
   CallParameters,
   Chain,
-  Client,
   ContractFunctionArgs,
   ContractFunctionName,
+  Prettify,
   ReadContractParameters,
   ReadContractReturnType,
   Transport,
@@ -20,10 +20,59 @@ import {
 import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
+import { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi'
 import type { SignedCallParameters } from '@sviem/signedCall'
 import { signedCall } from '@sviem/signedCall'
 
+type SignedReadClient<
+  TChain extends Chain | undefined,
+  TAccount extends Account | undefined,
+> =
+  | ShieldedPublicClient<Transport, TChain, TAccount>
+  | ShieldedWalletClient<Transport, TChain, TAccount>
+
+/**
+ * Executes a signed read operation on a smart contract.
+ *
+ * This function securely interacts with a contract's `nonpayable` or `payable` function by signing the request.
+ * It supports advanced functionality such as parameter encoding and ABI remapping for shielded operations.
+ *
+ * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
+ * @template TAccount - The account type used for signing the read operation (extends `Account` or `undefined`).
+ * @template TAbi - The ABI (Application Binary Interface) of the contract, supporting `Abi` or unknown arrays.
+ * @template TFunctionName - The name of the contract function to call (`nonpayable` or `payable`).
+ * @template TArgs - The arguments for the function call, derived from the ABI and function name.
+ *
+ * @param client - The client used to execute the signed read operation. Must be a {@link ShieldedPublicClient} or {@link ShieldedWalletClient}.
+ * @param parameters - The {@link https://viem.sh/docs/contract/readContract.html#parameters parameters} for the read operation, including:
+ * - `abi`: The contract's ABI.
+ * - `functionName`: The name of the function to call.
+ * - `args`: The arguments for the function.
+ * - `address`: The contract's address on the blockchain.
+ * - Additional options for customizing the call request.
+ *
+ * @returns {Promise<ReadContractReturnType>} A promise that resolves to the response from the contract. Type is inferred from the ABI
+ *
+ * @throws {Error} If the account is not specified for the operation.
+ *
+ * @example
+ * ```typescript
+ * const result = await signedReadContract(client, {
+ *   abi: myContractAbi,
+ *   functionName: 'getBalance',
+ *   args: ['0x1234...'],
+ *   address: '0x5678...',
+ * });
+ * console.log('Balance:', result);
+ * ```
+ *
+ * @remarks
+ * - If no `account` is specified in the parameters, the function defaults to using a standard read operation (`readContract`).
+ * - Encodes the ABI parameters and function selector for shielded calls.
+ * - Uses `signedCall` to securely sign and send the request.
+ * - The `data` returned by the contract call is decoded based on the provided ABI.
+ */
 export async function signedReadContract<
   TChain extends Chain | undefined,
   TAccount extends Account | undefined,
@@ -35,7 +84,7 @@ export async function signedReadContract<
     TFunctionName
   >,
 >(
-  client: Client<Transport, TChain, TAccount>,
+  client: SignedReadClient<TChain, TAccount>,
   parameters: ReadContractParameters<TAbi, TFunctionName, TArgs>
   // aesKey: Hex,
 ): Promise<ReadContractReturnType> {
@@ -79,6 +128,43 @@ export async function signedReadContract<
   }) as ReadContractReturnType<TAbi, TFunctionName>
 }
 
+/**
+ * Represents a signed read operation on a smart contract.
+ *
+ * This type defines the function signature for performing signed reads on a contract.
+ * A signed read operation allows secure and authenticated interactions with contract functions
+ * that are marked as `nonpayable` or `payable`.
+ *
+ * @template TAbi - The ABI (Application Binary Interface) of the contract. Defaults to `Abi | readonly unknown[]`.
+ * @template TFunctionName - The name of the contract function being called. Must be a `nonpayable` or `payable` function.
+ * @template TArgs - The arguments for the specified contract function, derived from the ABI and function name.
+ *
+ * @param args - The parameters for the signed read operation, including:
+ * - `abi`: The contract's ABI.
+ * - `functionName`: The name of the function being invoked.
+ * - `args`: The arguments required for the function call.
+ *
+ * @returns {Promise<ReadContractReturnType>} A promise that resolves to the result of the signed read operation.
+ *
+ * @example
+ * ```typescript
+ * const signedRead: SignedReadContract<MyContractAbi> = async (args) => {
+ *   const result = await signedReadContract({
+ *     abi: myContractAbi,
+ *     functionName: 'getBalance',
+ *     args: ['0x1234...'],
+ *   });
+ *   return result;
+ * };
+ *
+ * const result = await signedRead({
+ *   abi: myContractAbi,
+ *   functionName: 'getBalance',
+ *   args: ['0x1234...'],
+ * });
+ * console.log('Balance:', result);
+ * ```
+ */
 export type SignedReadContract<
   TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<

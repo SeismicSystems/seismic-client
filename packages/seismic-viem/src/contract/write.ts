@@ -4,11 +4,9 @@ import type {
   AbiItemName,
   Account,
   Chain,
-  Client,
   ContractFunctionArgs,
   ContractFunctionName,
   GetAbiItemParameters,
-  Hex,
   Transport,
   WriteContractParameters,
   WriteContractReturnType,
@@ -50,8 +48,8 @@ export function useSeismicWrite<
  * __Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.__
  *
  * @param client - Client to use
- * @param parameters - {@link WriteContractParameters}
- * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link WriteContractReturnType}
+ * @param parameters - {@link https://viem.sh/docs/contract/writeContract.html#parameters WriteContractParameters}
+ * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link https://viem.sh/docs/glossary/types#hash WriteContractReturnType}
  *
  * @example
  * import { createWalletClient, custom, parseAbi } from 'viem'
@@ -143,7 +141,52 @@ export async function shieldedWriteContract<
   return sendShieldedTransaction(client, request)
 }
 
-export type SeismicWriteContract<
+/**
+ * Represents a shielded write operation on a smart contract.
+ *
+ * This type defines the function signature for performing `payable` or `nonpayable`
+ * operations on a shielded smart contract. The shielded write operation involves
+ * encrypted payloads and enhanced privacy mechanisms for interacting with the blockchain.
+ *
+ * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
+ * @template TAccount - The account type associated with the operation (extends `Account` or `undefined`).
+ * @template abi - The ABI (Application Binary Interface) of the contract. Defaults to `Abi | readonly unknown[]`.
+ * @template functionName - The name of the contract function being called, restricted to `payable` or `nonpayable` functions.
+ * @template args - The arguments for the contract function, derived from the ABI and function name.
+ * @template TChainOverride - An optional chain override for the transaction (extends `Chain` or `undefined`).
+ *
+ * @param args - The parameters for the shielded write operation. This includes:
+ * - `abi`: The contract's ABI.
+ * - `functionName`: The name of the function being invoked.
+ * - `args`: The arguments for the function.
+ * - Additional options like gas and value, depending on the chain and account.
+ *
+ * @returns {Promise<WriteContractReturnType>} A promise that resolves to the result of the write operation.
+ *
+ * @example
+ * ```typescript
+ * const writeContract: ShieldedWriteContract<MyChain, MyAccount> = async (args) => {
+ *   const result = await shieldedWriteContract({
+ *     abi: myContractAbi,
+ *     functionName: 'transfer',
+ *     args: [recipient, amount],
+ *     value: 100n,
+ *     gas: 50000n,
+ *   });
+ *   return result;
+ * };
+ *
+ * const result = await writeContract({
+ *   abi: myContractAbi,
+ *   functionName: 'transfer',
+ *   args: ['0x1234...', 100n],
+ *   value: 100n,
+ *   gas: 50000n,
+ * });
+ * console.log('Transaction hash:', result.transactionHash);
+ * ```
+ */
+export type ShieldedWriteContract<
   TChain extends Chain | undefined,
   TAccount extends Account | undefined,
   abi extends Abi | readonly unknown[] = Abi | readonly unknown[],

@@ -1,0 +1,54 @@
+---
+custom_edit_url: null
+---
+
+# KeyedClient
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/viem-internal/client.ts#L37)
+
+</div>
+</div>
+
+<div className="doc-subtitle">
+
+Represents a client configuration that includes either a public client, a wallet client, or both.
+
+This type allows flexibility in defining clients by enabling configurations where:
+- Only the `public` client is provided.
+- Only the `wallet` client is provided.
+- Both `public` and `wallet` clients are provided.
+
+</div>
+
+```ts
+type KeyedClient<transport extends Transport = Transport, chain extends Chain | undefined = Chain | undefined, account extends Account | undefined = Account | undefined> = {
+  public?: Client<transport, chain>;
+  wallet: Client<transport, chain, account>
+} | {
+  public: Client<transport, chain>;
+  wallet?: Client<transport, chain, account>
+}
+```
+
+<h4 className="doc-comment-title">Remarks</h4>
+
+- The `public` client is used for general-purpose, non-account-specific actions.
+- The `wallet` client is used for account-specific operations such as transactions and contract interactions.
+:::info Example
+
+```typescript
+const keyedClient: KeyedClient<HttpTransport, SeismicChain, LocalAccount> = {
+  public: createPublicClient({ transport: httpTransport, chain: seismicChain }),
+  wallet: createWalletClient({ transport: httpTransport, chain: seismicChain, account: localAccount }),
+};
+
+// Access the public client
+const chainId = await keyedClient.public?.getChainId();
+
+// Access the wallet client
+const txResult = await keyedClient.wallet?.sendTransaction({ to: '0x1234...', value: 1000n });
+```
+
+:::

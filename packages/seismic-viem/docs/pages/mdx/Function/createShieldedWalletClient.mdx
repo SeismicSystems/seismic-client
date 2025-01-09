@@ -6,9 +6,20 @@ custom_edit_url: null
 <div className="doc-side">
 <div className="doc-main-source">
 
-[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/client.ts#L123)
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/client.ts#L285)
 
 </div>
+</div>
+
+<div className="doc-subtitle">
+
+Creates a shielded wallet client with extended functionality for interacting
+with shielded blockchain features, wallet operations, and encryption.
+
+This function builds upon the `getSeismicClients` helper to initialize and configure
+a shielded wallet client using a provided private key. The client supports standard
+wallet operations, public actions, and shielded-specific actions.
+
 </div>
 
 ```ts
@@ -25,10 +36,45 @@ createShieldedWalletClient(__namedParameters: GetSeismicClientsParameters): Prom
 
 <div className="doc-type">
 
-GetSeismicClientsParameters
+[GetSeismicClientsParameters](../Type/GetSeismicClientsParameters)
 
 </div>
 
 </div>
 
 </div>
+
+<h4 className="doc-comment-title">Returns</h4>
+
+A promise that resolves
+to a fully configured shielded wallet client.
+:::info Example
+
+```typescript
+const walletClient = await createShieldedWalletClient({
+  chain: seismicChain,
+  transport: httpTransport,
+  privateKey: '0xabcdef...',
+});
+
+// Perform wallet operations
+const result = await walletClient.writeContract({
+  address: '0x1234...',
+  data: '0xdeadbeef...',
+});
+
+// Access shielded-specific actions
+const encryptionKey = walletClient.getEncryption();
+console.log('Encryption Key:', encryptionKey);
+```
+
+:::
+<h4 className="doc-comment-title">Remarks</h4>
+
+This function is a wrapper around `getSeismicClients`, extracting and returning the wallet
+client from the generated clients. The shielded wallet client is equipped with:
+- Public actions
+- Wallet-specific actions
+- Shielded-specific actions
+
+The encryption key is derived from the provided private key and the TEE public key of the network.

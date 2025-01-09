@@ -1,0 +1,18 @@
+---
+custom_edit_url: null
+---
+
+# SignedCallParameters
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/signedCall.ts#L39)
+
+</div>
+</div>
+
+```ts
+type SignedCallParameters<chain extends Chain | undefined> = CallParameters<chain> & {
+  seismicInput?: Hex
+}
+```

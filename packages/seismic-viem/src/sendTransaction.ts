@@ -96,9 +96,45 @@ export type SendSeismicTransactionErrorType =
   | ErrorType
 
 /**
- * Sends a Seismic transaction,
- * taking in `seismicInput` as the (ciphered) input
- * to the node.
+ * Sends a shielded transaction on the Seismic network.
+ *
+ * This function facilitates sending a transaction that includes shielded inputs such as blobs,
+ * authorization lists, and a special `seismicInput`. The transaction is prepared, signed, and
+ * submitted to the network based on the provided parameters.
+ *
+ * @template TChain - The type of the blockchain chain (extends `Chain` or `undefined`).
+ * @template TAccount - The type of the account (extends `Account` or `undefined`).
+ * @template TRequest - The specific request type for the transaction.
+ * @template TChainOverride - The type of the chain override (extends `Chain` or `undefined`).
+ *
+ * @param client - The client instance used to execute the transaction, including chain, account,
+ * and transport configurations.
+ * @param parameters - The transaction parameters, including gas, value, blobs, seismicInput,
+ * and other details.
+ *
+ * @returns A promise that resolves to the result of the shielded transaction submission.
+ *
+ * @throws {AccountNotFoundError} If no account is provided in the client or parameters.
+ * @throws {AccountTypeNotSupportedError} If the account type is unsupported for shielded transactions.
+ * @throws {Error} If the `seismicInput` is invalid or missing.
+ *
+ * @remarks
+ * - Supports various account types, including `json-rpc` and `local`.
+ * - Requires a valid `seismicInput` in hexadecimal format.
+ * - Throws specific errors for unsupported account types or missing account configurations.
+ * - Uses the `sendRawTransaction` method for final transaction submission.
+ *
+ * @example
+ * ```typescript
+ * const result = await sendShieldedTransaction(client, {
+ *   account: { address: '0x1234...' },
+ *   chain: seismicChain,
+ *   seismicInput: '0xabcdef...',
+ *   value: 1000n,
+ *   gas: 21000n,
+ * });
+ * console.log('Transaction hash:', result.hash);
+ * ```
  */
 export async function sendShieldedTransaction<
   TChain extends Chain | undefined,
@@ -134,7 +170,8 @@ export async function sendShieldedTransaction<
 
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
-      docsPath: '/docs/actions/wallet/sendSeismicTransaction',
+      // TODO: link this
+      // docsPath: '/docs/actions/wallet/sendSeismicTransaction',
     })
   const account = account_ ? parseAccount(account_) : null
 

@@ -1,0 +1,33 @@
+---
+custom_edit_url: null
+---
+
+# ShieldedPublicActions
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/actions/public.ts#L33)
+
+</div>
+</div>
+
+<div className="doc-subtitle">
+
+Defines the additional actions available on a shielded public client.
+
+These actions provide functionality specific to shielded interactions,
+such as retrieving the TEE public key or interacting with storage and transactions.
+
+</div>
+
+```ts
+type ShieldedPublicActions<TChain extends Chain | undefined = Chain | undefined> = {
+  getStorageAt: ((args: GetStorageAtParameters) => Promise<GetStorageAtReturnType>);
+  getTeePublicKey: (() => Promise<Hex | string>);
+  getTransaction: ((args: GetTransactionParameters) => Promise<GetTransactionReturnType>)
+}
+```
+
+<h4 className="doc-comment-title">Returns</h4>
+
+A promise that resolves to the public key in hexadecimal or string format.

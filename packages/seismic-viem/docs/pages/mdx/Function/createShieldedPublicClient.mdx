@@ -6,9 +6,20 @@ custom_edit_url: null
 <div className="doc-side">
 <div className="doc-main-source">
 
-[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/client.ts#L80)
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/client.ts#L200)
 
 </div>
+</div>
+
+<div className="doc-subtitle">
+
+Creates a shielded public client with extended functionality for interacting
+with shielded blockchain features.
+
+This function builds upon the base public client and extends it with shielded-specific actions,
+such as retrieving the Trusted Execution Environment (TEE) public key and interacting with
+shielded features.
+
 </div>
 
 ```ts
@@ -28,6 +39,13 @@ createShieldedPublicClient<transport,chain,rpcSchema>(parameters: { batch?: { mu
 {&nbsp;batch?:&nbsp;{&nbsp;multicall?:&nbsp;boolean&nbsp;|&nbsp;({&nbsp;batchSize?:&nbsp;number&nbsp;|&nbsp;undefined;&nbsp;wait?:&nbsp;number&nbsp;|&nbsp;undefined;&nbsp;})&nbsp;};&nbsp;cacheTime?:&nbsp;number;&nbsp;ccipRead?:&nbsp;false&nbsp;|&nbsp;{&nbsp;request?:&nbsp;((parameters:&nbsp;CcipRequestParameters)&nbsp;=&gt;&nbsp;Promise&lt;`0x&quot;${string}`&gt;)&nbsp;};&nbsp;chain?:&nbsp;Chain&nbsp;|&nbsp;chain;&nbsp;key?:&nbsp;string;&nbsp;name?:&nbsp;string;&nbsp;pollingInterval?:&nbsp;number;&nbsp;rpcSchema?:&nbsp;rpcSchema;&nbsp;transport:&nbsp;transport&nbsp;}
 
 </div>
+
+</div>
+
+<div className="doc-desc">
+
+The configuration parameters for creating the public client. Includes transport,
+chain, and optional RPC schema definitions.
 
 </div>
 
@@ -195,3 +213,28 @@ The RPC transport
 </div>
 
 </div>
+
+<h4 className="doc-comment-title">Returns</h4>
+
+A shielded public client
+instance with extended shielded actions.
+:::info Example
+
+```typescript
+const client = createShieldedPublicClient({
+  transport: httpTransport,
+  chain: seismicChain,
+  rpcSchema: customRpcSchema,
+});
+
+// Use shielded public actions
+const teePublicKey = await client.getTeePublicKey();
+console.log('TEE Public Key:', teePublicKey);
+```
+
+:::
+<h4 className="doc-comment-title">Remarks</h4>
+
+The returned client includes all standard public client actions and additional
+shielded-specific actions. It is suitable for applications requiring secure and
+shielded interactions with blockchain networks.

@@ -1,0 +1,18 @@
+---
+custom_edit_url: null
+---
+
+# GetAccountParameter
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/9a8e456/packages/seismic-viem/src/viem-internal/account.ts#L3)
+
+</div>
+</div>
+
+```ts
+type GetAccountParameter<account extends Account | undefined = Account | undefined, accountOverride extends Account | Address | undefined = Account | Address, required extends boolean = true, nullish extends boolean = false> = MaybeRequired<{
+  account?: accountOverride | Account | Address | (nullish extends true ? null : never)
+}, IsUndefined<account> extends true ? required extends true ? true : false : false>
+```
