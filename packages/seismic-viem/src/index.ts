@@ -24,7 +24,3 @@ export type {
 export type { SignedReadContract } from '@sviem/contract/read'
 export type { SignedReadContractReturnType } from '@sviem/contract/contract'
 export type { ShieldedWriteContract } from '@sviem/contract/write'
-
-export type { KeyedClient } from '@sviem/viem-internal/client'
-export type { GetReadFunction } from '@sviem/viem-internal/function'
-export type { GetAccountParameter } from '@sviem/viem-internal/account'
