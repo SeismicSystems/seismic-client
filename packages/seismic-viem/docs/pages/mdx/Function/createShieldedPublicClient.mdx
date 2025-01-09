@@ -1,0 +1,197 @@
+---
+custom_edit_url: null
+---
+
+# createShieldedPublicClient
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/client.ts#L80)
+
+</div>
+</div>
+
+```ts
+createShieldedPublicClient<transport,chain,rpcSchema>(parameters: { batch?: { multicall?: boolean | ({ batchSize?: number | undefined; wait?: number | undefined; }) }; cacheTime?: number; ccipRead?: false | { request?: ((parameters: CcipRequestParameters) => Promise<`0x"${string}`>) }; chain?: Chain | chain; key?: string; name?: string; pollingInterval?: number; rpcSchema?: rpcSchema; transport: transport }): ShieldedPublicClient<transport, chain, undefined, rpcSchema>
+```
+
+<h4>Parameters</h4>
+
+<div className="doc-param">
+
+<div className="doc-param-header">
+
+<span className="doc-name">parameters</span>
+
+<div className="doc-type">
+
+{&nbsp;batch?:&nbsp;{&nbsp;multicall?:&nbsp;boolean&nbsp;|&nbsp;({&nbsp;batchSize?:&nbsp;number&nbsp;|&nbsp;undefined;&nbsp;wait?:&nbsp;number&nbsp;|&nbsp;undefined;&nbsp;})&nbsp;};&nbsp;cacheTime?:&nbsp;number;&nbsp;ccipRead?:&nbsp;false&nbsp;|&nbsp;{&nbsp;request?:&nbsp;((parameters:&nbsp;CcipRequestParameters)&nbsp;=&gt;&nbsp;Promise&lt;`0x&quot;${string}`&gt;)&nbsp;};&nbsp;chain?:&nbsp;Chain&nbsp;|&nbsp;chain;&nbsp;key?:&nbsp;string;&nbsp;name?:&nbsp;string;&nbsp;pollingInterval?:&nbsp;number;&nbsp;rpcSchema?:&nbsp;rpcSchema;&nbsp;transport:&nbsp;transport&nbsp;}
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.batch</span>
+
+<div className="doc-type">
+
+Object
+
+</div>
+
+<div className="doc-desc">
+
+Flags for batch settings.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.cacheTime</span>
+
+<div className="doc-type">
+
+number
+
+</div>
+
+<div className="doc-desc">
+
+Time (in ms) that cached data will remain in memory.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.ccipRead</span>
+
+<div className="doc-type">
+
+false&nbsp;|&nbsp;Object
+
+</div>
+
+<div className="doc-desc">
+
+[CCIP Read](https://eips.ethereum.org/EIPS/eip-3668) configuration.
+If `false`, the client will not support offchain CCIP lookups.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.chain</span>
+
+<div className="doc-type">
+
+Chain&nbsp;|&nbsp;chain
+
+</div>
+
+<div className="doc-desc">
+
+Chain for the client.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.key</span>
+
+<div className="doc-type">
+
+string
+
+</div>
+
+<div className="doc-desc">
+
+A key for the client.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.name</span>
+
+<div className="doc-type">
+
+string
+
+</div>
+
+<div className="doc-desc">
+
+A name for the client.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.pollingInterval</span>
+
+<div className="doc-type">
+
+number
+
+</div>
+
+<div className="doc-desc">
+
+Frequency (in ms) for polling enabled actions & events.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.rpcSchema</span>
+
+<div className="doc-type">
+
+rpcSchema
+
+</div>
+
+<div className="doc-desc">
+
+Typed JSON-RPC schema for the client.
+
+</div>
+
+</div>
+
+<div className="doc-sub-param">
+
+<span className="doc-name">parameters.transport</span>
+
+<div className="doc-type">
+
+transport
+
+</div>
+
+<div className="doc-desc">
+
+The RPC transport
+
+</div>
+
+</div>
+
+</div>

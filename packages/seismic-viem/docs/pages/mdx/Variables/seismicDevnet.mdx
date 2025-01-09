@@ -1,0 +1,551 @@
+---
+custom_edit_url: null
+---
+
+# seismicDevnet
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/chain.ts#L56)
+
+</div>
+</div>
+
+```ts
+const seismicDevnet: {
+  blockExplorers?: {
+    default: ChainBlockExplorer;
+    [key: string]: ChainBlockExplorer
+  };
+  contracts?: { [x: string]: ChainContract | { [sourceId: number]: ChainContract | undefined; } | undefined; ensRegistry?: ChainContract | undefined; ensUniversalResolver?: ChainContract | undefined; multicall3?: ChainContract | undefined; universalSignatureVerifier?: ChainContract | undefined; };
+  custom?: Record<string, unknown>;
+  fees?: ChainFees<undefined>;
+  formatters?: undefined;
+  id: 1337;
+  name: "Seismic";
+  nativeCurrency: {
+    decimals: 18;
+    name: "Ether";
+    symbol: "ETH"
+  };
+  rpcUrls: {
+    default: {
+      http: readonly ["http://127.0.0.1:8545"];
+      webSocket: readonly ["ws://127.0.0.1:8545"]
+    }
+  };
+  serializers?: ChainSerializers<undefined, TransactionSerializable>;
+  sourceId?: number;
+  testnet?: boolean
+}
+```
+
+<div className="doc-summary doc-properties">
+<h3 className="doc-summary-title">Properties</h3>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#blockExplorers">blockExplorers</a></div>
+<div className="doc-summary-desc">
+
+Collection of block explorers
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#contracts">contracts</a></div>
+<div className="doc-summary-desc">
+
+Collection of contracts
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#custom">custom</a></div>
+<div className="doc-summary-desc">
+
+Custom chain data.
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#fees">fees</a></div>
+<div className="doc-summary-desc">
+
+Modifies how fees are derived.
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#formatters">formatters</a></div>
+<div className="doc-summary-desc">
+
+Modifies how data is formatted and typed (e.g. blocks and transactions)
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#id">id</a></div>
+<div className="doc-summary-desc">
+
+ID in number form
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#name">name</a></div>
+<div className="doc-summary-desc">
+
+Human-readable name
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#nativeCurrency">nativeCurrency</a></div>
+<div className="doc-summary-desc">
+
+Currency used by chain
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#rpcUrls">rpcUrls</a></div>
+<div className="doc-summary-desc">
+
+Collection of RPC endpoints
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#serializers">serializers</a></div>
+<div className="doc-summary-desc">
+
+Modifies how data is serialized (e.g. transactions).
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#sourceId">sourceId</a></div>
+<div className="doc-summary-desc">
+
+Source Chain ID (ie. the L1 chain)
+
+</div>
+</div>
+<div className="doc-summary-item">
+<div className="doc-summary-name"><a href="#testnet">testnet</a></div>
+<div className="doc-summary-desc">
+
+Flag for test networks
+
+</div>
+</div>
+</div>
+
+## Properties
+
+<div className="doc-header-hidden">
+
+### blockExplorers {#blockExplorers}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">blockExplorers</span>
+
+<span className="doc-type">
+
+{&nbsp;default:&nbsp;ChainBlockExplorer;&nbsp;[key:&nbsp;string]:&nbsp;ChainBlockExplorer&nbsp;}
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Collection of block explorers
+
+</div>
+
+</details>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### contracts {#contracts}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">contracts</span>
+
+<span className="doc-type">
+
+{&nbsp;[x:&nbsp;string]:&nbsp;ChainContract&nbsp;|&nbsp;{&nbsp;[sourceId:&nbsp;number]:&nbsp;ChainContract&nbsp;|&nbsp;undefined;&nbsp;}&nbsp;|&nbsp;undefined;&nbsp;ensRegistry?:&nbsp;ChainContract&nbsp;|&nbsp;undefined;&nbsp;ensUniversalResolver?:&nbsp;ChainContract&nbsp;|&nbsp;undefined;&nbsp;multicall3?:&nbsp;ChainContract&nbsp;|&nbsp;undefined;&nbsp;universalSignatureVerifier?:&nbsp;ChainContract&nbsp;|&nbsp;undefined;&nbsp;}
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Collection of contracts
+
+</div>
+
+</details>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### custom {#custom}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">custom</span>
+
+<span className="doc-type">
+
+Record&lt;string,&nbsp;unknown&gt;
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Custom chain data.
+
+</div>
+
+</details>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### fees {#fees}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">fees</span>
+
+<span className="doc-type">
+
+ChainFees&lt;undefined&gt;
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Modifies how fees are derived.
+
+</div>
+
+</details>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### formatters {#formatters}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">formatters</span>
+
+<span className="doc-type">
+
+undefined
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Modifies how data is formatted and typed (e.g. blocks and transactions)
+
+</div>
+
+</details>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### id {#id}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">id</span>
+
+<span className="doc-type">
+
+1337
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+ID in number form
+
+</div>
+
+</details>
+
+<div className="doc-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/chain.ts#L58)
+
+</div>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### name {#name}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">name</span>
+
+<span className="doc-type">
+
+&quot;Seismic&quot;
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Human-readable name
+
+</div>
+
+</details>
+
+<div className="doc-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/chain.ts#L59)
+
+</div>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### nativeCurrency {#nativeCurrency}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">nativeCurrency</span>
+
+<span className="doc-type">
+
+{&nbsp;decimals:&nbsp;18;&nbsp;name:&nbsp;&quot;Ether&quot;;&nbsp;symbol:&nbsp;&quot;ETH&quot;&nbsp;}
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Currency used by chain
+
+</div>
+
+</details>
+
+<div className="doc-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/chain.ts#L60)
+
+</div>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### rpcUrls {#rpcUrls}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">rpcUrls</span>
+
+<span className="doc-type">
+
+{&nbsp;default:&nbsp;{&nbsp;http:&nbsp;readonly&nbsp;[&quot;http://127.0.0.1:8545&quot;];&nbsp;webSocket:&nbsp;readonly&nbsp;[&quot;ws://127.0.0.1:8545&quot;]&nbsp;}&nbsp;}
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Collection of RPC endpoints
+
+</div>
+
+</details>
+
+<div className="doc-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/chain.ts#L65)
+
+</div>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### serializers {#serializers}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">serializers</span>
+
+<span className="doc-type">
+
+ChainSerializers&lt;undefined,&nbsp;TransactionSerializable&gt;
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Modifies how data is serialized (e.g. transactions).
+
+</div>
+
+</details>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### sourceId {#sourceId}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">sourceId</span>
+
+<span className="doc-type">
+
+number
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Source Chain ID (ie. the L1 chain)
+
+</div>
+
+</details>
+
+</div>
+
+<div className="doc-header-hidden">
+
+### testnet {#testnet}
+
+</div>
+
+<div className="doc-entry">
+
+<details open className="doc-property">
+
+<summary className="doc-member">
+
+<span className="doc-name">testnet</span>
+
+<span className="doc-type">
+
+boolean
+
+</span>
+
+</summary>
+
+<div className="doc-desc">
+
+Flag for test networks
+
+</div>
+
+</details>
+
+</div>

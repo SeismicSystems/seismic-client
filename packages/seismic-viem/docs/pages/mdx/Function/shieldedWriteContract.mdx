@@ -1,0 +1,123 @@
+---
+custom_edit_url: null
+---
+
+# shieldedWriteContract
+<div className="doc-side">
+<div className="doc-main-source">
+
+[source](https://github.com/SeismicSystems/seismic-client/blob/d15de72/packages/seismic-viem/src/contract/write.ts#L90)
+
+</div>
+</div>
+
+<div className="doc-subtitle">
+
+Executes a write function on a contract.
+
+- Docs: https://viem.sh/docs/contract/writeContract
+- Examples: https://stackblitz.com/github/wevm/viem/tree/main/examples/contracts/writing-to-contracts
+
+A "write" function on a Solidity contract modifies the state of the blockchain. These types of functions require gas to be executed, and hence a [Transaction](https://viem.sh/docs/glossary/terms) is needed to be broadcast in order to change the state.
+
+Internally, uses a [Wallet Client](https://viem.sh/docs/clients/wallet) to call the [`sendTransaction` action](https://viem.sh/docs/actions/wallet/sendTransaction) with [ABI-encoded `data`](https://viem.sh/docs/contract/encodeFunctionData).
+
+__Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.__
+
+</div>
+
+```ts
+shieldedWriteContract<TTransport,TChain,TAccount,TAbi,TFunctionName,TArgs,chainOverride>(client: ShieldedWalletClient<TTransport, TChain, TAccount>, parameters: WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>): Promise<WriteContractReturnType>
+```
+
+<h4>Parameters</h4>
+
+<div className="doc-param">
+
+<div className="doc-param-header">
+
+<span className="doc-name">client</span>
+
+<div className="doc-type">
+
+[ShieldedWalletClient](../Type/ShieldedWalletClient)&lt;TTransport,&nbsp;TChain,&nbsp;TAccount&gt;
+
+</div>
+
+</div>
+
+<div className="doc-desc">
+
+Client to use
+
+</div>
+
+</div>
+
+<div className="doc-param">
+
+<div className="doc-param-header">
+
+<span className="doc-name">parameters</span>
+
+<div className="doc-type">
+
+WriteContractParameters&lt;TAbi,&nbsp;TFunctionName,&nbsp;TArgs,&nbsp;TChain,&nbsp;TAccount,&nbsp;chainOverride&gt;
+
+</div>
+
+</div>
+
+<div className="doc-desc">
+
+WriteContractParameters
+
+</div>
+
+</div>
+
+<h4 className="doc-comment-title">Returns</h4>
+
+A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). WriteContractReturnType
+:::info Example
+
+```ts
+import { createWalletClient, custom, parseAbi } from 'viem'
+import { mainnet } from 'viem/chains'
+import { writeContract } from 'viem/contract'
+
+const client = createWalletClient({
+  chain: mainnet,
+  transport: custom(window.ethereum),
+})
+const hash = await writeContract(client, {
+  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
+  functionName: 'mint',
+  args: [69420],
+})
+```
+
+:::
+:::info Example
+
+```ts
+// With Validation
+import { createWalletClient, http, parseAbi } from 'viem'
+import { mainnet } from 'viem/chains'
+import { simulateContract, writeContract } from 'viem/contract'
+
+const client = createWalletClient({
+  chain: mainnet,
+  transport: http(),
+})
+const { request } = await simulateContract(client, {
+  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
+  functionName: 'mint',
+  args: [69420],
+}
+const hash = await writeContract(client, request)
+```
+
+:::
