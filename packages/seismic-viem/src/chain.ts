@@ -60,7 +60,7 @@ export const serializeSeismicTransaction = (
  * for connecting to the Seismic development network. It can be used in applications
  * that interact with the blockchain using a defined chain.
  *
- * @type {ChainConfig} - The configuration object for the Seismic devnet.
+ * @type {Chain} - The configuration object for the Seismic devnet.
  * @property {number} id - The unique identifier (chain ID) of the Seismic devnet.
  * @property {string} name - The name of the Seismic network.
  * @property {Object} nativeCurrency - Details of the native currency used in the network.

@@ -27,4 +27,13 @@ module.exports = [
       ],
     },
   },
+  {
+    files: ['**/*.md', '**/*.mdx'],
+    plugins: {
+      'eslint-plugin-mdx': require('eslint-plugin-mdx'),
+    },
+    languageOptions: {
+      parser: require('eslint-mdx'),
+    },
+  },
 ]

@@ -31,7 +31,7 @@
     "docs:build": "vocs build",
     "docs:preview": "vocs preview",
     "docs:gen": "typedoc-to-mdx -c typedoc-to-mdx.json",
-    "docs:check": "typedoc src/index.ts --useTsLinkResolution --json docs/typedoc.out.json; rimraf docs/typedoc.out.json"
+    "docs:check": "typedoc src/index.ts --useTsLinkResolution --json docs/typedoc.out.json"
   },
   "dependencies": {
     "viem": "^2.21.50",
