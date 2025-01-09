@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: ['main']
 jobs:
-  build-and-test:
+  test:
     runs-on: self-hosted
     env:
       SEISMIC_ROOT: /home/azureuser/seismic/seismic
