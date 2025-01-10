@@ -1,4 +1,7 @@
 {
-  "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["./src/index.ts"]
+  "plugin": ["typedoc-plugin-markdown"],
+  "entryPoints": ["./src/index.ts"],
+  "useTsLinkResolution": true,
+  "publicPath": "/seismic-viem",
+  "fileExtension": ".mdx"
 }

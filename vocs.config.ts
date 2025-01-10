@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import type { Config } from 'vocs'
 import { defineConfig } from 'vocs'
 

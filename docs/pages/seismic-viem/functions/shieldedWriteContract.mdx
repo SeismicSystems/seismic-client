@@ -1,17 +1,14 @@
----
-custom_edit_url: null
----
+[**seismic-viem**](/seismic-viem/README.mdx)
 
-# shieldedWriteContract
-<div className="doc-side">
-<div className="doc-main-source">
+***
 
-[source](https://github.com/SeismicSystems/seismic-client/blob/53e6e22/packages/seismic-viem/src/contract/write.ts#L88)
+[seismic-viem](/seismic-viem/globals.mdx) / shieldedWriteContract
 
-</div>
-</div>
+# Function: shieldedWriteContract()
 
-<div className="doc-subtitle">
+> **shieldedWriteContract**\<`TTransport`, `TChain`, `TAccount`, `TAbi`, `TFunctionName`, `TArgs`, `chainOverride`\>(`client`, `parameters`): `Promise`\<`WriteContractReturnType`\>
+
+Defined in: [packages/seismic-viem/src/contract/write.ts:88](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/contract/write.ts#L88)
 
 Executes a write function on a contract.
 
@@ -24,62 +21,43 @@ Internally, uses a [Wallet Client](https://viem.sh/docs/clients/wallet) to call 
 
 __Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.__
 
-</div>
+## Type Parameters
 
-```ts
-shieldedWriteContract<TTransport,TChain,TAccount,TAbi,TFunctionName,TArgs,chainOverride>(client: ShieldedWalletClient<TTransport, TChain, TAccount>, parameters: WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>): Promise<WriteContractReturnType>
-```
+• **TTransport** *extends* `Transport`
 
-<h4>Parameters</h4>
+• **TChain** *extends* `undefined` \| `Chain`
 
-<div className="doc-param">
+• **TAccount** *extends* `undefined` \| `Account`
 
-<div className="doc-param-header">
+• **TAbi** *extends* `Abi` \| readonly `unknown`[]
 
-<span className="doc-name">client</span>
+• **TFunctionName** *extends* `string`
 
-<div className="doc-type">
+• **TArgs** *extends* `unknown`
 
-[ShieldedWalletClient](../Type/ShieldedWalletClient)&lt;TTransport,&nbsp;TChain,&nbsp;TAccount&gt;
+• **chainOverride** *extends* `undefined` \| `Chain` = `undefined`
 
-</div>
+## Parameters
 
-</div>
+### client
 
-<div className="doc-desc">
+[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`TTransport`, `TChain`, `TAccount`\>
 
 Client to use
 
-</div>
+### parameters
 
-</div>
-
-<div className="doc-param">
-
-<div className="doc-param-header">
-
-<span className="doc-name">parameters</span>
-
-<div className="doc-type">
-
-WriteContractParameters&lt;TAbi,&nbsp;TFunctionName,&nbsp;TArgs,&nbsp;TChain,&nbsp;TAccount,&nbsp;chainOverride&gt;
-
-</div>
-
-</div>
-
-<div className="doc-desc">
+`WriteContractParameters`\<`TAbi`, `TFunctionName`, `TArgs`, `TChain`, `TAccount`, `chainOverride`\>
 
 [WriteContractParameters](https://viem.sh/docs/contract/writeContract.html#parameters)
 
-</div>
+## Returns
 
-</div>
+`Promise`\<`WriteContractReturnType`\>
 
-<h4 className="doc-comment-title">Returns</h4>
+A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). [WriteContractReturnType](https://viem.sh/docs/glossary/types#hash)
 
-A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). https://viem.sh/docs/glossary/types#hash
-:::info Example
+## Examples
 
 ```ts
 import { createWalletClient, custom, parseAbi } from 'viem'
@@ -97,9 +75,6 @@ const hash = await writeContract(client, {
   args: [69420],
 })
 ```
-
-:::
-:::info Example
 
 ```ts
 // With Validation
@@ -119,5 +94,3 @@ const { request } = await simulateContract(client, {
 }
 const hash = await writeContract(client, request)
 ```
-
-:::

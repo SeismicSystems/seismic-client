@@ -140,6 +140,7 @@ type SeismicClients<
 }
 
 /**
+ * @ignore
  * Parameters required to create a public client.
  *
  * @property chain - The blockchain chain configuration.
@@ -151,8 +152,8 @@ export type GetPublicClientParameters = {
 }
 
 /**
+ * @ignore
  * Parameters required to create seismic clients, including a public client and a shielded wallet client.
- *
  * @extends GetPublicClientParameters
  *
  * @property privateKey - The private key used to derive the wallet account and encryption key.

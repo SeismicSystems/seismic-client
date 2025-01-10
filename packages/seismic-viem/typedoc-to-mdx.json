@@ -1,5 +1,0 @@
-{
-  "outDir": "./docs/pages/mdx",
-  "typedoc": "./typedoc.json",
-  "tsconfig": "./tsconfig.json"
-}

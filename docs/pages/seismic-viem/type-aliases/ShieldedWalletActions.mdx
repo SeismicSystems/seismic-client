@@ -1,0 +1,76 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+***
+
+[seismic-viem](/seismic-viem/globals.mdx) / ShieldedWalletActions
+
+# Type Alias: ShieldedWalletActions\<TChain, TAccount\>
+
+> **ShieldedWalletActions**\<`TChain`, `TAccount`\>: `object`
+
+Defined in: [packages/seismic-viem/src/actions/wallet.ts:42](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/actions/wallet.ts#L42)
+
+Defines the actions available for a shielded wallet client.
+
+These actions provide functionality for interacting with shielded contracts,
+making signed calls, sending shielded transactions, and retrieving encryption keys.
+
+## Type Parameters
+
+• **TChain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
+
+• **TAccount** *extends* `Account` \| `undefined` = `Account` \| `undefined`
+
+## Type declaration
+
+### getEncryption()
+
+> **getEncryption**: () => `Hex`
+
+#### Returns
+
+`Hex`
+
+### readContract
+
+> **readContract**: `SignedReadContract`
+
+### sendShieldedTransaction()
+
+> **sendShieldedTransaction**: \<`request`, `TChainOverride`\>(`args`) => `Promise`\<`SendSeismicTransactionReturnType`\>
+
+#### Type Parameters
+
+• **request** *extends* `SendSeismicTransactionRequest`\<`TChain`, `TChainOverride`\>
+
+• **TChainOverride** *extends* `Chain` \| `undefined` = `undefined`
+
+#### Parameters
+
+##### args
+
+`SendSeismicTransactionParameters`\<`TChain`, `TAccount`, `TChainOverride`, `request`\>
+
+#### Returns
+
+`Promise`\<`SendSeismicTransactionReturnType`\>
+
+### signedCall
+
+> **signedCall**: `SignedCall`\<`TChain`\>
+
+### writeContract
+
+> **writeContract**: `ShieldedWriteContract`\<`TChain`, `TAccount`\>
+
+## Param
+
+The parameters required for sending the transaction.
+
+## Returns
+
+A promise that resolves to the result of the shielded transaction.
+
+## Returns
+
+The encryption key in hexadecimal format.

@@ -36,9 +36,74 @@ import {
 import type { ErrorType } from '@sviem/viem-internal/error'
 import type { AssertRequestParameters } from '@sviem/viem-internal/request'
 
+/**
+ * @ignore
+ * Represents the parameters for a signed call operation on a blockchain.
+ *
+ * This type extends the base `CallParameters` type with an additional optional `seismicInput` field,
+ * which is used for shielded or specialized operations requiring extra data.
+ *
+ * @template chain - The blockchain chain type (extends `Chain` or `undefined`).
+ *
+ * @type {SignedCallParameters} - A combination of:
+ * - `CallParameters<chain>`: The standard parameters for a blockchain call.
+ * - `seismicInput`: Optional input data in hexadecimal format for advanced operations.
+ *
+ * @property {Hex | undefined} seismicInput - An optional field for passing additional encrypted or
+ * specialized data to the signed call.
+ *
+ * @example
+ * ```typescript
+ * const parameters: SignedCallParameters<MyChain> = {
+ *   account: { address: '0x1234...' },
+ *   to: '0x5678...',
+ *   data: '0xdeadbeef...',
+ *   value: 1000n,
+ *   gas: 21000n,
+ *   seismicInput: '0xabcdef123456...',
+ * };
+ *
+ * const result = await signedCall(parameters);
+ * console.log('Call result:', result);
+ * ```
+ */
 export type SignedCallParameters<chain extends Chain | undefined> =
   CallParameters<chain> & { seismicInput?: Hex | undefined }
 
+/**
+ * @ignore
+ * Represents a signed call operation on a blockchain.
+ *
+ * A signed call is used to securely interact with blockchain functions that require
+ * authentication, such as contract calls or transactions.
+ *
+ * @template chain - The blockchain chain type (extends `Chain` or `undefined`).
+ *
+ * @param args - The parameters for the signed call, including details such as:
+ * - The blockchain account to use for signing.
+ * - The contract address, method, and parameters.
+ * - Additional transaction-related options (e.g., gas, value).
+ *
+ * @returns {Promise<CallReturnType>} A promise that resolves to the result of the signed call,
+ * including any data returned by the contract or transaction.
+ *
+ * @example
+ * ```typescript
+ * const signedCall: SignedCall<MyChain> = async (args) => {
+ *   const result = await performSignedCall(args);
+ *   return result;
+ * };
+ *
+ * const result = await signedCall({
+ *   account: { address: '0x1234...' },
+ *   to: '0x5678...',
+ *   data: '0xdeadbeef...',
+ *   value: 1000n,
+ *   gas: 21000n,
+ * });
+ * console.log('Call result:', result);
+ * ```
+ */
 export type SignedCall<chain extends Chain | undefined> = (
   args: SignedCallParameters<chain>
 ) => Promise<CallReturnType>

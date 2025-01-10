@@ -1,0 +1,143 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+***
+
+[seismic-viem](/seismic-viem/globals.mdx) / seismicDevnet
+
+# Variable: seismicDevnet
+
+> `const` **seismicDevnet**: `object`
+
+Defined in: [packages/seismic-viem/src/chain.ts:75](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/chain.ts#L75)
+
+Defines the Seismic development network configuration.
+
+This configuration includes the chain ID, name, native currency, and RPC URLs
+for connecting to the Seismic development network. It can be used in applications
+that interact with the blockchain using a defined chain.
+
+## Type declaration
+
+### blockExplorers?
+
+> `optional` **blockExplorers**: `object`
+
+Collection of block explorers
+
+#### Index Signature
+
+\[`key`: `string`\]: `ChainBlockExplorer`
+
+#### blockExplorers.default
+
+> **default**: `ChainBlockExplorer`
+
+### contracts?
+
+> `optional` **contracts**: `object`
+
+Collection of contracts
+
+#### Index Signature
+
+\[`key`: `string`\]: `undefined` \| `ChainContract` \| \{\}
+
+#### contracts.ensRegistry?
+
+> `optional` **ensRegistry**: `ChainContract`
+
+#### contracts.ensUniversalResolver?
+
+> `optional` **ensUniversalResolver**: `ChainContract`
+
+#### contracts.multicall3?
+
+> `optional` **multicall3**: `ChainContract`
+
+#### contracts.universalSignatureVerifier?
+
+> `optional` **universalSignatureVerifier**: `ChainContract`
+
+### custom?
+
+> `optional` **custom**: `Record`\<`string`, `unknown`\>
+
+Custom chain data.
+
+### fees?
+
+> `optional` **fees**: `ChainFees`\<`undefined`\>
+
+Modifies how fees are derived.
+
+### formatters?
+
+> `optional` **formatters**: `undefined`
+
+Modifies how data is formatted and typed (e.g. blocks and transactions)
+
+### id
+
+> **id**: `1337`
+
+ID in number form
+
+### name
+
+> **name**: `"Seismic"`
+
+Human-readable name
+
+### nativeCurrency
+
+> **nativeCurrency**: `object`
+
+Currency used by chain
+
+#### nativeCurrency.decimals
+
+> `readonly` **decimals**: `18` = `18`
+
+#### nativeCurrency.name
+
+> `readonly` **name**: `"Ether"` = `'Ether'`
+
+#### nativeCurrency.symbol
+
+> `readonly` **symbol**: `"ETH"` = `'ETH'`
+
+### rpcUrls
+
+> **rpcUrls**: `object`
+
+Collection of RPC endpoints
+
+#### rpcUrls.default
+
+> `readonly` **default**: `object`
+
+#### rpcUrls.default.http
+
+> `readonly` **http**: readonly \[`"http://127.0.0.1:8545"`\]
+
+#### rpcUrls.default.webSocket
+
+> `readonly` **webSocket**: readonly \[`"ws://127.0.0.1:8545"`\]
+
+### serializers?
+
+> `optional` **serializers**: `ChainSerializers`\<`undefined`, `TransactionSerializable`\>
+
+Modifies how data is serialized (e.g. transactions).
+
+### sourceId?
+
+> `optional` **sourceId**: `number`
+
+Source Chain ID (ie. the L1 chain)
+
+### testnet?
+
+> `optional` **testnet**: `boolean`
+
+Flag for test networks

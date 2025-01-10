@@ -1,0 +1,79 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+***
+
+[seismic-viem](/seismic-viem/globals.mdx) / getShieldedContract
+
+# Function: getShieldedContract()
+
+> **getShieldedContract**\<`TTransport`, `TAddress`, `TAbi`, `TClient`, `TChain`, `TAccount`\>(`__namedParameters`): `GetContractReturnType`\<`TAbi`, `TClient`, `TAddress`\> & `SignedReadContractReturnType`\<`TAbi`, `TClient`\>
+
+Defined in: [packages/seismic-viem/src/contract/contract.ts:124](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/contract/contract.ts#L124)
+
+Retrieves a shielded contract instance with extended functionality for performing
+shielded write operations, signed reads, and contract interaction.
+
+This function extends the base `getContract` functionality by adding:
+- Shielded write actions for `nonpayable` and `payable` functions.
+- Signed read actions for `pure` and `view` functions.
+- Proxy-based access to dynamically invoke contract methods.
+
+## Type Parameters
+
+• **TTransport** *extends* `Transport`
+
+• **TAddress** *extends* `` `0x${string}` ``
+
+• **TAbi** *extends* `Abi` \| readonly `unknown`[]
+
+• **TClient** *extends* [`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`TTransport`, `TChain`, `TAccount`\> \| `KeyedClient`\<`TTransport`, `TChain`, `TAccount`\>
+
+• **TChain** *extends* `undefined` \| `Chain` = `undefined` \| `Chain`
+
+• **TAccount** *extends* `undefined` \| `Account` = `undefined` \| `Account`
+
+## Parameters
+
+### \_\_namedParameters
+
+`GetContractParameters`\<`TTransport`, `TChain`, `TAccount`, `TAbi`, `TClient`, `TAddress`\>
+
+## Returns
+
+`GetContractReturnType`\<`TAbi`, `TClient`, `TAddress`\> & `SignedReadContractReturnType`\<`TAbi`, `TClient`\>
+
+A contract instance with extended shielded write and signed read functionalities.
+The returned object includes standard contract methods (`abi`, `address`, `createEventFilter`, etc.)
+and shielded-specific methods (`write`, `read`, `sread`).
+
+## Throws
+
+If the wallet client is not provided for shielded write or signed read operations.
+
+## Throws
+
+If the wallet client does not have an account configured for signed reads.
+
+## Example
+
+```typescript
+const contract = getShieldedContract({
+  abi: myContractAbi,
+  address: '0x1234...',
+  client: shieldedWalletClient,
+});
+
+// Perform a shielded write
+await contract.write.myFunction([arg1, arg2], { gas: 50000n });
+
+// Perform a signed read
+const value = await contract.sread.getValue();
+console.log('Value:', value);
+```
+
+## Remarks
+
+- The `write` property allows dynamic invocation of `nonpayable` and `payable` functions.
+- The `read` property will toggle between public reads and signed reads, depending on whether an `account` is provided
+- The `sread` property does the same as `read`, except provides `account` as a parameter (so it always makes a signed read)
+- The client must be a `ShieldedWalletClient` or provide a wallet client for shielded-specific operations.

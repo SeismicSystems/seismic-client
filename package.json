@@ -5,17 +5,20 @@
     "packages/**",
     "tests/**"
   ],
+  "type": "module",
   "scripts": {
     "clean": "rimraf packages/*/dist -g; rimraf tests/*/dist -g; ",
     "lint": "eslint packages; eslint tests",
     "typecheck": "tsc -b --noEmit",
+    "docs:dev": "vocs dev",
+    "docs:build": "vocs build",
+    "docs:preview": "vocs preview",
     "viem:docs:gen": "bun run --cwd packages/seismic-viem docs:gen",
     "viem:docs:check": "bun run --cwd packages/seismic-viem docs:check",
     "viem:build": "bun run --cwd packages/seismic-viem build",
     "viem:publish": "npm publish -w packages/seismic-viem",
     "viem:test:anvil": "bun run --cwd tests/seismic-viem test:anvil",
     "viem:test:devnet": "bun run --cwd tests/seismic-viem test:devnet",
-    "viem:docs:dev": "bun run --cwd packages/seismic-viem vocs dev",
     "viem:docs:build": "bun run --cwd packages/seismic-viem vocs build",
     "viem:docs:preview": "bun run --cwd packages/seismic-viem vocs preview"
   },
@@ -38,7 +41,7 @@
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",
     "typedoc": "^0.27.6",
-    "typedoc-to-mdx": "^0.2.0",
+    "typedoc-plugin-markdown": "^4.4.1",
     "vocs": "^1.0.0-alpha.62"
   }
 }

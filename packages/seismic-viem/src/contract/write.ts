@@ -142,6 +142,7 @@ export async function shieldedWriteContract<
 }
 
 /**
+ * @ignore
  * Represents a shielded write operation on a smart contract.
  *
  * This type defines the function signature for performing `payable` or `nonpayable`

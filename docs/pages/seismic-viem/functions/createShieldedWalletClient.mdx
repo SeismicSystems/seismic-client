@@ -1,17 +1,14 @@
----
-custom_edit_url: null
----
+[**seismic-viem**](/seismic-viem/README.mdx)
 
-# createShieldedWalletClient
-<div className="doc-side">
-<div className="doc-main-source">
+***
 
-[source](https://github.com/SeismicSystems/seismic-client/blob/53e6e22/packages/seismic-viem/src/client.ts#L285)
+[seismic-viem](/seismic-viem/globals.mdx) / createShieldedWalletClient
 
-</div>
-</div>
+# Function: createShieldedWalletClient()
 
-<div className="doc-subtitle">
+> **createShieldedWalletClient**(`__namedParameters`): `Promise`\<[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`Transport`, `Chain`, `Account`\>\>
+
+Defined in: [packages/seismic-viem/src/client.ts:273](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/client.ts#L273)
 
 Creates a shielded wallet client with extended functionality for interacting
 with shielded blockchain features, wallet operations, and encryption.
@@ -20,35 +17,20 @@ This function builds upon the `getSeismicClients` helper to initialize and confi
 a shielded wallet client using a provided private key. The client supports standard
 wallet operations, public actions, and shielded-specific actions.
 
-</div>
+## Parameters
 
-```ts
-createShieldedWalletClient(__namedParameters: GetSeismicClientsParameters): Promise<ShieldedWalletClient>
-```
+### \_\_namedParameters
 
-<h4>Parameters</h4>
+`GetSeismicClientsParameters`
 
-<div className="doc-param">
+## Returns
 
-<div className="doc-param-header">
-
-<span className="doc-name">__namedParameters</span>
-
-<div className="doc-type">
-
-[GetSeismicClientsParameters](../Type/GetSeismicClientsParameters)
-
-</div>
-
-</div>
-
-</div>
-
-<h4 className="doc-comment-title">Returns</h4>
+`Promise`\<[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`Transport`, `Chain`, `Account`\>\>
 
 A promise that resolves
 to a fully configured shielded wallet client.
-:::info Example
+
+## Example
 
 ```typescript
 const walletClient = await createShieldedWalletClient({
@@ -68,8 +50,7 @@ const encryptionKey = walletClient.getEncryption();
 console.log('Encryption Key:', encryptionKey);
 ```
 
-:::
-<h4 className="doc-comment-title">Remarks</h4>
+## Remarks
 
 This function is a wrapper around `getSeismicClients`, extracting and returning the wallet
 client from the generated clients. The shielded wallet client is equipped with:

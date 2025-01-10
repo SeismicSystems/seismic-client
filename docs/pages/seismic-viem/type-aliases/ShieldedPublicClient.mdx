@@ -1,0 +1,42 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+***
+
+[seismic-viem](/seismic-viem/globals.mdx) / ShieldedPublicClient
+
+# Type Alias: ShieldedPublicClient\<transport, chain, accountOrAddress, rpcSchema\>
+
+> **ShieldedPublicClient**\<`transport`, `chain`, `accountOrAddress`, `rpcSchema`\>: `Prettify`\<`Client`\<`transport`, `chain`, `accountOrAddress`, `rpcSchema` *extends* `RpcSchema` ? \[`...PublicRpcSchema`, `...rpcSchema`\] : `PublicRpcSchema`, `PublicActions`\<`transport`, `chain`\> & [`ShieldedPublicActions`](/seismic-viem/type-aliases/ShieldedPublicActions.mdx)\<`chain`\>\>\>
+
+Defined in: [packages/seismic-viem/src/client.ts:57](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/client.ts#L57)
+
+Represents a shielded public client with extended functionality for interacting
+with a blockchain network. This client type combines public RPC schema actions
+with shielded-specific actions.
+
+## Type Parameters
+
+• **transport** *extends* `Transport` = `Transport`
+
+• **chain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
+
+• **accountOrAddress** *extends* `Account` \| `undefined` = `undefined`
+
+• **rpcSchema** *extends* `RpcSchema` \| `undefined` = `undefined`
+
+## Remarks
+
+This client is designed to support both standard public actions and shielded-specific actions.
+If an additional `rpcSchema` is provided, it is appended to the default `PublicRpcSchema`.
+
+## Example
+
+```typescript
+const client: ShieldedPublicClient<HttpTransport, SeismicChain, LocalAccount> = createShieldedClient({
+  transport: httpTransport,
+  chain: seismicChain,
+});
+
+// Use the client for shielded actions
+const result = await client.shieldedAction(...);
+```

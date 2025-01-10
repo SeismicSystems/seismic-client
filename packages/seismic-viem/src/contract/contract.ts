@@ -9,13 +9,11 @@ import type {
   ContractFunctionName,
   GetContractParameters,
   GetContractReturnType,
-  Hex,
   IsNarrowable,
   IsNever,
   ReadContractParameters,
   Transport,
   UnionOmit,
-  WalletClient,
   WriteContractParameters,
 } from 'viem'
 import { getContract } from 'viem'
@@ -28,6 +26,7 @@ import type { GetReadFunction } from '@sviem/viem-internal/function'
 import { getFunctionParameters } from '@sviem/viem-internal/function'
 
 /**
+ * @ignore
  * Defines the return type for a signed read operation on a smart contract.
  *
  * This type determines the structure of the object returned when performing

@@ -1,0 +1,133 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+***
+
+[seismic-viem](/seismic-viem/globals.mdx) / createShieldedPublicClient
+
+# Function: createShieldedPublicClient()
+
+> **createShieldedPublicClient**\<`transport`, `chain`, `rpcSchema`\>(`parameters`): [`ShieldedPublicClient`](/seismic-viem/type-aliases/ShieldedPublicClient.mdx)\<`transport`, `chain`, `undefined`, `rpcSchema`\>
+
+Defined in: [packages/seismic-viem/src/client.ts:188](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/client.ts#L188)
+
+Creates a shielded public client with extended functionality for interacting
+with shielded blockchain features.
+
+This function builds upon the base public client and extends it with shielded-specific actions,
+such as retrieving the Trusted Execution Environment (TEE) public key and interacting with
+shielded features.
+
+## Type Parameters
+
+• **transport** *extends* `Transport`
+
+• **chain** *extends* `undefined` \| `Chain` = `undefined`
+
+• **rpcSchema** *extends* `undefined` \| `RpcSchema` = `undefined`
+
+## Parameters
+
+### parameters
+
+The configuration parameters for creating the public client. Includes transport,
+chain, and optional RPC schema definitions.
+
+#### batch
+
+\{ `multicall`: `boolean` \| \{ `batchSize`: `number`; `wait`: `number`; \}; \}
+
+Flags for batch settings.
+
+#### batch.multicall
+
+`boolean` \| \{ `batchSize`: `number`; `wait`: `number`; \}
+
+Toggle to enable `eth_call` multicall aggregation.
+
+#### cacheTime
+
+`number`
+
+Time (in ms) that cached data will remain in memory.
+
+**Default**
+
+```ts
+4_000
+```
+
+#### ccipRead
+
+`false` \| \{ `request`: (`parameters`) => `Promise`\<`` `0x${string}` ``\>; \}
+
+[CCIP Read](https://eips.ethereum.org/EIPS/eip-3668) configuration.
+If `false`, the client will not support offchain CCIP lookups.
+
+#### chain
+
+`Chain` \| `chain`
+
+Chain for the client.
+
+#### key
+
+`string`
+
+A key for the client.
+
+#### name
+
+`string`
+
+A name for the client.
+
+#### pollingInterval
+
+`number`
+
+Frequency (in ms) for polling enabled actions & events.
+
+**Default**
+
+```ts
+4_000
+```
+
+#### rpcSchema
+
+`rpcSchema`
+
+Typed JSON-RPC schema for the client.
+
+#### transport
+
+`transport`
+
+The RPC transport
+
+## Returns
+
+[`ShieldedPublicClient`](/seismic-viem/type-aliases/ShieldedPublicClient.mdx)\<`transport`, `chain`, `undefined`, `rpcSchema`\>
+
+A shielded public client
+instance with extended shielded actions.
+
+## Example
+
+```typescript
+const client = createShieldedPublicClient({
+  transport: httpTransport,
+  chain: seismicChain,
+  rpcSchema: customRpcSchema,
+});
+
+// Use shielded public actions
+const teePublicKey = await client.getTeePublicKey();
+console.log('TEE Public Key:', teePublicKey);
+```
+
+## Remarks
+
+The returned client includes all standard public client actions and additional
+shielded-specific actions. It is suitable for applications requiring secure and
+shielded interactions with blockchain networks.

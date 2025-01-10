@@ -1,0 +1,46 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+***
+
+[seismic-viem](/seismic-viem/globals.mdx) / ShieldedWalletClient
+
+# Type Alias: ShieldedWalletClient\<transport, chain, account\>
+
+> **ShieldedWalletClient**\<`transport`, `chain`, `account`\>: `Client`\<`transport`, `chain`, `account`, `RpcSchema`, `PublicActions`\<`transport`, `chain`, `account`\> & `WalletActions`\<`chain`, `account`\> & [`ShieldedWalletActions`](/seismic-viem/type-aliases/ShieldedWalletActions.mdx)\<`chain`, `account`\>\>
+
+Defined in: [packages/seismic-viem/src/client.ts:110](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/client.ts#L110)
+
+Represents a shielded wallet client with extended functionality for interacting
+with shielded contracts, performing wallet operations, and executing public actions.
+
+## Type Parameters
+
+• **transport** *extends* `Transport` = `Transport`
+
+• **chain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
+
+• **account** *extends* `Account` \| `undefined` = `Account` \| `undefined`
+
+## Remarks
+
+The `ShieldedWalletClient` extends the base `Client` type by combining public, wallet, and shielded-specific
+actions into a single client. It is designed for secure and advanced blockchain interactions that require
+encryption and shielded transaction capabilities.
+
+## Example
+
+```typescript
+const client: ShieldedWalletClient<HttpTransport, SeismicChain, LocalAccount> = createShieldedWalletClient({
+  chain: seismicChain,
+  transport: httpTransport,
+  privateKey: '0xabcdef...',
+});
+
+// Access wallet-specific and shielded actions
+const writeResult = await client.writeContract({
+  address: '0x1234...',
+  data: '0xdeadbeef...',
+});
+const encryptionKey = client.getEncryption();
+console.log('Encryption Key:', encryptionKey);
+```
