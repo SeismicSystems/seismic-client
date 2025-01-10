@@ -1,14 +1,18 @@
 [**seismic-viem**](/seismic-viem/README.mdx)
 
-***
+---
 
 [seismic-viem](/seismic-viem/globals.mdx) / createShieldedPublicClient
 
 # Function: createShieldedPublicClient()
 
-> **createShieldedPublicClient**\<`transport`, `chain`, `rpcSchema`\>(`parameters`): [`ShieldedPublicClient`](/seismic-viem/type-aliases/ShieldedPublicClient.mdx)\<`transport`, `chain`, `undefined`, `rpcSchema`\>
+```ts
+function createShieldedPublicClient<transport, chain, rpcSchema>(
+  parameters
+): ShieldedPublicClient<transport, chain, undefined, rpcSchema>
+```
 
-Defined in: [packages/seismic-viem/src/client.ts:188](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/client.ts#L188)
+Defined in: [packages/seismic-viem/src/client.ts:201](https://github.com/SeismicSystems/seismic-client/blob/f9582ede0e1ab6ae9e7a70543134a36d1fb37484/packages/seismic-viem/src/client.ts#L201)
 
 Creates a shielded public client with extended functionality for interacting
 with shielded blockchain features.
@@ -19,11 +23,17 @@ shielded features.
 
 ## Type Parameters
 
-• **transport** *extends* `Transport`
+• **transport** _extends_ `Transport`
 
-• **chain** *extends* `undefined` \| `Chain` = `undefined`
+The type of the transport mechanism used for communication (extends `Transport`).
 
-• **rpcSchema** *extends* `undefined` \| `RpcSchema` = `undefined`
+• **chain** _extends_ `undefined` \| `Chain` = `undefined`
+
+The type of the blockchain chain (extends `Chain` or `undefined`).
+
+• **rpcSchema** _extends_ `undefined` \| `RpcSchema` = `undefined`
+
+The type of the RPC schema (extends `RpcSchema` or `undefined`).
 
 ## Parameters
 
@@ -34,13 +44,23 @@ chain, and optional RPC schema definitions.
 
 #### batch
 
-\{ `multicall`: `boolean` \| \{ `batchSize`: `number`; `wait`: `number`; \}; \}
+\{
+`multicall`: \| `boolean`
+\| \{
+`batchSize`: `number`;
+`wait`: `number`;
+\};
+\}
 
 Flags for batch settings.
 
 #### batch.multicall
 
-`boolean` \| \{ `batchSize`: `number`; `wait`: `number`; \}
+\| `boolean`
+\| \{
+`batchSize`: `number`;
+`wait`: `number`;
+\}
 
 Toggle to enable `eth_call` multicall aggregation.
 
@@ -58,7 +78,10 @@ Time (in ms) that cached data will remain in memory.
 
 #### ccipRead
 
-`false` \| \{ `request`: (`parameters`) => `Promise`\<`` `0x${string}` ``\>; \}
+\| `false`
+\| \{
+`request`: (`parameters`) => `Promise`\<`` `0x${string}` ``\>;
+\}
 
 [CCIP Read](https://eips.ethereum.org/EIPS/eip-3668) configuration.
 If `false`, the client will not support offchain CCIP lookups.
@@ -119,11 +142,11 @@ const client = createShieldedPublicClient({
   transport: httpTransport,
   chain: seismicChain,
   rpcSchema: customRpcSchema,
-});
+})
 
 // Use shielded public actions
-const teePublicKey = await client.getTeePublicKey();
-console.log('TEE Public Key:', teePublicKey);
+const teePublicKey = await client.getTeePublicKey()
+console.log('TEE Public Key:', teePublicKey)
 ```
 
 ## Remarks

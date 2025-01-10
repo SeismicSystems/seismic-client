@@ -2,6 +2,8 @@
   "plugin": ["typedoc-plugin-markdown"],
   "entryPoints": ["./src/index.ts"],
   "useTsLinkResolution": true,
+  "groupOrder": ["Variables", "Functions", "*", "Type Aliases"],
   "publicPath": "/seismic-viem",
-  "fileExtension": ".mdx"
+  "fileExtension": ".mdx",
+  "useCodeBlocks": true
 }

@@ -6,9 +6,11 @@
 
 # Type Alias: ShieldedWalletClient\<transport, chain, account\>
 
-> **ShieldedWalletClient**\<`transport`, `chain`, `account`\>: `Client`\<`transport`, `chain`, `account`, `RpcSchema`, `PublicActions`\<`transport`, `chain`, `account`\> & `WalletActions`\<`chain`, `account`\> & [`ShieldedWalletActions`](/seismic-viem/type-aliases/ShieldedWalletActions.mdx)\<`chain`, `account`\>\>
+```ts
+type ShieldedWalletClient<transport, chain, account> = Client<transport, chain, account, RpcSchema, PublicActions<transport, chain, account> & WalletActions<chain, account> & ShieldedWalletActions<chain, account>>;
+```
 
-Defined in: [packages/seismic-viem/src/client.ts:110](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/client.ts#L110)
+Defined in: [packages/seismic-viem/src/client.ts:119](https://github.com/SeismicSystems/seismic-client/blob/f9582ede0e1ab6ae9e7a70543134a36d1fb37484/packages/seismic-viem/src/client.ts#L119)
 
 Represents a shielded wallet client with extended functionality for interacting
 with shielded contracts, performing wallet operations, and executing public actions.
@@ -17,9 +19,15 @@ with shielded contracts, performing wallet operations, and executing public acti
 
 • **transport** *extends* `Transport` = `Transport`
 
+The transport mechanism used for communication (extends `Transport`).
+
 • **chain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
 
+The blockchain chain configuration (extends `Chain` or `undefined`).
+
 • **account** *extends* `Account` \| `undefined` = `Account` \| `undefined`
+
+The account type associated with the wallet client (extends `Account` or `undefined`).
 
 ## Remarks
 

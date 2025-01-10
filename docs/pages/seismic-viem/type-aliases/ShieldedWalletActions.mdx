@@ -6,9 +6,11 @@
 
 # Type Alias: ShieldedWalletActions\<TChain, TAccount\>
 
-> **ShieldedWalletActions**\<`TChain`, `TAccount`\>: `object`
+```ts
+type ShieldedWalletActions<TChain, TAccount> = object;
+```
 
-Defined in: [packages/seismic-viem/src/actions/wallet.ts:42](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/actions/wallet.ts#L42)
+Defined in: [packages/seismic-viem/src/actions/wallet.ts:45](https://github.com/SeismicSystems/seismic-client/blob/f9582ede0e1ab6ae9e7a70543134a36d1fb37484/packages/seismic-viem/src/actions/wallet.ts#L45)
 
 Defines the actions available for a shielded wallet client.
 
@@ -19,13 +21,19 @@ making signed calls, sending shielded transactions, and retrieving encryption ke
 
 • **TChain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
 
+The type of the blockchain chain (extends `Chain` or `undefined`).
+
 • **TAccount** *extends* `Account` \| `undefined` = `Account` \| `undefined`
+
+The type of the account (extends `Account` or `undefined`).
 
 ## Type declaration
 
 ### getEncryption()
 
-> **getEncryption**: () => `Hex`
+```ts
+getEncryption: () => Hex;
+```
 
 #### Returns
 
@@ -33,11 +41,15 @@ making signed calls, sending shielded transactions, and retrieving encryption ke
 
 ### readContract
 
-> **readContract**: `SignedReadContract`
+```ts
+readContract: SignedReadContract;
+```
 
 ### sendShieldedTransaction()
 
-> **sendShieldedTransaction**: \<`request`, `TChainOverride`\>(`args`) => `Promise`\<`SendSeismicTransactionReturnType`\>
+```ts
+sendShieldedTransaction: <request, TChainOverride>(args) => Promise<SendSeismicTransactionReturnType>;
+```
 
 #### Type Parameters
 
@@ -57,11 +69,15 @@ making signed calls, sending shielded transactions, and retrieving encryption ke
 
 ### signedCall
 
-> **signedCall**: `SignedCall`\<`TChain`\>
+```ts
+signedCall: SignedCall<TChain>;
+```
 
 ### writeContract
 
-> **writeContract**: `ShieldedWriteContract`\<`TChain`, `TAccount`\>
+```ts
+writeContract: ShieldedWriteContract<TChain, TAccount>;
+```
 
 ## Param
 

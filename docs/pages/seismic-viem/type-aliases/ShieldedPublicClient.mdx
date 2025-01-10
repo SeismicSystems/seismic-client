@@ -6,9 +6,11 @@
 
 # Type Alias: ShieldedPublicClient\<transport, chain, accountOrAddress, rpcSchema\>
 
-> **ShieldedPublicClient**\<`transport`, `chain`, `accountOrAddress`, `rpcSchema`\>: `Prettify`\<`Client`\<`transport`, `chain`, `accountOrAddress`, `rpcSchema` *extends* `RpcSchema` ? \[`...PublicRpcSchema`, `...rpcSchema`\] : `PublicRpcSchema`, `PublicActions`\<`transport`, `chain`\> & [`ShieldedPublicActions`](/seismic-viem/type-aliases/ShieldedPublicActions.mdx)\<`chain`\>\>\>
+```ts
+type ShieldedPublicClient<transport, chain, accountOrAddress, rpcSchema> = Prettify<Client<transport, chain, accountOrAddress, rpcSchema extends RpcSchema ? [...PublicRpcSchema, ...rpcSchema] : PublicRpcSchema, PublicActions<transport, chain> & ShieldedPublicActions<chain>>>;
+```
 
-Defined in: [packages/seismic-viem/src/client.ts:57](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/client.ts#L57)
+Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/f9582ede0e1ab6ae9e7a70543134a36d1fb37484/packages/seismic-viem/src/client.ts#L62)
 
 Represents a shielded public client with extended functionality for interacting
 with a blockchain network. This client type combines public RPC schema actions
@@ -18,11 +20,19 @@ with shielded-specific actions.
 
 • **transport** *extends* `Transport` = `Transport`
 
+The type of the transport mechanism used for communication (extends `Transport`).
+
 • **chain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
+
+The type of the blockchain chain (extends `Chain` or `undefined`).
 
 • **accountOrAddress** *extends* `Account` \| `undefined` = `undefined`
 
+The type of the account or address associated with the client (extends `Account` or `undefined`).
+
 • **rpcSchema** *extends* `RpcSchema` \| `undefined` = `undefined`
+
+The type of the RPC schema (extends `RpcSchema` or `undefined`).
 
 ## Remarks
 

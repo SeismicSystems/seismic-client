@@ -1,14 +1,16 @@
 [**seismic-viem**](/seismic-viem/README.mdx)
 
-***
+---
 
 [seismic-viem](/seismic-viem/globals.mdx) / ShieldedPublicActions
 
 # Type Alias: ShieldedPublicActions\<TChain\>
 
-> **ShieldedPublicActions**\<`TChain`\>: `object`
+```ts
+type ShieldedPublicActions<TChain> = object
+```
 
-Defined in: [packages/seismic-viem/src/actions/public.ts:31](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/actions/public.ts#L31)
+Defined in: [packages/seismic-viem/src/actions/public.ts:33](https://github.com/SeismicSystems/seismic-client/blob/f9582ede0e1ab6ae9e7a70543134a36d1fb37484/packages/seismic-viem/src/actions/public.ts#L33)
 
 Defines the additional actions available on a shielded public client.
 
@@ -17,13 +19,17 @@ such as retrieving the TEE public key or interacting with storage and transactio
 
 ## Type Parameters
 
-• **TChain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
+• **TChain** _extends_ `Chain` \| `undefined` = `Chain` \| `undefined`
+
+The type of the blockchain chain (extends `Chain` or `undefined`).
 
 ## Type declaration
 
 ### getStorageAt()
 
-> **getStorageAt**: (`args`) => `Promise`\<`GetStorageAtReturnType`\>
+```ts
+getStorageAt: (args) => Promise<GetStorageAtReturnType>
+```
 
 #### Parameters
 
@@ -37,7 +43,9 @@ such as retrieving the TEE public key or interacting with storage and transactio
 
 ### getTeePublicKey()
 
-> **getTeePublicKey**: () => `Promise`\<`Hex` \| `string`\>
+```ts
+getTeePublicKey: () => Promise<Hex | string>
+```
 
 #### Returns
 
@@ -45,7 +53,9 @@ such as retrieving the TEE public key or interacting with storage and transactio
 
 ### getTransaction()
 
-> **getTransaction**: (`args`) => `Promise`\<`GetTransactionReturnType`\<`TChain`, `BlockTag`\>\>
+```ts
+getTransaction: (args) => Promise<GetTransactionReturnType<TChain, BlockTag>>
+```
 
 #### Parameters
 

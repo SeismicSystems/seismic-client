@@ -1,14 +1,24 @@
 [**seismic-viem**](/seismic-viem/README.mdx)
 
-***
+---
 
 [seismic-viem](/seismic-viem/globals.mdx) / shieldedWriteContract
 
 # Function: shieldedWriteContract()
 
-> **shieldedWriteContract**\<`TTransport`, `TChain`, `TAccount`, `TAbi`, `TFunctionName`, `TArgs`, `chainOverride`\>(`client`, `parameters`): `Promise`\<`WriteContractReturnType`\>
+```ts
+function shieldedWriteContract<
+  TTransport,
+  TChain,
+  TAccount,
+  TAbi,
+  TFunctionName,
+  TArgs,
+  chainOverride,
+>(client, parameters): Promise<WriteContractReturnType>
+```
 
-Defined in: [packages/seismic-viem/src/contract/write.ts:88](https://github.com/SeismicSystems/seismic-client/blob/a4d19b5c0f021acba98fd1a07111747e3fc472b0/packages/seismic-viem/src/contract/write.ts#L88)
+Defined in: [packages/seismic-viem/src/contract/write.ts:88](https://github.com/SeismicSystems/seismic-client/blob/f9582ede0e1ab6ae9e7a70543134a36d1fb37484/packages/seismic-viem/src/contract/write.ts#L88)
 
 Executes a write function on a contract.
 
@@ -19,23 +29,23 @@ A "write" function on a Solidity contract modifies the state of the blockchain. 
 
 Internally, uses a [Wallet Client](https://viem.sh/docs/clients/wallet) to call the [`sendTransaction` action](https://viem.sh/docs/actions/wallet/sendTransaction) with [ABI-encoded `data`](https://viem.sh/docs/contract/encodeFunctionData).
 
-__Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.__
+**Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.**
 
 ## Type Parameters
 
-• **TTransport** *extends* `Transport`
+• **TTransport** _extends_ `Transport`
 
-• **TChain** *extends* `undefined` \| `Chain`
+• **TChain** _extends_ `undefined` \| `Chain`
 
-• **TAccount** *extends* `undefined` \| `Account`
+• **TAccount** _extends_ `undefined` \| `Account`
 
-• **TAbi** *extends* `Abi` \| readonly `unknown`[]
+• **TAbi** _extends_ `Abi` \| readonly `unknown`[]
 
-• **TFunctionName** *extends* `string`
+• **TFunctionName** _extends_ `string`
 
-• **TArgs** *extends* `unknown`
+• **TArgs** _extends_ `unknown`
 
-• **chainOverride** *extends* `undefined` \| `Chain` = `undefined`
+• **chainOverride** _extends_ `undefined` \| `Chain` = `undefined`
 
 ## Parameters
 
