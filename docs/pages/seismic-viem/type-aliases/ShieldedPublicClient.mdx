@@ -21,34 +21,11 @@ type ShieldedPublicClient<transport, chain, accountOrAddress, rpcSchema> =
   >
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/a6a7a0985cddc207c634448fb7c4cca5845c8a81/packages/seismic-viem/src/client.ts#L62)
+Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/fd3f57eb71a85bad7c1f28a6e6fc7d8fcbce7480/packages/seismic-viem/src/client.ts#L62)
 
 Represents a shielded public client with extended functionality for interacting
 with a blockchain network. This client type combines public RPC schema actions
 with shielded-specific actions.
-
-## Type Parameters
-
-• **transport** _extends_ `Transport` = `Transport`
-
-The type of the transport mechanism used for communication (extends `Transport`).
-
-• **chain** _extends_ `Chain` \| `undefined` = `Chain` \| `undefined`
-
-The type of the blockchain chain (extends `Chain` or `undefined`).
-
-• **accountOrAddress** _extends_ `Account` \| `undefined` = `undefined`
-
-The type of the account or address associated with the client (extends `Account` or `undefined`).
-
-• **rpcSchema** _extends_ `RpcSchema` \| `undefined` = `undefined`
-
-The type of the RPC schema (extends `RpcSchema` or `undefined`).
-
-## Remarks
-
-This client is designed to support both standard public actions and shielded-specific actions.
-If an additional `rpcSchema` is provided, it is appended to the default `PublicRpcSchema`.
 
 ## Example
 
@@ -61,3 +38,26 @@ const client: ShieldedPublicClient<HttpTransport, SeismicChain, LocalAccount> = 
 // Use the client for shielded actions
 const result = await client.shieldedAction(...);
 ```
+
+## Type Parameters
+
+• **transport** _extends_ [`Transport`](https://github.com/wevm/viem) = [`Transport`](https://github.com/wevm/viem)
+
+The type of the transport mechanism used for communication (extends `Transport`).
+
+• **chain** _extends_ [`Chain`](https://github.com/wevm/viem) \| `undefined` = [`Chain`](https://github.com/wevm/viem) \| `undefined`
+
+The type of the blockchain chain (extends `Chain` or `undefined`).
+
+• **accountOrAddress** _extends_ [`Account`](https://github.com/wevm/viem) \| `undefined` = `undefined`
+
+The type of the account or address associated with the client (extends `Account` or `undefined`).
+
+• **rpcSchema** _extends_ [`RpcSchema`](https://github.com/wevm/viem) \| `undefined` = `undefined`
+
+The type of the RPC schema (extends `RpcSchema` or `undefined`).
+
+## Remarks
+
+This client is designed to support both standard public actions and shielded-specific actions.
+If an additional `rpcSchema` is provided, it is appended to the default `PublicRpcSchema`.

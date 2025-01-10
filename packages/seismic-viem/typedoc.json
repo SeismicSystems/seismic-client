@@ -3,7 +3,21 @@
   "entryPoints": ["./src/index.ts"],
   "useTsLinkResolution": true,
   "groupOrder": ["Variables", "Functions", "*", "Type Aliases"],
+  "externalSymbolLinkMappings": {
+    "viem": {
+      "*": "https://github.com/wevm/viem"
+    }
+  },
   "publicPath": "/seismic-viem",
   "fileExtension": ".mdx",
-  "useCodeBlocks": true
+  "useCodeBlocks": true,
+  "blockTagsPreserveOrder": ["@example", "@deprecated"],
+  "indexFormat": "list",
+  "parametersFormat": "list",
+  "interfacePropertiesFormat": "table",
+  "classPropertiesFormat": "table",
+  "enumMembersFormat": "table",
+  "propertyMembersFormat": "table",
+  "typeDeclarationFormat": "list",
+  "typeDeclarationVisibility": "compact"
 }

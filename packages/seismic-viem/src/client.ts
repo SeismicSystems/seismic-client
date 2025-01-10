@@ -170,16 +170,6 @@ export type GetSeismicClientsParameters = GetPublicClientParameters & {
  * such as retrieving the Trusted Execution Environment (TEE) public key and interacting with
  * shielded features.
  *
- * @template transport - The type of the transport mechanism used for communication (extends `Transport`).
- * @template chain - The type of the blockchain chain (extends `Chain` or `undefined`).
- * @template rpcSchema - The type of the RPC schema (extends `RpcSchema` or `undefined`).
- *
- * @param parameters - The configuration parameters for creating the public client. Includes transport,
- * chain, and optional RPC schema definitions.
- *
- * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>} A shielded public client
- * instance with extended shielded actions.
- *
  * @example
  * ```typescript
  * const client = createShieldedPublicClient({
@@ -192,6 +182,16 @@ export type GetSeismicClientsParameters = GetPublicClientParameters & {
  * const teePublicKey = await client.getTeePublicKey();
  * console.log('TEE Public Key:', teePublicKey);
  * ```
+ *
+ * @template transport - The type of the transport mechanism used for communication (extends `Transport`).
+ * @template chain - The type of the blockchain chain (extends `Chain` or `undefined`).
+ * @template rpcSchema - The type of the RPC schema (extends `RpcSchema` or `undefined`).
+ *
+ * @param parameters - The configuration parameters for creating the public client. Includes transport,
+ * chain, and optional RPC schema definitions.
+ *
+ * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>} A shielded public client
+ * instance with extended shielded actions.
  *
  * @remarks
  * The returned client includes all standard public client actions and additional

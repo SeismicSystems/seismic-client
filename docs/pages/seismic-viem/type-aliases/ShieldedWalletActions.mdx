@@ -10,7 +10,7 @@
 type ShieldedWalletActions<TChain, TAccount> = object
 ```
 
-Defined in: [packages/seismic-viem/src/actions/wallet.ts:45](https://github.com/SeismicSystems/seismic-client/blob/a6a7a0985cddc207c634448fb7c4cca5845c8a81/packages/seismic-viem/src/actions/wallet.ts#L45)
+Defined in: [packages/seismic-viem/src/actions/wallet.ts:45](https://github.com/SeismicSystems/seismic-client/blob/fd3f57eb71a85bad7c1f28a6e6fc7d8fcbce7480/packages/seismic-viem/src/actions/wallet.ts#L45)
 
 Defines the actions available for a shielded wallet client.
 
@@ -19,11 +19,11 @@ making signed calls, sending shielded transactions, and retrieving encryption ke
 
 ## Type Parameters
 
-• **TChain** _extends_ `Chain` \| `undefined` = `Chain` \| `undefined`
+• **TChain** _extends_ [`Chain`](https://github.com/wevm/viem) \| `undefined` = [`Chain`](https://github.com/wevm/viem) \| `undefined`
 
 The type of the blockchain chain (extends `Chain` or `undefined`).
 
-• **TAccount** _extends_ `Account` \| `undefined` = `Account` \| `undefined`
+• **TAccount** _extends_ [`Account`](https://github.com/wevm/viem) \| `undefined` = [`Account`](https://github.com/wevm/viem) \| `undefined`
 
 The type of the account (extends `Account` or `undefined`).
 
@@ -32,12 +32,8 @@ The type of the account (extends `Account` or `undefined`).
 ### getEncryption()
 
 ```ts
-getEncryption: () => Hex
+;() => Hex
 ```
-
-#### Returns
-
-`Hex`
 
 ### readContract
 
@@ -48,25 +44,8 @@ readContract: SignedReadContract
 ### sendShieldedTransaction()
 
 ```ts
-sendShieldedTransaction: <request, TChainOverride>(args) =>
-  Promise<SendSeismicTransactionReturnType>
+;<request, TChainOverride>(args) => Promise<SendSeismicTransactionReturnType>
 ```
-
-#### Type Parameters
-
-• **request** _extends_ `SendSeismicTransactionRequest`\<`TChain`, `TChainOverride`\>
-
-• **TChainOverride** _extends_ `Chain` \| `undefined` = `undefined`
-
-#### Parameters
-
-##### args
-
-`SendSeismicTransactionParameters`\<`TChain`, `TAccount`, `TChainOverride`, `request`\>
-
-#### Returns
-
-`Promise`\<`SendSeismicTransactionReturnType`\>
 
 ### signedCall
 

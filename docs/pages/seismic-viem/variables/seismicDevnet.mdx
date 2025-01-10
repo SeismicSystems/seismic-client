@@ -10,7 +10,7 @@
 const seismicDevnet: object;
 ```
 
-Defined in: [packages/seismic-viem/src/chain.ts:75](https://github.com/SeismicSystems/seismic-client/blob/a6a7a0985cddc207c634448fb7c4cca5845c8a81/packages/seismic-viem/src/chain.ts#L75)
+Defined in: [packages/seismic-viem/src/chain.ts:75](https://github.com/SeismicSystems/seismic-client/blob/fd3f57eb71a85bad7c1f28a6e6fc7d8fcbce7480/packages/seismic-viem/src/chain.ts#L75)
 
 Defines the Seismic development network configuration.
 
@@ -23,60 +23,25 @@ that interact with the blockchain using a defined chain.
 ### blockExplorers?
 
 ```ts
-optional blockExplorers: object;
+{
+[key: string]: ChainBlockExplorer;   default: ChainBlockExplorer;
+}
 ```
 
 Collection of block explorers
 
-#### Index Signature
-
-```ts
-[key: string]: ChainBlockExplorer
-```
-
-#### blockExplorers.default
-
-```ts
-default: ChainBlockExplorer;
-```
-
 ### contracts?
 
 ```ts
-optional contracts: object;
+{
+[key: string]: undefined | ChainContract | {};   ensRegistry: ChainContract;
+  ensUniversalResolver: ChainContract;
+  multicall3: ChainContract;
+  universalSignatureVerifier: ChainContract;
+}
 ```
 
 Collection of contracts
-
-#### Index Signature
-
-```ts
-[key: string]: undefined | ChainContract | {}
-```
-
-#### contracts.ensRegistry?
-
-```ts
-optional ensRegistry: ChainContract;
-```
-
-#### contracts.ensUniversalResolver?
-
-```ts
-optional ensUniversalResolver: ChainContract;
-```
-
-#### contracts.multicall3?
-
-```ts
-optional multicall3: ChainContract;
-```
-
-#### contracts.universalSignatureVerifier?
-
-```ts
-optional universalSignatureVerifier: ChainContract;
-```
 
 ### custom?
 
@@ -121,54 +86,27 @@ Human-readable name
 ### nativeCurrency
 
 ```ts
-nativeCurrency: object
+{
+  decimals: 18
+  name: 'Ether'
+  symbol: 'ETH'
+}
 ```
 
 Currency used by chain
 
-#### nativeCurrency.decimals
-
-```ts
-readonly decimals: 18 = 18;
-```
-
-#### nativeCurrency.name
-
-```ts
-readonly name: "Ether" = 'Ether';
-```
-
-#### nativeCurrency.symbol
-
-```ts
-readonly symbol: "ETH" = 'ETH';
-```
-
 ### rpcUrls
 
 ```ts
-rpcUrls: object
+{
+  default: {
+     http: readonly ["http://127.0.0.1:8545"];
+     webSocket: readonly ["ws://127.0.0.1:8545"];
+    };
+}
 ```
 
 Collection of RPC endpoints
-
-#### rpcUrls.default
-
-```ts
-readonly default: object;
-```
-
-#### rpcUrls.default.http
-
-```ts
-readonly http: readonly ["http://127.0.0.1:8545"];
-```
-
-#### rpcUrls.default.webSocket
-
-```ts
-readonly webSocket: readonly ["ws://127.0.0.1:8545"];
-```
 
 ### serializers?
 
