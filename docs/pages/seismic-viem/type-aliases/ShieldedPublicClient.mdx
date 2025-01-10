@@ -1,16 +1,27 @@
 [**seismic-viem**](/seismic-viem/README.mdx)
 
-***
+---
 
 [seismic-viem](/seismic-viem/globals.mdx) / ShieldedPublicClient
 
 # Type Alias: ShieldedPublicClient\<transport, chain, accountOrAddress, rpcSchema\>
 
 ```ts
-type ShieldedPublicClient<transport, chain, accountOrAddress, rpcSchema> = Prettify<Client<transport, chain, accountOrAddress, rpcSchema extends RpcSchema ? [...PublicRpcSchema, ...rpcSchema] : PublicRpcSchema, PublicActions<transport, chain> & ShieldedPublicActions<chain>>>;
+type ShieldedPublicClient<transport, chain, accountOrAddress, rpcSchema> =
+  Prettify<
+    Client<
+      transport,
+      chain,
+      accountOrAddress,
+      rpcSchema extends RpcSchema
+        ? [...PublicRpcSchema, ...rpcSchema]
+        : PublicRpcSchema,
+      PublicActions<transport, chain> & ShieldedPublicActions<chain>
+    >
+  >
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/fb2b70a799e0a58e95478a9bc32d3743c2d88729/packages/seismic-viem/src/client.ts#L62)
+Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/a6a7a0985cddc207c634448fb7c4cca5845c8a81/packages/seismic-viem/src/client.ts#L62)
 
 Represents a shielded public client with extended functionality for interacting
 with a blockchain network. This client type combines public RPC schema actions
@@ -18,19 +29,19 @@ with shielded-specific actions.
 
 ## Type Parameters
 
-• **transport** *extends* `Transport` = `Transport`
+• **transport** _extends_ `Transport` = `Transport`
 
 The type of the transport mechanism used for communication (extends `Transport`).
 
-• **chain** *extends* `Chain` \| `undefined` = `Chain` \| `undefined`
+• **chain** _extends_ `Chain` \| `undefined` = `Chain` \| `undefined`
 
 The type of the blockchain chain (extends `Chain` or `undefined`).
 
-• **accountOrAddress** *extends* `Account` \| `undefined` = `undefined`
+• **accountOrAddress** _extends_ `Account` \| `undefined` = `undefined`
 
 The type of the account or address associated with the client (extends `Account` or `undefined`).
 
-• **rpcSchema** *extends* `RpcSchema` \| `undefined` = `undefined`
+• **rpcSchema** _extends_ `RpcSchema` \| `undefined` = `undefined`
 
 The type of the RPC schema (extends `RpcSchema` or `undefined`).
 

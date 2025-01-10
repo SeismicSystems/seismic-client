@@ -1,16 +1,18 @@
 [**seismic-viem**](/seismic-viem/README.mdx)
 
-***
+---
 
 [seismic-viem](/seismic-viem/globals.mdx) / createShieldedWalletClient
 
 # Function: createShieldedWalletClient()
 
 ```ts
-function createShieldedWalletClient(__namedParameters): Promise<ShieldedWalletClient<Transport, Chain, Account>>
+function createShieldedWalletClient(
+  __namedParameters
+): Promise<ShieldedWalletClient<Transport, Chain, Account>>
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:286](https://github.com/SeismicSystems/seismic-client/blob/fb2b70a799e0a58e95478a9bc32d3743c2d88729/packages/seismic-viem/src/client.ts#L286)
+Defined in: [packages/seismic-viem/src/client.ts:286](https://github.com/SeismicSystems/seismic-client/blob/a6a7a0985cddc207c634448fb7c4cca5845c8a81/packages/seismic-viem/src/client.ts#L286)
 
 Creates a shielded wallet client with extended functionality for interacting
 with shielded blockchain features, wallet operations, and encryption.
@@ -39,23 +41,24 @@ const walletClient = await createShieldedWalletClient({
   chain: seismicChain,
   transport: httpTransport,
   privateKey: '0xabcdef...',
-});
+})
 
 // Perform wallet operations
 const result = await walletClient.writeContract({
   address: '0x1234...',
   data: '0xdeadbeef...',
-});
+})
 
 // Access shielded-specific actions
-const encryptionKey = walletClient.getEncryption();
-console.log('Encryption Key:', encryptionKey);
+const encryptionKey = walletClient.getEncryption()
+console.log('Encryption Key:', encryptionKey)
 ```
 
 ## Remarks
 
 This function is a wrapper around `getSeismicClients`, extracting and returning the wallet
 client from the generated clients. The shielded wallet client is equipped with:
+
 - Public actions
 - Wallet-specific actions
 - Shielded-specific actions

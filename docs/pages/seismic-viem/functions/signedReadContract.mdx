@@ -1,16 +1,19 @@
 [**seismic-viem**](/seismic-viem/README.mdx)
 
-***
+---
 
 [seismic-viem](/seismic-viem/globals.mdx) / signedReadContract
 
 # Function: signedReadContract()
 
 ```ts
-function signedReadContract<TChain, TAccount, TAbi, TFunctionName, TArgs>(client, parameters): Promise<ReadContractReturnType>
+function signedReadContract<TChain, TAccount, TAbi, TFunctionName, TArgs>(
+  client,
+  parameters
+): Promise<ReadContractReturnType>
 ```
 
-Defined in: [packages/seismic-viem/src/contract/read.ts:76](https://github.com/SeismicSystems/seismic-client/blob/fb2b70a799e0a58e95478a9bc32d3743c2d88729/packages/seismic-viem/src/contract/read.ts#L76)
+Defined in: [packages/seismic-viem/src/contract/read.ts:76](https://github.com/SeismicSystems/seismic-client/blob/a6a7a0985cddc207c634448fb7c4cca5845c8a81/packages/seismic-viem/src/contract/read.ts#L76)
 
 Executes a signed read operation on a smart contract.
 
@@ -19,23 +22,23 @@ It supports advanced functionality such as parameter encoding and ABI remapping 
 
 ## Type Parameters
 
-• **TChain** *extends* `undefined` \| `Chain`
+• **TChain** _extends_ `undefined` \| `Chain`
 
 The blockchain chain type (extends `Chain` or `undefined`).
 
-• **TAccount** *extends* `undefined` \| `Account`
+• **TAccount** _extends_ `undefined` \| `Account`
 
 The account type used for signing the read operation (extends `Account` or `undefined`).
 
-• **TAbi** *extends* `Abi` \| readonly `unknown`[]
+• **TAbi** _extends_ `Abi` \| readonly `unknown`[]
 
 The ABI (Application Binary Interface) of the contract, supporting `Abi` or unknown arrays.
 
-• **TFunctionName** *extends* `string`
+• **TFunctionName** _extends_ `string`
 
 The name of the contract function to call (`nonpayable` or `payable`).
 
-• **TArgs** *extends* `unknown`
+• **TArgs** _extends_ `unknown`
 
 The arguments for the function call, derived from the ABI and function name.
 
@@ -52,6 +55,7 @@ The client used to execute the signed read operation. Must be a [ShieldedPublicC
 `ReadContractParameters`\<`TAbi`, `TFunctionName`, `TArgs`\>
 
 The [parameters](https://viem.sh/docs/contract/readContract.html#parameters) for the read operation, including:
+
 - `abi`: The contract's ABI.
 - `functionName`: The name of the function to call.
 - `args`: The arguments for the function.
@@ -76,8 +80,8 @@ const result = await signedReadContract(client, {
   functionName: 'getBalance',
   args: ['0x1234...'],
   address: '0x5678...',
-});
-console.log('Balance:', result);
+})
+console.log('Balance:', result)
 ```
 
 ## Remarks
