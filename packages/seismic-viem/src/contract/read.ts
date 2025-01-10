@@ -33,7 +33,6 @@ type SignedReadClient<
   | ShieldedWalletClient<Transport, TChain, TAccount>
 
 /**
- * @ignore
  * Executes a signed read operation on a smart contract.
  *
  * This function securely interacts with a contract's `nonpayable` or `payable` function by signing the request.
@@ -130,6 +129,7 @@ export async function signedReadContract<
 }
 
 /**
+ * @ignore
  * Represents a signed read operation on a smart contract.
  *
  * This type defines the function signature for performing signed reads on a contract.

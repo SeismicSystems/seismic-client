@@ -10,7 +10,7 @@
 type ShieldedPublicClient<transport, chain, accountOrAddress, rpcSchema> = Prettify<Client<transport, chain, accountOrAddress, rpcSchema extends RpcSchema ? [...PublicRpcSchema, ...rpcSchema] : PublicRpcSchema, PublicActions<transport, chain> & ShieldedPublicActions<chain>>>;
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/f9582ede0e1ab6ae9e7a70543134a36d1fb37484/packages/seismic-viem/src/client.ts#L62)
+Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/fb2b70a799e0a58e95478a9bc32d3743c2d88729/packages/seismic-viem/src/client.ts#L62)
 
 Represents a shielded public client with extended functionality for interacting
 with a blockchain network. This client type combines public RPC schema actions
