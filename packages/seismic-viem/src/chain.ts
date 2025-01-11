@@ -21,6 +21,8 @@ export const serializeSeismicTransaction = (
     )
   }
 
+  console.log('serializeSeismicTransaction signature', signature)
+
   const {
     chainId,
     nonce,
@@ -35,6 +37,13 @@ export const serializeSeismicTransaction = (
     throw new Error('Seismic transactions require chainId argument')
   }
 
+  let rlpSignatureEncoding = toYParitySignatureArray(transaction, signature)
+
+  console.log(
+    'serializeSeismicTransaction rlpSignatureEncoding',
+    rlpSignatureEncoding
+  )
+
   const rlpEncoded = toRlp([
     toHex(chainId),
     nonce ? toHex(nonce) : '0x',
@@ -43,12 +52,14 @@ export const serializeSeismicTransaction = (
     to ?? '0x',
     value ? toHex(value) : '0x',
     seismicInput ?? '0x',
-    ...toYParitySignatureArray(transaction, signature),
+    ...rlpSignatureEncoding,
   ])
+  console.log('serailizeSeismicTransaction seismicInput', seismicInput)
   const encodedTx = concatHex([
     toHex(74), // seismic tx type '0x4a'
     rlpEncoded,
   ])
+  console.log('serailizeSeismicTransaction encodedTx', encodedTx)
 
   return encodedTx
 }

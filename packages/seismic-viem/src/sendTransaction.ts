@@ -18,7 +18,7 @@ import type {
   Transport,
   UnionOmit,
 } from 'viem'
-import { assertCurrentChain } from 'viem'
+import { assertCurrentChain, serializeTransaction } from 'viem'
 import type {
   ParseAccountErrorType,
   SignTransactionErrorType,
@@ -195,6 +195,10 @@ export async function sendShieldedTransaction<
       const serializedTransaction = await account!.signTransaction!(
         { seismicInput, ...preparedTx },
         { serializer: serializeSeismicTransaction }
+      )
+      console.log(
+        'sendSeismicTransaction serializedTransaction',
+        serializedTransaction
       )
       return await sendRawTransaction(client, { serializedTransaction })
     }
