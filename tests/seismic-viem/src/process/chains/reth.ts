@@ -59,7 +59,7 @@ const runRethLocally = async (
     args: [
       'run',
       '--bin',
-      'reth',
+      'seismic-reth',
       '--',
       'node',
       ...devArg,
@@ -83,7 +83,7 @@ const runRethLocally = async (
 }
 
 export const setupRethNode = async (): Promise<SpawnedNode> => {
-  const rethProcess = await runRethLocally({ silent: false, verbosity: 0 })
+  const rethProcess = await runRethLocally({ silent: false, verbosity: 5 })
   return {
     url: rethProcess.url,
     exitProcess: async (code: 0 | 1) => {
