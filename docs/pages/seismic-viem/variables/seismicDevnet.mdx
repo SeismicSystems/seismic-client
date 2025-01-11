@@ -10,7 +10,7 @@
 const seismicDevnet: object;
 ```
 
-Defined in: [packages/seismic-viem/src/chain.ts:75](https://github.com/SeismicSystems/seismic-client/blob/fd3f57eb71a85bad7c1f28a6e6fc7d8fcbce7480/packages/seismic-viem/src/chain.ts#L75)
+Defined in: [packages/seismic-viem/src/chain.ts:75](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/chain.ts#L75)
 
 Defines the Seismic development network configuration.
 
@@ -20,114 +20,17 @@ that interact with the blockchain using a defined chain.
 
 ## Type declaration
 
-### blockExplorers?
-
-```ts
-{
-[key: string]: ChainBlockExplorer;   default: ChainBlockExplorer;
-}
-```
-
-Collection of block explorers
-
-### contracts?
-
-```ts
-{
-[key: string]: undefined | ChainContract | {};   ensRegistry: ChainContract;
-  ensUniversalResolver: ChainContract;
-  multicall3: ChainContract;
-  universalSignatureVerifier: ChainContract;
-}
-```
-
-Collection of contracts
-
-### custom?
-
-```ts
-optional custom: Record<string, unknown>;
-```
-
-Custom chain data.
-
-### fees?
-
-```ts
-optional fees: ChainFees<undefined>;
-```
-
-Modifies how fees are derived.
-
-### formatters?
-
-```ts
-optional formatters: undefined;
-```
-
-Modifies how data is formatted and typed (e.g. blocks and transactions)
-
-### id
-
-```ts
-id: 1337
-```
-
-ID in number form
-
-### name
-
-```ts
-name: 'Seismic'
-```
-
-Human-readable name
-
-### nativeCurrency
-
-```ts
-{
-  decimals: 18
-  name: 'Ether'
-  symbol: 'ETH'
-}
-```
-
-Currency used by chain
-
-### rpcUrls
-
-```ts
-{
-  default: {
-     http: readonly ["http://127.0.0.1:8545"];
-     webSocket: readonly ["ws://127.0.0.1:8545"];
-    };
-}
-```
-
-Collection of RPC endpoints
-
-### serializers?
-
-```ts
-optional serializers: ChainSerializers<undefined, TransactionSerializable>;
-```
-
-Modifies how data is serialized (e.g. transactions).
-
-### sourceId?
-
-```ts
-optional sourceId: number;
-```
-
-Source Chain ID (ie. the L1 chain)
-
-### testnet?
-
-```ts
-optional testnet: boolean;
-```
-
-Flag for test networks
+| Name                                          | Type                                                                                                                                                                                                                                                                                                                                                                                  | Description                                                             | Defined in                                    |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------- |
+| <a id="blockexplorers"></a> `blockExplorers`? | \{ `[key: string]`: [`ChainBlockExplorer`](https://github.com/wevm/viem); `default`: [`ChainBlockExplorer`](https://github.com/wevm/viem); \}                                                                                                                                                                                                                                         | Collection of block explorers                                           | node_modules/viem/\_types/types/chain.d.ts:14 |
+| <a id="contracts"></a> `contracts`?           | \{ `[key: string]`: `undefined` \| [`ChainContract`](https://github.com/wevm/viem) \| \{\}; `ensRegistry`: [`ChainContract`](https://github.com/wevm/viem); `ensUniversalResolver`: [`ChainContract`](https://github.com/wevm/viem); `multicall3`: [`ChainContract`](https://github.com/wevm/viem); `universalSignatureVerifier`: [`ChainContract`](https://github.com/wevm/viem); \} | Collection of contracts                                                 | node_modules/viem/\_types/types/chain.d.ts:19 |
+| <a id="custom"></a> `custom`?                 | `Record`\<`string`, `unknown`\>                                                                                                                                                                                                                                                                                                                                                       | Custom chain data.                                                      | node_modules/viem/\_types/types/chain.d.ts:47 |
+| <a id="fees"></a> `fees`?                     | [`ChainFees`](https://github.com/wevm/viem)\<`undefined`\>                                                                                                                                                                                                                                                                                                                            | Modifies how fees are derived.                                          | node_modules/viem/\_types/types/chain.d.ts:49 |
+| <a id="formatters"></a> `formatters`?         | `undefined`                                                                                                                                                                                                                                                                                                                                                                           | Modifies how data is formatted and typed (e.g. blocks and transactions) | node_modules/viem/\_types/types/chain.d.ts:51 |
+| <a id="id"></a> `id`                          | `1337`                                                                                                                                                                                                                                                                                                                                                                                | ID in number form                                                       | node_modules/viem/\_types/types/chain.d.ts:30 |
+| <a id="name"></a> `name`                      | `"Seismic"`                                                                                                                                                                                                                                                                                                                                                                           | Human-readable name                                                     | node_modules/viem/\_types/types/chain.d.ts:32 |
+| <a id="nativecurrency"></a> `nativeCurrency`  | \{ `decimals`: `18`; `name`: `"Ether"`; `symbol`: `"ETH"`; \}                                                                                                                                                                                                                                                                                                                         | Currency used by chain                                                  | node_modules/viem/\_types/types/chain.d.ts:34 |
+| <a id="rpcurls"></a> `rpcUrls`                | \{ `default`: \{ `http`: readonly \[`"http://127.0.0.1:8545"`\]; `webSocket`: readonly \[`"ws://127.0.0.1:8545"`\]; \}; \}                                                                                                                                                                                                                                                            | Collection of RPC endpoints                                             | node_modules/viem/\_types/types/chain.d.ts:36 |
+| <a id="serializers"></a> `serializers`?       | [`ChainSerializers`](https://github.com/wevm/viem)\<`undefined`, [`TransactionSerializable`](https://github.com/wevm/viem)\>                                                                                                                                                                                                                                                          | Modifies how data is serialized (e.g. transactions).                    | node_modules/viem/\_types/types/chain.d.ts:53 |
+| <a id="sourceid"></a> `sourceId`?             | `number`                                                                                                                                                                                                                                                                                                                                                                              | Source Chain ID (ie. the L1 chain)                                      | node_modules/viem/\_types/types/chain.d.ts:41 |
+| <a id="testnet"></a> `testnet`?               | `boolean`                                                                                                                                                                                                                                                                                                                                                                             | Flag for test networks                                                  | node_modules/viem/\_types/types/chain.d.ts:43 |

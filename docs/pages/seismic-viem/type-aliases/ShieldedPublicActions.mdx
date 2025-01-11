@@ -10,7 +10,7 @@
 type ShieldedPublicActions<TChain> = object
 ```
 
-Defined in: [packages/seismic-viem/src/actions/public.ts:33](https://github.com/SeismicSystems/seismic-client/blob/fd3f57eb71a85bad7c1f28a6e6fc7d8fcbce7480/packages/seismic-viem/src/actions/public.ts#L33)
+Defined in: [packages/seismic-viem/src/actions/public.ts:33](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/actions/public.ts#L33)
 
 Defines the additional actions available on a shielded public client.
 
@@ -25,23 +25,11 @@ The type of the blockchain chain (extends `Chain` or `undefined`).
 
 ## Type declaration
 
-### getStorageAt()
-
-```ts
-;(args) => Promise<GetStorageAtReturnType>
-```
-
-### getTeePublicKey()
-
-```ts
-;() => Promise<Hex | string>
-```
-
-### getTransaction()
-
-```ts
-;(args) => Promise<GetTransactionReturnType<TChain, BlockTag>>
-```
+| Name                                           | Type                                                                                                                                        | Defined in                                                                                                                                                                                       |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <a id="getstorageat"></a> `getStorageAt`       | (`args`) => `Promise`\<[`GetStorageAtReturnType`](https://github.com/wevm/viem)\>                                                           | [packages/seismic-viem/src/actions/public.ts:37](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/actions/public.ts#L37) |
+| <a id="getteepublickey"></a> `getTeePublicKey` | () => `Promise`\<[`Hex`](https://github.com/wevm/viem) \| `string`\>                                                                        | [packages/seismic-viem/src/actions/public.ts:36](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/actions/public.ts#L36) |
+| <a id="gettransaction"></a> `getTransaction`   | (`args`) => `Promise`\<[`GetTransactionReturnType`](https://github.com/wevm/viem)\<`TChain`, [`BlockTag`](https://github.com/wevm/viem)\>\> | [packages/seismic-viem/src/actions/public.ts:40](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/actions/public.ts#L40) |
 
 ## Returns
 
