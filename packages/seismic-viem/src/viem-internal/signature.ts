@@ -13,8 +13,8 @@ export function toYParitySignatureArray(
   if (typeof signature.s === 'undefined') return []
   if (typeof v === 'undefined' && typeof yParity === 'undefined') return []
 
-  const r = signature.r
-  const s = signature.s
+  const r = trim(signature.r)
+  const s = trim(signature.s)
 
   const yParity_ = (() => {
     if (typeof yParity === 'number') return yParity ? toHex(1) : '0x'

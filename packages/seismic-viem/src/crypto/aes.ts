@@ -4,7 +4,11 @@ import { hexToRlp } from 'viem'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
-const { createECDH, createCipheriv, createDecipheriv } = require('crypto-browserify')
+const {
+  createECDH,
+  createCipheriv,
+  createDecipheriv,
+} = require('crypto-browserify')
 
 export class AesGcmCrypto {
   private readonly ALGORITHM = 'aes-256-gcm'
@@ -85,17 +89,23 @@ export class AesGcmCrypto {
 
     // TODO: remove this, it already gets RLP encoded when serializing
     // RLP encode the input data
+    console.log('aes encrypt plaintext', plaintext)
     const rlpEncodedData = this.rlpEncodeInput(plaintext)
+    console.log('aes encrypt rlpEncodedData', rlpEncodedData)
+
+    const encodedData = new Uint8Array(Buffer.from(plaintext.slice(2), 'hex'))
 
     const key = new Uint8Array(Buffer.from(this.key.slice(2), 'hex'))
     const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
 
     // Encrypt the RLP encoded data
     const ciphertext = Buffer.concat([
-      new Uint8Array(cipher.update(rlpEncodedData)),
+      new Uint8Array(cipher.update(encodedData)),
       new Uint8Array(cipher.final()),
       new Uint8Array(cipher.getAuthTag()),
     ])
+
+    console.log('aes encrypt ciphertext', ciphertext)
 
     return {
       ciphertext: `0x${ciphertext.toString('hex')}` as Hex,
