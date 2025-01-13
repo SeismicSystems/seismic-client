@@ -19,7 +19,7 @@ jobs:
   test:
     runs-on: self-hosted
     env:
-      SEISMIC_ROOT: /home/azureuser/seismic/seismic
+      SEISMIC_ROOT: /home/azureuser/seismic/seismic-reth
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
       SEISMIC_RETH_FILES: /home/azureuser/.seismic-reth
