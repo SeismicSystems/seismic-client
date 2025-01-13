@@ -6,7 +6,6 @@ import type {
   Chain,
   ContractFunctionArgs,
   ContractFunctionName,
-  Prettify,
   ReadContractParameters,
   ReadContractReturnType,
   Transport,
@@ -27,7 +26,7 @@ import { signedCall } from '@sviem/signedCall'
 
 type SignedReadClient<
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
 > =
   | ShieldedPublicClient<Transport, TChain, TAccount>
   | ShieldedWalletClient<Transport, TChain, TAccount>
@@ -75,7 +74,7 @@ type SignedReadClient<
  */
 export async function signedReadContract<
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
   TArgs extends ContractFunctionArgs<
@@ -127,56 +126,3 @@ export async function signedReadContract<
     data: data || '0x',
   }) as ReadContractReturnType<TAbi, TFunctionName>
 }
-
-/**
- * @ignore
- * Represents a signed read operation on a smart contract.
- *
- * This type defines the function signature for performing signed reads on a contract.
- * A signed read operation allows secure and authenticated interactions with contract functions
- * that are marked as `nonpayable` or `payable`.
- *
- * @template TAbi - The ABI (Application Binary Interface) of the contract. Defaults to `Abi | readonly unknown[]`.
- * @template TFunctionName - The name of the contract function being called. Must be a `nonpayable` or `payable` function.
- * @template TArgs - The arguments for the specified contract function, derived from the ABI and function name.
- *
- * @param args - The parameters for the signed read operation, including:
- * - `abi`: The contract's ABI.
- * - `functionName`: The name of the function being invoked.
- * - `args`: The arguments required for the function call.
- *
- * @returns {Promise<ReadContractReturnType>} A promise that resolves to the result of the signed read operation.
- *
- * @example
- * ```typescript
- * const signedRead: SignedReadContract<MyContractAbi> = async (args) => {
- *   const result = await signedReadContract({
- *     abi: myContractAbi,
- *     functionName: 'getBalance',
- *     args: ['0x1234...'],
- *   });
- *   return result;
- * };
- *
- * const result = await signedRead({
- *   abi: myContractAbi,
- *   functionName: 'getBalance',
- *   args: ['0x1234...'],
- * });
- * console.log('Balance:', result);
- * ```
- */
-export type SignedReadContract<
-  TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<
-    TAbi,
-    'nonpayable' | 'payable'
-  > = ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  > = ContractFunctionArgs<TAbi, 'payable' | 'nonpayable', TFunctionName>,
-> = (
-  args: ReadContractParameters<TAbi, TFunctionName, TArgs>
-) => Promise<ReadContractReturnType>

@@ -22,41 +22,13 @@ import type { ShieldedWalletClient } from '@sviem/client'
 import { signedReadContract } from '@sviem/contract/read'
 import { shieldedWriteContract } from '@sviem/contract/write'
 import type { KeyedClient } from '@sviem/viem-internal/client'
-import type { GetReadFunction } from '@sviem/viem-internal/function'
+import type {
+  GetReadFunction,
+  GetWriteFunction,
+} from '@sviem/viem-internal/function'
 import { getFunctionParameters } from '@sviem/viem-internal/function'
 
-/**
- * @ignore
- * Defines the return type for a signed read operation on a smart contract.
- *
- * This type determines the structure of the object returned when performing
- * signed read operations on a contract, based on the provided ABI, client, and
- * function names.
- *
- * @template TAbi - The ABI (Application Binary Interface) of the contract. This can be a strict `Abi` type
- * or an array of unknown items for less strict use cases.
- * @template TClient - The client type, either a standard `Client` or a `KeyedClient`.
- * @template _readFunctionNames - The names of the contract's `pure` or `view` functions, extracted from the ABI.
- * @template _narrowable - A boolean flag indicating whether the provided ABI is narrowable to a specific contract's ABI.
- * @template _walletClient - The client associated with the wallet, if applicable, otherwise defaults to the provided client.
- *
- * @type {SignedReadContractReturnType}
- *
- * @remarks
- * - If `_walletClient` is a valid client, the returned type includes a `sread` object.
- * - The `sread` object maps function names (`_readFunctionNames`) to callable read functions
- *   that match the contract's ABI for `pure` or `view` functions.
- * - If `_readFunctionNames` is `never`, the return type defaults to `unknown`.
- *
- * @example
- * ```typescript
- * type ReturnType = SignedReadContractReturnType<MyContractAbi, MyClient>;
- *
- * // Access the `sread` object with callable contract read functions
- * const value = await returnType.sread.getValue();
- * ```
- */
-export type SignedReadContractReturnType<
+type TransparentReadContractReturnType<
   TAbi extends Abi | readonly unknown[],
   TClient extends Client | KeyedClient = Client | KeyedClient,
   _readFunctionNames extends string = TAbi extends Abi
@@ -74,7 +46,7 @@ export type SignedReadContractReturnType<
   ? IsNever<_readFunctionNames> extends true
     ? unknown
     : {
-        sread: {
+        tread: {
           [functionName in _readFunctionNames]: GetReadFunction<
             _narrowable,
             TAbi,
@@ -85,6 +57,58 @@ export type SignedReadContractReturnType<
         }
       }
   : unknown
+
+type TransparentWriteContractReturnType<
+  TAbi extends Abi | readonly unknown[],
+  TClient extends Client | KeyedClient = Client | KeyedClient,
+  _writeFunctionNames extends string = TAbi extends Abi
+    ? Abi extends TAbi
+      ? string
+      : ExtractAbiFunctionNames<TAbi, 'nonpayable' | 'payable'>
+    : string,
+  _narrowable extends boolean = IsNarrowable<TAbi, Abi>,
+  _walletClient extends Client | unknown = TClient extends {
+    wallet: Client
+  }
+    ? TClient['wallet']
+    : TClient,
+> = _walletClient extends Client
+  ? IsNever<_writeFunctionNames> extends true
+    ? unknown
+    : {
+        write: {
+          [functionName in _writeFunctionNames]: GetWriteFunction<
+            _narrowable,
+            _walletClient['chain'],
+            _walletClient['account'],
+            TAbi,
+            functionName extends ContractFunctionName<
+              TAbi,
+              'nonpayable' | 'payable'
+            >
+              ? functionName
+              : never
+          >
+        }
+      }
+  : unknown
+
+export type ShieldedContract<
+  TTransport extends Transport = Transport,
+  TAddress extends Address = Address,
+  TAbi extends Abi | readonly unknown[] = Abi,
+  TChain extends Chain | undefined = Chain | undefined,
+  TAccount extends Account = Account,
+  TClient extends
+    | ShieldedWalletClient<TTransport, TChain, TAccount>
+    | KeyedClient<TTransport, TChain, TAccount> = ShieldedWalletClient<
+    TTransport,
+    TChain,
+    TAccount
+  >,
+> = GetContractReturnType<TAbi, TClient, TAddress> &
+  TransparentReadContractReturnType<TAbi, TClient> &
+  TransparentWriteContractReturnType<TAbi, TClient, TAddress>
 
 /**
  * Retrieves a shielded contract instance with extended functionality for performing
@@ -143,7 +167,7 @@ export function getShieldedContract<
     | ShieldedWalletClient<TTransport, TChain, TAccount>
     | KeyedClient<TTransport, TChain, TAccount>,
   TChain extends Chain | undefined = Chain | undefined,
-  TAccount extends Account | undefined = Account | undefined,
+  TAccount extends Account = Account,
 >({
   abi,
   address,
@@ -155,8 +179,7 @@ export function getShieldedContract<
   TAbi,
   TClient,
   TAddress
->): GetContractReturnType<TAbi, TClient, TAddress> &
-  SignedReadContractReturnType<TAbi, TClient> {
+>): ShieldedContract<TTransport, TAddress, TAbi, TChain, TAccount, TClient> {
   const viemContract = getContract({ abi, address, client })
 
   const walletClient:
@@ -315,15 +338,28 @@ export function getShieldedContract<
       | 'createEventFilter'
       | 'estimateGas'
       | 'getEvents'
-      | 'read'
       | 'simulate'
       | 'watchEvent'
+      | 'read'
+      | 'tread'
       | 'write'
-      | 'sread']?: unknown
+      | 'twrite']?: unknown
   } = viemContract
+  // Transparent writes use the standard writeContract
+  contract.twrite = contract.write
+  // Transparent reads use signed reads,
+  // but signing is only activated if they supply an account parameter
+  contract.tread = readAction
+  // Shielded writes use seismic transactions
   contract.write = shieldedWriteAction
-  contract.read = readAction
-  contract.sread = signedReadAction
-  return contract as GetContractReturnType<TAbi, TClient, TAddress> &
-    SignedReadContractReturnType<TAbi, TClient>
+  // The default read is signed read, where we sign the raw tx with user's account
+  contract.read = signedReadAction
+  return contract as ShieldedContract<
+    TTransport,
+    TAddress,
+    TAbi,
+    TChain,
+    TAccount,
+    TClient
+  >
 }

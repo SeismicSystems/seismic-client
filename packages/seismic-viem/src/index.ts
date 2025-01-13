@@ -21,6 +21,4 @@ export type {
   GetPublicClientParameters,
 } from '@sviem/client'
 
-export type { SignedReadContract } from '@sviem/contract/read'
-export type { SignedReadContractReturnType } from '@sviem/contract/contract'
-export type { ShieldedWriteContract } from '@sviem/contract/write'
+export type { ShieldedContract } from '@sviem/contract/contract'

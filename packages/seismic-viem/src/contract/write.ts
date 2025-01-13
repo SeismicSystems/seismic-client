@@ -12,7 +12,6 @@ import type {
   WriteContractReturnType,
 } from 'viem'
 import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
-import { writeContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
 import type { ShieldedWalletClient } from '@sviem/client'
@@ -88,7 +87,7 @@ export function useSeismicWrite<
 export async function shieldedWriteContract<
   TTransport extends Transport,
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
   TArgs extends ContractFunctionArgs<
@@ -108,13 +107,22 @@ export async function shieldedWriteContract<
     chainOverride
   >
 ): Promise<WriteContractReturnType> {
-  const { abi, functionName, args = [] } = parameters as WriteContractParameters
-  if (!args || !useSeismicWrite({ abi, name: functionName })) {
-    return writeContract(client, parameters)
+  const {
+    abi,
+    functionName,
+    args = [],
+    address,
+    gas,
+    gasPrice,
+  } = parameters as WriteContractParameters
+  let { nonce } = parameters as WriteContractParameters
+
+  if (nonce === undefined) {
+    nonce = await client.getTransactionCount({
+      address: client.account?.address,
+    })
   }
 
-  const { address, nonce, gas, gasPrice } =
-    parameters as WriteContractParameters
   if (!nonce) {
     throw new Error('Must specify nonce with seismic transaction')
   }
@@ -140,74 +148,3 @@ export async function shieldedWriteContract<
   }
   return sendShieldedTransaction(client, request)
 }
-
-/**
- * @ignore
- * Represents a shielded write operation on a smart contract.
- *
- * This type defines the function signature for performing `payable` or `nonpayable`
- * operations on a shielded smart contract. The shielded write operation involves
- * encrypted payloads and enhanced privacy mechanisms for interacting with the blockchain.
- *
- * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
- * @template TAccount - The account type associated with the operation (extends `Account` or `undefined`).
- * @template abi - The ABI (Application Binary Interface) of the contract. Defaults to `Abi | readonly unknown[]`.
- * @template functionName - The name of the contract function being called, restricted to `payable` or `nonpayable` functions.
- * @template args - The arguments for the contract function, derived from the ABI and function name.
- * @template TChainOverride - An optional chain override for the transaction (extends `Chain` or `undefined`).
- *
- * @param args - The parameters for the shielded write operation. This includes:
- * - `abi`: The contract's ABI.
- * - `functionName`: The name of the function being invoked.
- * - `args`: The arguments for the function.
- * - Additional options like gas and value, depending on the chain and account.
- *
- * @returns {Promise<WriteContractReturnType>} A promise that resolves to the result of the write operation.
- *
- * @example
- * ```typescript
- * const writeContract: ShieldedWriteContract<MyChain, MyAccount> = async (args) => {
- *   const result = await shieldedWriteContract({
- *     abi: myContractAbi,
- *     functionName: 'transfer',
- *     args: [recipient, amount],
- *     value: 100n,
- *     gas: 50000n,
- *   });
- *   return result;
- * };
- *
- * const result = await writeContract({
- *   abi: myContractAbi,
- *   functionName: 'transfer',
- *   args: ['0x1234...', 100n],
- *   value: 100n,
- *   gas: 50000n,
- * });
- * console.log('Transaction hash:', result.transactionHash);
- * ```
- */
-export type ShieldedWriteContract<
-  TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
-  abi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-  functionName extends ContractFunctionName<
-    abi,
-    'payable' | 'nonpayable'
-  > = ContractFunctionName<abi, 'payable' | 'nonpayable'>,
-  args extends ContractFunctionArgs<
-    abi,
-    'payable' | 'nonpayable',
-    functionName
-  > = ContractFunctionArgs<abi, 'payable' | 'nonpayable', functionName>,
-  TChainOverride extends Chain | undefined = undefined,
-> = (
-  args: WriteContractParameters<
-    abi,
-    functionName,
-    args,
-    TChain,
-    TAccount,
-    TChainOverride
-  >
-) => Promise<WriteContractReturnType>

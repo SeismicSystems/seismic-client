@@ -1,10 +1,13 @@
 import type { Hex } from 'viem'
-import { hexToRlp } from 'viem'
 
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
-const { createECDH, createCipheriv, createDecipheriv } = require('crypto-browserify')
+const {
+  createECDH,
+  createCipheriv,
+  createDecipheriv,
+} = require('crypto-browserify')
 
 export class AesGcmCrypto {
   private readonly ALGORITHM = 'aes-256-gcm'
@@ -37,15 +40,6 @@ export class AesGcmCrypto {
 
     // Last 4 bytes remain as zeros
     return nonceBuffer
-  }
-
-  /**
-   * RLP encodes the input data
-   * @param data - The hex data to encode
-   */
-  private rlpEncodeInput(data: Hex): Uint8Array {
-    const rlpEncoded = hexToRlp(data)
-    return new Uint8Array(Buffer.from(rlpEncoded.slice(2), 'hex'))
   }
 
   /**
@@ -83,16 +77,12 @@ export class AesGcmCrypto {
         : this.numberToNonce(nonce)
     )
 
-    // TODO: remove this, it already gets RLP encoded when serializing
-    // RLP encode the input data
-    const rlpEncodedData = this.rlpEncodeInput(plaintext)
-
     const key = new Uint8Array(Buffer.from(this.key.slice(2), 'hex'))
     const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
 
-    // Encrypt the RLP encoded data
+    const callData = new Uint8Array(Buffer.from(plaintext.slice(2), 'hex'))
     const ciphertext = Buffer.concat([
-      new Uint8Array(cipher.update(rlpEncodedData)),
+      new Uint8Array(cipher.update(callData)),
       new Uint8Array(cipher.final()),
       new Uint8Array(cipher.getAuthTag()),
     ])
@@ -135,10 +125,7 @@ export class AesGcmCrypto {
       ])
     )
 
-    // Remove RLP prefix from decrypted data
-    const decoded = Buffer.from(decrypted.slice(1))
-
-    return `0x${decoded.toString('hex')}` as Hex
+    return `0x${Buffer.from(decrypted).toString('hex')}` as Hex
   }
 }
 

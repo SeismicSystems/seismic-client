@@ -8,6 +8,7 @@ module.exports = [
       '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
       import: require('eslint-plugin-import'),
       'no-relative-import-paths': require('eslint-plugin-no-relative-import-paths'),
+      'unused-imports': require('eslint-plugin-unused-imports'),
     },
     languageOptions: {
       // Added languageOptions block
@@ -25,6 +26,7 @@ module.exports = [
         'error',
         { allowSameFolder: false },
       ],
+      'unused-imports/no-unused-imports': 'error',
     },
   },
   {

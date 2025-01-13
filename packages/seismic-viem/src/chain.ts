@@ -5,7 +5,7 @@ import {
   toHex,
   toRlp,
 } from 'viem'
-import type { Chain, Hex, Signature, TransactionSerializable } from 'viem'
+import type { Hex, Signature, TransactionSerializable } from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 

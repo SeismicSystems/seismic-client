@@ -78,7 +78,7 @@ const textSeismicTx = async () => {
     abi: contractABI,
     functionName: 'isOdd',
   })
-  // const isOdd0 = await seismicContract.read.isOdd()
+  // const isOdd0 = await seismicContract.tread.isOdd()
   // contract initializes number to be 0
   expect(isOdd0).toBe(false)
   console.info(`[0] initial value of isOdd = ${isOdd0}`)
@@ -87,7 +87,6 @@ const textSeismicTx = async () => {
   const tx1 = await seismicContract.write.setNumber([TEST_NUMBER], {
     gas: 210000n,
     gasPrice: parseGwei('20'),
-    nonce: 1,
   })
   console.info(`[1] Set number tx: ${tx1}`)
   const receipt1 = await publicClient.waitForTransactionReceipt({ hash: tx1 })
@@ -96,7 +95,7 @@ const textSeismicTx = async () => {
   )
 
   // Try reading using explicit signedRead
-  const isOdd1 = await seismicContract.sread.isOdd()
+  const isOdd1 = await seismicContract.read.isOdd()
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
@@ -104,7 +103,6 @@ const textSeismicTx = async () => {
   const tx2 = await seismicContract.write.increment([], {
     gas: 210000n,
     gasPrice: parseGwei('20'),
-    nonce: 2,
   })
   console.info(`[2] Incremented number in tx: ${tx2}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
@@ -113,14 +111,13 @@ const textSeismicTx = async () => {
   )
 
   // Try reading using unsigned (normal) read
-  const isOdd2 = await seismicContract.read.isOdd()
+  const isOdd2 = await seismicContract.tread.isOdd()
   expect(isOdd2).toBe(false)
 
   // This is a seismic tx since the arg to setNumber is an suint
   const tx3 = await seismicContract.write.setNumber([TEST_NUMBER], {
     gas: 210000n,
     gasPrice: parseGwei('20'),
-    nonce: 3,
   })
   console.info(`[3] Set number tx: ${tx1}`)
   const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
@@ -129,7 +126,7 @@ const textSeismicTx = async () => {
   )
 
   // Use non-explicit signed-read
-  const isOdd3 = await seismicContract.read.isOdd([], {
+  const isOdd3 = await seismicContract.tread.isOdd([], {
     account: walletClient.account.address,
   })
   // number has been set back to 11
