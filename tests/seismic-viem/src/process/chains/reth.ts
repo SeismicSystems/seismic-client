@@ -59,7 +59,7 @@ const runRethLocally = async (
     args: [
       'run',
       '--bin',
-      'reth',
+      'seismic-reth',
       '--',
       'node',
       ...devArg,
