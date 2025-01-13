@@ -38,7 +38,7 @@ export type ShieldedWalletActions<
 export const shieldedWalletActions = <
   TTransport extends Transport,
   TChain extends Chain | undefined = Chain | undefined,
-  TAccount extends Account | undefined = Account | undefined,
+  TAccount extends Account = Account,
 >(
   client: ShieldedWalletClient<TTransport, TChain, TAccount>,
   encryption: Hex

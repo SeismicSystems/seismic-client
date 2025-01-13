@@ -60,7 +60,7 @@ export type ShieldedContract<
   TAddress extends Address = Address,
   TAbi extends Abi | readonly unknown[] = Abi,
   TChain extends Chain | undefined = Chain | undefined,
-  TAccount extends Account | undefined = Account | undefined,
+  TAccount extends Account = Account,
   TClient extends
     | ShieldedWalletClient<TTransport, TChain, TAccount>
     | KeyedClient<TTransport, TChain, TAccount> = ShieldedWalletClient<
