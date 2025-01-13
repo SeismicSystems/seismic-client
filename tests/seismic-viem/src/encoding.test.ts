@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import type { Hex, Signature, TransactionSerializable } from 'viem'
 
 import { serializeSeismicTransaction } from '@sviem/chain'

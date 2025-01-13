@@ -136,7 +136,7 @@ const textSeismicTx = async () => {
 }
 
 describe('Seismic Contract', async () => {
-  test('node detects and parses seismic transaction', textSeismicTx, {
+  test('deploy & call contracts with seismic tx', textSeismicTx, {
     timeout: 20_000,
   })
 })
