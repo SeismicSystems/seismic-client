@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: ['main']
 
-concurrency:
-  group: global-self-hosted-runner
-  cancel-in-progress: false
-
 jobs:
   lint:
     runs-on: ubuntu-24.04
@@ -23,6 +19,9 @@ jobs:
 
   test:
     runs-on: self-hosted
+    concurrency:
+      group: global-self-hosted-runner
+      cancel-in-progress: false
     env:
       SEISMIC_ROOT: /home/azureuser/seismic/seismic-reth
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
@@ -34,7 +33,7 @@ jobs:
       - name: Build reth
         run: |
           cd "$SEISMIC_ROOT"
-          cargo build --release --bin seismic-reth
+          cargo build --bin seismic-reth
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
       - name: Create .env
