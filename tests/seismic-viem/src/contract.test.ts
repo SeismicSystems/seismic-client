@@ -83,7 +83,6 @@ const textSeismicTx = async () => {
   expect(isOdd0).toBe(false)
   console.info(`[0] initial value of isOdd = ${isOdd0}`)
 
-  console.log(`set to ${TEST_NUMBER}`)
   // This is a seismic tx since the arg to setNumber is an suint
   const tx1 = await seismicContract.write.setNumber([TEST_NUMBER], {
     gas: 210000n,
@@ -100,7 +99,6 @@ const textSeismicTx = async () => {
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
-  console.log('increment')
   // Not a seismic tx since there are no arguments therefore no shielded arguments
   const tx2 = await seismicContract.write.increment([], {
     gas: 210000n,

@@ -233,7 +233,6 @@ export async function sendShieldedTransaction<
         { seismicInput, ...preparedTx },
         { serializer: serializeSeismicTransaction }
       )
-      console.log(`serialized: ${serializedTransaction}`)
       return await sendRawTransaction(client, { serializedTransaction })
     }
 
