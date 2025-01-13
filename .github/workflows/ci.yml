@@ -19,7 +19,7 @@ jobs:
       - name: Build reth
         run: |
           cd "$SEISMIC_ROOT"
-          cargo build --release --bin reth
+          cargo build --bin seismic-reth
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
       - name: Create .env
