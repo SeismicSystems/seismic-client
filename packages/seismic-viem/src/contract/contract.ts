@@ -9,13 +9,11 @@ import type {
   ContractFunctionName,
   GetContractParameters,
   GetContractReturnType,
-  Hex,
   IsNarrowable,
   IsNever,
   ReadContractParameters,
   Transport,
   UnionOmit,
-  WalletClient,
   WriteContractParameters,
 } from 'viem'
 import { getContract } from 'viem'
