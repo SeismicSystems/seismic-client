@@ -3,7 +3,6 @@ import type {
   CallParameters,
   CallReturnType,
   Chain,
-  Client,
   Hex,
   TransactionRequest,
   Transport,
@@ -143,7 +142,7 @@ export type SignedCall<chain extends Chain | undefined> = (
 export async function signedCall<
   TTransport extends Transport,
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
 >(
   client:
     | ShieldedPublicClient<TTransport, TChain, TAccount>

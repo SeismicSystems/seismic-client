@@ -13,13 +13,11 @@ import type {
 import {
   createClient,
   createPublicClient,
-  http,
   publicActions,
   walletActions,
 } from 'viem'
 import type { PublicClientConfig } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { anvil } from 'viem/chains'
 
 import type { ShieldedPublicActions } from '@sviem/actions/public'
 import { shieldedPublicActions } from '@sviem/actions/public'
