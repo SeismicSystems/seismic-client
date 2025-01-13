@@ -5,6 +5,7 @@
     "packages/**",
     "tests/**"
   ],
+  "type": "module",
   "scripts": {
     "clean": "rimraf packages/*/dist -g; rimraf tests/*/dist -g; ",
     "typecheck": "bun run --cwd packages/seismic-viem typecheck",
@@ -14,11 +15,18 @@
     "lint:eslint:check": "eslint ./packages && eslint ./tests",
     "lint:prettier": "prettier ./packages --write; prettier ./tests --write",
     "lint:prettier:check": "prettier ./packages -c && prettier ./tests -c",
-    "viem:docs:gen": "bun run --cwd packages/seismic-viem docs:gen",
+    "docs:dev": "vocs dev",
+    "docs:build": "vocs build",
+    "docs:preview": "vocs preview",
+    "docs:gen": "bun run viem:docs:gen; bun prettier --write ./docs/pages",
     "viem:build": "bun run --cwd packages/seismic-viem build",
     "viem:publish": "npm publish -w packages/seismic-viem",
     "viem:test:anvil": "bun run --cwd tests/seismic-viem test:anvil",
-    "viem:test:devnet": "bun run --cwd tests/seismic-viem test:devnet"
+    "viem:test:devnet": "bun run --cwd tests/seismic-viem test:devnet",
+    "viem:docs:build": "bun run --cwd packages/seismic-viem vocs build",
+    "viem:docs:preview": "bun run --cwd packages/seismic-viem vocs preview",
+    "viem:docs:gen": "bun run --cwd packages/seismic-viem docs:gen",
+    "viem:docs:check": "bun run --cwd packages/seismic-viem docs:check"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
@@ -31,11 +39,16 @@
     "bun-types": "^1.1.42",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-mdx": "^3.1.5",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-mdx": "^3.1.5",
     "eslint-plugin-no-relative-import-paths": "^1.5.5",
     "eslint-plugin-unused-imports": "^4.1.4",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
-    "tsc-alias": "^1.8.10"
+    "tsc-alias": "^1.8.10",
+    "typedoc": "^0.27.6",
+    "typedoc-plugin-markdown": "^4.4.1",
+    "vocs": "^1.0.0-alpha.62"
   }
 }

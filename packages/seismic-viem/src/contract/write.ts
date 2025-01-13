@@ -47,8 +47,8 @@ export function useSeismicWrite<
  * __Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.__
  *
  * @param client - Client to use
- * @param parameters - {@link WriteContractParameters}
- * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link WriteContractReturnType}
+ * @param parameters - {@link https://viem.sh/docs/contract/writeContract.html#parameters WriteContractParameters}
+ * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link https://viem.sh/docs/glossary/types#hash WriteContractReturnType}
  *
  * @example
  * import { createWalletClient, custom, parseAbi } from 'viem'

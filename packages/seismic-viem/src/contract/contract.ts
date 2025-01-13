@@ -110,6 +110,55 @@ export type ShieldedContract<
   TransparentReadContractReturnType<TAbi, TClient> &
   TransparentWriteContractReturnType<TAbi, TClient, TAddress>
 
+/**
+ * Retrieves a shielded contract instance with extended functionality for performing
+ * shielded write operations, signed reads, and contract interaction.
+ *
+ * This function extends the base `getContract` functionality by adding:
+ * - Shielded write actions for `nonpayable` and `payable` functions.
+ * - Signed read actions for `pure` and `view` functions.
+ * - Proxy-based access to dynamically invoke contract methods.
+ *
+ * @template TTransport - The transport mechanism used for communication (extends `Transport`).
+ * @template TAddress - The address type of the contract.
+ * @template TAbi - The ABI (Application Binary Interface) of the contract, either strict `Abi` or unknown array.
+ * @template TClient - The client type, supporting either a `ShieldedWalletClient` or `KeyedClient`.
+ * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
+ * @template TAccount - The account type associated with the wallet client (extends `Account` or `undefined`).
+ *
+ * @param abi - The ABI of the contract to interact with.
+ * @param address - The address of the contract on the blockchain.
+ * @param client - The client instance to use for interacting with the contract. Must be a shielded wallet client.
+ *
+ * @returns A contract instance with extended shielded write and signed read functionalities.
+ * The returned object includes standard contract methods (`abi`, `address`, `createEventFilter`, etc.)
+ * and shielded-specific methods (`write`, `read`, `sread`).
+ *
+ * @throws {Error} If the wallet client is not provided for shielded write or signed read operations.
+ * @throws {Error} If the wallet client does not have an account configured for signed reads.
+ *
+ * @example
+ * ```typescript
+ * const contract = getShieldedContract({
+ *   abi: myContractAbi,
+ *   address: '0x1234...',
+ *   client: shieldedWalletClient,
+ * });
+ *
+ * // Perform a shielded write
+ * await contract.write.myFunction([arg1, arg2], { gas: 50000n });
+ *
+ * // Perform a signed read
+ * const value = await contract.sread.getValue();
+ * console.log('Value:', value);
+ * ```
+ *
+ * @remarks
+ * - The `write` property allows dynamic invocation of `nonpayable` and `payable` functions.
+ * - The `read` property will toggle between public reads and signed reads, depending on whether an `account` is provided
+ * - The `sread` property does the same as `read`, except provides `account` as a parameter (so it always makes a signed read)
+ * - The client must be a `ShieldedWalletClient` or provide a wallet client for shielded-specific operations.
+ */
 export function getShieldedContract<
   TTransport extends Transport,
   TAddress extends Address,
