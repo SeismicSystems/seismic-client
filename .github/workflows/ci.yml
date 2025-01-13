@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: ['main']
 
+concurrency:
+  group: global-self-hosted-runner
+  cancel-in-progress: false
+
 jobs:
   lint:
-    runs-on: self-hosted
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -30,7 +34,7 @@ jobs:
       - name: Build reth
         run: |
           cd "$SEISMIC_ROOT"
-          cargo build --release --bin reth
+          cargo build --release --bin seismic-reth
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
       - name: Create .env
