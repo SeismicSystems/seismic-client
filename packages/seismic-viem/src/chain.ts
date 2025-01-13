@@ -12,7 +12,7 @@ import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 export const serializeSeismicTransaction = (
   transaction: TransactionSerializable & { seismicInput?: Hex | undefined },
   signature?: Signature
-) => {
+): Hex => {
   // should be a better way to decide this...
   if (!transaction.seismicInput) {
     return serializeTransaction(

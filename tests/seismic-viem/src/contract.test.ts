@@ -133,8 +133,8 @@ const textSeismicTx = async () => {
   expect(isOdd3).toBe(true)
 }
 
-describe('Seismic Transaction', async () => {
-  test('node detects and parses seismic transaction', textSeismicTx, {
+describe('Seismic Contract', async () => {
+  test('deploy & call contracts with seismic tx', textSeismicTx, {
     timeout: 20_000,
   })
 })
