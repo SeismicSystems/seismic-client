@@ -1,5 +1,4 @@
 import type { Hex } from 'viem'
-import { hexToRlp } from 'viem'
 
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
