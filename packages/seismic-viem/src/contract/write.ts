@@ -74,7 +74,6 @@ export function useSeismicWrite<
  * import { createWalletClient, http, parseAbi } from 'viem'
  * import { mainnet } from 'viem/chains'
  * import { simulateContract, writeContract } from 'viem/contract'
-import { privateKeyToAccount } from 'viem/accounts';
  *
  * const client = createWalletClient({
  *   chain: mainnet,
@@ -131,14 +130,7 @@ export async function shieldedWriteContract<
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
 
-  console.log('shieldedWriteContract aeskey', aesKey)
-  console.log('shieldedWriteContract encodedData', encodedData)
-
   const { ciphertext: data } = aesCipher.encrypt(encodedData, nonce)
-
-  console.log('shieldedWriteContract ciphertext', data)
-  console.log('shieldedWriteContract public key', client.account?.publicKey)
-  console.log('shieldedWriteContract private key', client.key)
 
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
