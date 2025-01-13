@@ -55,6 +55,18 @@ type SignedReadContractReturnType<
       }
   : unknown
 
+export type ShieldedContract<
+  TTransport extends Transport,
+  TAddress extends Address,
+  TAbi extends Abi | readonly unknown[],
+  TClient extends
+    | ShieldedWalletClient<TTransport, TChain, TAccount>
+    | KeyedClient<TTransport, TChain, TAccount>,
+  TChain extends Chain | undefined = Chain | undefined,
+  TAccount extends Account | undefined = Account | undefined,
+> = GetContractReturnType<TAbi, TClient, TAddress> &
+  SignedReadContractReturnType<TAbi, TClient>
+
 export function getShieldedContract<
   TTransport extends Transport,
   TAddress extends Address,
@@ -75,8 +87,7 @@ export function getShieldedContract<
   TAbi,
   TClient,
   TAddress
->): GetContractReturnType<TAbi, TClient, TAddress> &
-  SignedReadContractReturnType<TAbi, TClient> {
+>): ShieldedContract<TTransport, TAddress, TAbi, TClient, TChain, TAccount> {
   const viemContract = getContract({ abi, address, client })
 
   const walletClient:
