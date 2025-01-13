@@ -47,7 +47,7 @@ export type ShieldedPublicClient<
 export type ShieldedWalletClient<
   transport extends Transport = Transport,
   chain extends Chain | undefined = Chain | undefined,
-  account extends Account | undefined = Account | undefined,
+  account extends Account = Account,
 > = Client<
   transport,
   chain,
@@ -61,7 +61,7 @@ export type ShieldedWalletClient<
 type SeismicClients<
   transport extends Transport,
   chain extends Chain | undefined,
-  account extends Account | undefined,
+  account extends Account,
 > = {
   public: ShieldedPublicClient<transport, chain, undefined>
   wallet: ShieldedWalletClient<transport, chain, account>
