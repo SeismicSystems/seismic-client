@@ -78,18 +78,3 @@ export async function signedReadContract<
     data: data || '0x',
   }) as ReadContractReturnType<TAbi, TFunctionName>
 }
-
-export type SignedReadContract<
-  TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<
-    TAbi,
-    'nonpayable' | 'payable'
-  > = ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  > = ContractFunctionArgs<TAbi, 'payable' | 'nonpayable', TFunctionName>,
-> = (
-  args: ReadContractParameters<TAbi, TFunctionName, TArgs>
-) => Promise<ReadContractReturnType>

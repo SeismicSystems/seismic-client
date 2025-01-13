@@ -2,12 +2,18 @@ import type { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype'
 import type {
   Abi,
   AbiFunction,
+  Account,
+  Chain,
   ContractFunctionArgs,
   ContractFunctionName,
+  IsUndefined,
+  Or,
   Prettify,
   ReadContractParameters,
   ReadContractReturnType,
   UnionOmit,
+  WriteContractParameters,
+  WriteContractReturnType,
 } from 'viem'
 
 export function getFunctionParameters(
@@ -50,3 +56,71 @@ export type GetReadFunction<
         | [options?: _options]
         | [args: readonly unknown[], options?: _options]
     ) => Promise<ReadContractReturnType>
+
+export type GetWriteFunction<
+  narrowable extends boolean,
+  chain extends Chain | undefined,
+  account extends Account | undefined,
+  abi extends Abi | readonly unknown[],
+  functionName extends ContractFunctionName<abi, 'nonpayable' | 'payable'>,
+  args extends ContractFunctionArgs<
+    abi,
+    'nonpayable' | 'payable',
+    functionName
+  > = ContractFunctionArgs<abi, 'nonpayable' | 'payable', functionName>,
+  abiFunction extends AbiFunction = abi extends Abi
+    ? ExtractAbiFunction<abi, functionName>
+    : AbiFunction,
+  //
+  _args = AbiParametersToPrimitiveTypes<abiFunction['inputs']>,
+  // For making `options` parameter required if `account` or `chain` is undefined
+  _isOptionsRequired = Or<[IsUndefined<account>, IsUndefined<chain>]>,
+> = narrowable extends true
+  ? <
+      chainOverride extends Chain | undefined,
+      options extends Prettify<
+        UnionOmit<
+          WriteContractParameters<
+            abi,
+            functionName,
+            args,
+            chain,
+            account,
+            chainOverride
+          >,
+          'abi' | 'address' | 'args' | 'functionName'
+        >
+      >,
+    >(
+      ...parameters: _args extends readonly []
+        ? _isOptionsRequired extends true
+          ? [options: options]
+          : [options?: options]
+        : [
+            args: _args,
+            ...parameters: _isOptionsRequired extends true
+              ? [options: options]
+              : [options?: options],
+          ]
+    ) => Promise<WriteContractReturnType>
+  : <
+      chainOverride extends Chain | undefined,
+      options extends Prettify<
+        UnionOmit<
+          WriteContractParameters<
+            abi,
+            functionName,
+            args,
+            chain,
+            account,
+            chainOverride
+          >,
+          'abi' | 'address' | 'args' | 'functionName'
+        >
+      >,
+      Rest extends unknown[] = _isOptionsRequired extends true
+        ? [options: options]
+        : [options?: options],
+    >(
+      ...parameters: Rest | [args: readonly unknown[], ...parameters: Rest]
+    ) => Promise<WriteContractReturnType>

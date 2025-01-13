@@ -78,7 +78,7 @@ const textSeismicTx = async () => {
     abi: contractABI,
     functionName: 'isOdd',
   })
-  // const isOdd0 = await seismicContract.read.isOdd()
+  // const isOdd0 = await seismicContract.tread.isOdd()
   // contract initializes number to be 0
   expect(isOdd0).toBe(false)
   console.info(`[0] initial value of isOdd = ${isOdd0}`)
@@ -95,7 +95,7 @@ const textSeismicTx = async () => {
   )
 
   // Try reading using explicit signedRead
-  const isOdd1 = await seismicContract.sread.isOdd()
+  const isOdd1 = await seismicContract.read.isOdd()
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
@@ -111,7 +111,7 @@ const textSeismicTx = async () => {
   )
 
   // Try reading using unsigned (normal) read
-  const isOdd2 = await seismicContract.read.isOdd()
+  const isOdd2 = await seismicContract.tread.isOdd()
   expect(isOdd2).toBe(false)
 
   // This is a seismic tx since the arg to setNumber is an suint
@@ -126,7 +126,7 @@ const textSeismicTx = async () => {
   )
 
   // Use non-explicit signed-read
-  const isOdd3 = await seismicContract.read.isOdd([], {
+  const isOdd3 = await seismicContract.tread.isOdd([], {
     account: walletClient.account.address,
   })
   // number has been set back to 11
