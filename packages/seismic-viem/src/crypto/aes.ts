@@ -44,15 +44,6 @@ export class AesGcmCrypto {
   }
 
   /**
-   * RLP encodes the input data
-   * @param data - The hex data to encode
-   */
-  private rlpEncodeInput(data: Hex): Uint8Array {
-    const rlpEncoded = hexToRlp(data)
-    return new Uint8Array(Buffer.from(rlpEncoded.slice(2), 'hex'))
-  }
-
-  /**
    * Validates and converts a hex nonce to buffer
    * @param nonce - The nonce in hex format
    */
@@ -87,25 +78,15 @@ export class AesGcmCrypto {
         : this.numberToNonce(nonce)
     )
 
-    // TODO: remove this, it already gets RLP encoded when serializing
-    // RLP encode the input data
-    console.log('aes encrypt plaintext', plaintext)
-    const rlpEncodedData = this.rlpEncodeInput(plaintext)
-    console.log('aes encrypt rlpEncodedData', rlpEncodedData)
-
-    const encodedData = new Uint8Array(Buffer.from(plaintext.slice(2), 'hex'))
-
     const key = new Uint8Array(Buffer.from(this.key.slice(2), 'hex'))
     const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
 
-    // Encrypt the RLP encoded data
+    const callData = new Uint8Array(Buffer.from(plaintext.slice(2), 'hex'))
     const ciphertext = Buffer.concat([
-      new Uint8Array(cipher.update(encodedData)),
+      new Uint8Array(cipher.update(callData)),
       new Uint8Array(cipher.final()),
       new Uint8Array(cipher.getAuthTag()),
     ])
-
-    console.log('aes encrypt ciphertext', ciphertext)
 
     return {
       ciphertext: `0x${ciphertext.toString('hex')}` as Hex,
@@ -145,10 +126,7 @@ export class AesGcmCrypto {
       ])
     )
 
-    // Remove RLP prefix from decrypted data
-    const decoded = Buffer.from(decrypted.slice(1))
-
-    return `0x${decoded.toString('hex')}` as Hex
+    return `0x${Buffer.from(decrypted).toString('hex')}` as Hex
   }
 }
 
