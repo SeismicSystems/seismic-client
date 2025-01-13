@@ -5,7 +5,6 @@ export function toYParitySignatureArray(
   transaction: TransactionSerializableGeneric,
   signature_?: Signature | undefined
 ) {
-  console.log('toYParitySignatureArray signature', signature_)
   const signature = signature_ ?? transaction
   const { v, yParity } = signature
 
