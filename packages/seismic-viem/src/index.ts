@@ -13,3 +13,4 @@ export {
 } from '@sviem/client'
 
 export type { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
+export type { ShieldedContract } from '@sviem/contract/contract'
