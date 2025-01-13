@@ -12,7 +12,6 @@ import type {
   WriteContractReturnType,
 } from 'viem'
 import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
-import { writeContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
 import type { ShieldedWalletClient } from '@sviem/client'
@@ -88,7 +87,7 @@ export function useSeismicWrite<
 export async function shieldedWriteContract<
   TTransport extends Transport,
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
   TArgs extends ContractFunctionArgs<
@@ -108,13 +107,22 @@ export async function shieldedWriteContract<
     chainOverride
   >
 ): Promise<WriteContractReturnType> {
-  const { abi, functionName, args = [] } = parameters as WriteContractParameters
-  if (!args || !useSeismicWrite({ abi, name: functionName })) {
-    return writeContract(client, parameters)
+  const {
+    abi,
+    functionName,
+    args = [],
+    address,
+    gas,
+    gasPrice,
+  } = parameters as WriteContractParameters
+  let { nonce } = parameters as WriteContractParameters
+
+  if (nonce === undefined) {
+    nonce = await client.getTransactionCount({
+      address: client.account?.address,
+    })
   }
 
-  const { address, nonce, gas, gasPrice } =
-    parameters as WriteContractParameters
   if (!nonce) {
     throw new Error('Must specify nonce with seismic transaction')
   }

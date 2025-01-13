@@ -87,7 +87,6 @@ const textSeismicTx = async () => {
   const tx1 = await seismicContract.write.setNumber([TEST_NUMBER], {
     gas: 210000n,
     gasPrice: parseGwei('20'),
-    nonce: 1,
   })
   console.info(`[1] Set number tx: ${tx1}`)
   const receipt1 = await publicClient.waitForTransactionReceipt({ hash: tx1 })
@@ -104,7 +103,6 @@ const textSeismicTx = async () => {
   const tx2 = await seismicContract.write.increment([], {
     gas: 210000n,
     gasPrice: parseGwei('20'),
-    nonce: 2,
   })
   console.info(`[2] Incremented number in tx: ${tx2}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
@@ -120,7 +118,6 @@ const textSeismicTx = async () => {
   const tx3 = await seismicContract.write.setNumber([TEST_NUMBER], {
     gas: 210000n,
     gasPrice: parseGwei('20'),
-    nonce: 3,
   })
   console.info(`[3] Set number tx: ${tx1}`)
   const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })

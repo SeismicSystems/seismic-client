@@ -79,7 +79,7 @@ export function getShieldedContract<
     | ShieldedWalletClient<TTransport, TChain, TAccount>
     | KeyedClient<TTransport, TChain, TAccount>,
   TChain extends Chain | undefined = Chain | undefined,
-  TAccount extends Account | undefined = Account | undefined,
+  TAccount extends Account = Account,
 >({
   abi,
   address,
