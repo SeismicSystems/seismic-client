@@ -13,7 +13,6 @@
     "^@(.*)$",
     "^[./]"
   ],
-  "importOrderTypeScriptVersion": "5.0.0",
   "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true

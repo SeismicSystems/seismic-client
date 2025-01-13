@@ -7,7 +7,8 @@
   ],
   "scripts": {
     "clean": "rimraf packages/*/dist -g; rimraf tests/*/dist -g; ",
-    "lint": "eslint packages; eslint tests",
+    "lint": "prettier ./packages --write; prettier ./tests --write",
+    "lint:check": "prettier ./packages -c && prettier ./tests -c",
     "typecheck": "tsc -b --noEmit",
     "viem:docs:gen": "bun run --cwd packages/seismic-viem docs:gen",
     "viem:build": "bun run --cwd packages/seismic-viem build",
