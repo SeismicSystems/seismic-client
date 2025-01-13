@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "clean": "rimraf packages/*/dist -g; rimraf tests/*/dist -g; ",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "bun run --cwd packages/seismic-viem typecheck",
     "lint": "bun run lint:eslint && bun run lint:prettier",
     "lint:check": "bun run clean; bun run lint:eslint:check && bun run lint:prettier:check",
     "lint:eslint": "bun run clean; eslint ./packages --fix; eslint ./tests --fix",

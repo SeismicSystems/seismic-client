@@ -20,6 +20,19 @@ jobs:
       - name: Check lint
         run: bun run lint:check
 
+  typecheck:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.1.42
+      - name: Install dependencies
+        run: bun install
+      - name: Check typing
+        run: bun run typecheck
+
   test:
     runs-on: self-hosted
     concurrency:
