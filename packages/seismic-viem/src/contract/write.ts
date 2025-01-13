@@ -148,28 +148,3 @@ export async function shieldedWriteContract<
   }
   return sendShieldedTransaction(client, request)
 }
-
-export type SeismicWriteContract<
-  TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
-  abi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-  functionName extends ContractFunctionName<
-    abi,
-    'payable' | 'nonpayable'
-  > = ContractFunctionName<abi, 'payable' | 'nonpayable'>,
-  args extends ContractFunctionArgs<
-    abi,
-    'payable' | 'nonpayable',
-    functionName
-  > = ContractFunctionArgs<abi, 'payable' | 'nonpayable', functionName>,
-  TChainOverride extends Chain | undefined = undefined,
-> = (
-  args: WriteContractParameters<
-    abi,
-    functionName,
-    args,
-    TChain,
-    TAccount,
-    TChainOverride
-  >
-) => Promise<WriteContractReturnType>
