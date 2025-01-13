@@ -1,0 +1,66 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-viem](/seismic-viem/globals.mdx) / createShieldedWalletClient
+
+# Function: createShieldedWalletClient()
+
+```ts
+function createShieldedWalletClient(
+  __namedParameters
+): Promise<ShieldedWalletClient<Transport, Chain, Account>>
+```
+
+Defined in: [packages/seismic-viem/src/client.ts:286](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/client.ts#L286)
+
+Creates a shielded wallet client with extended functionality for interacting
+with shielded blockchain features, wallet operations, and encryption.
+
+This function builds upon the `getSeismicClients` helper to initialize and configure
+a shielded wallet client using a provided private key. The client supports standard
+wallet operations, public actions, and shielded-specific actions.
+
+## Example
+
+```typescript
+const walletClient = await createShieldedWalletClient({
+  chain: seismicChain,
+  transport: httpTransport,
+  privateKey: '0xabcdef...',
+})
+
+// Perform wallet operations
+const result = await walletClient.writeContract({
+  address: '0x1234...',
+  data: '0xdeadbeef...',
+})
+
+// Access shielded-specific actions
+const encryptionKey = walletClient.getEncryption()
+console.log('Encryption Key:', encryptionKey)
+```
+
+## Parameters
+
+### \_\_namedParameters
+
+`GetSeismicClientsParameters`
+
+## Returns
+
+`Promise`\<[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<[`Transport`](https://github.com/wevm/viem), [`Chain`](https://github.com/wevm/viem), [`Account`](https://github.com/wevm/viem)\>\>
+
+A promise that resolves
+to a fully configured shielded wallet client.
+
+## Remarks
+
+This function is a wrapper around `getSeismicClients`, extracting and returning the wallet
+client from the generated clients. The shielded wallet client is equipped with:
+
+- Public actions
+- Wallet-specific actions
+- Shielded-specific actions
+
+The encryption key is derived from the provided private key and the TEE public key of the network.

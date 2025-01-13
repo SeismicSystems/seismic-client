@@ -4,17 +4,14 @@ import type {
   AbiItemName,
   Account,
   Chain,
-  Client,
   ContractFunctionArgs,
   ContractFunctionName,
   GetAbiItemParameters,
-  Hex,
   Transport,
   WriteContractParameters,
   WriteContractReturnType,
 } from 'viem'
 import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
-import { writeContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
 import type { ShieldedWalletClient } from '@sviem/client'
@@ -50,8 +47,8 @@ export function useSeismicWrite<
  * __Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.__
  *
  * @param client - Client to use
- * @param parameters - {@link WriteContractParameters}
- * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link WriteContractReturnType}
+ * @param parameters - {@link https://viem.sh/docs/contract/writeContract.html#parameters WriteContractParameters}
+ * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link https://viem.sh/docs/glossary/types#hash WriteContractReturnType}
  *
  * @example
  * import { createWalletClient, custom, parseAbi } from 'viem'
@@ -90,7 +87,7 @@ export function useSeismicWrite<
 export async function shieldedWriteContract<
   TTransport extends Transport,
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
   TArgs extends ContractFunctionArgs<
@@ -110,13 +107,22 @@ export async function shieldedWriteContract<
     chainOverride
   >
 ): Promise<WriteContractReturnType> {
-  const { abi, functionName, args = [] } = parameters as WriteContractParameters
-  if (!args || !useSeismicWrite({ abi, name: functionName })) {
-    return writeContract(client, parameters)
+  const {
+    abi,
+    functionName,
+    args = [],
+    address,
+    gas,
+    gasPrice,
+  } = parameters as WriteContractParameters
+  let { nonce } = parameters as WriteContractParameters
+
+  if (nonce === undefined) {
+    nonce = await client.getTransactionCount({
+      address: client.account?.address,
+    })
   }
 
-  const { address, nonce, gas, gasPrice } =
-    parameters as WriteContractParameters
   if (!nonce) {
     throw new Error('Must specify nonce with seismic transaction')
   }
@@ -142,28 +148,3 @@ export async function shieldedWriteContract<
   }
   return sendShieldedTransaction(client, request)
 }
-
-export type SeismicWriteContract<
-  TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
-  abi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-  functionName extends ContractFunctionName<
-    abi,
-    'payable' | 'nonpayable'
-  > = ContractFunctionName<abi, 'payable' | 'nonpayable'>,
-  args extends ContractFunctionArgs<
-    abi,
-    'payable' | 'nonpayable',
-    functionName
-  > = ContractFunctionArgs<abi, 'payable' | 'nonpayable', functionName>,
-  TChainOverride extends Chain | undefined = undefined,
-> = (
-  args: WriteContractParameters<
-    abi,
-    functionName,
-    args,
-    TChain,
-    TAccount,
-    TChainOverride
-  >
-) => Promise<WriteContractReturnType>
