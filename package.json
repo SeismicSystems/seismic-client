@@ -51,7 +51,5 @@
     "typedoc-plugin-markdown": "^4.4.1",
     "vocs": "^1.0.0-alpha.62"
   },
-  "dependencies": {
-    "@noble/secp256k1": "^2.2.3"
-  }
+  "dependencies": {}
 }

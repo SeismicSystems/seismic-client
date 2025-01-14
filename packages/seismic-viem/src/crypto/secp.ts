@@ -1,4 +1,3 @@
-// Import noble-secp256k1
 import { Hex } from 'viem'
 
 import { ProjectivePoint } from '@noble/secp256k1'

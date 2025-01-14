@@ -31,9 +31,10 @@
     "docs:check": "typedoc src/index.ts --json ./typedoc.out.json; rm ./typedoc.out.json"
   },
   "dependencies": {
-    "viem": "^2.21.50",
+    "@noble/hashes": "^1.7.0",
+    "@noble/secp256k1": "^2.2.3",
     "crypto-browserify": "^3.12.1",
-    "noble": "^1.9.1"
+    "viem": "^2.21.50"
   },
   "devDependencies": {},
   "license": "MIT",
