@@ -1,11 +1,15 @@
+import { expect } from 'bun:test'
 import { http, parseGwei } from 'viem'
 
 import {
+  ShieldedContract,
+  ShieldedPublicClient,
+  ShieldedWalletClient,
   createShieldedPublicClient,
   createShieldedWalletClient,
   getShieldedContract,
   seismicDevnet,
-} from '@sviem'
+} from '@sviem/index'
 
 import { contractABI } from '../../../tests/seismic-viem/src/contract/abi'
 import { bytecode } from '../../../tests/seismic-viem/src/contract/bytecode'
@@ -16,11 +20,41 @@ import {
 
 const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
 
+function randomUnsigned256Bit(): bigint {
+  // Create a Uint8Array of 32 bytes (256 bits)
+  const byteArray = new Uint8Array(32)
+  crypto.getRandomValues(byteArray) // Fill it with secure random values
+
+  // Convert the byte array to a BigInt
+  let randomBigInt = 0n
+  for (const byte of byteArray) {
+    randomBigInt = (randomBigInt << 8n) | BigInt(byte)
+  }
+
+  return randomBigInt // The random number is already within the 256-bit range
+}
+
+const sendSeismicTx = async (
+  seismicContract: ShieldedContract,
+  publicClient: ShieldedPublicClient
+) => {
+  // This is a seismic tx since the arg to setNumber is an suint
+  const inputNumber = randomUnsigned256Bit()
+  const tx1 = await seismicContract.write.setNumber([inputNumber], {
+    gas: 210000n,
+    gasPrice: parseGwei('20'),
+  })
+  const receipt1 = await publicClient.waitForTransactionReceipt({ hash: tx1 })
+  const isOdd = await seismicContract.read.isOdd()
+  expect(isOdd).toBe(inputNumber % 2n === 1n)
+}
+
 const testSeismicTx = async (privateKey: string, rpcUrl: string) => {
   const publicClient = createShieldedPublicClient({
     chain: seismicDevnet,
     transport: http(rpcUrl),
   })
+
   const walletClient = await createShieldedWalletClient({
     chain: seismicDevnet,
     transport: http(rpcUrl),
@@ -47,65 +81,15 @@ const testSeismicTx = async (privateKey: string, rpcUrl: string) => {
     client: walletClient,
   })
 
-  const isOdd0 = await walletClient.readContract({
-    address: deployedContractAddress,
-    abi: contractABI,
-    functionName: 'isOdd',
-  })
-  // const isOdd0 = await seismicContract.tread.isOdd()
-  // contract initializes number to be 0
-  // expect(isOdd0).toBe(false)
-  console.info(`[0] initial value of isOdd = ${isOdd0}`)
-
-  // This is a seismic tx since the arg to setNumber is an suint
-  const input_number = Math.floor(Math.random() * 100)
-  const tx1 = await seismicContract.write.setNumber([input_number], {
-    gas: 210000n,
-    gasPrice: parseGwei('20'),
-  })
-  console.info(`[1] Set number tx: ${tx1}`)
-  const receipt1 = await publicClient.waitForTransactionReceipt({ hash: tx1 })
-  console.info(
-    `[1] setNumber receipt: ${JSON.stringify(receipt1, stringifyBigInt, 2)}`
-  )
-
-  // Try reading using explicit signedRead
-  const isOdd1 = await seismicContract.read.isOdd()
-  // number has been set to 11
-  // expect(isOdd1).toBe(true)
-
-  // Not a seismic tx since there are no arguments therefore no shielded arguments
-  const tx2 = await seismicContract.write.increment([], {
-    gas: 210000n,
-    gasPrice: parseGwei('20'),
-  })
-  console.info(`[2] Incremented number in tx: ${tx2}`)
-  const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
-  console.info(
-    `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
-  )
-
-  // Try reading using unsigned (normal) read
-  const isOdd2 = await seismicContract.tread.isOdd()
-  // expect(isOdd2).toBe(false)
-
-  // This is a seismic tx since the arg to setNumber is an suint
-  const tx3 = await seismicContract.write.setNumber([TEST_NUMBER], {
-    gas: 210000n,
-    gasPrice: parseGwei('20'),
-  })
-  console.info(`[3] Set number tx: ${tx1}`)
-  const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
-  console.info(
-    `[3] setNumber receipt: ${JSON.stringify(receipt3, stringifyBigInt, 2)}`
-  )
-
-  // Use non-explicit signed-read
-  const isOdd3 = await seismicContract.tread.isOdd([], {
-    account: walletClient.account.address,
-  })
-  // number has been set back to 11
-  // expect(isOdd3).toBe(true)
+  while (true) {
+    console.time('SeismicTxExecutionTime')
+    for (let i = 0; i < 10; i++) {
+      await sendSeismicTx(seismicContract, publicClient)
+    }
+    console.timeEnd('SeismicTxExecutionTime')
+    const randomDelay = Math.floor(Math.random() * 5000) + 1000 // Random delay between 1s to 6s
+    await new Promise((resolve) => setTimeout(resolve, randomDelay))
+  }
 }
 
 async function main() {

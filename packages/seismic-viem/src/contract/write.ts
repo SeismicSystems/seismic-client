@@ -117,13 +117,11 @@ export async function shieldedWriteContract<
   } = parameters as WriteContractParameters
   let { nonce } = parameters as WriteContractParameters
 
-  // if (nonce === undefined) {
-  //   nonce = await client.getTransactionCount({
-  //     address: client.account?.address,
-  //   })
-  // }
-
-  console.log('shiedled nonce', nonce)
+  if (nonce === undefined) {
+    nonce = await client.getTransactionCount({
+      address: client.account?.address,
+    })
+  }
 
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
