@@ -244,9 +244,6 @@ const getSeismicClients = async ({
     networkPublicKey,
     encryptionSk
   )
-  console.log(
-    JSON.stringify({ aesKey, encryptionPrivateKey, encryptionPublicKey })
-  )
   const wallet = createClient({ account, chain, transport })
     .extend(publicActions)
     .extend(walletActions)
