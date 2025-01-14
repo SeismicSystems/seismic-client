@@ -2,12 +2,9 @@ import type { Hex } from 'viem'
 
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
+import { getSharedSecret } from '@noble/secp256k1'
 
-const {
-  createECDH,
-  createCipheriv,
-  createDecipheriv,
-} = require('crypto-browserify')
+const { createCipheriv, createDecipheriv } = require('crypto-browserify')
 
 export class AesGcmCrypto {
   private readonly ALGORITHM = 'aes-256-gcm'
@@ -131,33 +128,36 @@ export class AesGcmCrypto {
 
 type AesInputKeys = { privateKey: Hex; networkPublicKey: string }
 
-const generateSharedKey = ({
+export const sharedSecretPoint = ({
   privateKey,
   networkPublicKey,
-}: AesInputKeys): string => {
+}: AesInputKeys): Uint8Array => {
   const privateKeyHex = privateKey.startsWith('0x')
     ? privateKey.slice(2)
     : privateKey
-  const walletKey = createECDH('secp256k1')
-  walletKey.setPrivateKey(new Uint8Array(Buffer.from(privateKeyHex, 'hex')))
-  const key = new Uint8Array(Buffer.from(networkPublicKey, 'hex'))
-  const sharedSecret = walletKey.computeSecret(key)
+  // return non-compressed point, stripping prefix (which will be 4)
+  return getSharedSecret(privateKeyHex, networkPublicKey, false).slice(1)
+}
 
+export const sharedKeyFromPoint = (sharedSecret: Uint8Array): string => {
   // Get the last byte (index 63) and apply the bitwise operations
   const version = (sharedSecret[63] & 0x01) | 0x02
-
   // Extra (non-standard) stuff that Rust does
   // Create a buffer for version and x-coordinate
-  const dataToHash = new Uint8Array(33) // 1 byte version + 32 bytes x-coordinate
-  dataToHash[0] = version
-  dataToHash.set(sharedSecret.slice(0, 32), 1)
-
-  // Perform SHA-256 hash
-  const finalSecret = sha256(dataToHash)
+  const finalSecret = sha256
+    .create()
+    .update(new Uint8Array([version]))
+    .update(sharedSecret.slice(0, 32))
+    .digest()
   return Buffer.from(finalSecret).toString('hex')
 }
 
-const deriveAesKey = (sharedSecret: string): Hex => {
+export const generateSharedKey = (inputs: AesInputKeys): string => {
+  const sharedSecret = sharedSecretPoint(inputs)
+  return sharedKeyFromPoint(sharedSecret)
+}
+
+export const deriveAesKey = (sharedSecret: string): Hex => {
   const derivedKey = hkdf(
     sha256, // Hash function
     new Uint8Array(Buffer.from(sharedSecret, 'hex')), // Input key material (IKM) - shared secret

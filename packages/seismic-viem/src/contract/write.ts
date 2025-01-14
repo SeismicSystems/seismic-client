@@ -145,6 +145,7 @@ export async function shieldedWriteContract<
     gas: gas!,
     gasPrice: gasPrice!,
     nonce: nonce!,
+    encryptionPubkey: client.getEncryptionPublicKey(),
   }
   return sendShieldedTransaction(client, request)
 }

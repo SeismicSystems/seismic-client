@@ -9,8 +9,15 @@ import type { Hex, Signature, TransactionSerializable } from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
+export type SeismicTxExtras = {
+  seismicInput?: Hex | undefined
+  encryptionPubkey?: Hex | undefined
+}
+export const stringifyBigInt = (_: any, v: any) =>
+  typeof v === 'bigint' ? v.toString() : v
+
 export const serializeSeismicTransaction = (
-  transaction: TransactionSerializable & { seismicInput?: Hex | undefined },
+  transaction: TransactionSerializable & SeismicTxExtras,
   signature?: Signature
 ): Hex => {
   // should be a better way to decide this...
@@ -29,6 +36,7 @@ export const serializeSeismicTransaction = (
     to,
     value = 0n,
     seismicInput,
+    encryptionPubkey,
   } = transaction
 
   if (!chainId) {
@@ -43,12 +51,15 @@ export const serializeSeismicTransaction = (
     to ?? '0x',
     value ? toHex(value) : '0x',
     seismicInput ?? '0x',
+    encryptionPubkey ?? '0x',
     ...toYParitySignatureArray(transaction, signature),
   ])
   const encodedTx = concatHex([
     toHex(74), // seismic tx type '0x4a'
     rlpEncoded,
   ])
+
+  console.log(JSON.stringify(signature, stringifyBigInt, 2))
 
   return encodedTx
 }

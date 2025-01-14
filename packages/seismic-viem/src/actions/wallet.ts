@@ -63,6 +63,7 @@ export type ShieldedWalletActions<
     >
   ) => Promise<SendSeismicTransactionReturnType>
   getEncryption: () => Hex
+  getEncryptionPublicKey: () => Hex
 }
 
 /**
@@ -114,7 +115,8 @@ export const shieldedWalletActions = <
   TAccount extends Account = Account,
 >(
   client: ShieldedWalletClient<TTransport, TChain, TAccount>,
-  encryption: Hex
+  encryption: Hex,
+  encryptionPublicKey: Hex
 ): ShieldedWalletActions<TChain, TAccount> => {
   return {
     writeContract: (args) => shieldedWriteContract(client, args as any),
@@ -125,5 +127,6 @@ export const shieldedWalletActions = <
     sendShieldedTransaction: (args) =>
       sendShieldedTransaction(client, args as any),
     getEncryption: () => encryption,
+    getEncryptionPublicKey: () => encryptionPublicKey,
   }
 }

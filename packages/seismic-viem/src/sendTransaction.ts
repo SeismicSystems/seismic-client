@@ -62,6 +62,7 @@ export type SendSeismicTransactionRequest<
 > = UnionOmit<FormattedTransactionRequest<_derivedChain>, 'from'> &
   GetTransactionRequestKzgParameter & {
     seismicInput: Hex
+    encryptionPubkey: Hex
   }
 
 export type SendSeismicTransactionParameters<
@@ -165,6 +166,7 @@ export async function sendShieldedTransaction<
     nonce,
     value,
     seismicInput,
+    encryptionPubkey,
     ...rest
   } = parameters
 
@@ -230,7 +232,7 @@ export async function sendShieldedTransaction<
       // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)
       const serializedTransaction = await account!.signTransaction!(
-        { seismicInput, ...preparedTx },
+        { seismicInput, encryptionPubkey, ...preparedTx },
         { serializer: serializeSeismicTransaction }
       )
       return await sendRawTransaction(client, { serializedTransaction })

@@ -29,7 +29,7 @@ const runSanvil = async (
 }
 
 export const setupAnvilNode = async (): Promise<SpawnedNode> => {
-  const anvilProcess = await runSanvil({ silent: true })
+  const anvilProcess = await runSanvil({ silent: false })
   const nodeUrl = anvilProcess.url
 
   const exitProcess = async (code: 0 | 1) => {
