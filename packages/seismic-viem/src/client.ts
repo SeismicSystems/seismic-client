@@ -213,7 +213,7 @@ export function createShieldedPublicClient<
   return viemPublicClient.extend(shieldedPublicActions) as any
 }
 
-const getSeismicClients = async ({
+export const getSeismicClients = async ({
   chain,
   transport,
   privateKey,

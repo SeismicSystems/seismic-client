@@ -2,6 +2,7 @@
   "extends": "./tsconfig.base.json",
   "references": [
     { "path": "./packages/seismic-viem/tsconfig.json" },
+    { "path": "./packages/seismic-spammer/tsconfig.json" },
     { "path": "./tests/seismic-viem/tsconfig.json" }
   ],
   "include": ["vocs.config.ts", "docs"],
