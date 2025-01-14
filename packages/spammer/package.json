@@ -1,8 +1,0 @@
-{
-  "name": "spammer",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "bun build src/index.ts --outdir dist",
-    "start": "bun src/index.ts"
-  }
-}
