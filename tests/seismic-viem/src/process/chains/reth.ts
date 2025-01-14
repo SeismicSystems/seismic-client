@@ -86,10 +86,8 @@ export const setupRethNode = async (): Promise<SpawnedNode> => {
   const rethProcess = await runRethLocally({ silent: false, verbosity: 0 })
   return {
     url: rethProcess.url,
-    exitProcess: async (code: 0 | 1) => {
-      // await new Promise(r => setTimeout(r, 5_000))
+    exitProcess: async () => {
       await killProcess(rethProcess.process)
-      process.exit(code)
     },
   }
 }

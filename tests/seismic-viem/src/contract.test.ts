@@ -44,7 +44,6 @@ const TEST_PRIVATE_KEY =
 const account = privateKeyToAccount(TEST_PRIVATE_KEY)
 
 const { url, exitProcess } = await setupNode(chain)
-// const url = 'http://127.0.0.1:8545'
 
 const transport = http(url)
 const publicClient = createShieldedPublicClient({ chain, transport })
@@ -143,5 +142,5 @@ describe('Seismic Contract', async () => {
 })
 
 afterAll(async () => {
-  await exitProcess(0)
+  await exitProcess()
 })
