@@ -1,24 +1,16 @@
-import { expect } from 'bun:test'
 import { http, parseGwei } from 'viem'
-import { getTransactionCount } from 'viem/actions'
 
 import {
   ShieldedContract,
   ShieldedPublicClient,
   ShieldedWalletClient,
-  createShieldedPublicClient,
-  createShieldedWalletClient,
+  getSeismicClients,
   getShieldedContract,
   seismicDevnet,
 } from '@sviem/index'
-
-import { contractABI } from '../../../tests/seismic-viem/src/contract/abi'
-import { bytecode } from '../../../tests/seismic-viem/src/contract/bytecode'
-import {
-  getDeployedAddress,
-  stringifyBigInt,
-} from '../../../tests/seismic-viem/src/utils'
-import { getSeismicClients } from '../../seismic-viem/src/client'
+import { contractABI } from '@test/contract/abi'
+import { bytecode } from '@test/contract/bytecode'
+import { getDeployedAddress } from '@test/utils'
 
 const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
 

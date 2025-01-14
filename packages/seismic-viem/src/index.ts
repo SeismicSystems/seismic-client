@@ -7,6 +7,7 @@ export { shieldedWriteContract } from '@sviem/contract/write'
 export {
   createShieldedPublicClient,
   createShieldedWalletClient,
+  getSeismicClients,
 } from '@sviem/client'
 
 export type { SignedCall, SignedCallParameters } from '@sviem/signedCall'
