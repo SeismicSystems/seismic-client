@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig.base.json",
   "references": [
-    { "path": "./packages/seismic-viem" },
-    { "path": "./tests/seismic-viem" }
+    { "path": "./packages/seismic-viem/tsconfig.json" },
+    { "path": "./tests/seismic-viem/tsconfig.json" }
   ],
-  "include": [],
+  "include": ["vocs.config.ts", "docs"],
   "exclude": ["node_modules", "dist", "packages/**/dist"]
 }
