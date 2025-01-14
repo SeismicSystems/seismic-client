@@ -123,10 +123,6 @@ export async function shieldedWriteContract<
     })
   }
 
-  if (!nonce) {
-    throw new Error('Must specify nonce with seismic transaction')
-  }
-
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
   const ethAbi = remapSeismicAbiInputs(seismicAbi)
