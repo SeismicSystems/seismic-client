@@ -59,8 +59,6 @@ export const serializeSeismicTransaction = (
     rlpEncoded,
   ])
 
-  console.log(JSON.stringify(signature, stringifyBigInt, 2))
-
   return encodedTx
 }
 
