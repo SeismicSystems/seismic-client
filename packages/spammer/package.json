@@ -1,11 +1,8 @@
 {
   "name": "spammer",
   "version": "1.0.0",
-  "dependencies": {
-    "seismic-viem": "file:../seismic-viem"
-  },
   "scripts": {
     "build": "bun build src/index.ts --outdir dist",
-    "start": "bun build src/index.ts --outdir dist"
+    "start": "bun src/index.ts"
   }
 }
