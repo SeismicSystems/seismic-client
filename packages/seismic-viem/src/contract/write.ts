@@ -132,7 +132,7 @@ export async function shieldedWriteContract<
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
 
-  const { ciphertext: data } = await aesCipher.encrypt(encodedData, nonce)
+  const data = await aesCipher.encrypt(encodedData, nonce)
 
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,

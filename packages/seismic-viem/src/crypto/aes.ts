@@ -64,9 +64,7 @@ export class AesGcmCrypto {
   public async encrypt(
     plaintext: Hex,
     nonce: number | bigint | Hex
-  ): Promise<{
-    ciphertext: Hex
-  }> {
+  ): Promise<Hex> {
     console.log('inside encrypt. building noncebuffer')
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
@@ -92,15 +90,17 @@ export class AesGcmCrypto {
     //   ...new Uint8Array(cipher.getAuthTag()),
     // ])
     console.log('bytestohex(ciphertext)')
-    return {
-      ciphertext: bytesToHex(ciphertext),
-    }
+    return bytesToHex(ciphertext)
   }
 
   /**
    * Decrypts data using either a number-based nonce or hex nonce
+   * NOTE: not tested or called in any real way
    */
-  public decrypt(ciphertext: Hex, nonce: number | bigint | Hex): Hex {
+  public async decrypt(
+    ciphertext: Hex,
+    nonce: number | bigint | Hex
+  ): Promise<Hex> {
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -114,17 +114,7 @@ export class AesGcmCrypto {
     const encryptedData = ciphertextBuffer.slice(0, -this.TAG_LENGTH)
 
     const key = hexToBytes(this.key)
-    const decipher = createDecipheriv(this.ALGORITHM, key, nonceBuffer)
-
-    // Set the auth tag
-    decipher.setAuthTag(tag)
-
-    // Decrypt the data
-    const decrypted = new Uint8Array([
-      ...new Uint8Array(decipher.update(encryptedData)),
-      ...new Uint8Array(decipher.final()),
-    ])
-
+    const decrypted = await gcm(key, nonceBuffer).decrypt(encryptedData)
     return bytesToHex(decrypted)
   }
 }
