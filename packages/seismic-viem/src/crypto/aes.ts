@@ -1,8 +1,9 @@
 import { type Hex, bytesToHex, hexToBytes } from 'viem'
 
+import { gcm } from '@noble/ciphers/webcrypto'
+import { secp256k1 } from '@noble/curves/secp256k1'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
-import { getSharedSecret } from '@noble/secp256k1'
 
 const { createCipheriv, createDecipheriv } = require('crypto-browserify')
 
@@ -60,29 +61,37 @@ export class AesGcmCrypto {
   /**
    * Encrypts data using either a number-based nonce or hex nonce
    */
-  public encrypt(
+  public async encrypt(
     plaintext: Hex,
     nonce: number | bigint | Hex
-  ): {
+  ): Promise<{
     ciphertext: Hex
-  } {
+  }> {
+    console.log('inside encrypt. building noncebuffer')
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
         ? this.validateAndConvertNonce(nonce as Hex)
         : this.numberToNonce(nonce)
     )
+    console.log('hextobytes(key)')
 
     const key = hexToBytes(this.key)
-    const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
-
+    console.log('hextobytes(calldata)')
     const callData = hexToBytes(plaintext)
-    const ciphertext = new Uint8Array([
-      ...new Uint8Array(cipher.update(callData)),
-      ...new Uint8Array(cipher.final()),
-      ...new Uint8Array(cipher.getAuthTag()),
-    ])
 
+    console.log('creating cipher')
+    const ciphertext = await gcm(key, nonceBuffer).encrypt(callData)
+
+    // const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
+
+    // console.log('ciphertext uint8')
+    // const ciphertext = new Uint8Array([
+    //   ...new Uint8Array(cipher.update(callData)),
+    //   ...new Uint8Array(cipher.final()),
+    //   ...new Uint8Array(cipher.getAuthTag()),
+    // ])
+    console.log('bytestohex(ciphertext)')
     return {
       ciphertext: bytesToHex(ciphertext),
     }
@@ -130,7 +139,9 @@ export const sharedSecretPoint = ({
     ? privateKey.slice(2)
     : privateKey
   // return non-compressed point, stripping prefix (which will be 4)
-  return getSharedSecret(privateKeyHex, networkPublicKey, false).slice(1)
+  return secp256k1
+    .getSharedSecret(privateKeyHex, networkPublicKey, false)
+    .slice(1)
 }
 
 export const sharedKeyFromPoint = (sharedSecret: Uint8Array): string => {

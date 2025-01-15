@@ -1,6 +1,6 @@
 import { Hex, bytesToHex } from 'viem'
 
-import { ProjectivePoint } from '@noble/secp256k1'
+import { secp256k1 } from '@noble/curves/secp256k1'
 
 // Function to convert uncompressed public key to compressed format
 export const compressPublicKey = (uncompressedKey: Hex): Hex => {
@@ -12,6 +12,6 @@ export const compressPublicKey = (uncompressedKey: Hex): Hex => {
     throw new Error('Invalid uncompressed public key length')
   }
 
-  const pt = ProjectivePoint.fromHex(cleanKey)
+  const pt = secp256k1.ProjectivePoint.fromHex(cleanKey)
   return bytesToHex(pt.toRawBytes(true))
 }
