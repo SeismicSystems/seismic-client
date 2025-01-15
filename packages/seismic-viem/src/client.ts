@@ -230,7 +230,7 @@ const getEncryption = (
   return { encryptionPrivateKey, encryptionPublicKey, aesKey }
 }
 
-const getSeismicClients = async ({
+export const getSeismicClients = async ({
   chain,
   transport,
   account,
