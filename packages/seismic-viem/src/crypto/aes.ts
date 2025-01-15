@@ -5,8 +5,6 @@ import { secp256k1 } from '@noble/curves/secp256k1'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
-const { createCipheriv, createDecipheriv } = require('crypto-browserify')
-
 export class AesGcmCrypto {
   private readonly ALGORITHM = 'aes-256-gcm'
   private readonly TAG_LENGTH = 16 // Authentication tag length in bytes
@@ -65,31 +63,16 @@ export class AesGcmCrypto {
     plaintext: Hex,
     nonce: number | bigint | Hex
   ): Promise<Hex> {
-    console.log('inside encrypt. building noncebuffer')
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
         ? this.validateAndConvertNonce(nonce as Hex)
         : this.numberToNonce(nonce)
     )
-    console.log('hextobytes(key)')
 
     const key = hexToBytes(this.key)
-    console.log('hextobytes(calldata)')
     const callData = hexToBytes(plaintext)
-
-    console.log('creating cipher')
     const ciphertext = await gcm(key, nonceBuffer).encrypt(callData)
-
-    // const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
-
-    // console.log('ciphertext uint8')
-    // const ciphertext = new Uint8Array([
-    //   ...new Uint8Array(cipher.update(callData)),
-    //   ...new Uint8Array(cipher.final()),
-    //   ...new Uint8Array(cipher.getAuthTag()),
-    // ])
-    console.log('bytestohex(ciphertext)')
     return bytesToHex(ciphertext)
   }
 
@@ -109,8 +92,9 @@ export class AesGcmCrypto {
     )
 
     const ciphertextBuffer = hexToBytes(ciphertext)
+    // TODO: no clue if the tag is still there...
     // Extract the tag from the end (last 16 bytes)
-    const tag = ciphertextBuffer.slice(-this.TAG_LENGTH)
+    // const tag = ciphertextBuffer.slice(-this.TAG_LENGTH)
     const encryptedData = ciphertextBuffer.slice(0, -this.TAG_LENGTH)
 
     const key = hexToBytes(this.key)
