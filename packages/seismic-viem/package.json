@@ -1,6 +1,6 @@
 {
-  "name": "test-seismic2",
-  "version": "1.0.16",
+  "name": "seismic-viem",
+  "version": "1.0.6",
   "description": "Typescript interface for Seismic",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -35,7 +35,6 @@
     "@noble/hashes": "^1.7.0",
     "@noble/curves": "^1.8.0",
     "@noble/ciphers": "^1.2.0",
-    "crypto-browserify": "^3.12.1",
     "viem": "^2.21.50"
   },
   "devDependencies": {},
