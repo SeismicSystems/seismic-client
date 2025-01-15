@@ -1,6 +1,6 @@
 import { createPublicClient, http, parseGwei } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { Chain, mainnet } from 'viem/chains'
+import { Chain } from 'viem/chains'
 
 import {
   ShieldedContract,
