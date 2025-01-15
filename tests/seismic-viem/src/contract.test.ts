@@ -1,7 +1,6 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { parseGwei } from 'viem/utils'
 
 import {
   createShieldedPublicClient,
@@ -86,10 +85,7 @@ const textSeismicTx = async () => {
   console.info(`[0] initial value of isOdd = ${isOdd0}`)
 
   // This is a seismic tx since the arg to setNumber is an suint
-  const tx1 = await seismicContract.write.setNumber([TEST_NUMBER], {
-    gas: 210000n,
-    gasPrice: parseGwei('20'),
-  })
+  const tx1 = await seismicContract.write.setNumber([TEST_NUMBER])
   console.info(`[1] Set number tx: ${tx1}`)
   const receipt1 = await publicClient.waitForTransactionReceipt({ hash: tx1 })
   console.info(
@@ -102,10 +98,7 @@ const textSeismicTx = async () => {
   expect(isOdd1).toBe(true)
 
   // Not a seismic tx since there are no arguments therefore no shielded arguments
-  const tx2 = await seismicContract.write.increment([], {
-    gas: 210000n,
-    gasPrice: parseGwei('20'),
-  })
+  const tx2 = await seismicContract.write.increment()
   console.info(`[2] Incremented number in tx: ${tx2}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
   console.info(
@@ -117,10 +110,7 @@ const textSeismicTx = async () => {
   expect(isOdd2).toBe(false)
 
   // This is a seismic tx since the arg to setNumber is an suint
-  const tx3 = await seismicContract.write.setNumber([TEST_NUMBER], {
-    gas: 210000n,
-    gasPrice: parseGwei('20'),
-  })
+  const tx3 = await seismicContract.write.setNumber([TEST_NUMBER])
   console.info(`[3] Set number tx: ${tx1}`)
   const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
   console.info(

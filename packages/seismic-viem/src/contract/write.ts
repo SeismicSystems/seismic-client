@@ -112,7 +112,7 @@ export async function shieldedWriteContract<
     functionName,
     args = [],
     address,
-    gas,
+    gas = 30_000_000n,
     gasPrice,
   } = parameters as WriteContractParameters
   let { nonce } = parameters as WriteContractParameters
