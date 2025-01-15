@@ -1,4 +1,4 @@
-import type { Hex } from 'viem'
+import { type Hex, bytesToHex, hexToBytes } from 'viem'
 
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
@@ -13,7 +13,7 @@ export class AesGcmCrypto {
   private readonly U64_SIZE = 8 // Size of u64 in bytes
 
   constructor(private readonly key: Hex) {
-    const keyBuffer = Buffer.from(key.slice(2), 'hex')
+    const keyBuffer = hexToBytes(key)
     if (keyBuffer.length !== 32) {
       throw new Error('Key must be 32 bytes (256 bits)')
     }
@@ -23,12 +23,11 @@ export class AesGcmCrypto {
    * Creates a nonce from a u64 number, matching Rust's implementation
    * @param num - The number to convert (will be treated as u64)
    */
-  private numberToNonce(num: bigint | number): Buffer {
+  private numberToNonce(num: bigint | number): Uint8Array {
     let value = BigInt(num)
 
     // Create a buffer for the full nonce (12 bytes)
-    const nonceBuffer = Buffer.alloc(this.NONCE_LENGTH, 0)
-
+    const nonceBuffer = new Uint8Array(this.NONCE_LENGTH)
     // Write the u64 value in big-endian format to the first 8 bytes
     for (let i = this.U64_SIZE - 1; i >= 0; i--) {
       nonceBuffer[i] = Number(value & 0xffn)
@@ -43,8 +42,8 @@ export class AesGcmCrypto {
    * Validates and converts a hex nonce to buffer
    * @param nonce - The nonce in hex format
    */
-  private validateAndConvertNonce(nonce: Hex): Buffer {
-    const nonceBuffer = Buffer.from(nonce.slice(2), 'hex')
+  private validateAndConvertNonce(nonce: Hex): Uint8Array {
+    const nonceBuffer = hexToBytes(nonce)
     if (nonceBuffer.length !== this.NONCE_LENGTH) {
       throw new Error('Nonce must be 12 bytes')
     }
@@ -55,7 +54,7 @@ export class AesGcmCrypto {
    * Creates a nonce from a number in a way compatible with the Rust backend
    */
   public createNonce(num: number | bigint): Hex {
-    return `0x${this.numberToNonce(num).toString('hex')}` as Hex
+    return bytesToHex(this.numberToNonce(num))
   }
 
   /**
@@ -74,18 +73,18 @@ export class AesGcmCrypto {
         : this.numberToNonce(nonce)
     )
 
-    const key = new Uint8Array(Buffer.from(this.key.slice(2), 'hex'))
+    const key = hexToBytes(this.key)
     const cipher = createCipheriv(this.ALGORITHM, key, nonceBuffer)
 
-    const callData = new Uint8Array(Buffer.from(plaintext.slice(2), 'hex'))
-    const ciphertext = Buffer.concat([
-      new Uint8Array(cipher.update(callData)),
-      new Uint8Array(cipher.final()),
-      new Uint8Array(cipher.getAuthTag()),
+    const callData = hexToBytes(plaintext)
+    const ciphertext = new Uint8Array([
+      ...new Uint8Array(cipher.update(callData)),
+      ...new Uint8Array(cipher.final()),
+      ...new Uint8Array(cipher.getAuthTag()),
     ])
 
     return {
-      ciphertext: `0x${ciphertext.toString('hex')}` as Hex,
+      ciphertext: bytesToHex(ciphertext),
     }
   }
 
@@ -100,29 +99,24 @@ export class AesGcmCrypto {
         : this.numberToNonce(nonce)
     )
 
-    const ciphertextBuffer = new Uint8Array(
-      Buffer.from(ciphertext.slice(2), 'hex')
-    )
-
+    const ciphertextBuffer = hexToBytes(ciphertext)
     // Extract the tag from the end (last 16 bytes)
     const tag = ciphertextBuffer.slice(-this.TAG_LENGTH)
     const encryptedData = ciphertextBuffer.slice(0, -this.TAG_LENGTH)
 
-    const key = new Uint8Array(Buffer.from(this.key.slice(2), 'hex'))
+    const key = hexToBytes(this.key)
     const decipher = createDecipheriv(this.ALGORITHM, key, nonceBuffer)
 
     // Set the auth tag
     decipher.setAuthTag(tag)
 
     // Decrypt the data
-    const decrypted = new Uint8Array(
-      Buffer.concat([
-        new Uint8Array(decipher.update(encryptedData)),
-        new Uint8Array(decipher.final()),
-      ])
-    )
+    const decrypted = new Uint8Array([
+      ...new Uint8Array(decipher.update(encryptedData)),
+      ...new Uint8Array(decipher.final()),
+    ])
 
-    return `0x${Buffer.from(decrypted).toString('hex')}` as Hex
+    return bytesToHex(decrypted)
   }
 }
 
@@ -149,7 +143,7 @@ export const sharedKeyFromPoint = (sharedSecret: Uint8Array): string => {
     .update(new Uint8Array([version]))
     .update(sharedSecret.slice(0, 32))
     .digest()
-  return Buffer.from(finalSecret).toString('hex')
+  return bytesToHex(finalSecret).slice(2)
 }
 
 export const generateSharedKey = (inputs: AesInputKeys): string => {
@@ -160,13 +154,12 @@ export const generateSharedKey = (inputs: AesInputKeys): string => {
 export const deriveAesKey = (sharedSecret: string): Hex => {
   const derivedKey = hkdf(
     sha256, // Hash function
-    new Uint8Array(Buffer.from(sharedSecret, 'hex')), // Input key material (IKM) - shared secret
+    hexToBytes(`0x${sharedSecret}`),
     new Uint8Array(0), // Salt
     new TextEncoder().encode('aes-gcm key'), // Info (optional context string)
     32 // Output length (32 bytes for AES-256)
   )
-  const derivedKeyBuffer = Buffer.from(derivedKey)
-  return `0x${derivedKeyBuffer.toString('hex')}`
+  return bytesToHex(derivedKey)
 }
 
 export const generateAesKey = (aesKeys: AesInputKeys): Hex => {

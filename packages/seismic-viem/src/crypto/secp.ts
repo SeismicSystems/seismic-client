@@ -1,4 +1,4 @@
-import { Hex } from 'viem'
+import { Hex, bytesToHex } from 'viem'
 
 import { ProjectivePoint } from '@noble/secp256k1'
 
@@ -13,6 +13,5 @@ export const compressPublicKey = (uncompressedKey: Hex): Hex => {
   }
 
   const pt = ProjectivePoint.fromHex(cleanKey)
-  const asHex = Buffer.from(pt.toRawBytes(true)).toString('hex')
-  return `0x${asHex}`
+  return bytesToHex(pt.toRawBytes(true))
 }

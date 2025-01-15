@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import type { Hex } from 'viem'
+import { bytesToHex } from 'viem/utils'
 
 import {
   deriveAesKey,
@@ -16,10 +17,10 @@ describe('AES', async () => {
 
     const aesInputs = { networkPublicKey: pk, privateKey: sk }
     const sharedPoint = sharedSecretPoint(aesInputs)
-    const spHex = Buffer.from(sharedPoint).toString('hex')
+    const spHex = bytesToHex(sharedPoint)
     console.log(sharedPoint[83])
     expect(spHex).toBe(
-      'ae50584c10ef7484c2f28868cce536958960ab86376f1bd7d6c44fcf52e1a18c347bab95860cbd4a9fec067be4217ce48d83964e3d85bdf6b9384a30a44f0653'
+      '0xae50584c10ef7484c2f28868cce536958960ab86376f1bd7d6c44fcf52e1a18c347bab95860cbd4a9fec067be4217ce48d83964e3d85bdf6b9384a30a44f0653'
     )
     const sharedSecret = sharedKeyFromPoint(sharedPoint)
     expect(sharedSecret).toBe(
