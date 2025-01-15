@@ -1,4 +1,6 @@
-import { http, parseGwei } from 'viem'
+import { createPublicClient, http, parseGwei } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { Chain, mainnet } from 'viem/chains'
 
 import {
   ShieldedContract,
@@ -6,7 +8,6 @@ import {
   ShieldedWalletClient,
   getSeismicClients,
   getShieldedContract,
-  seismicDevnet,
 } from '@sviem/index'
 import { contractABI } from '@test/contract/abi'
 import { bytecode } from '@test/contract/bytecode'
@@ -75,22 +76,53 @@ const callSeismicTx = async (
   })
 }
 
-const testSeismicTx = async (privateKey: string, rpcUrl: string) => {
-  const seismicClient = await getSeismicClients({
-    chain: seismicDevnet,
+async function detectChain(rpcUrl: string): Promise<Chain | null> {
+  const publicClient = createPublicClient({
     transport: http(rpcUrl),
-    privateKey: privateKey as `0x${string}`,
+  })
+
+  try {
+    const chainId = await publicClient.getChainId()
+    console.log(`Detected Chain ID: ${chainId}`)
+    return {
+      id: chainId,
+      name: `Chain-${chainId}`,
+      nativeCurrency: {
+        decimals: 18,
+        name: 'Ether',
+        symbol: 'ETH',
+      },
+      rpcUrls: { default: { http: [rpcUrl] } },
+    }
+  } catch (error) {
+    console.error('Error detecting chain:', error)
+    return null
+  }
+}
+
+const testSeismicTx = async (
+  privateKey: string,
+  detectedChain: Chain,
+  rpcUrl: string
+) => {
+  const seismicClient = await getSeismicClients({
+    chain: detectedChain,
+    transport: http(rpcUrl),
+    account: privateKeyToAccount(privateKey as `0x${string}`),
   })
   const fundedPublicClient = seismicClient.public
   const fundedWalletClient = seismicClient.wallet
+  console.log('Getting Seismic Client for funded wallet...')
 
   const newSeismicClient = await getSeismicClients({
-    chain: seismicDevnet,
+    chain: detectedChain,
     transport: http(rpcUrl),
-    privateKey: getNewPrivateKey() as `0x${string}`,
+    account: privateKeyToAccount(getNewPrivateKey() as `0x${string}`),
   })
   const poorPublicClient = newSeismicClient.public
   const poorWalletClient = newSeismicClient.wallet
+
+  console.log('Sending some ETH to the poor wallet...')
 
   // Transfer some ETH from fundedWalletClient to poorWalletClient
   const transferTx = await fundedWalletClient.sendTransaction({
@@ -132,21 +164,21 @@ const testSeismicTx = async (privateKey: string, rpcUrl: string) => {
   let fundedNonce = await getNonce(fundedWalletClient)
   let poorNonce = await getNonce(poorWalletClient)
 
+  console.log('Starting Seismic Tx spamming...')
+  console.log(`Funded Wallet Nonce: ${fundedNonce}`)
+  console.log(`Poor Wallet Nonce: ${poorNonce}`)
+
   while (true) {
     console.time('SeismicTxExecutionTime')
-    const promises = []
-
     for (let i = 0; i < TX_CNT_PER_SPIKE; i++) {
-      promises.push(
-        sendSeismicTx(fundedSeismicContract, fundedPublicClient, fundedNonce)
-      ) // Start the async task
+      await sendSeismicTx(
+        fundedSeismicContract,
+        fundedPublicClient,
+        fundedNonce
+      )
       fundedNonce = fundedNonce + 1n
+      await callSeismicTx(poorSeismicContract, poorNonce)
     }
-    for (let i = 0; i < CALL_CNT_PER_SPIKE; i++) {
-      promises.push(callSeismicTx(poorSeismicContract, poorNonce))
-    }
-
-    await Promise.all(promises) // Wait for all async tasks to complete
     console.timeEnd('SeismicTxExecutionTime')
     const randomDelay = Math.floor(Math.random() * 5000) + 1000 // Random delay between 1s to 6s
     await new Promise((resolve) => setTimeout(resolve, randomDelay))
@@ -164,6 +196,9 @@ async function main() {
       rpcUrl = arg.split('=')[1]
     } else if (arg.startsWith('--sk=')) {
       privateKey = arg.split('=')[1]
+      if (!privateKey.startsWith('0x')) {
+        privateKey = '0x' + privateKey
+      }
     }
   })
 
@@ -172,9 +207,16 @@ async function main() {
     process.exit(1) // Exit with failure
   }
 
+  const detectedChain = await detectChain(rpcUrl)
+  if (!detectedChain) {
+    console.error('Error: Failed to detect chain')
+    process.exit(1) // Exit with failure
+  }
+
   console.log(`RPC URL: ${rpcUrl}`)
   console.log(`Private Key: ${privateKey}`)
+  console.log(`ChainId: ${detectedChain.id}`)
 
-  await testSeismicTx(privateKey, rpcUrl)
+  await testSeismicTx(privateKey, detectedChain, rpcUrl)
 }
 main()
