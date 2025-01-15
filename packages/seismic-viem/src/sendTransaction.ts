@@ -158,7 +158,7 @@ export async function sendShieldedTransaction<
     authorizationList,
     blobs,
     data,
-    gas,
+    gas = 30_000_000,
     gasPrice,
     maxFeePerBlobGas,
     maxFeePerGas,
