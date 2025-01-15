@@ -170,15 +170,21 @@ const testSeismicTx = async (
 
   while (true) {
     console.time('SeismicTxExecutionTime')
+
+    const promises = []
+
     for (let i = 0; i < TX_CNT_PER_SPIKE; i++) {
-      await sendSeismicTx(
-        fundedSeismicContract,
-        fundedPublicClient,
-        fundedNonce
-      )
+      promises.push(
+        sendSeismicTx(fundedSeismicContract, fundedPublicClient, fundedNonce)
+      ) // Start the async task
       fundedNonce = fundedNonce + 1n
-      await callSeismicTx(poorSeismicContract, poorNonce)
     }
+    for (let i = 0; i < CALL_CNT_PER_SPIKE; i++) {
+      promises.push(callSeismicTx(poorSeismicContract, poorNonce))
+    }
+
+    await Promise.all(promises)
+
     console.timeEnd('SeismicTxExecutionTime')
     const randomDelay = Math.floor(Math.random() * 5000) + 1000 // Random delay between 1s to 6s
     await new Promise((resolve) => setTimeout(resolve, randomDelay))
