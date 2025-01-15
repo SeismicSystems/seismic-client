@@ -17,13 +17,14 @@ import {
   walletActions,
 } from 'viem'
 import type { PublicClientConfig } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
 import type { ShieldedPublicActions } from '@sviem/actions/public'
 import { shieldedPublicActions } from '@sviem/actions/public'
 import type { ShieldedWalletActions } from '@sviem/actions/wallet'
 import { shieldedWalletActions } from '@sviem/actions/wallet'
 import { generateAesKey } from '@sviem/crypto/aes'
+import { compressPublicKey } from '@sviem/crypto/secp'
 
 /**
  * Represents a shielded public client with extended functionality for interacting
@@ -157,7 +158,8 @@ export type GetPublicClientParameters = {
  * @property privateKey - The private key used to derive the wallet account and encryption key.
  */
 export type GetSeismicClientsParameters = GetPublicClientParameters & {
-  privateKey: Hex
+  account: Account
+  encryptionSk?: Hex | undefined
 }
 
 /**
@@ -213,24 +215,42 @@ export function createShieldedPublicClient<
   return viemPublicClient.extend(shieldedPublicActions) as any
 }
 
-export const getSeismicClients = async ({
+const getEncryption = (
+  networkPk: string,
+  clientSk?: Hex | undefined
+): { aesKey: Hex; encryptionPrivateKey: Hex; encryptionPublicKey: Hex } => {
+  const encryptionPrivateKey = clientSk ?? generatePrivateKey()
+  const aesKey = generateAesKey({
+    privateKey: encryptionPrivateKey,
+    networkPublicKey: networkPk,
+  })
+
+  const uncompressedPk = privateKeyToAccount(encryptionPrivateKey).publicKey
+  const encryptionPublicKey = compressPublicKey(uncompressedPk)
+  return { encryptionPrivateKey, encryptionPublicKey, aesKey }
+}
+
+const getSeismicClients = async ({
   chain,
   transport,
-  privateKey,
+  account,
+  encryptionSk,
 }: GetSeismicClientsParameters): Promise<
   SeismicClients<Transport, Chain, Account>
 > => {
   const publicClient = createShieldedPublicClient({ chain, transport })
   const networkPublicKey = await publicClient.getTeePublicKey()
-  const encryption = generateAesKey({ privateKey, networkPublicKey })
-  const account = privateKeyToAccount(privateKey)
+  const { aesKey, encryptionPrivateKey, encryptionPublicKey } = getEncryption(
+    networkPublicKey,
+    encryptionSk
+  )
   const wallet = createClient({ account, chain, transport })
     .extend(publicActions)
     .extend(walletActions)
     // @ts-ignore
     .extend(shieldedPublicActions)
     // @ts-ignore
-    .extend((c) => shieldedWalletActions(c, encryption))
+    .extend((c) => shieldedWalletActions(c, aesKey, encryptionPublicKey))
 
   return {
     public: publicClient,
@@ -284,10 +304,16 @@ export const getSeismicClients = async ({
 export const createShieldedWalletClient = async ({
   chain,
   transport,
-  privateKey,
+  account,
+  encryptionSk,
 }: GetSeismicClientsParameters): Promise<
   ShieldedWalletClient<Transport, Chain, Account>
 > => {
-  const clients = await getSeismicClients({ chain, transport, privateKey })
+  const clients = await getSeismicClients({
+    chain,
+    transport,
+    account,
+    encryptionSk,
+  })
   return clients.wallet
 }

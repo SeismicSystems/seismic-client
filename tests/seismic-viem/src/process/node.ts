@@ -15,7 +15,7 @@ export type NodeProcess = ServerProcess & { url: string }
 
 export type SpawnedNode = {
   url: string
-  exitProcess: (code: 0 | 1) => void
+  exitProcess: () => Promise<void>
 }
 
 enum ChainName {
