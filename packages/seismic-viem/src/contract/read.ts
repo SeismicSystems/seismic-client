@@ -16,11 +16,13 @@ import {
   getAbiItem,
   toFunctionSelector,
 } from 'viem'
+import { parseAccount } from 'viem/accounts'
 import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
 import { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi'
+import { AesGcmCrypto } from '@sviem/crypto/aes'
 import type { SignedCallParameters } from '@sviem/signedCall'
 import { signedCall } from '@sviem/signedCall'
 
@@ -30,6 +32,18 @@ type SignedReadClient<
 > =
   | ShieldedPublicClient<Transport, TChain, TAccount>
   | ShieldedWalletClient<Transport, TChain, TAccount>
+
+export type SignedReadContractParameters<
+  TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
+> = ReadContractParameters<TAbi, TFunctionName, TArgs> & {
+  nonce?: number
+}
 
 /**
  * Executes a signed read operation on a smart contract.
@@ -84,7 +98,7 @@ export async function signedReadContract<
   >,
 >(
   client: SignedReadClient<TChain, TAccount>,
-  parameters: ReadContractParameters<TAbi, TFunctionName, TArgs>
+  parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
   // aesKey: Hex,
 ): Promise<ReadContractReturnType> {
   const {
@@ -98,25 +112,30 @@ export async function signedReadContract<
   // If they specify no address, then use the standard read contract,
   // since it doesn't have to be signed
   if (!rest.account) {
-    return readContract(client, parameters)
+    return readContract(client, parameters as ReadContractParameters)
   }
+
+  const account = parseAccount(rest.account)
+
+  const { nonce: nonce_ } = parameters
+  const nonce =
+    nonce_ ?? (await client.getTransactionCount({ address: account.address }))
 
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
   const ethAbi = remapSeismicAbiInputs(seismicAbi)
   const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
-  const encodedData = `${selector}${encodedParams}` as `0x${string}`
+  const plaintextCalldata = `${selector}${encodedParams}` as `0x${string}`
 
-  // NOTE: can't encrypt calls because there's no nonce
-  // const aesCipher = new AesGcmCrypto(aesKey)
-  // const data = aesCipher.encrypt(encodedData, nonce).ciphertext
-  const calldata = encodedData
+  const aesKey = client.getEncryption()
+  const aesCipher = new AesGcmCrypto(aesKey)
+  const encryptedCalldata = await aesCipher.encrypt(plaintextCalldata, nonce)
 
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
-    data: calldata,
+    nonce,
     to: address!,
-    seismicInput: undefined,
+    seismicInput: encryptedCalldata,
   }
   const { data } = await signedCall(client, request)
   return decodeFunctionResult({

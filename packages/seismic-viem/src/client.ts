@@ -16,9 +16,9 @@ import {
   publicActions,
   walletActions,
 } from 'viem'
-import type { PublicClientConfig } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
+import { EncryptionActions, encryptionActions } from '@sviem/actions/encryption'
 import type { ShieldedPublicActions } from '@sviem/actions/public'
 import { shieldedPublicActions } from '@sviem/actions/public'
 import type { ShieldedWalletActions } from '@sviem/actions/wallet'
@@ -71,7 +71,9 @@ export type ShieldedPublicClient<
     rpcSchema extends RpcSchema
       ? [...PublicRpcSchema, ...rpcSchema]
       : PublicRpcSchema,
-    PublicActions<transport, chain> & ShieldedPublicActions<chain>
+    PublicActions<transport, chain> &
+      ShieldedPublicActions<chain> &
+      EncryptionActions
   >
 >
 
@@ -126,16 +128,18 @@ export type ShieldedWalletClient<
   RpcSchema,
   PublicActions<transport, chain, account> &
     WalletActions<chain, account> &
+    EncryptionActions &
+    ShieldedPublicActions<chain> &
     ShieldedWalletActions<chain, account>
 >
 
 type SeismicClients<
-  transport extends Transport,
-  chain extends Chain | undefined,
-  account extends Account,
+  TTransport extends Transport,
+  TChain extends Chain | undefined,
+  TAccount extends Account,
 > = {
-  public: ShieldedPublicClient<transport, chain, undefined>
-  wallet: ShieldedWalletClient<transport, chain, account>
+  public: ShieldedPublicClient<TTransport, TChain, undefined>
+  wallet: ShieldedWalletClient<TTransport, TChain, TAccount>
 }
 
 /**
@@ -145,9 +149,13 @@ type SeismicClients<
  * @property chain - The blockchain chain configuration.
  * @property transport - The transport mechanism for communication with the blockchain.
  */
-export type GetPublicClientParameters = {
-  chain: Chain
-  transport: Transport
+export type GetPublicClientParameters<
+  TTransport extends Transport = Transport,
+  TChain extends Chain | undefined = undefined,
+> = {
+  chain: TChain
+  transport: TTransport
+  encryptionSk?: Hex | undefined
 }
 
 /**
@@ -157,9 +165,26 @@ export type GetPublicClientParameters = {
  *
  * @property privateKey - The private key used to derive the wallet account and encryption key.
  */
-export type GetSeismicClientsParameters = GetPublicClientParameters & {
-  account: Account
-  encryptionSk?: Hex | undefined
+export type GetSeismicClientsParameters<
+  TTransport extends Transport,
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+> = GetPublicClientParameters<TTransport, TChain> & {
+  account: TAccount
+}
+
+const getEncryption = (
+  networkPk: string,
+  clientSk?: Hex | undefined
+): { aesKey: Hex; encryptionPrivateKey: Hex; encryptionPublicKey: Hex } => {
+  const encryptionPrivateKey = clientSk ?? generatePrivateKey()
+  const aesKey = generateAesKey({
+    privateKey: encryptionPrivateKey,
+    networkPublicKey: networkPk,
+  })
+  const uncompressedPk = privateKeyToAccount(encryptionPrivateKey).publicKey
+  const encryptionPublicKey = compressPublicKey(uncompressedPk)
+  return { encryptionPrivateKey, encryptionPublicKey, aesKey }
 }
 
 /**
@@ -198,13 +223,13 @@ export type GetSeismicClientsParameters = GetPublicClientParameters & {
  * shielded-specific actions. It is suitable for applications requiring secure and
  * shielded interactions with blockchain networks.
  */
-export function createShieldedPublicClient<
+export const createShieldedPublicClient = async <
   transport extends Transport,
   chain extends Chain | undefined = undefined,
   rpcSchema extends RpcSchema | undefined = undefined,
 >(
-  parameters: PublicClientConfig<transport, chain, undefined, rpcSchema>
-): ShieldedPublicClient<transport, chain, undefined, rpcSchema> {
+  parameters: GetPublicClientParameters<transport, chain>
+): Promise<ShieldedPublicClient<transport, chain, undefined, rpcSchema>> => {
   const viemPublicClient = createPublicClient<
     transport,
     chain,
@@ -212,45 +237,43 @@ export function createShieldedPublicClient<
     rpcSchema
   >(parameters) as ShieldedPublicClient<transport, chain, undefined, rpcSchema>
   // @ts-ignore
-  return viemPublicClient.extend(shieldedPublicActions) as any
+  const client = viemPublicClient.extend(shieldedPublicActions) as any
+  const networkPublicKey = await client.getTeePublicKey()
+  const { aesKey, encryptionPublicKey } = getEncryption(
+    networkPublicKey,
+    parameters.encryptionSk
+  )
+  return client.extend(() => encryptionActions(aesKey, encryptionPublicKey))
 }
 
-const getEncryption = (
-  networkPk: string,
-  clientSk?: Hex | undefined
-): { aesKey: Hex; encryptionPrivateKey: Hex; encryptionPublicKey: Hex } => {
-  const encryptionPrivateKey = clientSk ?? generatePrivateKey()
-  const aesKey = generateAesKey({
-    privateKey: encryptionPrivateKey,
-    networkPublicKey: networkPk,
-  })
-
-  const uncompressedPk = privateKeyToAccount(encryptionPrivateKey).publicKey
-  const encryptionPublicKey = compressPublicKey(uncompressedPk)
-  return { encryptionPrivateKey, encryptionPublicKey, aesKey }
-}
-
-export const getSeismicClients = async ({
+export const getSeismicClients = async <
+  TTransport extends Transport,
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+>({
   chain,
   transport,
   account,
   encryptionSk,
-}: GetSeismicClientsParameters): Promise<
-  SeismicClients<Transport, Chain, Account>
+}: GetSeismicClientsParameters<TTransport, TChain, TAccount>): Promise<
+  SeismicClients<TTransport, TChain, TAccount>
 > => {
-  const publicClient = createShieldedPublicClient({ chain, transport })
-  const networkPublicKey = await publicClient.getTeePublicKey()
-  const { aesKey, encryptionPrivateKey, encryptionPublicKey } = getEncryption(
-    networkPublicKey,
-    encryptionSk
-  )
+  const publicClient = await createShieldedPublicClient<
+    TTransport,
+    TChain,
+    undefined
+  >({ chain, transport, encryptionSk })
+
+  const aesKey = publicClient.getEncryption()
+  const encryptionPublicKey = publicClient.getEncryptionPublicKey()
   const wallet = createClient({ account, chain, transport })
     .extend(publicActions)
     .extend(walletActions)
+    .extend(() => encryptionActions(aesKey, encryptionPublicKey))
     // @ts-ignore
     .extend(shieldedPublicActions)
     // @ts-ignore
-    .extend((c) => shieldedWalletActions(c, aesKey, encryptionPublicKey))
+    .extend(shieldedWalletActions)
 
   return {
     public: publicClient,
@@ -301,13 +324,17 @@ export const getSeismicClients = async ({
  *
  * The encryption key is derived from the provided private key and the TEE public key of the network.
  */
-export const createShieldedWalletClient = async ({
+export const createShieldedWalletClient = async <
+  TTransport extends Transport,
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+>({
   chain,
   transport,
   account,
   encryptionSk,
-}: GetSeismicClientsParameters): Promise<
-  ShieldedWalletClient<Transport, Chain, Account>
+}: GetSeismicClientsParameters<TTransport, TChain, TAccount>): Promise<
+  ShieldedWalletClient<TTransport, TChain, TAccount>
 > => {
   const clients = await getSeismicClients({
     chain,

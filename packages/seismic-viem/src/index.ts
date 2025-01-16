@@ -14,6 +14,7 @@ export type { SignedCall, SignedCallParameters } from '@sviem/signedCall'
 
 export type { ShieldedPublicActions } from '@sviem/actions/public'
 export type { ShieldedWalletActions } from '@sviem/actions/wallet'
+export type { EncryptionActions } from '@sviem/actions/encryption'
 
 export type {
   ShieldedPublicClient,
