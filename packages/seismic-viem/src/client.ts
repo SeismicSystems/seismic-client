@@ -197,7 +197,7 @@ const getEncryption = (
  *
  * @example
  * ```typescript
- * const client = createShieldedPublicClient({
+ * const client = await createShieldedPublicClient({
  *   transport: httpTransport,
  *   chain: seismicChain,
  *   rpcSchema: customRpcSchema,
