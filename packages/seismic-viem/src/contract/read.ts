@@ -116,7 +116,6 @@ export async function signedReadContract<
   }
 
   const account = parseAccount(rest.account)
-
   const { nonce: nonce_ } = parameters
   const nonce =
     nonce_ ?? (await client.getTransactionCount({ address: account.address }))
@@ -136,6 +135,7 @@ export async function signedReadContract<
     nonce,
     to: address!,
     seismicInput: encryptedCalldata,
+    encryptionPubkey: client.getEncryptionPublicKey(),
   }
   const { data } = await signedCall(client, request)
   return decodeFunctionResult({

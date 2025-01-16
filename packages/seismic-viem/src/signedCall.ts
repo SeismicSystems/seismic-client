@@ -67,7 +67,11 @@ import type { AssertRequestParameters } from '@sviem/viem-internal/request'
  * ```
  */
 export type SignedCallParameters<chain extends Chain | undefined> =
-  CallParameters<chain> & { nonce: number; seismicInput?: Hex | undefined }
+  CallParameters<chain> & {
+    nonce: number
+    encryptionPubkey: Hex
+    seismicInput?: Hex | undefined
+  }
 
 /**
  * @ignore
