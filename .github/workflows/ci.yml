@@ -40,6 +40,7 @@ jobs:
       cancel-in-progress: false
     env:
       SRETH_ROOT: /home/azureuser/seismic/seismic-reth
+      SFOUNDRY_ROOT: /home/azureuser/seismic/seismic-foundry
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
       SEISMIC_RETH_FILES: /home/azureuser/.seismic-reth
