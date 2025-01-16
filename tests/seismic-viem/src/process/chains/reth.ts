@@ -45,14 +45,14 @@ const runRethLocally = async (
     ? ['--datadir.static_files', process.env.RETH_STATIC_FILES]
     : []
 
-  const seismicDir = process.env.SEISMIC_ROOT
-  if (!seismicDir) {
+  const srethDir = process.env.SRETH_ROOT
+  if (!srethDir) {
     throw new Error(
-      'Must provide SEISMIC_ROOT environment variable pointing to local seismic-reth repo'
+      'Must provide SRETH_ROOT environment variable pointing to local seismic-reth repo'
     )
   }
-  if (!existsSync(seismicDir)) {
-    throw new Error(`Could not find directory at ${seismicDir}`)
+  if (!existsSync(srethDir)) {
+    throw new Error(`Could not find directory at ${srethDir}`)
   }
 
   const srethProcess = await runProcess('cargo', {
@@ -71,7 +71,7 @@ const runRethLocally = async (
       ...verbosityArg,
       ...quietArg,
     ],
-    cwd: seismicDir,
+    cwd: srethDir,
     waitMs,
   })
   try {

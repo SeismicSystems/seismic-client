@@ -39,7 +39,7 @@ jobs:
       group: global-self-hosted-runner
       cancel-in-progress: false
     env:
-      SEISMIC_ROOT: /home/azureuser/seismic/seismic-reth
+      SRETH_ROOT: /home/azureuser/seismic/seismic-reth
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
       SEISMIC_RETH_FILES: /home/azureuser/.seismic-reth
@@ -48,13 +48,13 @@ jobs:
         uses: actions/checkout@v3
       - name: Build reth
         run: |
-          cd "$SEISMIC_ROOT"
+          cd "$SRETH_ROOT"
           cargo build --bin seismic-reth
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
       - name: Create .env
         run: |
-          echo "SEISMIC_ROOT=$SEISMIC_ROOT" > .env
+          echo "SRETH_ROOT=$SRETH_ROOT" > .env
           echo "RETH_DATA_DIR=$RETH_DATA_DIR" >> .env
           echo "RETH_STATIC_FILES=$RETH_STATIC_FILES" >> .env
       - name: Install dependencies
