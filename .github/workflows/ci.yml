@@ -46,6 +46,7 @@ jobs:
       - name: Build anvil
         run: |
           cd "$SFOUNDRY_ROOT"
+          git checkout seismic
           git pull
           cargo build --bin sanvil
       - name: Return to main repo
@@ -73,6 +74,7 @@ jobs:
       - name: Build reth
         run: |
           cd "$SRETH_ROOT"
+          git checkout seismic
           git pull
           cargo build --bin seismic-reth
       - name: Return to main repo
