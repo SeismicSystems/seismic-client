@@ -65,9 +65,8 @@ jobs:
       cancel-in-progress: false
     env:
       SRETH_ROOT: /home/azureuser/seismic/seismic-reth
-      RETH_DIR: /home/azureuser/.seismic-reth
-      RETH_DATA_DIR: $RETH_DIR/data
-      RETH_STATIC_FILES: $RETH_DIR/static_files
+      RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
+      RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -86,4 +85,4 @@ jobs:
       - name: Test devnet
         run: bun viem:test:devnet
       - name: Remove reth files
-        run: rm -rf "$RETH_DIR"
+        run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
