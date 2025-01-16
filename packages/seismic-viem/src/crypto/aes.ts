@@ -71,9 +71,9 @@ export class AesGcmCrypto {
     )
 
     const key = hexToBytes(this.key)
-    const callData = hexToBytes(plaintext)
-    const ciphertext = await gcm(key, nonceBuffer).encrypt(callData)
-    return bytesToHex(ciphertext)
+    const plaintextBytes = hexToBytes(plaintext)
+    const ciphertextBytes = await gcm(key, nonceBuffer).encrypt(plaintextBytes)
+    return bytesToHex(ciphertextBytes)
   }
 
   /**
@@ -81,9 +81,13 @@ export class AesGcmCrypto {
    * NOTE: not tested or called in any real way
    */
   public async decrypt(
-    ciphertext: Hex,
+    ciphertext: Hex | undefined,
     nonce: number | bigint | Hex
-  ): Promise<Hex> {
+  ): Promise<Hex | undefined> {
+    if (!ciphertext) {
+      return undefined
+    }
+
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -91,15 +95,10 @@ export class AesGcmCrypto {
         : this.numberToNonce(nonce)
     )
 
-    const ciphertextBuffer = hexToBytes(ciphertext)
-    // TODO: no clue if the tag is still there...
-    // Extract the tag from the end (last 16 bytes)
-    // const tag = ciphertextBuffer.slice(-this.TAG_LENGTH)
-    const encryptedData = ciphertextBuffer.slice(0, -this.TAG_LENGTH)
-
     const key = hexToBytes(this.key)
-    const decrypted = await gcm(key, nonceBuffer).decrypt(encryptedData)
-    return bytesToHex(decrypted)
+    const ciphertextBytes = hexToBytes(ciphertext)
+    const plaintextBytes = await gcm(key, nonceBuffer).decrypt(ciphertextBytes)
+    return bytesToHex(plaintextBytes)
   }
 }
 
