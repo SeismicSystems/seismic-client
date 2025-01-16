@@ -165,7 +165,7 @@ export async function signedCall<
     data: data_,
     factory,
     factoryData,
-    gas,
+    gas = 30_000_000,
     gasPrice,
     maxFeePerBlobGas,
     maxFeePerGas,
@@ -263,10 +263,15 @@ export async function signedCall<
     // @ts-ignore
     const preparedTx = await prepareTransactionRequest(client, request)
     const serializedTransaction = await client.account!.signTransaction!(
-      { seismicInput, ...preparedTx },
+      {
+        seismicInput,
+        encryptionPubkey: client.getEncryptionPublicKey(),
+        ...preparedTx,
+      },
       { serializer: serializeSeismicTransaction }
     )
 
+    console.log(`Sending signed call: ${serializedTransaction}`)
     // @ts-ignore
     const response: Hex = await client.request({
       method: 'eth_call',

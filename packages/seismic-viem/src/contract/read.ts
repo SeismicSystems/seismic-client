@@ -6,6 +6,7 @@ import type {
   Chain,
   ContractFunctionArgs,
   ContractFunctionName,
+  GetTransactionCountParameters,
   ReadContractParameters,
   ReadContractReturnType,
   Transport,
@@ -43,6 +44,37 @@ export type SignedReadContractParameters<
   >,
 > = ReadContractParameters<TAbi, TFunctionName, TArgs> & {
   nonce?: number
+}
+
+const fillNonce = async <
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+  const TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
+>(
+  client: SignedReadClient<TChain, TAccount>,
+  parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
+) => {
+  const account = parseAccount(parameters.account!)
+  const { nonce: nonce_ } = parameters
+  if (nonce_) {
+    return nonce_
+  }
+
+  const { blockNumber, blockTag = 'latest' } = parameters
+  let args: GetTransactionCountParameters = {
+    address: account.address,
+    blockTag,
+  }
+  if (blockNumber) {
+    args = { address: account.address, blockNumber }
+  }
+  return client.getTransactionCount(args)
 }
 
 /**
@@ -115,10 +147,7 @@ export async function signedReadContract<
     return readContract(client, parameters as ReadContractParameters)
   }
 
-  const account = parseAccount(rest.account)
-  const { nonce: nonce_ } = parameters
-  const nonce =
-    nonce_ ?? (await client.getTransactionCount({ address: account.address }))
+  const nonce = await fillNonce(client, parameters)
 
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
