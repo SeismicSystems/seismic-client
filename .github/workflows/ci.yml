@@ -57,8 +57,8 @@ jobs:
           cargo build --bin sanvil
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
-      # So there's no errors
       - name: Create .env
+        # So bun doesn't log a warning about no .env file
         run: touch .env
       - name: Install dependencies
         run: bun install
