@@ -5,11 +5,11 @@ import {
   NodeProcess,
   NodeProcessOptions,
   SpawnedNode,
+  parseVerbosity,
 } from '@test/process/node'
 
 type RethProcessOptions = NodeProcessOptions & {
   dev?: boolean
-  verbosity?: number
   devBlockMaxTx?: number
   teeMockServer?: boolean
 }
@@ -22,7 +22,7 @@ const runRethLocally = async (
     silent = true,
     dev = true,
     waitMs = 5_000,
-    verbosity = 1,
+    verbosity,
     devBlockMaxTx = 1,
     teeMockServer = true,
   } = options
@@ -33,9 +33,7 @@ const runRethLocally = async (
     : []
   const quietArg = silent ? ['--quiet'] : []
   const httpArgs = port ? ['--http', '--http.port', port.toString()] : []
-  const verbosityArg = verbosity
-    ? [`-${'v'.repeat(Math.min(verbosity, 5))}`]
-    : []
+  const verbosityArg = parseVerbosity(verbosity)
   const teeMockServerArg = teeMockServer ? ['--tee.mock-server'] : []
 
   const dataDirArg = process.env.RETH_DATA_DIR

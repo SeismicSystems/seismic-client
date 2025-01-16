@@ -37,6 +37,7 @@ curl -fsSL https://bun.sh/install | bash
 Create a `.env` file in the repo root. These variables are only used for running tests. This file should have:
 
 - `SRETH_ROOT`: the path to your local `seismic-reth` directory
+- `SFOUNDRY_ROOT`: the path to your local `seismic-foundry` directory
 
 Optionally, you may set these variables to specify where `reth` will store its state:
 

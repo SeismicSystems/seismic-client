@@ -33,16 +33,40 @@ jobs:
       - name: Check typing
         run: bun run typecheck
 
-  test:
+  test-anvil:
+    runs-on: self-hosted
+    concurrency:
+      group: global-self-hosted-runner
+      cancel-in-progress: false
+    env:
+      SFOUNDRY_ROOT: /home/azureuser/seismic/seismic-foundry
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Build anvil
+        run: |
+          cd "$SFOUNDRY_ROOT"
+          cargo build --bin sanvil
+      - name: Return to main repo
+        run: cd "$GITHUB_WORKSPACE"
+      - name: Create .env
+        # So bun doesn't log a warning about no .env file
+        run: touch .env
+      - name: Install dependencies
+        run: bun install
+      - name: Test anvil
+        run: bun viem:test:anvil
+
+  test-devnet:
     runs-on: self-hosted
     concurrency:
       group: global-self-hosted-runner
       cancel-in-progress: false
     env:
       SRETH_ROOT: /home/azureuser/seismic/seismic-reth
-      RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
-      RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
-      SEISMIC_RETH_FILES: /home/azureuser/.seismic-reth
+      RETH_DIR: /home/azureuser/.seismic-reth
+      RETH_DATA_DIR: $RETH_DIR/data
+      RETH_STATIC_FILES: $RETH_DIR/static_files
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -53,15 +77,11 @@ jobs:
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
       - name: Create .env
-        run: |
-          echo "SRETH_ROOT=$SRETH_ROOT" > .env
-          echo "RETH_DATA_DIR=$RETH_DATA_DIR" >> .env
-          echo "RETH_STATIC_FILES=$RETH_STATIC_FILES" >> .env
+        # So bun doesn't log a warning about no .env file
+        run: touch .env
       - name: Install dependencies
         run: bun install
       - name: Test devnet
         run: bun viem:test:devnet
       - name: Remove reth files
-        run: rm -rf "$SEISMIC_RETH_FILES"
-      - name: Test anvil
-        run: bun viem:test:anvil
+        run: rm -rf "$RETH_DIR"
