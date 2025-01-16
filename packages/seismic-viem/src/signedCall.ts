@@ -240,6 +240,7 @@ export async function signedCall<
       nonce,
       to: deploylessCall ? undefined : to,
       value,
+      type: 'legacy',
     } as TransactionRequest
 
     if (batch && shouldPerformMulticall({ request }) && !rpcStateOverride) {
@@ -269,7 +270,6 @@ export async function signedCall<
       { serializer: serializeSeismicTransaction }
     )
 
-    console.log(`Sending signed call: ${serializedTransaction}`)
     // @ts-ignore
     const response: Hex = await client.request({
       method: 'eth_call',

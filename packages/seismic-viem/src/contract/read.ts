@@ -160,10 +160,7 @@ export async function signedReadContract<
     encryptionPubkey: client.getEncryptionPublicKey(),
   }
   const { data: encryptedData } = await signedCall(client, request)
-  console.log('encrypted data', encryptedData)
-  console.log('decrypting...')
   const data = await aesCipher.decrypt(encryptedData, nonce)
-  console.log('decrypted data', data)
   return decodeFunctionResult({
     abi,
     args,
