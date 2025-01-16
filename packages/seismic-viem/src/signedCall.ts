@@ -21,7 +21,7 @@ import { prepareTransactionRequest } from 'viem/actions'
 import { extract, getCallError, parseAccount } from 'viem/utils'
 
 import { serializeSeismicTransaction } from '@sviem/chain'
-import { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
+import { ShieldedWalletClient } from '@sviem/client'
 import { SignedCallError } from '@sviem/error/signedCall'
 import type { ScheduleMulticallParameters } from '@sviem/viem-internal/call'
 import {
@@ -149,9 +149,7 @@ export async function signedCall<
   TChain extends Chain | undefined,
   TAccount extends Account,
 >(
-  client:
-    | ShieldedPublicClient<TTransport, TChain, TAccount>
-    | ShieldedWalletClient<TTransport, TChain, TAccount>,
+  client: ShieldedWalletClient<TTransport, TChain, TAccount>,
   args: SignedCallParameters<TChain>
 ): Promise<CallReturnType> {
   const {

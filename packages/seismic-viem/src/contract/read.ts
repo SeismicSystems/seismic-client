@@ -21,18 +21,11 @@ import { parseAccount } from 'viem/accounts'
 import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
-import { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
+import { ShieldedWalletClient } from '@sviem/client'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi'
 import { AesGcmCrypto } from '@sviem/crypto/aes'
 import type { SignedCallParameters } from '@sviem/signedCall'
 import { signedCall } from '@sviem/signedCall'
-
-type SignedReadClient<
-  TChain extends Chain | undefined,
-  TAccount extends Account,
-> =
-  | ShieldedPublicClient<Transport, TChain, TAccount>
-  | ShieldedWalletClient<Transport, TChain, TAccount>
 
 export type SignedReadContractParameters<
   TAbi extends Abi | readonly unknown[],
@@ -57,7 +50,7 @@ const fillNonce = async <
     TFunctionName
   >,
 >(
-  client: SignedReadClient<TChain, TAccount>,
+  client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
 ) => {
   const account = parseAccount(parameters.account!)
@@ -129,7 +122,7 @@ export async function signedReadContract<
     TFunctionName
   >,
 >(
-  client: SignedReadClient<TChain, TAccount>,
+  client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
   // aesKey: Hex,
 ): Promise<ReadContractReturnType> {

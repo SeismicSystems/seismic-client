@@ -5,6 +5,7 @@ import type {
   Hex,
   Prettify,
   PublicActions,
+  PublicClientConfig,
   PublicRpcSchema,
   RpcSchema,
   Transport,
@@ -71,9 +72,7 @@ export type ShieldedPublicClient<
     rpcSchema extends RpcSchema
       ? [...PublicRpcSchema, ...rpcSchema]
       : PublicRpcSchema,
-    PublicActions<transport, chain> &
-      ShieldedPublicActions<chain> &
-      EncryptionActions
+    PublicActions<transport, chain> & ShieldedPublicActions<chain>
   >
 >
 
@@ -152,11 +151,7 @@ type SeismicClients<
 export type GetPublicClientParameters<
   TTransport extends Transport = Transport,
   TChain extends Chain | undefined = undefined,
-> = {
-  chain: TChain
-  transport: TTransport
-  encryptionSk?: Hex | undefined
-}
+> = PublicClientConfig<TTransport, TChain> & { encryptionSk?: Hex | undefined }
 
 /**
  * @ignore
@@ -236,14 +231,7 @@ export const createShieldedPublicClient = async <
     undefined,
     rpcSchema
   >(parameters) as ShieldedPublicClient<transport, chain, undefined, rpcSchema>
-  // @ts-ignore
-  const client = viemPublicClient.extend(shieldedPublicActions) as any
-  const networkPublicKey = await client.getTeePublicKey()
-  const { aesKey, encryptionPublicKey } = getEncryption(
-    networkPublicKey,
-    parameters.encryptionSk
-  )
-  return client.extend(() => encryptionActions(aesKey, encryptionPublicKey))
+  return viemPublicClient.extend(shieldedPublicActions as any)
 }
 
 export const getSeismicClients = async <
@@ -264,8 +252,12 @@ export const getSeismicClients = async <
     undefined
   >({ chain, transport, encryptionSk })
 
-  const aesKey = publicClient.getEncryption()
-  const encryptionPublicKey = publicClient.getEncryptionPublicKey()
+  const networkPublicKey = await publicClient.getTeePublicKey()
+  const { aesKey, encryptionPublicKey } = getEncryption(
+    networkPublicKey,
+    encryptionSk
+  )
+
   const wallet = createClient({ account, chain, transport })
     .extend(publicActions)
     .extend(walletActions)
