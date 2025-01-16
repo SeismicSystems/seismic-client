@@ -27,8 +27,8 @@ const spawnAnvil = async (
     ...parseVerbosity(verbosity),
   ]
 
-  const sanvilDir = process.env.SANVIL_ROOT
-  if (!sanvilDir) {
+  const sfoundryDir = process.env.SFOUNDRY_ROOT
+  if (!sfoundryDir) {
     return runProcess('sanvil', {
       args,
       waitMs,
@@ -37,7 +37,7 @@ const spawnAnvil = async (
 
   return runProcess('cargo', {
     args: ['run', '--bin', 'sanvil', '--', ...args],
-    cwd: sanvilDir,
+    cwd: sfoundryDir,
     waitMs,
   })
 }
