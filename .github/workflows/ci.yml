@@ -82,7 +82,7 @@ jobs:
         run: touch .env
       - name: Install dependencies
         run: bun install
+      - name: Clear reth files
+        run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
       - name: Test devnet
         run: bun viem:test:devnet
-      - name: Remove reth files
-        run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
