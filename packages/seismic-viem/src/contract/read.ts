@@ -6,6 +6,7 @@ import type {
   Chain,
   ContractFunctionArgs,
   ContractFunctionName,
+  GetTransactionCountParameters,
   ReadContractParameters,
   ReadContractReturnType,
   Transport,
@@ -16,20 +17,58 @@ import {
   getAbiItem,
   toFunctionSelector,
 } from 'viem'
+import { parseAccount } from 'viem/accounts'
 import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
-import { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
+import { ShieldedWalletClient } from '@sviem/client'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi'
+import { AesGcmCrypto } from '@sviem/crypto/aes'
 import type { SignedCallParameters } from '@sviem/signedCall'
 import { signedCall } from '@sviem/signedCall'
 
-type SignedReadClient<
+export type SignedReadContractParameters<
+  TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
+> = ReadContractParameters<TAbi, TFunctionName, TArgs> & {
+  nonce?: number
+}
+
+const fillNonce = async <
   TChain extends Chain | undefined,
   TAccount extends Account,
-> =
-  | ShieldedPublicClient<Transport, TChain, TAccount>
-  | ShieldedWalletClient<Transport, TChain, TAccount>
+  const TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
+>(
+  client: ShieldedWalletClient<Transport, TChain, TAccount>,
+  parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
+) => {
+  const account = parseAccount(parameters.account!)
+  const { nonce: nonce_ } = parameters
+  if (nonce_) {
+    return nonce_
+  }
+
+  const { blockNumber, blockTag = 'latest' } = parameters
+  let args: GetTransactionCountParameters = {
+    address: account.address,
+    blockTag,
+  }
+  if (blockNumber) {
+    args = { address: account.address, blockNumber }
+  }
+  return client.getTransactionCount(args)
+}
 
 /**
  * Executes a signed read operation on a smart contract.
@@ -83,8 +122,8 @@ export async function signedReadContract<
     TFunctionName
   >,
 >(
-  client: SignedReadClient<TChain, TAccount>,
-  parameters: ReadContractParameters<TAbi, TFunctionName, TArgs>
+  client: ShieldedWalletClient<Transport, TChain, TAccount>,
+  parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
   // aesKey: Hex,
 ): Promise<ReadContractReturnType> {
   const {
@@ -98,27 +137,30 @@ export async function signedReadContract<
   // If they specify no address, then use the standard read contract,
   // since it doesn't have to be signed
   if (!rest.account) {
-    return readContract(client, parameters)
+    return readContract(client, parameters as ReadContractParameters)
   }
+
+  const nonce = await fillNonce(client, parameters)
 
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
   const ethAbi = remapSeismicAbiInputs(seismicAbi)
   const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
-  const encodedData = `${selector}${encodedParams}` as `0x${string}`
+  const plaintextCalldata = `${selector}${encodedParams}` as `0x${string}`
 
-  // NOTE: can't encrypt calls because there's no nonce
-  // const aesCipher = new AesGcmCrypto(aesKey)
-  // const data = aesCipher.encrypt(encodedData, nonce).ciphertext
-  const calldata = encodedData
+  const aesKey = client.getEncryption()
+  const aesCipher = new AesGcmCrypto(aesKey)
+  const encryptedCalldata = await aesCipher.encrypt(plaintextCalldata, nonce)
 
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
-    data: calldata,
+    nonce,
     to: address!,
-    seismicInput: undefined,
+    seismicInput: encryptedCalldata,
+    encryptionPubkey: client.getEncryptionPublicKey(),
   }
-  const { data } = await signedCall(client, request)
+  const { data: encryptedData } = await signedCall(client, request)
+  const data = await aesCipher.decrypt(encryptedData, nonce)
   return decodeFunctionResult({
     abi,
     args,

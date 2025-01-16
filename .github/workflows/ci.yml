@@ -46,6 +46,8 @@ jobs:
       - name: Build anvil
         run: |
           cd "$SFOUNDRY_ROOT"
+          git checkout seismic
+          git pull
           cargo build --bin sanvil
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
@@ -64,15 +66,16 @@ jobs:
       cancel-in-progress: false
     env:
       SRETH_ROOT: /home/azureuser/seismic/seismic-reth
-      RETH_DIR: /home/azureuser/.seismic-reth
-      RETH_DATA_DIR: $RETH_DIR/data
-      RETH_STATIC_FILES: $RETH_DIR/static_files
+      RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
+      RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
       - name: Build reth
         run: |
           cd "$SRETH_ROOT"
+          git checkout seismic
+          git pull
           cargo build --bin seismic-reth
       - name: Return to main repo
         run: cd "$GITHUB_WORKSPACE"
@@ -81,7 +84,9 @@ jobs:
         run: touch .env
       - name: Install dependencies
         run: bun install
+      - name: Clear reth files
+        run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
       - name: Test devnet
         run: bun viem:test:devnet
       - name: Remove reth files
-        run: rm -rf "$RETH_DIR"
+        run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"

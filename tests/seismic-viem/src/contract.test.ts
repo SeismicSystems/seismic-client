@@ -45,7 +45,7 @@ const account = privateKeyToAccount(TEST_PRIVATE_KEY)
 const { url, exitProcess } = await setupNode(chain)
 
 const transport = http(url)
-const publicClient = createShieldedPublicClient({ chain, transport })
+const publicClient = await createShieldedPublicClient({ chain, transport })
 const walletClient = await createShieldedWalletClient({
   chain,
   transport,
@@ -79,7 +79,6 @@ const textSeismicTx = async () => {
     abi: contractABI,
     functionName: 'isOdd',
   })
-  // const isOdd0 = await seismicContract.tread.isOdd()
   // contract initializes number to be 0
   expect(isOdd0).toBe(false)
   console.info(`[0] initial value of isOdd = ${isOdd0}`)

@@ -1,4 +1,4 @@
-import type { Account, Chain, Hex, Transport } from 'viem'
+import type { Account, Chain, Transport } from 'viem'
 import { readContract, writeContract } from 'viem/actions'
 
 import { ShieldedWalletClient } from '@sviem/client'
@@ -62,8 +62,6 @@ export type ShieldedWalletActions<
       request
     >
   ) => Promise<SendSeismicTransactionReturnType>
-  getEncryption: () => Hex
-  getEncryptionPublicKey: () => Hex
 }
 
 /**
@@ -114,9 +112,7 @@ export const shieldedWalletActions = <
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends Account = Account,
 >(
-  client: ShieldedWalletClient<TTransport, TChain, TAccount>,
-  encryption: Hex,
-  encryptionPublicKey: Hex
+  client: ShieldedWalletClient<TTransport, TChain, TAccount>
 ): ShieldedWalletActions<TChain, TAccount> => {
   return {
     writeContract: (args) => shieldedWriteContract(client, args as any),
@@ -126,7 +122,5 @@ export const shieldedWalletActions = <
     signedCall: (args) => signedCall(client, args as any),
     sendShieldedTransaction: (args) =>
       sendShieldedTransaction(client, args as any),
-    getEncryption: () => encryption,
-    getEncryptionPublicKey: () => encryptionPublicKey,
   }
 }
