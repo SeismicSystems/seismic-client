@@ -9,6 +9,7 @@ export type NodeProcessOptions = {
   port?: number
   silent?: boolean
   waitMs?: number
+  verbosity?: number
 }
 
 export type NodeProcess = ServerProcess & { url: string }
@@ -40,6 +41,10 @@ export const envChain = (): Chain => {
     throw new Error(`BACKEND env variable must be either "anvil" or "reth"`)
   }
   return nameToChain(chainName)
+}
+
+export const parseVerbosity = (verbosity: number | undefined): string[] => {
+  return verbosity ? [`-${'v'.repeat(Math.min(verbosity, 5))}`] : []
 }
 
 export const setupNode = async (chain: Chain): Promise<SpawnedNode> => {
