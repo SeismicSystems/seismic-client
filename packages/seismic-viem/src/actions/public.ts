@@ -80,13 +80,11 @@ export const shieldedPublicActions = <
   client: ShieldedPublicClient<TTransport, TChain, TAccount, TRpcSchema>
 ): ShieldedPublicActions<TChain> => ({
   getTeePublicKey: async () => {
-    // TODO: remove this once we figure out metamask
     // @ts-ignore
-    // const key: Hex | string = await client.request({
-    //   method: 'seismic_getTeePublicKey',
-    // })
-    // return key.startsWith('0x') ? key.slice(2) : key
-    return '028e76821eb4d77fd30223ca971c49738eb5b5b71eabe93f96b348fdce788ae5a0'
+    const key: Hex | string = await client.request({
+      method: 'seismic_getTeePublicKey',
+    })
+    return key.startsWith('0x') ? key.slice(2) : key
   },
   getStorageAt: async (_args) => {
     throw new Error('Cannot call getStorageAt with a shielded public client')
