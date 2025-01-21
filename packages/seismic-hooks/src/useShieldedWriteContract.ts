@@ -11,14 +11,13 @@ import {
 import { useConnectorClient } from 'wagmi'
 import { writeContract } from 'wagmi/actions'
 
+import { config } from '@shooks/config/seismicDevnet'
 import {
   type ShieldedPublicClient,
   type ShieldedWalletClient,
   createShieldedPublicClient,
   createShieldedWalletClient,
 } from '@sviem/index'
-
-import { config } from '@shooks/config/seismicDevnet'
 
 export type UseShieldedWriteContractConfig<
   TAbi extends Abi | readonly unknown[],
@@ -81,7 +80,7 @@ export function useShieldedWriteContract<
         const chain = extractedWalletClient.data?.chain
         if (!chain) throw new Error('No chain connected')
 
-        // Initialize the shielded public client    
+        // Initialize the shielded public client
         const publicClient = await createShieldedPublicClient({
           transport: http(),
           chain,
@@ -123,7 +122,8 @@ export function useShieldedWriteContract<
     setError(null)
 
     try {
-      const tx = await writeContract( // TODO: use shieldedWriteContract
+      const tx = await writeContract(
+        // TODO: use shieldedWriteContract
         config,
         // shieldedClients.wallet, // TODO: use shielded wallet client
         {
