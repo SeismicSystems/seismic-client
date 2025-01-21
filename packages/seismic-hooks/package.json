@@ -1,7 +1,7 @@
 {
   "name": "seismic-hooks",
   "version": "1.0.0",
-  "description": "React hooks for Seismic systems.",
+  "description": "React hooks for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
   "module": "dist/_esm/index.js",
