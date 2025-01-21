@@ -110,7 +110,7 @@ const textSeismicTx = async () => {
 
   // This is a seismic tx since the arg to setNumber is an suint
   const tx3 = await seismicContract.write.setNumber([TEST_NUMBER])
-  console.info(`[3] Set number tx: ${tx1}`)
+  console.info(`[3] Set number tx: ${tx3}`)
   const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
   console.info(
     `[3] setNumber receipt: ${JSON.stringify(receipt3, stringifyBigInt, 2)}`
