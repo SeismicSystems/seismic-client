@@ -158,7 +158,7 @@ export async function sendShieldedTransaction<
     authorizationList,
     blobs,
     data,
-    gas = 30_000_000,
+    gas,
     gasPrice,
     maxFeePerBlobGas,
     maxFeePerGas,
@@ -226,8 +226,11 @@ export async function sendShieldedTransaction<
         to,
         value,
         type: 'legacy',
+        encryptionPubkey,
         ...rest,
       } as TransactionRequest
+
+      console.log('send shielded transaction request', request)
 
       // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)

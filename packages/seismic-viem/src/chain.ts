@@ -1,13 +1,29 @@
 import {
   concatHex,
   defineChain,
+  formatTransactionRequest,
   serializeTransaction,
   toHex,
   toRlp,
 } from 'viem'
-import type { Hex, Signature, TransactionSerializable } from 'viem'
+import type {
+  BlockIdentifier,
+  BlockNumber,
+  BlockTag,
+  ChainFormatters,
+  ExactPartial,
+  Hex,
+  RpcSchema,
+  RpcStateOverride,
+  RpcTransactionRequest,
+  Signature,
+  TransactionRequest,
+  TransactionSerializable,
+} from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
+
+export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
 
 export type SeismicTxExtras = {
   seismicInput?: Hex | undefined
@@ -62,6 +78,58 @@ export const serializeSeismicTransaction = (
   return encodedTx
 }
 
+export const seismicRpcSchema: RpcSchema = [
+  {
+    Method: 'eth_estimateGas',
+    Parameters: ['SeismicTransactionRequest'] as
+      | [SeismicTransactionRequest]
+      | [SeismicTransactionRequest, BlockNumber]
+      | [SeismicTransactionRequest, BlockNumber, RpcStateOverride],
+    ReturnType: 'Quantity',
+  },
+  {
+    Method: 'eth_call',
+    Parameters: ['SeismicTransactionRequest'] as
+      | [ExactPartial<SeismicTransactionRequest>]
+      | [
+          ExactPartial<SeismicTransactionRequest>,
+          BlockNumber | BlockTag | BlockIdentifier,
+        ]
+      | [
+          ExactPartial<SeismicTransactionRequest>,
+          BlockNumber | BlockTag | BlockIdentifier,
+          RpcStateOverride,
+        ],
+    ReturnType: 'Hex',
+  },
+]
+
+// Define your formatter
+const seismicChainFormatters: ChainFormatters = {
+  transactionRequest: {
+    format: (request: SeismicTransactionRequest) => {
+      console.log('formatter input', request)
+
+      const rpcRequest = formatTransactionRequest(request)
+
+      let type = rpcRequest.type ?? '0x4a'
+      let data = request.seismicInput ?? request.data
+      let encryptionPubkey = request.encryptionPubkey
+
+      let ret = {
+        ...rpcRequest,
+        ...(type !== undefined && { type }),
+        ...(data !== undefined && { data }),
+        ...(encryptionPubkey !== undefined && { encryptionPubkey }),
+      }
+
+      console.log('formatter output', ret)
+      return ret
+    },
+    type: 'transactionRequest',
+  },
+}
+
 /**
  * Defines the Seismic development network configuration.
  *
@@ -85,11 +153,7 @@ export const seismicDevnet = /*#__PURE__*/ defineChain({
   // TODO
   id: 1337,
   name: 'Seismic',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
-  },
+  nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
     default: {
       // TODO: publish real URLs
@@ -99,4 +163,5 @@ export const seismicDevnet = /*#__PURE__*/ defineChain({
       webSocket: ['ws://127.0.0.1:8545'],
     },
   },
+  formatters: seismicChainFormatters,
 })

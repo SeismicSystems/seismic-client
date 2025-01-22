@@ -2,6 +2,8 @@ import type {
   Account,
   BlockTag,
   Chain,
+  EstimateGasParameters,
+  EstimateGasReturnType,
   GetStorageAtParameters,
   GetStorageAtReturnType,
   GetTransactionParameters,

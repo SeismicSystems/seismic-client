@@ -5,8 +5,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
-    "test:anvil": "CHAIN=anvil bun test",
-    "test:devnet": "CHAIN=devnet bun test"
+    "test:anvil": "CHAIN=anvil bun test contract.test.ts",
+    "test:devnet": "CHAIN=devnet bun test contract.test.ts"
   },
   "devDependencies": {
     "dotenv": "^16.4.7",

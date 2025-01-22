@@ -255,8 +255,10 @@ export function getShieldedContract<
     ...options
   }: ReadContractParameters<TAbi, functionName, args>) {
     if (walletClient === undefined) {
-      throw new Error('Must provide wallet client to write seismic contract')
+      throw new Error('Must provide wallet client to read seismic contract')
     }
+
+    console.log('signedRead options', options)
 
     return signedReadContract(walletClient, {
       abi,

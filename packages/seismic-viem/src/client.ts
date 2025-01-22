@@ -1,5 +1,6 @@
 import type {
   Account,
+  BlockNumber,
   Chain,
   Client,
   Hex,
@@ -8,6 +9,8 @@ import type {
   PublicClientConfig,
   PublicRpcSchema,
   RpcSchema,
+  RpcStateOverride,
+  TransactionRequest,
   Transport,
   WalletActions,
 } from 'viem'
@@ -26,6 +29,12 @@ import type { ShieldedWalletActions } from '@sviem/actions/wallet'
 import { shieldedWalletActions } from '@sviem/actions/wallet'
 import { generateAesKey } from '@sviem/crypto/aes'
 import { compressPublicKey } from '@sviem/crypto/secp'
+
+import {
+  SeismicTransactionRequest,
+  SeismicTxExtras,
+  seismicRpcSchema,
+} from './chain'
 
 /**
  * Represents a shielded public client with extended functionality for interacting
@@ -258,7 +267,12 @@ export const getSeismicClients = async <
     encryptionSk
   )
 
-  const wallet = createClient({ account, chain, transport })
+  const wallet = createClient({
+    account,
+    chain,
+    transport,
+    rpcSchema: seismicRpcSchema,
+  })
     .extend(publicActions)
     .extend(walletActions)
     .extend(() => encryptionActions(aesKey, encryptionPublicKey))

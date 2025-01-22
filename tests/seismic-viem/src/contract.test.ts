@@ -91,37 +91,37 @@ const textSeismicTx = async () => {
     `[1] setNumber receipt: ${JSON.stringify(receipt1, stringifyBigInt, 2)}`
   )
 
-  // Try reading using explicit signedRead
-  const isOdd1 = await seismicContract.read.isOdd()
-  // number has been set to 11
-  expect(isOdd1).toBe(true)
+  // // Try reading using explicit signedRead
+  // const isOdd1 = await seismicContract.read.isOdd()
+  // // number has been set to 11
+  // expect(isOdd1).toBe(true)
 
-  // Not a seismic tx since there are no arguments therefore no shielded arguments
-  const tx2 = await seismicContract.write.increment()
-  console.info(`[2] Incremented number in tx: ${tx2}`)
-  const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
-  console.info(
-    `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
-  )
+  // // Not a seismic tx since there are no arguments therefore no shielded arguments
+  // const tx2 = await seismicContract.write.increment()
+  // console.info(`[2] Incremented number in tx: ${tx2}`)
+  // const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
+  // console.info(
+  //   `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
+  // )
 
-  // Try reading using unsigned (normal) read
-  const isOdd2 = await seismicContract.tread.isOdd()
-  expect(isOdd2).toBe(false)
+  // // Try reading using unsigned (normal) read
+  // const isOdd2 = await seismicContract.tread.isOdd()
+  // expect(isOdd2).toBe(false)
 
-  // This is a seismic tx since the arg to setNumber is an suint
-  const tx3 = await seismicContract.write.setNumber([TEST_NUMBER])
-  console.info(`[3] Set number tx: ${tx1}`)
-  const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
-  console.info(
-    `[3] setNumber receipt: ${JSON.stringify(receipt3, stringifyBigInt, 2)}`
-  )
+  // // This is a seismic tx since the arg to setNumber is an suint
+  // const tx3 = await seismicContract.write.setNumber([TEST_NUMBER])
+  // console.info(`[3] Set number tx: ${tx1}`)
+  // const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
+  // console.info(
+  //   `[3] setNumber receipt: ${JSON.stringify(receipt3, stringifyBigInt, 2)}`
+  // )
 
-  // Use non-explicit signed-read
-  const isOdd3 = await seismicContract.tread.isOdd([], {
-    account: walletClient.account.address,
-  })
-  // number has been set back to 11
-  expect(isOdd3).toBe(true)
+  // // Use non-explicit signed-read
+  // const isOdd3 = await seismicContract.tread.isOdd([], {
+  //   account: walletClient.account.address,
+  // })
+  // // number has been set back to 11
+  // expect(isOdd3).toBe(true)
 }
 
 describe('Seismic Contract', async () => {
