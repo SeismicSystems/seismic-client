@@ -1,33 +1,35 @@
-import {
-  concatHex,
-  defineChain,
-  serializeTransaction,
-  toHex,
-  toRlp,
+import { concatHex, defineChain, toHex, toRlp } from 'viem'
+import type {
+  Address,
+  Hex,
+  Signature,
+  TransactionSerializableLegacy,
 } from 'viem'
-import type { Hex, Signature, TransactionSerializable } from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
-export type SeismicTxExtras = {
-  seismicInput?: Hex | undefined
-  encryptionPubkey?: Hex | undefined
+export type SeismicTxExtras = { encryptionPubkey: Hex }
+export type TransactionSerializableSeismic = TransactionSerializableLegacy &
+  SeismicTxExtras
+export type TxSeismic = {
+  chainId?: number | undefined
+  nonce?: bigint | undefined
+  gasPrice?: bigint | undefined
+  gasLimit?: bigint | undefined
+  to?: Address | null | undefined
+  value?: bigint | undefined
+  input?: Hex | undefined
+  // TODO: serde alias in alloy
+  encryption_pubkey: Hex
 }
+
 export const stringifyBigInt = (_: any, v: any) =>
   typeof v === 'bigint' ? v.toString() : v
 
 export const serializeSeismicTransaction = (
-  transaction: TransactionSerializable & SeismicTxExtras,
+  transaction: TransactionSerializableSeismic,
   signature?: Signature
 ): Hex => {
-  // should be a better way to decide this...
-  if (!transaction.seismicInput) {
-    return serializeTransaction(
-      transaction as TransactionSerializable,
-      signature
-    )
-  }
-
   const {
     chainId,
     nonce,
@@ -35,7 +37,7 @@ export const serializeSeismicTransaction = (
     gas,
     to,
     value = 0n,
-    seismicInput,
+    data,
     encryptionPubkey,
   } = transaction
 
@@ -50,7 +52,7 @@ export const serializeSeismicTransaction = (
     gas ? toHex(gas) : '0x',
     to ?? '0x',
     value ? toHex(value) : '0x',
-    seismicInput ?? '0x',
+    data ?? '0x',
     encryptionPubkey ?? '0x',
     ...toYParitySignatureArray(transaction, signature),
   ])

@@ -123,7 +123,7 @@ export async function shieldedWriteContract<
     })
   }
 
-  const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
+  const seismicAbi = getAbiItem({ abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
   const ethAbi = remapSeismicAbiInputs(seismicAbi)
   const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)

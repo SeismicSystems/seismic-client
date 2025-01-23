@@ -14,7 +14,6 @@ import type {
   Hex,
   PrepareTransactionRequestErrorType,
   SendRawTransactionErrorType,
-  TransactionRequest,
   Transport,
   UnionOmit,
 } from 'viem'
@@ -42,7 +41,10 @@ import {
   getTransactionError,
 } from 'viem/utils'
 
-import { serializeSeismicTransaction } from '@sviem/chain'
+import {
+  TransactionSerializableSeismic,
+  serializeSeismicTransaction,
+} from '@sviem/chain'
 import type {
   AccountNotFoundErrorType,
   AccountTypeNotSupportedErrorType,
@@ -165,7 +167,6 @@ export async function sendShieldedTransaction<
     maxPriorityFeePerGas,
     nonce,
     value,
-    seismicInput,
     encryptionPubkey,
     ...rest
   } = parameters
@@ -180,11 +181,7 @@ export async function sendShieldedTransaction<
   try {
     assertRequest(parameters as AssertRequestParameters)
 
-    if (
-      !seismicInput ||
-      typeof seismicInput !== 'string' ||
-      !seismicInput.startsWith('0x')
-    ) {
+    if (!data || typeof data !== 'string' || !data.startsWith('0x')) {
       throw new Error('seismicInput must be a non-empty hex string')
     }
 
@@ -194,9 +191,9 @@ export async function sendShieldedTransaction<
     })()
 
     if (
-      account?.type === 'json-rpc' ||
       account === null ||
-      account?.type === 'local'
+      account?.type === 'local' ||
+      account?.type === 'json-rpc'
     ) {
       let chainId: number | undefined
       if (chain !== null) {
@@ -227,15 +224,28 @@ export async function sendShieldedTransaction<
         value,
         type: 'legacy',
         ...rest,
-      } as TransactionRequest
+      } as any
 
       // @ts-ignore
-      const preparedTx = await prepareTransactionRequest(client, request)
-      const serializedTransaction = await account!.signTransaction!(
-        { seismicInput, encryptionPubkey, ...preparedTx },
-        { serializer: serializeSeismicTransaction }
+      const { data: input, ...preparedTx } = await prepareTransactionRequest(
+        client,
+        request
       )
-      return await sendRawTransaction(client, { serializedTransaction })
+      const txRequest = {
+        input,
+        encryptionPubkey,
+        ...preparedTx,
+      } as any as TransactionSerializableSeismic
+      if (account?.type === 'json-rpc') {
+        throw new Error('Local accounts are not supported')
+      } else {
+        const serializedTransaction = await account!.signTransaction!(
+          txRequest,
+          // @ts-ignore
+          { serializer: serializeSeismicTransaction }
+        )
+        return await sendRawTransaction(client, { serializedTransaction })
+      }
     }
 
     if (account?.type === 'smart')
