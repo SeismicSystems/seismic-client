@@ -38,7 +38,7 @@ const nameToChain = (name: ChainName): Chain => {
 export const envChain = (): Chain => {
   const chainName = process.env.CHAIN as ChainName
   if (!Object.values(ChainName).includes(chainName)) {
-    throw new Error(`BACKEND env variable must be either "anvil" or "reth"`)
+    throw new Error(`CHAIN env variable must be either "anvil" or "reth"`)
   }
   return nameToChain(chainName)
 }
