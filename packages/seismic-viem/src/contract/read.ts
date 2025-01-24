@@ -134,6 +134,8 @@ export async function signedReadContract<
     ...rest
   } = parameters as ReadContractParameters
 
+  console.log('signedReadContract parameters', parameters)
+
   // If they specify no address, then use the standard read contract,
   // since it doesn't have to be signed
   if (!rest.account) {
@@ -141,6 +143,7 @@ export async function signedReadContract<
   }
 
   const nonce = await fillNonce(client, parameters)
+  console.log('signedReadContract nonce', nonce)
 
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
@@ -156,9 +159,10 @@ export async function signedReadContract<
     ...(rest as CallParameters),
     nonce,
     to: address!,
-    seismicInput: encryptedCalldata,
+    data: encryptedCalldata,
     encryptionPubkey: client.getEncryptionPublicKey(),
   }
+  console.log('signedReadContract request', request)
   const { data: encryptedData } = await signedCall(client, request)
   const data = await aesCipher.decrypt(encryptedData, nonce)
   return decodeFunctionResult({

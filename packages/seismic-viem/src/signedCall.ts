@@ -172,7 +172,6 @@ export async function signedCall<
     to,
     value,
     stateOverride,
-    seismicInput,
     ...rest
   } = args
   const account = account_ ? parseAccount(account_) : undefined
@@ -263,7 +262,6 @@ export async function signedCall<
     const preparedTx = await prepareTransactionRequest(client, request)
     const serializedTransaction = await client.account!.signTransaction!(
       {
-        seismicInput,
         encryptionPubkey: client.getEncryptionPublicKey(),
         ...preparedTx,
       },

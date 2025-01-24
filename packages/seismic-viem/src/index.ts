@@ -1,4 +1,4 @@
-export { seismicDevnet } from '@sviem/chain'
+export { seismicDevnetChain } from '@sviem/chain'
 
 export { getShieldedContract } from '@sviem/contract/contract'
 export { signedReadContract } from '@sviem/contract/read'

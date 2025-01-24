@@ -61,7 +61,6 @@ export type SendSeismicTransactionRequest<
   _derivedChain extends Chain | undefined = DeriveChain<chain, chainOverride>,
 > = UnionOmit<FormattedTransactionRequest<_derivedChain>, 'from'> &
   GetTransactionRequestKzgParameter & {
-    seismicInput: Hex
     encryptionPubkey: Hex
   }
 
@@ -158,17 +157,17 @@ export async function sendShieldedTransaction<
     authorizationList,
     blobs,
     data,
-    gas = 30_000_000,
+    gas,
     gasPrice,
     maxFeePerBlobGas,
     maxFeePerGas,
     maxPriorityFeePerGas,
     nonce,
     value,
-    seismicInput,
     encryptionPubkey,
     ...rest
   } = parameters
+  console.log('send shielded transaction request', parameters)
 
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
@@ -179,14 +178,6 @@ export async function sendShieldedTransaction<
 
   try {
     assertRequest(parameters as AssertRequestParameters)
-
-    if (
-      !seismicInput ||
-      typeof seismicInput !== 'string' ||
-      !seismicInput.startsWith('0x')
-    ) {
-      throw new Error('seismicInput must be a non-empty hex string')
-    }
 
     const to = await (async () => {
       if (parameters.to) return parameters.to
@@ -225,14 +216,18 @@ export async function sendShieldedTransaction<
         nonce,
         to,
         value,
-        type: 'legacy',
+        type: 'legacy', // prepareTransactionRequest will fill the required fields using legacy spec
+        encryptionPubkey,
         ...rest,
       } as TransactionRequest
 
       // @ts-ignore
+      console.log('sendShieldedTransaction request', request)
+      // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)
+      console.log('sendShieldedTransaction preparedTx', preparedTx)
       const serializedTransaction = await account!.signTransaction!(
-        { seismicInput, encryptionPubkey, ...preparedTx },
+        { encryptionPubkey, ...preparedTx },
         { serializer: serializeSeismicTransaction }
       )
       return await sendRawTransaction(client, { serializedTransaction })
