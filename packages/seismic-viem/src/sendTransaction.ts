@@ -164,7 +164,6 @@ export async function sendShieldedTransaction<
     maxPriorityFeePerGas,
     nonce,
     value,
-    seismicInput,
     encryptionPubkey,
     ...rest
   } = parameters
@@ -217,16 +216,16 @@ export async function sendShieldedTransaction<
         nonce,
         to,
         value,
-        type: 'seismic',
+        type: 'legacy', // prepareTransactionRequest will fill the required fields using legacy spec
         encryptionPubkey,
-        seismicInput,
         ...rest,
       } as TransactionRequest
 
       // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)
+      console.log('sendShieldedTransaction preparedTx', preparedTx)
       const serializedTransaction = await account!.signTransaction!(
-        { seismicInput, encryptionPubkey, ...preparedTx },
+        { encryptionPubkey, ...preparedTx },
         { serializer: serializeSeismicTransaction }
       )
       return await sendRawTransaction(client, { serializedTransaction })

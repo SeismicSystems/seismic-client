@@ -26,7 +26,6 @@ import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
 
 export type SeismicTxExtras = {
-  seismicInput?: Hex | undefined
   encryptionPubkey?: Hex | undefined
 }
 export const stringifyBigInt = (_: any, v: any) =>
@@ -36,22 +35,15 @@ export const serializeSeismicTransaction = (
   transaction: TransactionSerializable & SeismicTxExtras,
   signature?: Signature
 ): Hex => {
-  // should be a better way to decide this...
-  if (!transaction.seismicInput) {
-    return serializeTransaction(
-      transaction as TransactionSerializable,
-      signature
-    )
-  }
-
+  console.log('serializeSeismicTransaction transaction', transaction)
   const {
     chainId,
     nonce,
     gasPrice,
     gas,
     to,
+    data,
     value = 0n,
-    seismicInput,
     encryptionPubkey,
   } = transaction
 
@@ -66,7 +58,7 @@ export const serializeSeismicTransaction = (
     gas ? toHex(gas) : '0x',
     to ?? '0x',
     value ? toHex(value) : '0x',
-    seismicInput ?? '0x',
+    data ?? '0x',
     encryptionPubkey ?? '0x',
     ...toYParitySignatureArray(transaction, signature),
   ])
@@ -122,11 +114,14 @@ const seismicChainFormatters: ChainFormatters = {
 
       const formattedRpcRequest = formatTransactionRequest(request)
 
-      let type =
-        formattedRpcRequest.type ??
-        (request.type ? allTransactionTypes[request.type] : undefined)
-      let data = formattedRpcRequest.data ?? request.seismicInput
-      let encryptionPubkey = request.encryptionPubkey
+      let data = formattedRpcRequest.data
+
+      let encryptionPubkey
+      let type
+      if (request.encryptionPubkey) {
+        encryptionPubkey = request.encryptionPubkey
+        type = '0x4a'
+      }
 
       let ret = {
         ...formattedRpcRequest,

@@ -172,7 +172,6 @@ export async function signedCall<
     to,
     value,
     stateOverride,
-    seismicInput,
     ...rest
   } = args
   const account = account_ ? parseAccount(account_) : undefined
@@ -240,7 +239,7 @@ export async function signedCall<
       nonce,
       to: deploylessCall ? undefined : to,
       value,
-      type: 'seismic',
+      type: 'legacy',
     } as TransactionRequest
 
     if (batch && shouldPerformMulticall({ request }) && !rpcStateOverride) {
@@ -263,7 +262,6 @@ export async function signedCall<
     const preparedTx = await prepareTransactionRequest(client, request)
     const serializedTransaction = await client.account!.signTransaction!(
       {
-        seismicInput,
         encryptionPubkey: client.getEncryptionPublicKey(),
         ...preparedTx,
       },

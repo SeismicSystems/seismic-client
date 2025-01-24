@@ -159,7 +159,7 @@ export async function signedReadContract<
     ...(rest as CallParameters),
     nonce,
     to: address!,
-    seismicInput: encryptedCalldata,
+    data: encryptedCalldata,
     encryptionPubkey: client.getEncryptionPublicKey(),
   }
   console.log('signedReadContract request', request)
