@@ -59,8 +59,11 @@ const runSanvil = async (
   }
 }
 
-export const setupAnvilNode = async (port = 8545): Promise<SpawnedNode> => {
-  const anvilProcess = await runSanvil({ port, silent: false, verbosity: 0 })
+export const setupAnvilNode = async (
+  port = 8545,
+  silent = false
+): Promise<SpawnedNode> => {
+  const anvilProcess = await runSanvil({ port, silent, verbosity: 5 })
   const nodeUrl = anvilProcess.url
 
   const exitProcess = async () => {

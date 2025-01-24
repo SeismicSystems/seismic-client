@@ -10,17 +10,19 @@ import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
 export type SeismicTxExtras = { encryptionPubkey: Hex }
 export type TransactionSerializableSeismic = TransactionSerializableLegacy &
-  SeismicTxExtras
+  SeismicTxExtras & { from: Address }
 export type TxSeismic = {
+  type: number
   chainId?: number | undefined
   nonce?: bigint | undefined
   gasPrice?: bigint | undefined
   gasLimit?: bigint | undefined
+  from?: Address
   to?: Address | null | undefined
   value?: bigint | undefined
   input?: Hex | undefined
   // TODO: serde alias in alloy
-  encryption_pubkey: Hex
+  encryptionPubkey: Hex
 }
 
 export const stringifyBigInt = (_: any, v: any) =>
