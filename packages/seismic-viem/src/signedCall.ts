@@ -240,7 +240,7 @@ export async function signedCall<
       nonce,
       to: deploylessCall ? undefined : to,
       value,
-      type: 'legacy',
+      type: 'seismic',
     } as TransactionRequest
 
     if (batch && shouldPerformMulticall({ request }) && !rpcStateOverride) {

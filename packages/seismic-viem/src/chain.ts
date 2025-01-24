@@ -104,20 +104,32 @@ export const seismicRpcSchema: RpcSchema = [
   },
 ]
 
-// Define your formatter
+export const allTransactionTypes = {
+  seismic: '0x4a',
+  legacy: '0x0',
+  eip2930: '0x1',
+  eip1559: '0x2',
+  eip4844: '0x3',
+  eip7702: '0x4',
+} as const
+
+// This function is called by viem's call, estimateGas, and sendTransaction, ...
+// We can use this to parse transaction request before sending it to the node
 const seismicChainFormatters: ChainFormatters = {
   transactionRequest: {
     format: (request: SeismicTransactionRequest) => {
       console.log('formatter input', request)
 
-      const rpcRequest = formatTransactionRequest(request)
+      const formattedRpcRequest = formatTransactionRequest(request)
 
-      let type = rpcRequest.type ?? '0x4a'
-      let data = request.seismicInput ?? request.data
+      let type =
+        formattedRpcRequest.type ??
+        (request.type ? allTransactionTypes[request.type] : undefined)
+      let data = formattedRpcRequest.data ?? request.seismicInput
       let encryptionPubkey = request.encryptionPubkey
 
       let ret = {
-        ...rpcRequest,
+        ...formattedRpcRequest,
         ...(type !== undefined && { type }),
         ...(data !== undefined && { data }),
         ...(encryptionPubkey !== undefined && { encryptionPubkey }),

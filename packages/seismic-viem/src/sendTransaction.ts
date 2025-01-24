@@ -61,7 +61,6 @@ export type SendSeismicTransactionRequest<
   _derivedChain extends Chain | undefined = DeriveChain<chain, chainOverride>,
 > = UnionOmit<FormattedTransactionRequest<_derivedChain>, 'from'> &
   GetTransactionRequestKzgParameter & {
-    seismicInput: Hex
     encryptionPubkey: Hex
   }
 
@@ -169,6 +168,7 @@ export async function sendShieldedTransaction<
     encryptionPubkey,
     ...rest
   } = parameters
+  console.log('send shielded transaction request', parameters)
 
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
@@ -179,14 +179,6 @@ export async function sendShieldedTransaction<
 
   try {
     assertRequest(parameters as AssertRequestParameters)
-
-    if (
-      !seismicInput ||
-      typeof seismicInput !== 'string' ||
-      !seismicInput.startsWith('0x')
-    ) {
-      throw new Error('seismicInput must be a non-empty hex string')
-    }
 
     const to = await (async () => {
       if (parameters.to) return parameters.to
@@ -225,12 +217,11 @@ export async function sendShieldedTransaction<
         nonce,
         to,
         value,
-        type: 'legacy',
+        type: 'seismic',
         encryptionPubkey,
+        seismicInput,
         ...rest,
       } as TransactionRequest
-
-      console.log('send shielded transaction request', request)
 
       // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)

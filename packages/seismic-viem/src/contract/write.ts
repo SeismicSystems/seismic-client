@@ -135,7 +135,7 @@ export async function shieldedWriteContract<
 
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
-    seismicInput,
+    data: seismicInput,
     gas: gas!,
     gasPrice: gasPrice!,
     nonce: nonce!,
