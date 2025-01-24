@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
-    "test:anvil": "CHAIN=anvil bun test contract.test.ts",
+    "test:anvil": "CHAIN=anvil bun test sandbox.test.ts",
     "test:devnet": "CHAIN=devnet bun test contract.test.ts"
   },
   "devDependencies": {
