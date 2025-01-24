@@ -1,4 +1,13 @@
-import { Account, Hex, TypedData, numberToHex, parseSignature } from 'viem'
+import {
+  Account,
+  Chain,
+  Client,
+  Hex,
+  Transport,
+  TypedData,
+  numberToHex,
+  parseSignature,
+} from 'viem'
 import { SignTypedDataParameters, signTypedData } from 'viem/actions'
 
 import {
@@ -6,7 +15,6 @@ import {
   type TxSeismic,
   stringifyBigInt,
 } from '@sviem/chain'
-import type { ShieldedWalletClient } from '@sviem/client'
 
 const seismicTxTypedData = <
   typedData extends TypedData | Record<string, unknown>,
@@ -75,14 +83,16 @@ type PrimitiveSignature = {
 }
 
 export const signSeismicTxTypedData = async <
+  TTransport extends Transport,
+  TChain extends Chain | undefined,
+  TAccount extends Account,
   typedData extends TypedData | Record<string, unknown>,
   primaryType extends keyof typedData | 'EIP712Domain',
-  account extends Account | undefined,
 >(
-  client: ShieldedWalletClient,
+  client: Client<TTransport, TChain, TAccount>,
   tx: TransactionSerializableSeismic
 ): Promise<{
-  typedData: SignTypedDataParameters<typedData, primaryType, account>
+  typedData: SignTypedDataParameters<typedData, primaryType, TAccount>
   signature: PrimitiveSignature
 }> => {
   const typedData = seismicTxTypedData(tx)

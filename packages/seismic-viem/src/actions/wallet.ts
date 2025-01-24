@@ -98,7 +98,7 @@ export type ShieldedWalletActions<
  * // Send a shielded transaction
  * const txResult = await actions.sendShieldedTransaction({
  *   account: { address: '0x5678...' },
- *   seismicInput: '0xabcdef...',
+ *   data: '0xabcdef...',
  *   value: 1000n,
  * });
  *

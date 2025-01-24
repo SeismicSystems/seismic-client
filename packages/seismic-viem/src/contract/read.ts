@@ -156,7 +156,7 @@ export async function signedReadContract<
     ...(rest as CallParameters),
     nonce,
     to: address!,
-    seismicInput: encryptedCalldata,
+    data: encryptedCalldata,
     encryptionPubkey: client.getEncryptionPublicKey(),
   }
   const { data: encryptedData } = await signedCall(client, request)

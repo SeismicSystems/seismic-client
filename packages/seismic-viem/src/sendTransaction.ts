@@ -11,7 +11,6 @@ import type {
   GetChainParameter,
   GetTransactionRequestKzgParameter,
   Hash,
-  Hex,
   PrepareTransactionRequestErrorType,
   SendRawTransactionErrorType,
   Transport,
@@ -42,6 +41,7 @@ import {
 } from 'viem/utils'
 
 import {
+  SeismicTxExtras,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
 } from '@sviem/chain'
@@ -53,6 +53,7 @@ import {
   AccountNotFoundError,
   AccountTypeNotSupportedError,
 } from '@sviem/error/account'
+import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
 import type { GetAccountParameter } from '@sviem/viem-internal/account'
 import type { ErrorType } from '@sviem/viem-internal/error'
 import type { AssertRequestParameters } from '@sviem/viem-internal/request'
@@ -62,10 +63,8 @@ export type SendSeismicTransactionRequest<
   chainOverride extends Chain | undefined = Chain | undefined,
   _derivedChain extends Chain | undefined = DeriveChain<chain, chainOverride>,
 > = UnionOmit<FormattedTransactionRequest<_derivedChain>, 'from'> &
-  GetTransactionRequestKzgParameter & {
-    seismicInput: Hex
-    encryptionPubkey: Hex
-  }
+  GetTransactionRequestKzgParameter &
+  SeismicTxExtras
 
 export type SendSeismicTransactionParameters<
   chain extends Chain | undefined = Chain | undefined,
@@ -102,7 +101,7 @@ export type SendSeismicTransactionErrorType =
  * Sends a shielded transaction on the Seismic network.
  *
  * This function facilitates sending a transaction that includes shielded inputs such as blobs,
- * authorization lists, and a special `seismicInput`. The transaction is prepared, signed, and
+ * authorization lists, and encrypted calldata. The transaction is prepared, signed, and
  * submitted to the network based on the provided parameters.
  *
  * @template TChain - The type of the blockchain chain (extends `Chain` or `undefined`).
@@ -112,18 +111,17 @@ export type SendSeismicTransactionErrorType =
  *
  * @param client - The client instance used to execute the transaction, including chain, account,
  * and transport configurations.
- * @param parameters - The transaction parameters, including gas, value, blobs, seismicInput,
- * and other details.
+ * @param parameters - The transaction parameters, including gas, value, blobs, and other details.
  *
  * @returns A promise that resolves to the result of the shielded transaction submission.
  *
  * @throws {AccountNotFoundError} If no account is provided in the client or parameters.
  * @throws {AccountTypeNotSupportedError} If the account type is unsupported for shielded transactions.
- * @throws {Error} If the `seismicInput` is invalid or missing.
+ * @throws {Error} If the `data` is invalid or missing.
  *
  * @remarks
  * - Supports various account types, including `json-rpc` and `local`.
- * - Requires a valid `seismicInput` in hexadecimal format.
+ * - Requires a valid `data` in hexadecimal format.
  * - Throws specific errors for unsupported account types or missing account configurations.
  * - Uses the `sendRawTransaction` method for final transaction submission.
  *
@@ -132,7 +130,7 @@ export type SendSeismicTransactionErrorType =
  * const result = await sendShieldedTransaction(client, {
  *   account: { address: '0x1234...' },
  *   chain: seismicChain,
- *   seismicInput: '0xabcdef...',
+ *   data: '0xabcdef...',
  *   value: 1000n,
  *   gas: 21000n,
  * });
@@ -141,7 +139,7 @@ export type SendSeismicTransactionErrorType =
  */
 export async function sendShieldedTransaction<
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
   const TRequest extends SendSeismicTransactionRequest<TChain, TChainOverride>,
   TChainOverride extends Chain | undefined = undefined,
 >(
@@ -180,10 +178,6 @@ export async function sendShieldedTransaction<
 
   try {
     assertRequest(parameters as AssertRequestParameters)
-
-    if (!data || typeof data !== 'string' || !data.startsWith('0x')) {
-      throw new Error('seismicInput must be a non-empty hex string')
-    }
 
     const to = await (async () => {
       if (parameters.to) return parameters.to
@@ -237,7 +231,12 @@ export async function sendShieldedTransaction<
         ...preparedTx,
       } as any as TransactionSerializableSeismic
       if (account?.type === 'json-rpc') {
-        throw new Error('Local accounts are not supported')
+        const { typedData, signature } = await signSeismicTxTypedData(
+          client,
+          txRequest
+        )
+        // @ts-ignore
+        return await sendRawTransaction(client, { typedData, signature })
       } else {
         const serializedTransaction = await account!.signTransaction!(
           txRequest,

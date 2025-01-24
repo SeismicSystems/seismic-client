@@ -2,21 +2,30 @@ import { concatHex, defineChain, toHex, toRlp } from 'viem'
 import type {
   Address,
   Hex,
+  Prettify,
+  SerializeTransactionFn,
   Signature,
+  TransactionSerializableGeneric,
   TransactionSerializableLegacy,
 } from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
+type SeismicTxAlwaysPresent = { from: Address; type: '0x4a' }
 export type SeismicTxExtras = { encryptionPubkey: Hex }
-export type TransactionSerializableSeismic = TransactionSerializableLegacy &
-  SeismicTxExtras & { from: Address }
+export type TransactionSerializableSeismic = Prettify<
+  SeismicTxExtras &
+    SeismicTxAlwaysPresent &
+    Omit<TransactionSerializableLegacy, keyof SeismicTxAlwaysPresent>
+>
+
 export type TxSeismic = {
   type: number
   chainId?: number | undefined
   nonce?: bigint | undefined
   gasPrice?: bigint | undefined
   gasLimit?: bigint | undefined
+  // from is never undefined because it's always signed
   from?: Address
   to?: Address | null | undefined
   value?: bigint | undefined
@@ -28,7 +37,11 @@ export type TxSeismic = {
 export const stringifyBigInt = (_: any, v: any) =>
   typeof v === 'bigint' ? v.toString() : v
 
-export const serializeSeismicTransaction = (
+export type SeismicTxSerializer =
+  SerializeTransactionFn<TransactionSerializableSeismic>
+
+// @ts-ignore
+export const serializeSeismicTransaction: SeismicTxSerializer = (
   transaction: TransactionSerializableSeismic,
   signature?: Signature
 ): Hex => {
@@ -56,7 +69,10 @@ export const serializeSeismicTransaction = (
     value ? toHex(value) : '0x',
     data ?? '0x',
     encryptionPubkey ?? '0x',
-    ...toYParitySignatureArray(transaction, signature),
+    ...toYParitySignatureArray(
+      transaction as TransactionSerializableGeneric,
+      signature
+    ),
   ])
   const encodedTx = concatHex([
     toHex(74), // seismic tx type '0x4a'
