@@ -113,6 +113,7 @@ const seismicChainFormatters: ChainFormatters = {
       const formattedRpcRequest = formatTransactionRequest(request)
 
       let data = formattedRpcRequest.data
+      // @ts-ignore
       let chainId = request.chainId // anvil requires chainId to be set but estimateGas doesn't set it
 
       let encryptionPubkey

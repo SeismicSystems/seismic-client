@@ -223,6 +223,7 @@ export async function sendShieldedTransaction<
 
       // @ts-ignore
       console.log('sendShieldedTransaction request', request)
+      // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)
       console.log('sendShieldedTransaction preparedTx', preparedTx)
       const serializedTransaction = await account!.signTransaction!(
