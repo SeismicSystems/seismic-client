@@ -1,6 +1,5 @@
 import type {
   Account,
-  BlockNumber,
   Chain,
   Client,
   Hex,
@@ -9,8 +8,6 @@ import type {
   PublicClientConfig,
   PublicRpcSchema,
   RpcSchema,
-  RpcStateOverride,
-  TransactionRequest,
   Transport,
   WalletActions,
 } from 'viem'
@@ -27,14 +24,9 @@ import type { ShieldedPublicActions } from '@sviem/actions/public'
 import { shieldedPublicActions } from '@sviem/actions/public'
 import type { ShieldedWalletActions } from '@sviem/actions/wallet'
 import { shieldedWalletActions } from '@sviem/actions/wallet'
+import { seismicRpcSchema } from '@sviem/chain'
 import { generateAesKey } from '@sviem/crypto/aes'
 import { compressPublicKey } from '@sviem/crypto/secp'
-
-import {
-  SeismicTransactionRequest,
-  SeismicTxExtras,
-  seismicRpcSchema,
-} from './chain'
 
 /**
  * Represents a shielded public client with extended functionality for interacting

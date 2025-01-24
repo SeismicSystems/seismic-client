@@ -2,7 +2,6 @@ import {
   concatHex,
   defineChain,
   formatTransactionRequest,
-  serializeTransaction,
   toHex,
   toRlp,
 } from 'viem'
@@ -15,7 +14,6 @@ import type {
   Hex,
   RpcSchema,
   RpcStateOverride,
-  RpcTransactionRequest,
   Signature,
   TransactionRequest,
   TransactionSerializable,
