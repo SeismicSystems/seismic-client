@@ -59,6 +59,7 @@ const doSignedCall = async <
     })
     return response
   }
+
   // otherwise, locally sign a normal seismic tx
   // and send it to the node as raw tx bytes
   const serializedTransaction = await client.account!

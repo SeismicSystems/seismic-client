@@ -221,12 +221,8 @@ export async function sendShieldedTransaction<
       } as any
 
       // @ts-ignore
-      const { data: input, ...preparedTx } = await prepareTransactionRequest(
-        client,
-        request
-      )
+      const preparedTx = await prepareTransactionRequest(client, request)
       const txRequest = {
-        input,
         encryptionPubkey,
         ...preparedTx,
       } as any as TransactionSerializableSeismic

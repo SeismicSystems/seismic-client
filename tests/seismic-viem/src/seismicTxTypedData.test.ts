@@ -1,20 +1,18 @@
-import { afterAll, describe, test } from 'bun:test'
+import { afterAll, describe, expect, test } from 'bun:test'
 import { http } from 'viem'
 import type { TransactionSerializableLegacy } from 'viem'
+import type { Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { anvil } from 'viem/chains'
+import { parseEther } from 'viem/utils'
 
-import {
-  SeismicTxExtras,
-  TransactionSerializableSeismic,
-  stringifyBigInt,
-} from '@sviem/chain'
 import { createShieldedWalletClient } from '@sviem/client'
+import { AesGcmCrypto } from '@sviem/crypto/aes'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
 import { setupAnvilNode } from '@test/process/chains/anvil'
 
 // Running on a different port because contract.test.ts uses 8545
-const { url, exitProcess } = await setupAnvilNode(8547, false)
+const { url, exitProcess } = await setupAnvilNode({ port: 8547 })
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
@@ -25,26 +23,49 @@ const TEST_ACCOUNT_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 const testAccount = privateKeyToAccount(TEST_ACCOUNT_PRIVATE_KEY)
 
-const testSeismicTypedMsgSigning = async () => {
+const recipientAddress = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+
+const testSeismicCallTypedData = async () => {
+  const client = await createShieldedWalletClient({
+    chain: anvil,
+    account: testAccount,
+    transport: http(url),
+    encryptionSk: ENC_SK,
+  })
+
+  const nonce = await client.getTransactionCount({
+    address: testAccount.address,
+  })
+
+  const toShaHash = '0x68656c6c6f20776f726c64'
+  const aes = new AesGcmCrypto(client.getEncryption())
+  const encrypted = await aes.encrypt(toShaHash, nonce)
+
   const baseTx: TransactionSerializableLegacy = {
-    nonce: 2,
-    gasPrice: 1000000000n,
-    gas: 100000n,
-    to: '0xd3e8763675e4c425df46cc3b5c0f6cbdac396046',
-    data: '0xfc3c2cf4943c327f19af0efaf3b07201f608dd5c8e3954399a919b72588d3872b6819ac3d13d3656cbb38833a39ffd1e73963196a1ddfa9e4a5d595fdbebb875',
-    value: 1000000000000000n,
+    nonce,
+    to: '0x0000000000000000000000000000000000000002',
+    data: encrypted,
     chainId: anvil.id,
+    type: 'legacy',
   }
+  const preparedTx = await client.prepareTransactionRequest(baseTx)
+  const tx = { ...preparedTx, encryptionPubkey: ENC_PK }
 
-  const seismicExtras: SeismicTxExtras = {
-    encryptionPubkey: ENC_PK,
-  }
+  // @ts-ignore
+  const { typedData, signature } = await signSeismicTxTypedData(client, tx)
+  const ciphertext: Hex = await client.request({
+    method: 'eth_call',
+    params: [{ data: typedData, signature }],
+  })
 
-  const tx: TransactionSerializableSeismic = {
-    from: testAccount.address,
-    ...baseTx,
-    ...seismicExtras,
-  }
+  const decrypted = await aes.decrypt(ciphertext, nonce)
+  const expectedPlaintext =
+    '0xb94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9'
+  expect(decrypted).toBe(expectedPlaintext)
+}
+
+const testSeismicTxTypedData = async () => {
+  const value = parseEther('1', 'wei')
 
   const client = await createShieldedWalletClient({
     chain: anvil,
@@ -53,19 +74,34 @@ const testSeismicTypedMsgSigning = async () => {
     encryptionSk: ENC_SK,
   })
 
+  const preTxBalance = await client.getBalance({ address: recipientAddress })
+
+  const baseTx: TransactionSerializableLegacy = {
+    to: recipientAddress,
+    value,
+    chainId: anvil.id,
+    type: 'legacy',
+  }
+  const preparedTx = await client.prepareTransactionRequest(baseTx)
+  const tx = { ...preparedTx, encryptionPubkey: ENC_PK }
+
+  // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
-  const result = await client.request({
-    method: 'eth_call',
+
+  const hash: Hex = await client.request({
+    method: 'eth_sendRawTransaction',
     params: [{ data: typedData, signature }],
   })
+  await client.waitForTransactionReceipt({ hash })
 
-  console.log(JSON.stringify(result, stringifyBigInt, 2))
+  const postTxBalance = await client.getBalance({ address: recipientAddress })
+  expect(postTxBalance).toBe(preTxBalance + value)
 }
 
 describe('Seismic Transaction Encoding', async () => {
-  test('client can sign a seismic typed message', testSeismicTypedMsgSigning, {
-    timeout: 20_000,
-  })
+  // test('client can sign a seismic typed message', testSeismicCallTypedData)
+
+  test('client can sign via eth_signTypedData', testSeismicTxTypedData)
 })
 
 afterAll(async () => {

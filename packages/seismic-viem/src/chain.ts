@@ -12,7 +12,10 @@ import type {
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
 type SeismicTxAlwaysPresent = { from: Address; type: '0x4a' }
-export type SeismicTxExtras = { encryptionPubkey: Hex }
+export type SeismicTxExtras = {
+  encryptionPubkey: Hex
+  messageVersion?: number | undefined
+}
 export type TransactionSerializableSeismic = Prettify<
   SeismicTxExtras &
     SeismicTxAlwaysPresent &
@@ -20,18 +23,17 @@ export type TransactionSerializableSeismic = Prettify<
 >
 
 export type TxSeismic = {
-  type: number
   chainId?: number | undefined
   nonce?: bigint | undefined
   gasPrice?: bigint | undefined
   gasLimit?: bigint | undefined
   // from is never undefined because it's always signed
-  from?: Address
   to?: Address | null | undefined
   value?: bigint | undefined
   input?: Hex | undefined
   // TODO: serde alias in alloy
   encryptionPubkey: Hex
+  messageVersion: number | undefined
 }
 
 export const stringifyBigInt = (_: any, v: any) =>
@@ -54,6 +56,7 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     value = 0n,
     data,
     encryptionPubkey,
+    messageVersion = 0,
   } = transaction
 
   if (!chainId) {
@@ -67,8 +70,9 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     gas ? toHex(gas) : '0x',
     to ?? '0x',
     value ? toHex(value) : '0x',
-    data ?? '0x',
     encryptionPubkey ?? '0x',
+    messageVersion ? toHex(messageVersion) : '0x',
+    data ?? '0x',
     ...toYParitySignatureArray(
       transaction as TransactionSerializableGeneric,
       signature

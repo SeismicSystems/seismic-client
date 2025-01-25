@@ -13,8 +13,11 @@ import { SignTypedDataParameters, signTypedData } from 'viem/actions'
 import {
   type TransactionSerializableSeismic,
   type TxSeismic,
-  stringifyBigInt,
 } from '@sviem/chain'
+
+// reserve 0 for normal seismic tx
+// reserve 1 for personal_sign (ledger/trezor compatible)
+const MESSAGE_VERSION = '2'
 
 const seismicTxTypedData = <
   typedData extends TypedData | Record<string, unknown>,
@@ -28,18 +31,16 @@ const seismicTxTypedData = <
   }
 
   const message: TxSeismic = {
-    type: 0x4a,
-    from: tx.from,
     chainId: tx.chainId,
     nonce: tx.nonce !== undefined ? BigInt(tx.nonce) : undefined,
     gasPrice: tx.gasPrice && BigInt(tx.gasPrice),
     gasLimit: tx.gas && BigInt(tx.gas),
     to: tx.to,
-    value: tx.value && BigInt(tx.value),
-    input: tx.data,
+    value: tx.value ? BigInt(tx.value) : 0n,
+    input: tx.data ?? '0x',
     encryptionPubkey: tx.encryptionPubkey,
+    messageVersion: parseInt(MESSAGE_VERSION),
   }
-  console.log(JSON.stringify(message, stringifyBigInt, 2))
   // @ts-ignore
   return {
     types: {
@@ -50,8 +51,6 @@ const seismicTxTypedData = <
         { name: 'verifyingContract', type: 'address' },
       ],
       TxSeismic: [
-        { name: 'type', type: 'uint8' },
-        { name: 'from', type: 'address' },
         { name: 'chainId', type: 'uint64' },
         { name: 'nonce', type: 'uint64' },
         { name: 'gasPrice', type: 'uint128' },
@@ -59,15 +58,16 @@ const seismicTxTypedData = <
         // if blank, we assume it's a create
         { name: 'to', type: 'address' },
         { name: 'value', type: 'uint256' },
-        { name: 'input', type: 'bytes' },
         // compressed secp256k1 public key (33 bytes)
         { name: 'encryptionPubkey', type: 'bytes' },
+        { name: 'messageVersion', type: 'uint8' },
+        { name: 'input', type: 'bytes' },
       ],
     },
     primaryType: 'TxSeismic',
     domain: {
       name: 'Seismic Transaction',
-      version: '1',
+      version: MESSAGE_VERSION,
       chainId: tx.chainId,
       // no verifying contract since this happens in RPC
       verifyingContract: '0x0000000000000000000000000000000000000000',

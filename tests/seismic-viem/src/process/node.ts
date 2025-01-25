@@ -50,7 +50,7 @@ export const parseVerbosity = (verbosity: number | undefined): string[] => {
 export const setupNode = async (chain: Chain): Promise<SpawnedNode> => {
   switch (chain.id) {
     case anvil.id:
-      return setupAnvilNode()
+      return setupAnvilNode({})
     case seismicDevnet.id:
       return setupRethNode()
     default:
