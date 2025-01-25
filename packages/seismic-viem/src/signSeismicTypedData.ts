@@ -24,7 +24,8 @@ const seismicTxTypedData = <
   primaryType extends keyof typedData | 'EIP712Domain',
   account extends Account | undefined,
 >(
-  tx: TransactionSerializableSeismic
+  tx: TransactionSerializableSeismic,
+  signedCall: boolean = false
 ): SignTypedDataParameters<typedData, primaryType, account> => {
   if (!tx.chainId) {
     throw new Error('Seismic transactions require chainId argument')
@@ -66,7 +67,7 @@ const seismicTxTypedData = <
     },
     primaryType: 'TxSeismic',
     domain: {
-      name: 'Seismic Transaction',
+      name: signedCall ? 'Signed Call' : 'Seismic Transaction',
       version: MESSAGE_VERSION,
       chainId: tx.chainId,
       // no verifying contract since this happens in RPC
@@ -90,12 +91,13 @@ export const signSeismicTxTypedData = async <
   primaryType extends keyof typedData | 'EIP712Domain',
 >(
   client: Client<TTransport, TChain, TAccount>,
-  tx: TransactionSerializableSeismic
+  tx: TransactionSerializableSeismic,
+  signedCall: boolean = false
 ): Promise<{
   typedData: SignTypedDataParameters<typedData, primaryType, TAccount>
   signature: PrimitiveSignature
 }> => {
-  const typedData = seismicTxTypedData(tx)
+  const typedData = seismicTxTypedData(tx, signedCall)
   const encodedSignature = await signTypedData(client, typedData)
   const { r, s, yParity } = parseSignature(encodedSignature)
   return {

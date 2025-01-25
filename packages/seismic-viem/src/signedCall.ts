@@ -51,7 +51,8 @@ const doSignedCall = async <
     // the typedData and signature to the node
     const { typedData, signature } = await signSeismicTxTypedData(
       client,
-      seismicTx
+      seismicTx,
+      true
     )
     const response: Hex = await client.request({
       method: 'eth_call',
