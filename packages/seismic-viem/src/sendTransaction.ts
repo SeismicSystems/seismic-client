@@ -158,7 +158,7 @@ export async function sendShieldedTransaction<
     authorizationList,
     blobs,
     data,
-    gas = 30_000_000,
+    gas,
     gasPrice,
     maxFeePerBlobGas,
     maxFeePerGas,
@@ -168,6 +168,7 @@ export async function sendShieldedTransaction<
     encryptionPubkey,
     ...rest
   } = parameters
+  console.log('send shielded transaction request', parameters)
 
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
@@ -216,10 +217,13 @@ export async function sendShieldedTransaction<
         nonce,
         to,
         value,
-        type: 'legacy',
+        type: 'legacy', // prepareTransactionRequest will fill the required fields using legacy spec
+        encryptionPubkey,
         ...rest,
       } as any
 
+      // @ts-ignore
+      console.log('sendShieldedTransaction request', request)
       // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)
       const txRequest = {
@@ -242,8 +246,12 @@ export async function sendShieldedTransaction<
         })
       } else {
         const serializedTransaction = await account!.signTransaction!(
-          txRequest,
-          // @ts-ignore
+          {
+            encryptionPubkey,
+            messageVersion: 0,
+            type: '0x4a',
+            ...preparedTx,
+          },
           { serializer: serializeSeismicTransaction }
         )
         return await sendRawTransaction(client, { serializedTransaction })

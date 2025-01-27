@@ -31,6 +31,10 @@ const seismicTxTypedData = <
     throw new Error('Seismic transactions require chainId argument')
   }
 
+  if (!tx.encryptionPubkey) {
+    throw new Error('Seismic transactions require encryptionPubkey argument')
+  }
+
   const message: TxSeismic = {
     chainId: tx.chainId,
     nonce: tx.nonce !== undefined ? BigInt(tx.nonce) : undefined,

@@ -1,21 +1,39 @@
-import { concatHex, defineChain, toHex, toRlp } from 'viem'
+import {
+  concatHex,
+  defineChain,
+  formatTransactionRequest,
+  toHex,
+  toRlp,
+} from 'viem'
 import type {
   Address,
+  BlockIdentifier,
+  BlockNumber,
+  BlockTag,
+  ChainFormatters,
+  ExactPartial,
   Hex,
   Prettify,
+  RpcSchema,
+  RpcStateOverride,
   SerializeTransactionFn,
   Signature,
+  TransactionRequest,
   TransactionSerializableGeneric,
   TransactionSerializableLegacy,
 } from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
-type SeismicTxAlwaysPresent = { from: Address; type: '0x4a' }
 export type SeismicTxExtras = {
-  encryptionPubkey: Hex
+  encryptionPubkey?: Hex | undefined
   messageVersion?: number | undefined
 }
+
+export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
+
+type SeismicTxAlwaysPresent = { type: '0x4a' }
+
 export type TransactionSerializableSeismic = Prettify<
   SeismicTxExtras &
     SeismicTxAlwaysPresent &
@@ -53,8 +71,8 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     gasPrice,
     gas,
     to,
-    value = 0n,
     data,
+    value = 0n,
     encryptionPubkey,
     messageVersion = 0,
   } = transaction
@@ -86,6 +104,76 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   return encodedTx
 }
 
+export const seismicRpcSchema: RpcSchema = [
+  {
+    Method: 'eth_estimateGas',
+    Parameters: ['SeismicTransactionRequest'] as
+      | [SeismicTransactionRequest]
+      | [SeismicTransactionRequest, BlockNumber]
+      | [SeismicTransactionRequest, BlockNumber, RpcStateOverride],
+    ReturnType: 'Quantity',
+  },
+  {
+    Method: 'eth_call',
+    Parameters: ['SeismicTransactionRequest'] as
+      | [ExactPartial<SeismicTransactionRequest>]
+      | [
+          ExactPartial<SeismicTransactionRequest>,
+          BlockNumber | BlockTag | BlockIdentifier,
+        ]
+      | [
+          ExactPartial<SeismicTransactionRequest>,
+          BlockNumber | BlockTag | BlockIdentifier,
+          RpcStateOverride,
+        ],
+    ReturnType: 'Hex',
+  },
+]
+
+export const allTransactionTypes = {
+  seismic: '0x4a',
+  legacy: '0x0',
+  eip2930: '0x1',
+  eip1559: '0x2',
+  eip4844: '0x3',
+  eip7702: '0x4',
+} as const
+
+// This function is called by viem's call, estimateGas, and sendTransaction, ...
+// We can use this to parse transaction request before sending it to the node
+const seismicChainFormatters: ChainFormatters = {
+  transactionRequest: {
+    format: (request: SeismicTransactionRequest) => {
+      console.log('formatter input', request)
+
+      const formattedRpcRequest = formatTransactionRequest(request)
+
+      let data = formattedRpcRequest.data
+      // @ts-ignore
+      let chainId = request.chainId // anvil requires chainId to be set but estimateGas doesn't set it
+
+      let encryptionPubkey
+      let type
+      if (request.encryptionPubkey) {
+        encryptionPubkey = request.encryptionPubkey
+        type = '0x4a'
+      }
+
+      let ret = {
+        ...formattedRpcRequest,
+        ...(type !== undefined && { type }),
+        ...(data !== undefined && { data }),
+        ...(encryptionPubkey !== undefined && { encryptionPubkey }),
+        ...(chainId !== undefined && { chainId }),
+      }
+
+      console.log('formatter output', ret)
+      return ret
+    },
+    type: 'transactionRequest',
+  },
+}
+
 /**
  * Defines the Seismic development network configuration.
  *
@@ -105,15 +193,11 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
  * @property {string[]} rpcUrls.default.http - HTTP URLs for RPC access.
  * @property {string[]} rpcUrls.default.webSocket - WebSocket URLs for RPC access.
  */
-export const seismicDevnet = /*#__PURE__*/ defineChain({
+export const seismicDevnetChain = /*#__PURE__*/ defineChain({
   // TODO
   id: 1337,
   name: 'Seismic',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
-  },
+  nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
     default: {
       // TODO: publish real URLs
@@ -123,4 +207,18 @@ export const seismicDevnet = /*#__PURE__*/ defineChain({
       webSocket: ['ws://127.0.0.1:8545'],
     },
   },
+  formatters: seismicChainFormatters,
+})
+
+export const anvilChain = /*#__PURE__*/ defineChain({
+  id: 31_337,
+  name: 'Anvil',
+  nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
+  rpcUrls: {
+    default: {
+      http: ['http://127.0.0.1:8545'],
+      webSocket: ['ws://127.0.0.1:8545'],
+    },
+  },
+  formatters: seismicChainFormatters,
 })

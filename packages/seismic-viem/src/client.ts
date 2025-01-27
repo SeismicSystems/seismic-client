@@ -24,6 +24,7 @@ import type { ShieldedPublicActions } from '@sviem/actions/public'
 import { shieldedPublicActions } from '@sviem/actions/public'
 import type { ShieldedWalletActions } from '@sviem/actions/wallet'
 import { shieldedWalletActions } from '@sviem/actions/wallet'
+import { seismicRpcSchema } from '@sviem/chain'
 import { generateAesKey } from '@sviem/crypto/aes'
 import { compressPublicKey } from '@sviem/crypto/secp'
 
@@ -262,7 +263,12 @@ export const getSeismicClients = async <
     encryptionSk
   )
 
-  const wallet = createClient({ account, chain, transport })
+  const wallet = createClient({
+    account,
+    chain,
+    transport,
+    rpcSchema: seismicRpcSchema,
+  })
     .extend(walletActions)
     // @ts-ignore
     .extend(() => publicActions(pubClient))
