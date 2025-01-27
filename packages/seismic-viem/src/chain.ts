@@ -134,8 +134,6 @@ export const allTransactionTypes = {
 export const seismicChainFormatters: ChainFormatters = {
   transactionRequest: {
     format: (request: SeismicTransactionRequest) => {
-      console.log('formatter input', request)
-
       const formattedRpcRequest = formatTransactionRequest(request)
 
       let data = formattedRpcRequest.data
@@ -157,7 +155,6 @@ export const seismicChainFormatters: ChainFormatters = {
         ...(chainId !== undefined && { chainId }),
       }
 
-      console.log('formatter output', ret)
       return ret
     },
     type: 'transactionRequest',

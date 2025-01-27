@@ -168,7 +168,6 @@ export async function sendShieldedTransaction<
     encryptionPubkey,
     ...rest
   } = parameters
-  console.log('send shielded transaction request', parameters)
 
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
@@ -222,9 +221,6 @@ export async function sendShieldedTransaction<
         ...rest,
       } as any
 
-      // @ts-ignore
-      console.log('sendShieldedTransaction request', request)
-      // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)
       const txRequest = {
         encryptionPubkey,
