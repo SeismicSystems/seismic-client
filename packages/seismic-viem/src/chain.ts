@@ -131,7 +131,7 @@ export const allTransactionTypes = {
 
 // This function is called by viem's call, estimateGas, and sendTransaction, ...
 // We can use this to parse transaction request before sending it to the node
-const seismicChainFormatters: ChainFormatters = {
+export const seismicChainFormatters: ChainFormatters = {
   transactionRequest: {
     format: (request: SeismicTransactionRequest) => {
       console.log('formatter input', request)

@@ -83,7 +83,6 @@ const textSeismicTx = async () => {
   expect(isOdd0).toBe(false)
   console.info(`[0] initial value of isOdd = ${isOdd0}`)
 
-  // This is a seismic tx since the arg to setNumber is an suint
   const tx1 = await seismicContract.write.setNumber([TEST_NUMBER])
   console.info(`[1] Set number tx: ${tx1}`)
   const receipt1 = await publicClient.waitForTransactionReceipt({ hash: tx1 })
@@ -96,7 +95,6 @@ const textSeismicTx = async () => {
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
-  // Not a seismic tx since there are no arguments therefore no shielded arguments
   const tx2 = await seismicContract.write.increment()
   console.info(`[2] Incremented number in tx: ${tx2}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
@@ -108,7 +106,6 @@ const textSeismicTx = async () => {
   const isOdd2 = await seismicContract.tread.isOdd()
   expect(isOdd2).toBe(false)
 
-  // This is a seismic tx since the arg to setNumber is an suint
   const tx3 = await seismicContract.write.setNumber([TEST_NUMBER])
   console.info(`[3] Set number tx: ${tx1}`)
   const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
