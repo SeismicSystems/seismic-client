@@ -229,7 +229,7 @@ export async function sendShieldedTransaction<
       const txRequest = {
         encryptionPubkey,
         ...preparedTx,
-      } as any as TransactionSerializableSeismic
+      } as TransactionSerializableSeismic
       if (account?.type === 'json-rpc') {
         const { typedData, signature } = await signSeismicTxTypedData(
           client,
@@ -246,12 +246,7 @@ export async function sendShieldedTransaction<
         })
       } else {
         const serializedTransaction = await account!.signTransaction!(
-          {
-            encryptionPubkey,
-            messageVersion: 0,
-            type: '0x4a',
-            ...preparedTx,
-          },
+          txRequest,
           { serializer: serializeSeismicTransaction }
         )
         return await sendRawTransaction(client, { serializedTransaction })
