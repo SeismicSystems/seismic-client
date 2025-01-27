@@ -166,9 +166,10 @@ export type GetSeismicClientsParameters<
   TAccount extends Account,
 > = GetPublicClientParameters<TTransport, TChain> & {
   account: TAccount
+  publicClient?: ShieldedPublicClient<TTransport, TChain, undefined>
 }
 
-const getEncryption = (
+export const getEncryption = (
   networkPk: string,
   clientSk?: Hex | undefined
 ): { aesKey: Hex; encryptionPrivateKey: Hex; encryptionPublicKey: Hex } => {
@@ -218,13 +219,13 @@ const getEncryption = (
  * shielded-specific actions. It is suitable for applications requiring secure and
  * shielded interactions with blockchain networks.
  */
-export const createShieldedPublicClient = async <
+export const createShieldedPublicClient = <
   transport extends Transport,
   chain extends Chain | undefined = undefined,
   rpcSchema extends RpcSchema | undefined = undefined,
 >(
   parameters: GetPublicClientParameters<transport, chain>
-): Promise<ShieldedPublicClient<transport, chain, undefined, rpcSchema>> => {
+): ShieldedPublicClient<transport, chain, undefined, rpcSchema> => {
   const viemPublicClient = createPublicClient<
     transport,
     chain,
@@ -243,24 +244,29 @@ export const getSeismicClients = async <
   transport,
   account,
   encryptionSk,
+  publicClient,
 }: GetSeismicClientsParameters<TTransport, TChain, TAccount>): Promise<
   SeismicClients<TTransport, TChain, TAccount>
 > => {
-  const publicClient = await createShieldedPublicClient<
-    TTransport,
-    TChain,
-    undefined
-  >({ chain, transport, encryptionSk })
+  const pubClient: ShieldedPublicClient<TTransport, TChain, undefined> =
+    publicClient ??
+    (await createShieldedPublicClient<TTransport, TChain, undefined>({
+      chain,
+      transport,
+      encryptionSk,
+    }))
 
-  const networkPublicKey = await publicClient.getTeePublicKey()
+  const networkPublicKey = await pubClient.getTeePublicKey()
   const { aesKey, encryptionPublicKey } = getEncryption(
     networkPublicKey,
     encryptionSk
   )
 
   const wallet = createClient({ account, chain, transport })
-    .extend(publicActions)
     .extend(walletActions)
+    // @ts-ignore
+    .extend(() => publicActions(pubClient))
+    // @ts-ignore
     .extend(() => encryptionActions(aesKey, encryptionPublicKey))
     // @ts-ignore
     .extend(shieldedPublicActions)
@@ -268,7 +274,7 @@ export const getSeismicClients = async <
     .extend(shieldedWalletActions)
 
   return {
-    public: publicClient,
+    public: pubClient,
     wallet,
   }
 }
@@ -325,6 +331,7 @@ export const createShieldedWalletClient = async <
   transport,
   account,
   encryptionSk,
+  publicClient,
 }: GetSeismicClientsParameters<TTransport, TChain, TAccount>): Promise<
   ShieldedWalletClient<TTransport, TChain, TAccount>
 > => {
@@ -333,6 +340,7 @@ export const createShieldedWalletClient = async <
     transport,
     account,
     encryptionSk,
+    publicClient,
   })
   return clients.wallet
 }

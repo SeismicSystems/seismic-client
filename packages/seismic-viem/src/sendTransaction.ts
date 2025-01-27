@@ -231,8 +231,15 @@ export async function sendShieldedTransaction<
           client,
           txRequest
         )
-        // @ts-ignore
-        return await sendRawTransaction(client, { typedData, signature })
+        const action = getAction(
+          client,
+          sendRawTransaction,
+          'sendRawTransaction'
+        )
+        return await action({
+          // @ts-ignore
+          serializedTransaction: { data: typedData, signature },
+        })
       } else {
         const serializedTransaction = await account!.signTransaction!(
           txRequest,
