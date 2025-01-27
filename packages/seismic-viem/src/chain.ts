@@ -13,14 +13,13 @@ import type {
   ChainFormatters,
   ExactPartial,
   Hex,
-  Prettify,
   RpcSchema,
   RpcStateOverride,
   SerializeTransactionFn,
   Signature,
   TransactionRequest,
+  TransactionSerializable,
   TransactionSerializableGeneric,
-  TransactionSerializableLegacy,
 } from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
@@ -31,14 +30,8 @@ export type SeismicTxExtras = {
 }
 
 export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
-
-type SeismicTxAlwaysPresent = { type: '0x4a' }
-
-export type TransactionSerializableSeismic = Prettify<
-  SeismicTxExtras &
-    SeismicTxAlwaysPresent &
-    Omit<TransactionSerializableLegacy, keyof SeismicTxAlwaysPresent>
->
+export type TransactionSerializableSeismic = TransactionSerializable &
+  SeismicTxExtras
 
 export type TxSeismic = {
   chainId?: number | undefined
@@ -58,7 +51,6 @@ export const stringifyBigInt = (_: any, v: any) =>
 export type SeismicTxSerializer =
   SerializeTransactionFn<TransactionSerializableSeismic>
 
-// @ts-ignore
 export const serializeSeismicTransaction: SeismicTxSerializer = (
   transaction: TransactionSerializableSeismic,
   signature?: Signature
