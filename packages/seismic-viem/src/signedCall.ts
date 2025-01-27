@@ -64,12 +64,9 @@ const doSignedCall = async <
   // otherwise, locally sign a normal seismic tx
   // and send it to the node as raw tx bytes
   const serializedTransaction = await client.account!
-    .signTransaction!<SeismicTxSerializer>(
-    seismicTx,
-    /// TODO: add to chain serializers
-    // @ts-ignore
-    { serializer: serializeSeismicTransaction }
-  )
+    .signTransaction!<SeismicTxSerializer>(seismicTx, {
+    serializer: serializeSeismicTransaction,
+  })
 
   const response: Hex = await client.request({
     method: 'eth_call',
@@ -315,15 +312,10 @@ export async function signedCall<
     const encryptionPubkey = client.getEncryptionPublicKey()
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
-      // Placed here so typescript doesn't complain about `from` being missing
-      // it will always be there because of the !fromAddress check above
-      from: fromAddress,
-      type: '0x4a',
       encryptionPubkey,
     }
 
     const response = await doSignedCall(client, seismicTx, { block })
-
     if (response === '0x') return { data: undefined }
     return { data: response }
   } catch (err) {
