@@ -45,11 +45,9 @@ export type TxSeismic = {
   nonce?: bigint | undefined
   gasPrice?: bigint | undefined
   gasLimit?: bigint | undefined
-  // from is never undefined because it's always signed
   to?: Address | null | undefined
   value?: bigint | undefined
   input?: Hex | undefined
-  // TODO: serde alias in alloy
   encryptionPubkey: Hex
   messageVersion: number | undefined
 }
