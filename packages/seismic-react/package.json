@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.0-alpha.experimental.3",
+  "version": "1.0.0",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -23,8 +23,8 @@
     "clean": "bun run rimraf dist",
     "typecheck": "tsc --noEmit --project tsconfig.types.json",
     "build": "bun build:cjs && bun build:esm && bun build:types",
-    "build:cjs": "bun build src/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external @tanstack/query-core",
-    "build:esm": "bun build src/index.ts --outdir dist/_esm --target browser --format esm --external react --external @tanstack/query-core",
+    "build:cjs": "bun build src/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
+    "build:esm": "bun build src/index.ts --outdir dist/_esm --target browser --format esm --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
     "test": "bun test",
@@ -35,11 +35,10 @@
   "peerDependencies": {
     "typescript": ">=5.0.4",
     "react": ">=18",
-    "@tanstack/react-query": ">=5.0.0",
     "viem": "2.x",
     "wagmi": "^2.0.0",
     "@rainbow-me/rainbowkit": "^2.0.0",
-    "seismic-viem": "1.0.11-alpha.experimental.1"
+    "seismic-viem": "1.0.11"
   },
   "peerDependenciesMeta": {
     "typescript": {
