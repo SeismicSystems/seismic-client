@@ -48,7 +48,10 @@
   "license": "MIT",
   "author": "Seismic Systems",
   "homepage": "https://seismic.systems",
-  "repository": "https://github.com/SeismicSystems/seismic-client",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SeismicSystems/seismic-client"
+  },
   "keywords": [
     "seismic",
     "hooks",
