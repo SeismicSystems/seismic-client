@@ -35,14 +35,14 @@ export const useShieldedWallet = () => {
 type ShieldedWalletProviderProps = {
   children: React.ReactNode
   config: Config
-  initialState: { publicTransport?: Transport }
+  options?: { publicTransport?: Transport }
 }
 
 // Provider component
 export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   children,
   config,
-  initialState = {},
+  options = {},
 }) => {
   const { data, isFetched } = useConnectorClient({ config })
   const [error, setError] = useState<string | null>(null)
@@ -71,8 +71,7 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
       return
     }
 
-    const publicTransport =
-      initialState.publicTransport ?? (http() as Transport)
+    const publicTransport = options.publicTransport ?? (http() as Transport)
 
     const publicClient = createShieldedPublicClient({
       // @ts-ignore
