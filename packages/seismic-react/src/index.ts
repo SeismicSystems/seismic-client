@@ -4,7 +4,7 @@ export {
   localSeismicDevnet,
   seismicDevnet,
   createSeismicDevnet,
-} from '@sreact/config/chain'
+} from './config/chain'
 
 export { ShieldedWalletProvider } from '@sreact/context/shieldedWallet'
 

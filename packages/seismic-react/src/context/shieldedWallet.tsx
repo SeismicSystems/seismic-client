@@ -32,15 +32,17 @@ export const useShieldedWallet = () => {
   return context
 }
 
-// Provider component
-export const ShieldedWalletProvider = ({
-  children,
-  config,
-  initialState = {},
-}: {
+type ShieldedWalletProviderProps = {
   children: React.ReactNode
   config: Config
   initialState: { publicTransport?: Transport }
+}
+
+// Provider component
+export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
+  children,
+  config,
+  initialState = {},
 }) => {
   const { data, isFetched } = useConnectorClient({ config })
   const [error, setError] = useState<string | null>(null)
