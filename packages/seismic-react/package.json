@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.experimental.6",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -38,7 +38,7 @@
     "viem": "2.x",
     "wagmi": "^2.0.0",
     "@rainbow-me/rainbowkit": "^2.0.0",
-    "seismic-viem": "1.0.11"
+    "seismic-viem": "1.0.11-alpha.experimental.3"
   },
   "peerDependenciesMeta": {
     "typescript": {

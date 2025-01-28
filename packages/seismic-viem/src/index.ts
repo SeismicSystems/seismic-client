@@ -1,7 +1,10 @@
 export {
   sanvil,
+  seismicDevnet1,
+  seismicDevnet2,
   seismicDevnet,
   localSeismicDevnet,
+  createSeismicDevnet,
   seismicChainFormatters,
 } from '@sviem/chain'
 

@@ -1,7 +1,9 @@
 import {
+  createSeismicDevnet as createSeismicDevnetViem,
   localSeismicDevnet as localSeismicDevnetViem,
   sanvil as sanvilViem,
-  seismicDevnet as seismicDevnetViem,
+  seismicDevnet1 as seismicDevnetViem1,
+  seismicDevnet2 as seismicDevnetViem2,
 } from 'seismic-viem'
 import type { Chain as ViemChain } from 'viem'
 
@@ -20,29 +22,14 @@ const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
   }
 }
 
-export const seismicDevnet = toRainbowKitChain(seismicDevnetViem as ViemChain)
+export const seismicDevnet = toRainbowKitChain(seismicDevnetViem1)
+export const seismicDevnet1 = toRainbowKitChain(seismicDevnetViem1)
+export const seismicDevnet2 = toRainbowKitChain(seismicDevnetViem2)
 export const sanvil = toRainbowKitChain(sanvilViem as ViemChain)
 export const localSeismicDevnet = toRainbowKitChain(
   localSeismicDevnetViem as ViemChain
 )
 
 export const createSeismicDevnet = (node: number) => {
-  const hostname = `node-${node}.seismicdev.net`
-  return toRainbowKitChain({
-    id: 1337,
-    name: 'Seismic',
-    nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-    rpcUrls: {
-      default: {
-        http: [`https://${hostname}/rpc`],
-        webSocket: [`wss://${hostname}/ws`],
-      },
-    },
-    blockExplorers: {
-      default: {
-        name: 'SeismicScan',
-        url: `https://explorer-${node}.seismicdev.net`,
-      },
-    },
-  })
+  return toRainbowKitChain(createSeismicDevnetViem(node))
 }

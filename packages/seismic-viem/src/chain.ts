@@ -10,6 +10,7 @@ import type {
   BlockIdentifier,
   BlockNumber,
   BlockTag,
+  Chain,
   ChainFormatters,
   ExactPartial,
   Hex,
@@ -161,6 +162,27 @@ export const seismicChainFormatters: ChainFormatters = {
   },
 }
 
+export const createSeismicDevnet = /*#__PURE__*/ (node: number): Chain => {
+  return defineChain({
+    id: 1337,
+    name: 'Seismic',
+    nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
+    rpcUrls: {
+      default: {
+        http: [`https://node-${node}.seismicdev.net/rpc`],
+        webSocket: [`wss://node-${node}.seismicdev.net/ws`],
+      },
+    },
+    blockExplorers: {
+      default: {
+        name: 'SeismicScan',
+        url: `https://explorer-${node}.seismicdev.net`,
+      },
+    },
+    formatters: seismicChainFormatters,
+  })
+}
+
 /**
  * Defines the Seismic development network configuration.
  *
@@ -180,24 +202,9 @@ export const seismicChainFormatters: ChainFormatters = {
  * @property {string[]} rpcUrls.default.http - HTTP URLs for RPC access.
  * @property {string[]} rpcUrls.default.webSocket - WebSocket URLs for RPC access.
  */
-export const seismicDevnet = /*#__PURE__*/ defineChain({
-  id: 1337,
-  name: 'Seismic',
-  nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-  rpcUrls: {
-    default: {
-      http: ['https://node-1.seismicdev.net/rpc'],
-      ws: ['https://node-1.seismicdev.net/ws'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'SeismicScan',
-      url: 'https://explorer-1.seismicdev.net',
-    },
-  },
-  formatters: seismicChainFormatters,
-})
+export const seismicDevnet1 = createSeismicDevnet(1)
+export const seismicDevnet2 = createSeismicDevnet(2)
+export const seismicDevnet = seismicDevnet1
 
 export const localSeismicDevnet = /*#__PURE__*/ defineChain({
   // TODO
