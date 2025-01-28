@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.experimental.1",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -35,8 +35,10 @@
     "react": "^18.2.0",
     "viem": "^2.21.50",
     "wagmi": "^2.0.0",
-    "@rainbow-me/rainbowkit": "^2.0.0",
-    "seismic-viem": "^1.0.10"
+    "@rainbow-me/rainbowkit": "^2.0.0"
+  },
+  "peerDependencies": {
+    "seismic-viem": "1.0.11-alpha.experimental.1"
   },
   "license": "MIT",
   "author": "Seismic Systems",

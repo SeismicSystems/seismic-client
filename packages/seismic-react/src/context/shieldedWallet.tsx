@@ -1,15 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import {
+  ShieldedPublicClient,
+  ShieldedWalletClient,
+  createShieldedPublicClient,
+  createShieldedWalletClient,
+} from 'seismic-viem'
 import { custom, http } from 'viem'
 import type { Transport } from 'viem'
 import { useConnectorClient } from 'wagmi'
 import type { Config } from 'wagmi'
-
-import {
-  ShieldedPublicClient,
-  ShieldedWalletClient,
-  createShieldedWalletClient,
-} from '@sviem/client'
-import { createShieldedPublicClient } from '@sviem/client'
 
 interface WalletClientContextType {
   publicClient: ShieldedPublicClient | null

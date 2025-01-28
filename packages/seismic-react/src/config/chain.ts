@@ -1,11 +1,11 @@
-import type { Chain as ViemChain } from 'viem'
-
-import { Chain as RainbowKitChain } from '@rainbow-me/rainbowkit'
 import {
   localSeismicDevnet as localSeismicDevnetViem,
   sanvil as sanvilViem,
   seismicDevnet as seismicDevnetViem,
-} from '@sviem/chain'
+} from 'seismic-viem'
+import type { Chain as ViemChain } from 'viem'
+
+import { Chain as RainbowKitChain } from '@rainbow-me/rainbowkit'
 
 const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
   return {

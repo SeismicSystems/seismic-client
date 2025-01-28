@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "rootDir": "../..",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler"
   }
 }

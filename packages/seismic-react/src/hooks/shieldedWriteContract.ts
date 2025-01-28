@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
+import { shieldedWriteContract } from 'seismic-viem'
 import type { Abi, ContractFunctionArgs, ContractFunctionName } from 'viem'
 
 import { useShieldedWallet } from '@sreact/context/shieldedWallet'
-import { shieldedWriteContract } from '@sviem/contract/write'
 
 export type UseShieldedWriteContractConfig<
   TAbi extends Abi | readonly unknown[],

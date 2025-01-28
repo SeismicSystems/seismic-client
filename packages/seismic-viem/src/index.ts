@@ -31,7 +31,6 @@ export type {
   ShieldedWalletClient,
   GetSeismicClientsParameters,
   GetPublicClientParameters,
-  KeyedClient,
 } from '@sviem/client'
 
 export type { ShieldedContract } from '@sviem/contract/contract'

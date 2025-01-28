@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
+import type { ShieldedContract } from 'seismic-viem'
+import { getShieldedContract } from 'seismic-viem'
 import type { Abi, Address } from 'viem'
 
 import { useShieldedWallet } from '@sreact/context/shieldedWallet'
-import type { ShieldedContract } from '@sviem/contract/contract'
-import { getShieldedContract } from '@sviem/contract/contract'
 
 // NOTE: Must use ShieldedWalletProvider to use this hook
 export function useShieldedContract<
