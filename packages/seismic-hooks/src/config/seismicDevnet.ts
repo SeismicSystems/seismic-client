@@ -1,13 +1,5 @@
-import {
-  arbitrum,
-  base,
-  mainnet,
-  optimism,
-  polygon,
-  sepolia,
-} from 'wagmi/chains'
-
 import { Chain, getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { seismicChainFormatters } from '@sviem/chain'
 
 const seismicDevnet = {
   id: 31337,
@@ -21,19 +13,12 @@ const seismicDevnet = {
   blockExplorers: {
     default: { name: 'SeismicScan', url: 'http://127.0.0.1:8545' },
   },
+  formatters: seismicChainFormatters,
 } as const satisfies Chain
 
 export const config = getDefaultConfig({
   appName: 'Walnut App',
   projectId: 'YOUR_PROJECT_ID',
-  chains: [
-    mainnet,
-    polygon,
-    optimism,
-    arbitrum,
-    base,
-    seismicDevnet as Chain,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
-  ],
+  chains: [seismicDevnet as Chain],
   ssr: true,
 })

@@ -1,23 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  type Abi,
-  type Account,
-  type Chain,
-  type ContractFunctionArgs,
-  type ContractFunctionName,
-  type Transport,
-  http,
+import type {
+  Abi,
+  Account,
+  Chain,
+  ContractFunctionArgs,
+  ContractFunctionName,
+  Transport,
 } from 'viem'
+import { custom, http } from 'viem'
 import { useConnectorClient } from 'wagmi'
-import { writeContract } from 'wagmi/actions'
 
 import { config } from '@shooks/config/seismicDevnet'
 import {
-  type ShieldedPublicClient,
-  type ShieldedWalletClient,
   createShieldedPublicClient,
   createShieldedWalletClient,
-} from '@sviem/index'
+} from '@sviem/client'
+import type { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client'
+import { shieldedWriteContract } from '@sviem/contract/write'
 
 export type UseShieldedWriteContractConfig<
   TAbi extends Abi | readonly unknown[],
@@ -34,8 +33,24 @@ export type UseShieldedWriteContractConfig<
   args?: TArgs
 }
 
+/**
+Usage:
+const { write, isLoading, error, hash } = useShieldedWriteContract({
+  address: '0x...',
+  abi: myContractAbi,
+  functionName: 'myFunction',
+  args: [arg1, arg2]
+})
+
+try {
+  const tx = await write()
+  console.log('Transaction hash:', tx)
+} catch (error) {
+  console.error('Error:', error)
+}
+*/
 export function useShieldedWriteContract<
-  const TAbi extends Abi | readonly unknown[],
+  TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
   TArgs extends ContractFunctionArgs<
     TAbi,
@@ -51,9 +66,8 @@ export function useShieldedWriteContract<
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [hash, setHash] = useState<`0x${string}` | null>(null)
-  const extractedWalletClient = useConnectorClient()
+  const { data, isFetched } = useConnectorClient({ config })
 
-  // Store the shielded client instances
   const [shieldedClients, setShieldedClients] = useState<{
     wallet: ShieldedWalletClient<Transport, Chain | undefined, Account> | null
     public: ShieldedPublicClient<
@@ -70,26 +84,24 @@ export function useShieldedWriteContract<
   // Initialize shielded clients when a wallet is connected
   useEffect(() => {
     const initShieldedClients = async () => {
+      if (!isFetched || !data) return
+
+      const { account, chain, transport } = data
+      if (!account) throw new Error('No account connected')
+      if (!transport) throw new Error('No transport connected')
+      if (!chain) throw new Error('No chain connected')
+
       try {
-        const account = extractedWalletClient.data?.account
-        if (!account) throw new Error('No account connected')
-
-        const transport = extractedWalletClient.data?.transport
-        if (!transport) throw new Error('No transport connected')
-
-        const chain = extractedWalletClient.data?.chain
-        if (!chain) throw new Error('No chain connected')
-
-        // Initialize the shielded public client
         const publicClient = await createShieldedPublicClient({
           transport: http(),
           chain,
         })
 
         const walletClient = await createShieldedWalletClient({
-          chain,
-          transport: http(),
           account,
+          chain,
+          transport: custom(transport),
+          publicClient,
         })
 
         setShieldedClients({
@@ -102,37 +114,32 @@ export function useShieldedWriteContract<
             ? err
             : new Error('Failed to initialize shielded clients')
         )
+        console.log('err', err)
       }
     }
 
     initShieldedClients()
-  }, [extractedWalletClient.data])
+  }, [data])
 
   // The write function that executes the shielded contract write
   const write = useCallback(async () => {
-    console.log('write', shieldedClients.wallet)
-    if (!shieldedClients.wallet) {
-      throw new Error(
-        'Shielded wallet client not initialized, the wallet is: ' +
-          shieldedClients.wallet
-      )
-    }
-
     setIsLoading(true)
     setError(null)
+    setHash(null)
+
+    if (!shieldedClients.wallet) {
+      setError(new Error('Shielded wallet client not initialized'))
+      return
+    }
 
     try {
-      const tx = await writeContract(
-        // TODO: use shieldedWriteContract
-        config,
-        // shieldedClients.wallet, // TODO: use shielded wallet client
-        {
-          address,
-          abi,
-          functionName,
-          ...(args && { args }),
-        } as any
-      )
+      const tx = await shieldedWriteContract(shieldedClients.wallet, {
+        address,
+        abi,
+        functionName,
+        ...(args && { args }),
+      } as any)
+      console.log('tx', tx)
       setHash(tx)
       return tx
     } catch (err) {
@@ -153,20 +160,3 @@ export function useShieldedWriteContract<
     shieldedClients,
   }
 }
-
-// Usage example:
-/*
-const { write, isLoading, error, hash } = useShieldedWriteContract({
-  address: '0x...',
-  abi: myContractAbi,
-  functionName: 'myFunction',
-  args: [arg1, arg2]
-})
-
-try {
-  const tx = await write()
-  console.log('Transaction hash:', tx)
-} catch (error) {
-  console.error('Error:', error)
-}
-*/

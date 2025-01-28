@@ -33,12 +33,10 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "viem": "^2.21.50"
-  },
-  "devDependencies": {
-    "@rainbow-me/rainbowkit": "^2.0.0",
     "viem": "^2.21.50",
-    "wagmi": "^2.0.0"
+    "@rainbow-me/rainbowkit": "^2.0.0",
+    "wagmi": "^2.0.0",
+    "seismic-viem": "^1.0.10"
   },
   "license": "MIT",
   "author": "Seismic Systems",
