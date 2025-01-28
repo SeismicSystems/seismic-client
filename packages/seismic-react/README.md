@@ -1,3 +1,3 @@
-# Seismic hooks
+# Seismic react
 
-This is a package to extend `wagmi` hooks for use with the Seismic blockchain.
+This is a package to integrate `seismic-viem` with React, wagmi & rainbowkit.

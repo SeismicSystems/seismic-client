@@ -28,7 +28,7 @@
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
     "test": "bun test",
-    "docs:gen": "bun run typedoc src/index.ts --out ../../docs/pages/seismic-hooks",
+    "docs:gen": "bun run typedoc src/index.ts --out ../../docs/pages/seismic-react",
     "docs:check": "bun run typedoc src/index.ts --json ./typedoc.out.json && rm ./typedoc.out.json"
   },
   "dependencies": {
