@@ -1,7 +1,7 @@
 {
-  "name": "seismic-hooks",
+  "name": "seismic-react",
   "version": "1.0.0",
-  "description": "React hooks for Seismic.",
+  "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
   "module": "dist/_esm/index.js",
@@ -34,8 +34,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "viem": "^2.21.50",
-    "@rainbow-me/rainbowkit": "^2.0.0",
     "wagmi": "^2.0.0",
+    "@rainbow-me/rainbowkit": "^2.0.0",
     "seismic-viem": "^1.0.10"
   },
   "license": "MIT",

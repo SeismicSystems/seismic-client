@@ -11,7 +11,7 @@
     "baseUrl": "src",
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
-      "@shooks/*": ["./*"]
+      "@sreact/*": ["./*"]
     }
   },
   "include": ["src/**/*.ts"]

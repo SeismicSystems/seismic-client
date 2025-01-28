@@ -180,31 +180,47 @@ export const seismicChainFormatters: ChainFormatters = {
  * @property {string[]} rpcUrls.default.http - HTTP URLs for RPC access.
  * @property {string[]} rpcUrls.default.webSocket - WebSocket URLs for RPC access.
  */
-export const seismicDevnetChain = /*#__PURE__*/ defineChain({
+export const seismicDevnet = /*#__PURE__*/ defineChain({
+  id: 1337,
+  name: 'Seismic',
+  nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
+  rpcUrls: {
+    default: {
+      http: ['https://node-1.seismicdev.net/rpc'],
+      ws: ['https://node-1.seismicdev.net/ws'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'SeismicScan',
+      url: 'https://explorer-1.seismicdev.net',
+    },
+  },
+  formatters: seismicChainFormatters,
+})
+
+export const localSeismicDevnet = /*#__PURE__*/ defineChain({
   // TODO
   id: 1337,
   name: 'Seismic',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
     default: {
-      // TODO: publish real URLs
-      // http: ['https://seismicdev.net/rpc'],
-      // http: ['https://seismicdev.net/ws'],
       http: ['http://127.0.0.1:8545'],
-      webSocket: ['ws://127.0.0.1:8545'],
+      ws: ['ws://127.0.0.1:8546'],
     },
   },
   formatters: seismicChainFormatters,
 })
 
-export const anvilChain = /*#__PURE__*/ defineChain({
+export const sanvil = /*#__PURE__*/ defineChain({
   id: 31_337,
   name: 'Anvil',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
     default: {
       http: ['http://127.0.0.1:8545'],
-      webSocket: ['ws://127.0.0.1:8545'],
+      webSocket: ['ws://127.0.0.1:8546'],
     },
   },
   formatters: seismicChainFormatters,

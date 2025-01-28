@@ -1,4 +1,9 @@
-export { seismicDevnetChain, seismicChainFormatters } from '@sviem/chain'
+export {
+  sanvil,
+  seismicDevnet,
+  localSeismicDevnet,
+  seismicChainFormatters,
+} from '@sviem/chain'
 
 export { getShieldedContract } from '@sviem/contract/contract'
 export { signedReadContract } from '@sviem/contract/read'
@@ -26,6 +31,7 @@ export type {
   ShieldedWalletClient,
   GetSeismicClientsParameters,
   GetPublicClientParameters,
+  KeyedClient,
 } from '@sviem/client'
 
 export type { ShieldedContract } from '@sviem/contract/contract'
