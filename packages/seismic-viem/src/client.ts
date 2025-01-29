@@ -218,8 +218,7 @@ export const getSeismicClients = async <
  * Creates a wallet client to perform reads & writes on the Seismic network
  *
  * @param parameters {@link GetSeismicClientsParameters}
- * @returns {Promise<ShieldedWalletClient<Transport, Chain, Account>>} A promise that resolves
- * to a fully configured shielded wallet client.
+ * @returns {Promise<ShieldedWalletClient<Transport, Chain, Account>>}
  *
  * @example
  * ```typescript
