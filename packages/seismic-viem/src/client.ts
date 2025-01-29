@@ -144,18 +144,6 @@ type SeismicClients<
 
 /**
  * @ignore
- * Parameters required to create a public client.
- *
- * @property chain - The blockchain chain configuration.
- * @property transport - The transport mechanism for communication with the blockchain.
- */
-export type GetPublicClientParameters<
-  TTransport extends Transport = Transport,
-  TChain extends Chain | undefined = undefined,
-> = PublicClientConfig<TTransport, TChain> & { encryptionSk?: Hex | undefined }
-
-/**
- * @ignore
  * Parameters required to create seismic clients, including a public client and a shielded wallet client.
  * @extends GetPublicClientParameters
  *
@@ -165,11 +153,22 @@ export type GetSeismicClientsParameters<
   TTransport extends Transport,
   TChain extends Chain | undefined,
   TAccount extends Account,
-> = GetPublicClientParameters<TTransport, TChain> & {
+> = PublicClientConfig<TTransport, TChain> & {
   account: TAccount
   publicClient?: ShieldedPublicClient<TTransport, TChain, undefined>
+  encryptionSk?: Hex | undefined
 }
 
+/**
+ * Returns an AES key and its input keys
+ *
+ * @param networkPk - The network's encryption public key (secp256k1)
+ * @param clientSk - Optionally, the user's encryption private key. If not provided, this function will generate one
+ * @returns {Object} An object with 3 fields:
+ *   - `aesKey` (string) - The AES key used to encrypt calldata
+ *   - `encryptionPrivateKey` (string) - Either `clientSk` if it was provided. Otherwise a newly generated secp256k1 private key
+ *   - `encryptionPublicKey` (string) - The corresponding secp256k1 public key
+ */
 export const getEncryption = (
   networkPk: string,
   clientSk?: Hex | undefined
@@ -185,47 +184,40 @@ export const getEncryption = (
 }
 
 /**
- * Creates a shielded public client with extended functionality for interacting
- * with shielded blockchain features.
- *
- * This function builds upon the base public client and extends it with shielded-specific actions,
- * such as retrieving the Trusted Execution Environment (TEE) public key and interacting with
- * shielded features.
- *
- * @example
- * ```typescript
- * const client = await createShieldedPublicClient({
- *   transport: httpTransport,
- *   chain: seismicChain,
- *   rpcSchema: customRpcSchema,
- * });
- *
- * // Use shielded public actions
- * const teePublicKey = await client.getTeePublicKey();
- * console.log('TEE Public Key:', teePublicKey);
- * ```
+ * Creates a public client for the Seismic network.
  *
  * @template transport - The type of the transport mechanism used for communication (extends `Transport`).
  * @template chain - The type of the blockchain chain (extends `Chain` or `undefined`).
  * @template rpcSchema - The type of the RPC schema (extends `RpcSchema` or `undefined`).
  *
- * @param parameters - The configuration parameters for creating the public client. Includes transport,
- * chain, and optional RPC schema definitions.
+ * @param {PublicClientConfig} - The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html| createPublicClient}
  *
- * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>} A shielded public client
- * instance with extended shielded actions.
+ * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>}
  *
  * @remarks
- * The returned client includes all standard public client actions and additional
- * shielded-specific actions. It is suitable for applications requiring secure and
- * shielded interactions with blockchain networks.
+ * This has the same exact behaviour as viem's, with a few notable differences:
+ * - `getTeePublicKey`: a new function specific to Seismic. It takes no parameters and returns a Promise containing the network's public key
+ * - `getStorageAt` and `getTransaction`: both of these will return an error since Seismic does not support these endpoints
+ *
+ * @example
+ * ```typescript
+ * import { http } from 'viem'
+ * import { seismicDevnet, createShieldedPublicClient } from 'seismic-viem'
+ *
+ * const client = await createShieldedPublicClient({
+ *   transport: http(),
+ *   chain: seismicChain,
+ * });
+ *
+ * const teePublicKey = await client.getTeePublicKey();
+ * ```
  */
 export const createShieldedPublicClient = <
   transport extends Transport,
   chain extends Chain | undefined = undefined,
   rpcSchema extends RpcSchema | undefined = undefined,
 >(
-  parameters: GetPublicClientParameters<transport, chain>
+  parameters: PublicClientConfig<transport, chain>
 ): ShieldedPublicClient<transport, chain, undefined, rpcSchema> => {
   const viemPublicClient = createPublicClient<
     transport,
@@ -254,7 +246,6 @@ export const getSeismicClients = async <
     (await createShieldedPublicClient<TTransport, TChain, undefined>({
       chain,
       transport,
-      encryptionSk,
     }))
 
   const networkPublicKey = await pubClient.getTeePublicKey()
@@ -275,7 +266,7 @@ export const getSeismicClients = async <
     // @ts-ignore
     .extend(() => encryptionActions(aesKey, encryptionPublicKey))
     // @ts-ignore
-    .extend(shieldedPublicActions)
+    .extend(() => shieldedPublicActions(pubClient))
     // @ts-ignore
     .extend(shieldedWalletActions)
 
