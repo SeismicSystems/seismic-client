@@ -16,11 +16,10 @@ fi
 
 # Find all files within the target directory (recursively)
 while IFS= read -r -d '' file; do
-  echo "Processing: $file"
   perl -pi -e '
-    s{node_modules/viem/\\_types/([^:]+):(\d+)}{[viem/$1](https://github.com/wevm/viem/blob/main/src/$1#L$2)}g;
+    s{node_modules/viem/\\_types/([^:]+):(\d+)}{viem @ [$1](https://github.com/wevm/viem/blob/main/src/$1#L$2)}g;
     s{(https://github.com/wevm/viem/blob/main/src/[^)]+)\.d\.ts}{$1.ts}g;
   ' "$file"
 done < <(find "$TARGET_DIR" -type f -print0)
 
-echo "Replacement complete in directory: $TARGET_DIR"
+echo "Replacement link complete in directory: $TARGET_DIR"
