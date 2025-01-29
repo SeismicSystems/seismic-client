@@ -1,0 +1,42 @@
+[**seismic-react**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-react](/seismic-viem/globals.mdx) / useSignedReadContract
+
+# Function: useSignedReadContract()
+
+```ts
+function useSignedReadContract<TAbi, TFunctionName, TArgs>(
+  __namedParameters
+): object
+```
+
+Defined in: [packages/seismic-react/src/hooks/signedReadContract.ts:26](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/signedReadContract.ts#L26)
+
+Similar to wagmi's [useReadContract](https://wagmi.sh/react/api/hooks/useReadContract) hook,
+but uses signedReadContract instead
+
+## Type Parameters
+
+• **TAbi** _extends_ `Abi` \| readonly `unknown`[]
+
+• **TFunctionName** _extends_ `string`
+
+• **TArgs** _extends_ `unknown`
+
+## Parameters
+
+### \_\_namedParameters
+
+`UseSignedReadContractConfig`\<`TAbi`, `TFunctionName`, `TArgs`\>
+
+## Returns
+
+`object`
+
+| Name                               | Type                         | Defined in                                                                                                                                                                                                             |
+| ---------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a id="error"></a> `error`         | `null` \| `Error`            | [packages/seismic-react/src/hooks/signedReadContract.ts:77](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/signedReadContract.ts#L77) |
+| <a id="isloading"></a> `isLoading` | `boolean`                    | [packages/seismic-react/src/hooks/signedReadContract.ts:76](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/signedReadContract.ts#L76) |
+| <a id="read"></a> `read`           | () => `Promise`\<`unknown`\> | [packages/seismic-react/src/hooks/signedReadContract.ts:75](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/signedReadContract.ts#L75) |

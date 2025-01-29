@@ -1,0 +1,43 @@
+[**seismic-react**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-react](/seismic-viem/globals.mdx) / useShieldedWriteContract
+
+# Function: useShieldedWriteContract()
+
+```ts
+function useShieldedWriteContract<TAbi, TFunctionName, TArgs>(
+  __namedParameters
+): object
+```
+
+Defined in: [packages/seismic-react/src/hooks/shieldedWriteContract.ts:26](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L26)
+
+Similar to wagmi's [useWriteContract](https://wagmi.sh/react/api/hooks/useWriteContract) hook,
+but uses shieldedWriteContract instead
+
+## Type Parameters
+
+• **TAbi** _extends_ `Abi` \| readonly `unknown`[]
+
+• **TFunctionName** _extends_ `string`
+
+• **TArgs** _extends_ `unknown`
+
+## Parameters
+
+### \_\_namedParameters
+
+`UseShieldedWriteContractConfig`\<`TAbi`, `TFunctionName`, `TArgs`\>
+
+## Returns
+
+`object`
+
+| Name                               | Type                                                  | Defined in                                                                                                                                                                                                                   |
+| ---------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a id="error"></a> `error`         | `null` \| `Error`                                     | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:80](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L80) |
+| <a id="hash"></a> `hash`           | `null` \| `` `0x${string}` ``                         | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:81](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L81) |
+| <a id="isloading"></a> `isLoading` | `boolean`                                             | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:79](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L79) |
+| <a id="write"></a> `write`         | () => `Promise`\<`undefined` \| `` `0x${string}` ``\> | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:78](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L78) |

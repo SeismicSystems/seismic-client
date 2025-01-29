@@ -1,0 +1,42 @@
+[**seismic-react**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-react](/seismic-viem/globals.mdx) / useShieldedContract
+
+# Function: useShieldedContract()
+
+```ts
+function useShieldedContract<TAddress, TAbi>(__namedParameters): object
+```
+
+Defined in: [packages/seismic-react/src/hooks/shieldedContract.ts:11](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedContract.ts#L11)
+
+A react hook that exposes `contract`, which is returned by a call to getShieldedContract
+
+## Type Parameters
+
+• **TAddress** _extends_ `` `0x${string}` ``
+
+• **TAbi** _extends_ `Abi` \| readonly `unknown`[]
+
+## Parameters
+
+### \_\_namedParameters
+
+#### abi
+
+`TAbi`
+
+#### address
+
+`TAddress`
+
+## Returns
+
+`object`
+
+| Name                             | Type                         | Defined in                                                                                                                                                                                                         |
+| -------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <a id="contract"></a> `contract` | `null` \| `ShieldedContract` | [packages/seismic-react/src/hooks/shieldedContract.ts:31](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedContract.ts#L31) |
+| <a id="error"></a> `error`       | `null` \| `Error`            | [packages/seismic-react/src/hooks/shieldedContract.ts:32](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/hooks/shieldedContract.ts#L32) |

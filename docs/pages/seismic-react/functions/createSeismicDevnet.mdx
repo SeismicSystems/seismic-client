@@ -1,0 +1,50 @@
+[**seismic-react**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-react](/seismic-viem/globals.mdx) / createSeismicDevnet
+
+# Function: createSeismicDevnet()
+
+```ts
+function createSeismicDevnet(params): RainbowKitChain
+```
+
+Defined in: [packages/seismic-react/src/config/chain.ts:81](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/config/chain.ts#L81)
+
+Creates a Seismic development network chain configuration
+
+## Example
+
+```typescript
+// Create using node number
+const devnet1 = createSeismicDevnet({ node: 1 })
+
+// Create using custom host
+const devnet2 = createSeismicDevnet({ nodeHost: 'custom.node.example.com' })
+```
+
+## Parameters
+
+### params
+
+`CreateSeismicDevnetParams`
+
+The parameters for creating a Seismic devnet
+
+## Returns
+
+`RainbowKitChain`
+
+A chain configuration object containing:
+
+- Chain ID: 1337
+- Network name: 'Seismic'
+- Native ETH currency configuration
+- RPC URLs (HTTP and WebSocket endpoints)
+- Block explorer configuration (if applicable)
+- Seismic-specific transaction formatters
+
+## Throws
+
+Throws if neither node number nor nodeHost is provided

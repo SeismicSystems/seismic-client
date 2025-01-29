@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.0-alpha.experimental.6",
+  "version": "1.0.0-alpha.experimental.7",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -28,7 +28,7 @@
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
     "test": "bun test",
-    "docs:gen": "bun run typedoc src/index.ts --out ../../docs/pages/seismic-react",
+    "docs:gen": "bun run typedoc src/index.ts --out ../../docs/pages/seismic-react && bash ../../docs/replace_sources.sh ../../docs/pages/seismic-react",
     "docs:check": "bun run typedoc src/index.ts --json ./typedoc.out.json && rm ./typedoc.out.json"
   },
   "dependencies": {},

@@ -1,0 +1,33 @@
+[**seismic-react**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-react](/seismic-viem/globals.mdx) / useShieldedWallet
+
+# Function: useShieldedWallet()
+
+```ts
+function useShieldedWallet(): WalletClientContextType
+```
+
+Defined in: [packages/seismic-react/src/context/shieldedWallet.tsx:40](https://github.com/SeismicSystems/seismic-client/blob/6800e83d0d012626a97370bb2f821499462334a8/packages/seismic-react/src/context/shieldedWallet.tsx#L40)
+
+A react hook callable when there is a WalletClientProvider present
+
+## Example
+
+```typescript
+import { useShieldedWriteContract } from 'seismic-react'
+
+// inside your component:
+
+const { write } = useShieldedWriteContract({
+  address: '0x01234...',
+  abi: YOUR_ABI,
+  functionName: 'myFunctionName',
+})
+```
+
+## Returns
+
+`WalletClientContextType`
