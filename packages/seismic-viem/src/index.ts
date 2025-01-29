@@ -2,6 +2,7 @@ export type {
   SeismicTxExtras,
   SeismicTransactionRequest,
   TransactionSerializableSeismic,
+  CreateSeismicDevnetParams,
 } from '@sviem/chain'
 
 export {

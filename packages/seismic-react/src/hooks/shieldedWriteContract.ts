@@ -19,7 +19,10 @@ export type UseShieldedWriteContractConfig<
   args?: TArgs
 }
 
-// NOTE: Must use ShieldedWalletProvider to use this hook
+/**
+ * Similar to wagmi's {@link https://wagmi.sh/react/api/hooks/useWriteContract useWriteContract} hook,
+ * but uses {@link shieldedWriteContract} instead
+ */
 export function useShieldedWriteContract<
   TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,

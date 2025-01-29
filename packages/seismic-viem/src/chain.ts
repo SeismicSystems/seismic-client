@@ -193,7 +193,7 @@ export const seismicChainFormatters: ChainFormatters = {
   },
 }
 
-type CreateSeismicDevnetParams = { explorerUrl?: string } & (
+export type CreateSeismicDevnetParams = { explorerUrl?: string } & (
   | { node?: number; nodeHost: string }
   | { node: number; nodeHost?: string }
 )
@@ -299,7 +299,7 @@ export const localSeismicDevnet = /*#__PURE__*/ defineChain({
 
 /**
  * For connecting to a locally-running seismic anvil instance.
- * Use {@link https://seismic-2.gitbook.io/seismic-book/getting-started/publish-your-docs#sforge-sanvil-and-ssolc | sfoundryup}  to install this
+ * Use {@link https://seismic-2.gitbook.io/seismic-book/getting-started/publish-your-docs#sforge-sanvil-and-ssolc sfoundryup}  to install this
  */
 export const sanvil = /*#__PURE__*/ defineChain({
   id: 31_337,

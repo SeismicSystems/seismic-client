@@ -19,7 +19,10 @@ export type UseSignedReadContractConfig<
   args?: TArgs
 }
 
-// NOTE: Must use ShieldedWalletProvider to use this hook
+/**
+ * Similar to wagmi's {@link https://wagmi.sh/react/api/hooks/useReadContract useReadContract} hook,
+ * but uses {@link signedReadContract} instead
+ */
 export function useSignedReadContract<
   TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,

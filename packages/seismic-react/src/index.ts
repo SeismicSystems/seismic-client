@@ -2,11 +2,16 @@
 export {
   sanvil,
   localSeismicDevnet,
+  seismicDevnet1,
+  seismicDevnet2,
   seismicDevnet,
   createSeismicDevnet,
-} from './config/chain'
+} from '@sreact/config/chain'
 
-export { ShieldedWalletProvider } from '@sreact/context/shieldedWallet'
+export {
+  ShieldedWalletProvider,
+  useShieldedWallet,
+} from '@sreact/context/shieldedWallet'
 
 export { useShieldedWriteContract } from '@sreact/hooks/shieldedWriteContract'
 export { useSignedReadContract } from '@sreact/hooks/signedReadContract'
