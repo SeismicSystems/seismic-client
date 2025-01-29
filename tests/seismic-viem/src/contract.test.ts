@@ -7,11 +7,12 @@ import {
   createShieldedWalletClient,
 } from '@sviem/client'
 import { getShieldedContract } from '@sviem/contract/contract'
+import { stringifyBigInt } from '@sviem/utils'
 import { contractABI } from '@test/contract/abi'
 import { bytecode } from '@test/contract/bytecode'
 import { loadDotenv } from '@test/env'
 import { envChain, setupNode } from '@test/process/node'
-import { getDeployedAddress, stringifyBigInt } from '@test/utils'
+import { getDeployedAddress } from '@test/utils'
 
 /* Test Contract:
 // SPDX-License-Identifier: UNLICENSED

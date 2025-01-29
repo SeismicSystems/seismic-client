@@ -25,12 +25,30 @@ import type {
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
+/**
+ * The additional fields added to a Seismic transaction
+ * @interface SeismicTxExtras
+ * @property {Hex} [encryptionPubkey] - The public key used to encrypt the calldata. This uses AES encryption, where the user's keypair is combined with the network's keypair
+ * @property {number} [messageVersion] - The version of the message being sent. Used for signing transactions via messages. Normal transactions use messageVersion = 0. Txs signed with EIP-712 use messageVersion = 2
+ */
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
   messageVersion?: number | undefined
 }
 
+/**
+ * Represents a Seismic transaction request, extending viem's base TransactionRequest with {@link SeismicTxExtras}
+ * @interface SeismicTransactionRequest
+ * @extends {TransactionRequest}
+ * @extends {SeismicTxExtras}
+ */
 export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
+
+/**
+ * Represents a serializable Seismic transaction, extending viem's base TransactionSerializable with {@link SeismicTxExtras}
+ * @extends {TransactionSerializable}
+ * @extends {SeismicTxExtras}
+ */
 export type TransactionSerializableSeismic = TransactionSerializable &
   SeismicTxExtras
 
@@ -45,9 +63,6 @@ export type TxSeismic = {
   encryptionPubkey: Hex
   messageVersion: number | undefined
 }
-
-export const stringifyBigInt = (_: any, v: any) =>
-  typeof v === 'bigint' ? v.toString() : v
 
 export type SeismicTxSerializer =
   SerializeTransactionFn<TransactionSerializableSeismic>
@@ -130,8 +145,21 @@ export const allTransactionTypes = {
   eip7702: '0x4',
 } as const
 
-// This function is called by viem's call, estimateGas, and sendTransaction, ...
-// We can use this to parse transaction request before sending it to the node
+/**
+ * Chain formatters for Seismic transactions, providing formatting utilities for transaction requests.
+ * @property {SeismicTransactionRequest} transactionRequest - Formatter configuration for transaction requests
+ * @property {Function} transactionRequest.format - Formats a Seismic transaction request into the required RPC format
+ * @param {SeismicTransactionRequest} request - The transaction request to be formatted
+ * @returns {Object} A formatted transaction request object containing:
+ *   - All properties from the formatted RPC request
+ *   - `type` (optional) - Set to '0x4a' if encryption public key is present
+ *   - `data` (optional) - Transaction data if present
+ *   - `encryptionPubkey` (optional) - Public key for transaction encryption
+ *   - `chainId` (optional) - Chain ID for the transaction
+ * @remarks
+ * This function is called by viem's call, estimateGas, and sendTransaction.
+ * We can use this to parse transaction request before sending it to the node
+ */
 export const seismicChainFormatters: ChainFormatters = {
   transactionRequest: {
     format: (request: SeismicTransactionRequest) => {
@@ -162,52 +190,98 @@ export const seismicChainFormatters: ChainFormatters = {
   },
 }
 
-export const createSeismicDevnet = /*#__PURE__*/ (node: number): Chain => {
+type CreateSeismicDevnetParams = { explorerUrl?: string } & (
+  | { node?: number; nodeHost: string }
+  | { node: number; nodeHost?: string }
+)
+
+/**
+ * Creates a Seismic development network chain configuration
+ * @param {Object} params - The parameters for creating a Seismic devnet
+ * @param {number} [params.node] - Node number for the devnet. If provided without nodeHost,
+ *                                will generate hostname as `node-{number}.seismicdev.net`
+ * @param {string} [params.nodeHost] - Direct hostname for the node. Required if node number not provided
+ * @param {string} [params.explorerUrl] - Custom block explorer URL. If not provided and node number exists,
+ *                                       defaults to `https://explorer-{node}.seismicdev.net`
+ * @throws {Error} Throws if neither node number nor nodeHost is provided
+ * @returns {Chain} A chain configuration object containing:
+ *   - Chain ID: 1337
+ *   - Network name: 'Seismic'
+ *   - Native ETH currency configuration
+ *   - RPC URLs (HTTP and WebSocket endpoints)
+ *   - Block explorer configuration (if applicable)
+ *   - Seismic-specific transaction formatters
+ * @example
+ * ```typescript
+ * // Create using node number
+ * const devnet1 = createSeismicDevnet({ node: 1 })
+ *
+ * // Create using custom host
+ * const devnet2 = createSeismicDevnet({ nodeHost: 'custom.node.example.com' })
+ * ```
+ */
+export const createSeismicDevnet = /*#__PURE__*/ ({
+  node,
+  nodeHost,
+  explorerUrl,
+}: CreateSeismicDevnetParams): Chain => {
+  if (!node && !nodeHost) {
+    throw new Error('Must set `nodeHost` argument, e.g. node-1.seismicdev.net')
+  } else if (!nodeHost) {
+    nodeHost = `node-${node}.seismicdev.net`
+  }
+
+  let blockExplorerUrl =
+    explorerUrl ??
+    (node ? `https://explorer-${node}.seismicdev.net` : undefined)
+
   return defineChain({
     id: 1337,
     name: 'Seismic',
     nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
     rpcUrls: {
       default: {
-        http: [`https://node-${node}.seismicdev.net/rpc`],
-        webSocket: [`wss://node-${node}.seismicdev.net/ws`],
+        http: [`https://${nodeHost}/rpc`],
+        webSocket: [`wss://${nodeHost}/ws`],
       },
     },
-    blockExplorers: {
-      default: {
-        name: 'SeismicScan',
-        url: `https://explorer-${node}.seismicdev.net`,
-      },
-    },
+    blockExplorers: blockExplorerUrl
+      ? {
+          default: {
+            name: 'SeismicScan',
+            url: blockExplorerUrl,
+          },
+        }
+      : undefined,
     formatters: seismicChainFormatters,
   })
 }
 
 /**
- * Defines the Seismic development network configuration.
+ * The seismic devnet running at node-1.seismicdev.net
+ * Its associated explorer is at explorer-1.seismicdev.net
  *
- * This configuration includes the chain ID, name, native currency, and RPC URLs
- * for connecting to the Seismic development network. It can be used in applications
- * that interact with the blockchain using a defined chain.
- *
- * @type {Chain} - The configuration object for the Seismic devnet.
- * @property {number} id - The unique identifier (chain ID) of the Seismic devnet.
- * @property {string} name - The name of the Seismic network.
- * @property {Object} nativeCurrency - Details of the native currency used in the network.
- * @property {number} nativeCurrency.decimals - Decimal precision of the native currency.
- * @property {string} nativeCurrency.name - Name of the native currency.
- * @property {string} nativeCurrency.symbol - Symbol of the native currency.
- * @property {Object} rpcUrls - The RPC URLs for connecting to the network.
- * @property {Object} rpcUrls.default - Default RPC configuration.
- * @property {string[]} rpcUrls.default.http - HTTP URLs for RPC access.
- * @property {string[]} rpcUrls.default.webSocket - WebSocket URLs for RPC access.
+ * This is a single-node network running seismic's fork of reth on --dev mode
  */
-export const seismicDevnet1 = createSeismicDevnet(1)
-export const seismicDevnet2 = createSeismicDevnet(2)
+export const seismicDevnet1 = createSeismicDevnet({ node: 1 })
+/**
+ * The seismic devnet running at node-2.seismicdev.net
+ * Its associated explorer is at explorer-2.seismicdev.net
+ *
+ * This is a single-node network running seismic's fork of reth on --dev mode
+ */
+export const seismicDevnet2 = createSeismicDevnet({ node: 1 })
+
+/**
+ * An alias for {@link seismicDevnet1}
+ */
 export const seismicDevnet = seismicDevnet1
 
+/**
+ * For connecting to a locally-running seismic-reth instance on --dev mode
+ */
 export const localSeismicDevnet = /*#__PURE__*/ defineChain({
-  // TODO
+  // TODO: change network ID
   id: 1337,
   name: 'Seismic',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
@@ -220,6 +294,10 @@ export const localSeismicDevnet = /*#__PURE__*/ defineChain({
   formatters: seismicChainFormatters,
 })
 
+/**
+ * For connecting to a locally-running seismic anvil instance.
+ * Use {@link https://seismic-2.gitbook.io/seismic-book/getting-started/publish-your-docs#sforge-sanvil-and-ssolc | sfoundryup}  to install this
+ */
 export const sanvil = /*#__PURE__*/ defineChain({
   id: 31_337,
   name: 'Anvil',

@@ -1,3 +1,9 @@
+export type {
+  SeismicTxExtras,
+  SeismicTransactionRequest,
+  TransactionSerializableSeismic,
+} from '@sviem/chain'
+
 export {
   sanvil,
   seismicDevnet1,
