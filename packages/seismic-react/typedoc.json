@@ -8,7 +8,7 @@
       "*": "https://github.com/wevm/viem"
     }
   },
-  "publicPath": "/seismic-viem",
+  "publicPath": "/seismic-react",
   "fileExtension": ".mdx",
   "useCodeBlocks": true,
   "blockTagsPreserveOrder": ["@example", "@deprecated"],

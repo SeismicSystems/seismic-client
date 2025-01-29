@@ -133,7 +133,7 @@ export const getEncryption = (
 /**
  * Creates a public client for the Seismic network.
  *
- * @param parameters {PublicClientConfig}: The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html | createPublicClient}
+ * @param parameters {@link https://viem.sh/docs/clients/public.html#parameters PublicClientConfig}: The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html | createPublicClient}
  *
  * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>}
  *
