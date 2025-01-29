@@ -1,0 +1,19 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-viem](/seismic-viem/globals.mdx) / SeismicTxExtras
+
+# Interface: SeismicTxExtras
+
+Defined in: [packages/seismic-viem/src/chain.ts:34](https://github.com/SeismicSystems/seismic-client/blob/20cbc38b124eb846d84808d4920a4be5d594b1cb/packages/seismic-viem/src/chain.ts#L34)
+
+The additional fields added to a Seismic transaction
+SeismicTxExtras
+
+## Properties
+
+| Property                                          | Type                | Description                                                                                                                                                                   | Defined in                                                                                                                                                                     |
+| ------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <a id="encryptionpubkey"></a> `encryptionPubkey?` | `` `0x${string}` `` | The public key used to encrypt the calldata. This uses AES encryption, where the user's keypair is combined with the network's keypair                                        | [packages/seismic-viem/src/chain.ts:35](https://github.com/SeismicSystems/seismic-client/blob/20cbc38b124eb846d84808d4920a4be5d594b1cb/packages/seismic-viem/src/chain.ts#L35) |
+| <a id="messageversion"></a> `messageVersion?`     | `number`            | The version of the message being sent. Used for signing transactions via messages. Normal transactions use messageVersion = 0. Txs signed with EIP-712 use messageVersion = 2 | [packages/seismic-viem/src/chain.ts:36](https://github.com/SeismicSystems/seismic-client/blob/20cbc38b124eb846d84808d4920a4be5d594b1cb/packages/seismic-viem/src/chain.ts#L36) |

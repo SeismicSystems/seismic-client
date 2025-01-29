@@ -1,0 +1,37 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-viem](/seismic-viem/globals.mdx) / ShieldedContract
+
+# Type Alias: ShieldedContract\<TTransport, TAddress, TAbi, TChain, TAccount, TClient\>
+
+```ts
+type ShieldedContract<TTransport, TAddress, TAbi, TChain, TAccount, TClient> =
+  GetContractReturnType<TAbi, TClient, TAddress> &
+    TransparentReadContractReturnType<TAbi, TClient> &
+    TransparentWriteContractReturnType<TAbi, TClient, TAddress>
+```
+
+Defined in: [packages/seismic-viem/src/contract/contract.ts:101](https://github.com/SeismicSystems/seismic-client/blob/20cbc38b124eb846d84808d4920a4be5d594b1cb/packages/seismic-viem/src/contract/contract.ts#L101)
+
+The same as viem's [GetContractReturnType](https://viem.sh/docs/contract/getContract.html#with-wallet-client), with a few differences:
+
+- `read` and `write` use signed reads & seismic transactions
+- `tread` and `twrite` behave like viem's standard read & write
+
+## Type Parameters
+
+• **TTransport** _extends_ [`Transport`](https://github.com/wevm/viem) = [`Transport`](https://github.com/wevm/viem)
+
+• **TAddress** _extends_ `Address` = `Address`
+
+• **TAbi** _extends_ `Abi` \| readonly `unknown`[] = `Abi`
+
+• **TChain** _extends_ [`Chain`](https://github.com/wevm/viem) \| `undefined` = [`Chain`](https://github.com/wevm/viem) \| `undefined`
+
+• **TAccount** _extends_ [`Account`](https://github.com/wevm/viem) = [`Account`](https://github.com/wevm/viem)
+
+• **TClient** _extends_
+\| [`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`TTransport`, `TChain`, `TAccount`\>
+\| `KeyedClient`\<`TTransport`, `TChain`, `TAccount`\> = [`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`TTransport`, `TChain`, `TAccount`\>

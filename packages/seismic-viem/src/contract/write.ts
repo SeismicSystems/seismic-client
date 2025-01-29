@@ -35,7 +35,7 @@ export function useSeismicWrite<
 }
 
 /**
- * Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's {@link https://viem.sh/docs/contract/writeContract|writeContract}
+ * Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's {@link https://viem.sh/docs/contract/writeContract writeContract}
  *
  * @param client - Client to use
  * @param parameters - {@link https://viem.sh/docs/contract/writeContract.html#parameters WriteContractParameters}

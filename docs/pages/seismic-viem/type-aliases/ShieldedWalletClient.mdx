@@ -14,50 +14,32 @@ type ShieldedWalletClient<transport, chain, account> = Client<
   RpcSchema,
   PublicActions<transport, chain, account> &
     WalletActions<chain, account> &
+    EncryptionActions &
+    ShieldedPublicActions<chain> &
     ShieldedWalletActions<chain, account>
 >
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:119](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/client.ts#L119)
+Defined in: [packages/seismic-viem/src/client.ts:68](https://github.com/SeismicSystems/seismic-client/blob/20cbc38b124eb846d84808d4920a4be5d594b1cb/packages/seismic-viem/src/client.ts#L68)
 
-Represents a shielded wallet client with extended functionality for interacting
-with shielded contracts, performing wallet operations, and executing public actions.
+This has the same API as viem's wallet client, with a few notable differences:
 
-## Example
-
-```typescript
-const client: ShieldedWalletClient<HttpTransport, SeismicChain, LocalAccount> =
-  createShieldedWalletClient({
-    chain: seismicChain,
-    transport: httpTransport,
-    privateKey: '0xabcdef...',
-  })
-
-// Access wallet-specific and shielded actions
-const writeResult = await client.writeContract({
-  address: '0x1234...',
-  data: '0xdeadbeef...',
-})
-const encryptionKey = client.getEncryption()
-console.log('Encryption Key:', encryptionKey)
-```
+- All public RPC requests are called through the provided public client
+- This client will encrypt the calldata of Seismic transactions
+- This exposes the following Seimsic-specific actions:
+  - `getEncryption`: return an AES key and its generators
+  - `getEncryptionPublicKey`: return only the user's encryption public key
+  - `signedCall`: make an eth_call. The `data` parameter should already be encrypted
+  - `sendShieldedTransaction`: send a Seismic transaction to the network. The `data` parameter should already be encrypted
+  - `readContract`: call a contract function with a `signedRead`
+  - `treadContract`: call a contract function with an unsigned read (from the zero address)
+  - `writeContract`: execute a function on a contract via a Seismic transaction, encrypting the calldata
+  - `twriteContract`: execute a function on a contract via a standard ethereum transaction
 
 ## Type Parameters
 
 • **transport** _extends_ [`Transport`](https://github.com/wevm/viem) = [`Transport`](https://github.com/wevm/viem)
 
-The transport mechanism used for communication (extends `Transport`).
-
 • **chain** _extends_ [`Chain`](https://github.com/wevm/viem) \| `undefined` = [`Chain`](https://github.com/wevm/viem) \| `undefined`
 
-The blockchain chain configuration (extends `Chain` or `undefined`).
-
-• **account** _extends_ [`Account`](https://github.com/wevm/viem) \| `undefined` = [`Account`](https://github.com/wevm/viem) \| `undefined`
-
-The account type associated with the wallet client (extends `Account` or `undefined`).
-
-## Remarks
-
-The `ShieldedWalletClient` extends the base `Client` type by combining public, wallet, and shielded-specific
-actions into a single client. It is designed for secure and advanced blockchain interactions that require
-encryption and shielded transaction capabilities.
+• **account** _extends_ [`Account`](https://github.com/wevm/viem) = [`Account`](https://github.com/wevm/viem)

@@ -37,7 +37,8 @@ export type SeismicTxExtras = {
 }
 
 /**
- * Represents a Seismic transaction request, extending viem's base TransactionRequest with {@link SeismicTxExtras}
+ * Represents a Seismic transaction request, extending viem's base {@link https://viem.sh/docs/glossary/types#transactionrequest TransactionRequest} with {@link SeismicTxExtras}
+ *
  * @interface SeismicTransactionRequest
  * @extends {TransactionRequest}
  * @extends {SeismicTxExtras}
@@ -45,7 +46,9 @@ export type SeismicTxExtras = {
 export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
 
 /**
- * Represents a serializable Seismic transaction, extending viem's base TransactionSerializable with {@link SeismicTxExtras}
+ * Represents a serializable Seismic transaction, extending viem's base {@link https://viem.sh/docs/utilities/parseTransaction#returns TransactionSerializable} with {@link SeismicTxExtras}
+ *
+ * @interface TransactionSerializableSeismic
  * @extends {TransactionSerializable}
  * @extends {SeismicTxExtras}
  */

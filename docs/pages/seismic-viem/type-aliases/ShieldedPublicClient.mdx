@@ -21,43 +21,19 @@ type ShieldedPublicClient<transport, chain, accountOrAddress, rpcSchema> =
   >
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:62](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/client.ts#L62)
+Defined in: [packages/seismic-viem/src/client.ts:36](https://github.com/SeismicSystems/seismic-client/blob/20cbc38b124eb846d84808d4920a4be5d594b1cb/packages/seismic-viem/src/client.ts#L36)
 
-Represents a shielded public client with extended functionality for interacting
-with a blockchain network. This client type combines public RPC schema actions
-with shielded-specific actions.
+This is the same as viem's public client, with a few notable differences:
 
-## Example
-
-```typescript
-const client: ShieldedPublicClient<HttpTransport, SeismicChain, LocalAccount> = createShieldedClient({
-  transport: httpTransport,
-  chain: seismicChain,
-});
-
-// Use the client for shielded actions
-const result = await client.shieldedAction(...);
-```
+- `getTeePublicKey`: a new function specific to Seismic. It takes no parameters and returns a Promise that resolves to the network's public key
+- `getStorageAt` and `getTransaction`: both of these will return an error since Seismic does not support these endpoints
 
 ## Type Parameters
 
 • **transport** _extends_ [`Transport`](https://github.com/wevm/viem) = [`Transport`](https://github.com/wevm/viem)
 
-The type of the transport mechanism used for communication (extends `Transport`).
-
 • **chain** _extends_ [`Chain`](https://github.com/wevm/viem) \| `undefined` = [`Chain`](https://github.com/wevm/viem) \| `undefined`
-
-The type of the blockchain chain (extends `Chain` or `undefined`).
 
 • **accountOrAddress** _extends_ [`Account`](https://github.com/wevm/viem) \| `undefined` = `undefined`
 
-The type of the account or address associated with the client (extends `Account` or `undefined`).
-
 • **rpcSchema** _extends_ [`RpcSchema`](https://github.com/wevm/viem) \| `undefined` = `undefined`
-
-The type of the RPC schema (extends `RpcSchema` or `undefined`).
-
-## Remarks
-
-This client is designed to support both standard public actions and shielded-specific actions.
-If an additional `rpcSchema` is provided, it is appended to the default `PublicRpcSchema`.

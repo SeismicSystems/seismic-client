@@ -133,7 +133,7 @@ export const getEncryption = (
 /**
  * Creates a public client for the Seismic network.
  *
- * @param {PublicClientConfig} - The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html| createPublicClient}
+ * @param parameters {PublicClientConfig}: The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html | createPublicClient}
  *
  * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>}
  *
@@ -217,7 +217,7 @@ export const getSeismicClients = async <
 /**
  * Creates a wallet client to perform reads & writes on the Seismic network
  *
- * @param {GetSeismicClientsParameters}
+ * @param parameters {@link GetSeismicClientsParameters}
  * @returns {Promise<ShieldedWalletClient<Transport, Chain, Account>>} A promise that resolves
  * to a fully configured shielded wallet client.
  *

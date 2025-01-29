@@ -20,5 +20,6 @@
   "propertyMembersFormat": "table",
   "typeDeclarationFormat": "table",
   "typeDeclarationVisibility": "compact",
-  "formatWithPrettier": true
+  "formatWithPrettier": true,
+  "exclude": ["node_modules/**"]
 }

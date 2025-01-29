@@ -94,7 +94,7 @@ type TransparentWriteContractReturnType<
   : unknown
 
 /**
- * The same as viem's {@link https://viem.sh/docs/contract/getContract.html#with-wallet-client|GetContractReturnType}, with a few differences:
+ * The same as viem's {@link https://viem.sh/docs/contract/getContract.html#with-wallet-client GetContractReturnType}, with a few differences:
  * - `read` and `write` use signed reads & seismic transactions
  * - `tread` and `twrite` behave like viem's standard read & write
  */
@@ -116,7 +116,7 @@ export type ShieldedContract<
   TransparentWriteContractReturnType<TAbi, TClient, TAddress>
 
 /**
- * This function extends viem's base {@link https://viem.sh/docs/contract/getContract.html|getContract} functionality by adding:
+ * This function extends viem's base {@link https://viem.sh/docs/contract/getContract.html getContract} functionality by adding:
  * - `write`: write to a contract with encrypted calldata
  * - `read`: read from a contract using a signed read
  * - `tread`: transparently read from a contract using an unsigned read (from the zero address)
@@ -129,9 +129,10 @@ export type ShieldedContract<
  * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
  * @template TAccount - The account type associated with the wallet client (extends `Account` or `undefined`).
  *
- * @param abi - The contract's ABI
- * @param address - The contract's address
- * @param client - The client instance to use for interacting with the contract. Must be a {@link ShieldedWalletClient}.
+ * @param params
+ * @property abi - The contract's ABI
+ * @property address - The contract's address
+ * @property client - The client instance to use for interacting with the contract. Must be a {@link ShieldedWalletClient}.
  *
  * @returns A contract instance with extended shielded write and signed read functionalities.
  *
