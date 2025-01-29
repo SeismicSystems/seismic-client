@@ -29,36 +29,9 @@ import { generateAesKey } from '@sviem/crypto/aes'
 import { compressPublicKey } from '@sviem/crypto/secp'
 
 /**
- * Represents a shielded public client with extended functionality for interacting
- * with a blockchain network. This client type combines public RPC schema actions
- * with shielded-specific actions.
- *
- * @template transport - The type of the transport mechanism used for communication (extends `Transport`).
- * @template chain - The type of the blockchain chain (extends `Chain` or `undefined`).
- * @template accountOrAddress - The type of the account or address associated with the client (extends `Account` or `undefined`).
- * @template rpcSchema - The type of the RPC schema (extends `RpcSchema` or `undefined`).
- *
- * @type {Prettify<Client>} - A prettified version of the `Client` type with the following features:
- * - The transport mechanism (`transport`).
- * - The blockchain chain (`chain`).
- * - The associated account or address (`accountOrAddress`).
- * - The RPC schema, which extends the `PublicRpcSchema` with additional methods if provided.
- * - A combination of `PublicActions` and `ShieldedPublicActions`.
- *
- * @remarks
- * This client is designed to support both standard public actions and shielded-specific actions.
- * If an additional `rpcSchema` is provided, it is appended to the default `PublicRpcSchema`.
- *
- * @example
- * ```typescript
- * const client: ShieldedPublicClient<HttpTransport, SeismicChain, LocalAccount> = createShieldedClient({
- *   transport: httpTransport,
- *   chain: seismicChain,
- * });
- *
- * // Use the client for shielded actions
- * const result = await client.shieldedAction(...);
- * ```
+ * This is the same as viem's public client, with a few notable differences:
+ * - `getTeePublicKey`: a new function specific to Seismic. It takes no parameters and returns a Promise that resolves to the network's public key
+ * - `getStorageAt` and `getTransaction`: both of these will return an error since Seismic does not support these endpoints
  */
 export type ShieldedPublicClient<
   transport extends Transport = Transport,
@@ -78,44 +51,19 @@ export type ShieldedPublicClient<
 >
 
 /**
- * Represents a shielded wallet client with extended functionality for interacting
- * with shielded contracts, performing wallet operations, and executing public actions.
- *
- * @template transport - The transport mechanism used for communication (extends `Transport`).
- * @template chain - The blockchain chain configuration (extends `Chain` or `undefined`).
- * @template account - The account type associated with the wallet client (extends `Account` or `undefined`).
- *
- * @type {Client} - A specialized client type that includes:
- * - The transport mechanism (`transport`).
- * - The blockchain chain (`chain`).
- * - The associated account (`account`).
- * - The RPC schema (`RpcSchema`).
- * - A combination of actions:
- *   - `PublicActions`: Standard public client actions.
- *   - `WalletActions`: Actions for wallet-specific functionality.
- *   - `ShieldedWalletActions`: Enhanced actions for interacting with shielded features.
- *
- * @remarks
- * The `ShieldedWalletClient` extends the base `Client` type by combining public, wallet, and shielded-specific
- * actions into a single client. It is designed for secure and advanced blockchain interactions that require
- * encryption and shielded transaction capabilities.
- *
- * @example
- * ```typescript
- * const client: ShieldedWalletClient<HttpTransport, SeismicChain, LocalAccount> = createShieldedWalletClient({
- *   chain: seismicChain,
- *   transport: httpTransport,
- *   privateKey: '0xabcdef...',
- * });
- *
- * // Access wallet-specific and shielded actions
- * const writeResult = await client.writeContract({
- *   address: '0x1234...',
- *   data: '0xdeadbeef...',
- * });
- * const encryptionKey = client.getEncryption();
- * console.log('Encryption Key:', encryptionKey);
- * ```
+ * This has the same API as viem's wallet client, with a few notable differences:
+ * - All public RPC requests are called through the provided public client
+ * - This client will encrypt the calldata of Seismic transactions
+ * - This exposes the following Seimsic-specific actions:
+ *   - `getEncryption`: return an AES key and its generators
+ *   - `getEncryptionPublicKey`: return only the user's encryption public key
+ *   - `signedCall`: make an eth_call. The `data` parameter should already be encrypted
+ *   - `sendShieldedTransaction`: send a Seismic transaction to the network. The `data` parameter should already be encrypted
+ *   - `readContract`: call a contract function with a `signedRead`
+ *   - `treadContract`: call a contract function with an unsigned read (from the zero address)
+ *   - `writeContract`: execute a function on a contract via a Seismic transaction, encrypting the calldata
+ *   - `twriteContract`: execute a function on a contract via a standard ethereum transaction
+
  */
 export type ShieldedWalletClient<
   transport extends Transport = Transport,
@@ -144,10 +92,9 @@ type SeismicClients<
 
 /**
  * @ignore
- * Parameters required to create seismic clients, including a public client and a shielded wallet client.
- * @extends GetPublicClientParameters
- *
- * @property privateKey - The private key used to derive the wallet account and encryption key.
+ * @extends {PublicClientConfig<Transport, Chain>}
+ * @property publicClient (optional) - The public client used to serve non-signing requests
+ * @property privateKey (optional) - A secp256k1 private key, used to generate an AES key, which encrypts calldata. This is NOT the wallet's private key used to sign transactions.
  */
 export type GetSeismicClientsParameters<
   TTransport extends Transport,
@@ -186,18 +133,9 @@ export const getEncryption = (
 /**
  * Creates a public client for the Seismic network.
  *
- * @template transport - The type of the transport mechanism used for communication (extends `Transport`).
- * @template chain - The type of the blockchain chain (extends `Chain` or `undefined`).
- * @template rpcSchema - The type of the RPC schema (extends `RpcSchema` or `undefined`).
- *
  * @param {PublicClientConfig} - The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html| createPublicClient}
  *
  * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>}
- *
- * @remarks
- * This has the same exact behaviour as viem's, with a few notable differences:
- * - `getTeePublicKey`: a new function specific to Seismic. It takes no parameters and returns a Promise containing the network's public key
- * - `getStorageAt` and `getTransaction`: both of these will return an error since Seismic does not support these endpoints
  *
  * @example
  * ```typescript
@@ -277,25 +215,22 @@ export const getSeismicClients = async <
 }
 
 /**
- * Creates a shielded wallet client with extended functionality for interacting
- * with shielded blockchain features, wallet operations, and encryption.
+ * Creates a wallet client to perform reads & writes on the Seismic network
  *
- * This function builds upon the `getSeismicClients` helper to initialize and configure
- * a shielded wallet client using a provided private key. The client supports standard
- * wallet operations, public actions, and shielded-specific actions.
- *
- * @param chain - The blockchain chain configuration.
- * @param transport - The transport mechanism for communication with the blockchain.
- * @param privateKey - The private key used to derive the wallet account and encryption key.
- *
+ * @param {GetSeismicClientsParameters}
  * @returns {Promise<ShieldedWalletClient<Transport, Chain, Account>>} A promise that resolves
  * to a fully configured shielded wallet client.
  *
  * @example
  * ```typescript
+ * import { http } from 'viem'
+ * import { privateKeyToAccount } from 'viem/accounts'
+ * import { seismicDevnet, createShieldedWalletClient } from 'seismic-viem'
+ *
  * const walletClient = await createShieldedWalletClient({
- *   chain: seismicChain,
- *   transport: httpTransport,
+ *   chain: seismicDevnet,
+ *   transport: http(),
+ *   account: privateKeyToAccount('0x0123...')
  *   privateKey: '0xabcdef...',
  * });
  *
@@ -306,18 +241,9 @@ export const getSeismicClients = async <
  * });
  *
  * // Access shielded-specific actions
- * const encryptionKey = walletClient.getEncryption();
- * console.log('Encryption Key:', encryptionKey);
+ * const { aesKey } = walletClient.getEncryption();
+ * console.info('AES Key:', aesKey);
  * ```
- *
- * @remarks
- * This function is a wrapper around `getSeismicClients`, extracting and returning the wallet
- * client from the generated clients. The shielded wallet client is equipped with:
- * - Public actions
- * - Wallet-specific actions
- * - Shielded-specific actions
- *
- * The encryption key is derived from the provided private key and the TEE public key of the network.
  */
 export const createShieldedWalletClient = async <
   TTransport extends Transport,

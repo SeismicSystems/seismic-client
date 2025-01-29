@@ -93,6 +93,11 @@ type TransparentWriteContractReturnType<
       }
   : unknown
 
+/**
+ * The same as viem's {@link https://viem.sh/docs/contract/getContract.html#with-wallet-client|GetContractReturnType}, with a few differences:
+ * - `read` and `write` use signed reads & seismic transactions
+ * - `tread` and `twrite` behave like viem's standard read & write
+ */
 export type ShieldedContract<
   TTransport extends Transport = Transport,
   TAddress extends Address = Address,
@@ -111,12 +116,11 @@ export type ShieldedContract<
   TransparentWriteContractReturnType<TAbi, TClient, TAddress>
 
 /**
- * Retrieves a shielded contract instance with extended functionality for performing
- * shielded write operations, signed reads, and contract interaction.
- *
- * This function extends the base `getContract` functionality by adding:
- * - Shielded write actions for `nonpayable` and `payable` functions.
- * - Signed read actions for `pure` and `view` functions.
+ * This function extends viem's base {@link https://viem.sh/docs/contract/getContract.html|getContract} functionality by adding:
+ * - `write`: write to a contract with encrypted calldata
+ * - `read`: read from a contract using a signed read
+ * - `tread`: transparently read from a contract using an unsigned read (from the zero address)
+ * - `twrite`: transparently write to a contract using non-encrypted calldata
  *
  * @template TTransport - The transport mechanism used for communication (extends `Transport`).
  * @template TAddress - The address type of the contract.
@@ -130,9 +134,6 @@ export type ShieldedContract<
  * @param client - The client instance to use for interacting with the contract. Must be a {@link ShieldedWalletClient}.
  *
  * @returns A contract instance with extended shielded write and signed read functionalities.
- * The returned object includes standard contract methods (`abi`, `address`, `createEventFilter`, etc.),
- * shielded-specific methods (calling `write` and `read` will use shielded writes and signed reads),
- * and transparent methods (`tread` to call a standard `read` and `twrite` to call a standard `write`).
  *
  * @throws {Error} If the wallet client is not provided for shielded write or signed read operations.
  * @throws {Error} If the wallet client does not have an account configured for signed reads.
