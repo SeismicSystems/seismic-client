@@ -310,6 +310,7 @@ export async function signedCall<
     // @ts-ignore
     const preparedTx = await prepareTransactionRequest(client, request)
     const encryptionPubkey = client.getEncryptionPublicKey()
+    // @ts-ignore
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
       encryptionPubkey,

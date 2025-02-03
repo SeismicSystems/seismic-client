@@ -1,11 +1,8 @@
 import type {
   Account,
-  BlockTag,
   Chain,
   GetStorageAtParameters,
   GetStorageAtReturnType,
-  GetTransactionParameters,
-  GetTransactionReturnType,
   Hex,
   RpcSchema,
   Transport,
@@ -30,16 +27,11 @@ import type { ShieldedPublicClient } from '@sviem/client'
  * @property getTransaction - (Not Supported) Attempts to retrieve a transaction by its parameters.
  * Throws an error when called on a shielded public client.
  */
-export type ShieldedPublicActions<
-  TChain extends Chain | undefined = Chain | undefined,
-> = {
+export type ShieldedPublicActions = {
   getTeePublicKey: () => Promise<Hex | string>
   getStorageAt: (
     args: GetStorageAtParameters
   ) => Promise<GetStorageAtReturnType>
-  getTransaction: (
-    args: GetTransactionParameters
-  ) => Promise<GetTransactionReturnType<TChain, BlockTag>>
 }
 
 /**
@@ -78,7 +70,7 @@ export const shieldedPublicActions = <
   TRpcSchema extends RpcSchema | undefined = undefined,
 >(
   client: ShieldedPublicClient<TTransport, TChain, TAccount, TRpcSchema>
-): ShieldedPublicActions<TChain> => ({
+): ShieldedPublicActions => ({
   getTeePublicKey: async () => {
     // @ts-ignore
     const key: Hex | string = await client.request({
@@ -88,8 +80,5 @@ export const shieldedPublicActions = <
   },
   getStorageAt: async (_args) => {
     throw new Error('Cannot call getStorageAt with a shielded public client')
-  },
-  getTransaction: async (_args) => {
-    throw new Error('Cannot call getTransaction with a shielded public client')
   },
 })
