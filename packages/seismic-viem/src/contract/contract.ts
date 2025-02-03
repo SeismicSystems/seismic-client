@@ -258,8 +258,6 @@ export function getShieldedContract<
       throw new Error('Must provide wallet client to read seismic contract')
     }
 
-    console.log('signedRead options', options)
-
     return signedReadContract(walletClient, {
       abi,
       address,
