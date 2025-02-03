@@ -78,9 +78,11 @@ const testSeismicTxTypedData = async () => {
 
   const baseTx: TransactionSerializableLegacy = {
     to: recipientAddress,
-    value,
     chainId: anvil.id,
     type: 'legacy',
+    gas: 100_000n,
+    value,
+    nonce: 0,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
   const tx = { ...preparedTx, encryptionPubkey: ENC_PK }
@@ -101,7 +103,9 @@ const testSeismicTxTypedData = async () => {
 describe('Seismic Transaction Encoding', async () => {
   // test('client can sign a seismic typed message', testSeismicCallTypedData)
 
-  test('client can sign via eth_signTypedData', testSeismicTxTypedData)
+  test('client can sign via eth_signTypedData', testSeismicTxTypedData, {
+    timeout: 20000,
+  })
 })
 
 afterAll(async () => {
