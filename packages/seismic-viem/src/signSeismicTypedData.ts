@@ -71,7 +71,7 @@ const seismicTxTypedData = <
     },
     primaryType: 'TxSeismic',
     domain: {
-      name: signedCall ? 'Signed Call' : 'Seismic Transaction',
+      name: 'Seismic Transaction',
       version: MESSAGE_VERSION,
       chainId: tx.chainId,
       // no verifying contract since this happens in RPC
