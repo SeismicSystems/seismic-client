@@ -73,7 +73,7 @@ export type ShieldedPublicClient<
     rpcSchema extends RpcSchema
       ? [...PublicRpcSchema, ...rpcSchema]
       : PublicRpcSchema,
-    PublicActions<transport, chain> & ShieldedPublicActions<chain>
+    PublicActions<transport, chain> & ShieldedPublicActions
   >
 >
 
@@ -129,7 +129,7 @@ export type ShieldedWalletClient<
   PublicActions<transport, chain, account> &
     WalletActions<chain, account> &
     EncryptionActions &
-    ShieldedPublicActions<chain> &
+    ShieldedPublicActions &
     ShieldedWalletActions<chain, account>
 >
 
