@@ -22,6 +22,7 @@ export const runProcess = async (
     cwd,
     stdio: 'inherit',
   })
+
   await new Promise((resolve) => {
     process.on('spawn', () => setTimeout(resolve, waitMs))
   })
