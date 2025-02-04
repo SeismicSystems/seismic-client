@@ -149,7 +149,6 @@ export async function signedReadContract<
   }
 
   const nonce = await fillNonce(client, parameters)
-  console.log('signedReadContract nonce', nonce)
 
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
@@ -168,7 +167,6 @@ export async function signedReadContract<
     data: encryptedCalldata,
     encryptionPubkey: client.getEncryptionPublicKey(),
   }
-  console.log('signedReadContract request', request)
   const { data: encryptedData } = await signedCall(client, request)
   const data = await aesCipher.decrypt(encryptedData, nonce)
   return decodeFunctionResult({

@@ -54,7 +54,8 @@ const doSignedCall = async <
       seismicTx,
       true
     )
-    const response: Hex = await client.request({
+    // @ts-ignore
+    const response: Hex = await client.publicRequest({
       method: 'eth_call',
       params: [{ data: typedData, signature }],
     })

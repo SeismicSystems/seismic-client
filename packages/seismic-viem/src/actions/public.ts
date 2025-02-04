@@ -1,6 +1,8 @@
 import type {
   Account,
   Chain,
+  EIP1193RequestFn,
+  EIP1474Methods,
   GetStorageAtParameters,
   GetStorageAtReturnType,
   Hex,
@@ -9,6 +11,7 @@ import type {
 } from 'viem'
 
 import type { ShieldedPublicClient } from '@sviem/client'
+import { RpcRequest } from '@sviem/viem-internal/rpc'
 
 /**
  * Defines the additional actions available on a shielded public client.
@@ -27,11 +30,18 @@ import type { ShieldedPublicClient } from '@sviem/client'
  * @property getTransaction - (Not Supported) Attempts to retrieve a transaction by its parameters.
  * Throws an error when called on a shielded public client.
  */
-export type ShieldedPublicActions = {
+export type ShieldedPublicActions<
+  rpcSchema extends RpcSchema | undefined = undefined,
+> = {
   getTeePublicKey: () => Promise<Hex | string>
   getStorageAt: (
     args: GetStorageAtParameters
   ) => Promise<GetStorageAtReturnType>
+  publicRequest: (
+    args: RpcRequest
+  ) => EIP1193RequestFn<
+    rpcSchema extends undefined ? EIP1474Methods : rpcSchema
+  >
 }
 
 /**
@@ -81,4 +91,6 @@ export const shieldedPublicActions = <
   getStorageAt: async (_args) => {
     throw new Error('Cannot call getStorageAt with a shielded public client')
   },
+  // @ts-ignore
+  publicRequest: async (_args) => client.request<TRpcSchema>(_args),
 })
