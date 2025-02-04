@@ -86,6 +86,7 @@ export async function shieldedWriteContract<
     address,
     gas,
     gasPrice,
+    value,
   } = parameters as WriteContractParameters
   let { nonce } = parameters as WriteContractParameters
 
@@ -111,6 +112,7 @@ export async function shieldedWriteContract<
     gas: gas!,
     gasPrice: gasPrice!,
     nonce: nonce!,
+    value,
     encryptionPubkey: client.getEncryptionPublicKey(),
   }
   return sendShieldedTransaction(client, request)
