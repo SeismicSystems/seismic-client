@@ -134,8 +134,6 @@ export async function signedReadContract<
     ...rest
   } = parameters as ReadContractParameters
 
-  console.log('signedReadContract parameters', parameters)
-
   // If they specify no address, then use the standard read contract,
   // since it doesn't have to be signed
   if (!rest.account) {
