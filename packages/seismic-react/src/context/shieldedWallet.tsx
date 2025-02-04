@@ -97,6 +97,7 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   )
   useEffect(() => {
     if (!publicClient) {
+      // don't overwrite any errors coming from second effect
       setError(null)
     }
     const publicTransport = options.publicTransport ?? (http() as Transport)
