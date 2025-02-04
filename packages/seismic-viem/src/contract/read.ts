@@ -73,8 +73,16 @@ const fillNonce = async <
 /**
  * Executes a signed read operation on a smart contract.
  *
- * This function securely interacts with a contract's `nonpayable` or `payable` function by signing the request.
- * It supports advanced functionality such as parameter encoding and ABI remapping for shielded operations.
+ * A signed read is an operation unique to Seismic's blockchain.
+ * In Ethereum, users can make an eth_call and specify any `from` address.
+ * However Seismic restricts this feature: any eth_call made to Seismic
+ * will have the from address overridden to zero. We do this so contract
+ * developers can check against `msg.sender` inside non-transactions knowing
+ * that these calls will not be spoofed
+ *
+ * To make a read that specifies a from address on Seismic, use signed reads.
+ * Essentially a signed read sends a signed, raw transaction to the eth_call endpoint.
+ * The msg.sender for the call is set to the transaction's signer
  *
  * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
  * @template TAccount - The account type used for signing the read operation (extends `Account` or `undefined`).

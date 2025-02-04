@@ -19,7 +19,16 @@ export type UseShieldedWriteContractConfig<
   args?: TArgs
 }
 
-// NOTE: Must use ShieldedWalletProvider to use this hook
+/**
+ * Similar to wagmi's {@link https://wagmi.sh/react/api/hooks/useWriteContract useWriteContract} hook,
+ * but uses {@link shieldedWriteContract} instead
+ *
+ * @returns {Object}
+ * - `writeContract` (function) - to make writes
+ * - `isLoading` (bool)
+ * - `hash` (string) - Transaction hash of last successful call to `writeContract`
+ * - `error` (string) - Error from most recent call to `writeContract`, if any
+ */
 export function useShieldedWriteContract<
   TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
@@ -41,7 +50,7 @@ export function useShieldedWriteContract<
   const [hash, setHash] = useState<`0x${string}` | null>(null)
 
   // The write function that executes the shielded contract write
-  const write = useCallback(async () => {
+  const writeContract = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     setHash(null)
@@ -72,7 +81,8 @@ export function useShieldedWriteContract<
   }, [walletClient, address, abi, functionName, args])
 
   return {
-    write,
+    writeContract,
+    write: writeContract,
     isLoading,
     error,
     hash,

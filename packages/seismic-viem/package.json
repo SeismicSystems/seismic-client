@@ -1,6 +1,6 @@
 {
   "name": "seismic-viem",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Typescript interface for Seismic",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -28,7 +28,7 @@
     "build:esm": "bun build src/index.ts --outdir dist/_esm --target browser --format esm",
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "rimraf ./dist/tsconfig.types.tsbuildinfo",
-    "docs:gen": "typedoc src/index.ts --out ../../docs/pages/seismic-viem",
+    "docs:gen": "typedoc src/index.ts --out ../../docs/pages/seismic-viem && bash ../../docs/replace_sources.sh ../../docs/pages/seismic-viem",
     "docs:check": "typedoc src/index.ts --json ./typedoc.out.json; rm ./typedoc.out.json"
   },
   "dependencies": {
