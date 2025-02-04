@@ -6,7 +6,7 @@ import {
   createShieldedWalletClient,
 } from 'seismic-viem'
 import { custom, http } from 'viem'
-import type { Transport } from 'viem'
+import type { Chain, Transport } from 'viem'
 import { useConnectorClient } from 'wagmi'
 import type { Config } from 'wagmi'
 
@@ -50,7 +50,7 @@ export const useShieldedWallet = () => {
 type ShieldedWalletProviderProps = {
   children: React.ReactNode
   config: Config
-  options?: { publicTransport?: Transport }
+  options?: { publicTransport?: Transport; publicChain?: Chain }
 }
 
 /**
@@ -95,34 +95,54 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   const [walletClient, setWalletClient] = useState<ShieldedWalletClient | null>(
     null
   )
+  useEffect(() => {
+    const publicTransport = options.publicTransport ?? (http() as Transport)
+    if (options.publicChain) {
+      const publicClient = createShieldedPublicClient({
+        // @ts-ignore
+        transport: publicTransport,
+        // @ts-ignore
+        chain: options.publicChain,
+      })
+      setPublicClient(publicClient)
+      return
+    }
+
+    if (!isFetched || !data) {
+      setError('Failed to create public client: Connector not fetched')
+      return
+    }
+
+    const { chain } = data
+    if (!chain) {
+      setError('Failed to create public client: No chain connected')
+      return
+    }
+    const publicClient = createShieldedPublicClient({
+      transport: publicTransport,
+      chain,
+    })
+    setPublicClient(publicClient)
+  }, [data, isFetched, options.publicChain, options.publicTransport])
 
   useEffect(() => {
     if (!isFetched || !data) {
+      setError('Failed to create shielded client: Connector not fetched')
       return
     }
     const { account, chain, transport } = data
     if (!account) {
-      setError('No account connected')
+      setError('Failed to create shielded client: No account connected')
       return
     }
     if (!transport) {
-      setError('No transport connected')
+      setError('Failed to create shielded client: No transport connected')
       return
     }
     if (!chain) {
-      setError('No chain connected')
+      setError('Failed to create shielded client: No chain connected')
       return
     }
-
-    const publicTransport = options.publicTransport ?? (http() as Transport)
-
-    const publicClient = createShieldedPublicClient({
-      // @ts-ignore
-      transport: publicTransport,
-      // @ts-ignore
-      chain,
-    })
-    setPublicClient(publicClient)
 
     createShieldedWalletClient({
       // @ts-ignore
@@ -131,9 +151,10 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
       chain,
       // @ts-ignore
       transport: custom(transport),
+      // @ts-ignore
       publicClient,
     }).then((wc) => setWalletClient(wc))
-  }, [isFetched, data])
+  }, [isFetched, data, publicClient])
 
   // Create the value object that will be provided to consumers
   const value = {
