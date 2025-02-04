@@ -15,21 +15,18 @@ function getShieldedContract<
   TChain,
   TAccount,
 >(
-  __namedParameters
-): GetContractReturnType<TAbi, TClient, TAddress> &
-  SignedReadContractReturnType<TAbi, TClient>
+  params
+): ShieldedContract<TTransport, TAddress, TAbi, TChain, TAccount, TClient>
 ```
 
-Defined in: [packages/seismic-viem/src/contract/contract.ts:138](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/contract/contract.ts#L138)
+Defined in: [packages/seismic-viem/src/contract/contract.ts:165](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/contract/contract.ts#L165)
 
-Retrieves a shielded contract instance with extended functionality for performing
-shielded write operations, signed reads, and contract interaction.
+This function extends viem's base [getContract](https://viem.sh/docs/contract/getContract.html) functionality by adding:
 
-This function extends the base `getContract` functionality by adding:
-
-- Shielded write actions for `nonpayable` and `payable` functions.
-- Signed read actions for `pure` and `view` functions.
-- Proxy-based access to dynamically invoke contract methods.
+- `write`: write to a contract with encrypted calldata
+- `read`: read from a contract using a signed read
+- `tread`: transparently read from a contract using an unsigned read (from the zero address)
+- `twrite`: transparently write to a contract using non-encrypted calldata
 
 ## Example
 
@@ -44,7 +41,7 @@ const contract = getShieldedContract({
 await contract.write.myFunction([arg1, arg2], { gas: 50000n })
 
 // Perform a signed read
-const value = await contract.sread.getValue()
+const value = await contract.read.getValue()
 console.log('Value:', value)
 ```
 
@@ -72,23 +69,21 @@ The client type, supporting either a `ShieldedWalletClient` or `KeyedClient`.
 
 The blockchain chain type (extends `Chain` or `undefined`).
 
-• **TAccount** _extends_ `undefined` \| [`Account`](https://github.com/wevm/viem) = `undefined` \| [`Account`](https://github.com/wevm/viem)
+• **TAccount** _extends_ [`Account`](https://github.com/wevm/viem) = [`Account`](https://github.com/wevm/viem)
 
 The account type associated with the wallet client (extends `Account` or `undefined`).
 
 ## Parameters
 
-### \_\_namedParameters
+### params
 
 [`GetContractParameters`](https://github.com/wevm/viem)\<`TTransport`, `TChain`, `TAccount`, `TAbi`, `TClient`, `TAddress`\>
 
 ## Returns
 
-[`GetContractReturnType`](https://github.com/wevm/viem)\<`TAbi`, `TClient`, `TAddress`\> & `SignedReadContractReturnType`\<`TAbi`, `TClient`\>
+[`ShieldedContract`](/seismic-viem/type-aliases/ShieldedContract.mdx)\<`TTransport`, `TAddress`, `TAbi`, `TChain`, `TAccount`, `TClient`\>
 
 A contract instance with extended shielded write and signed read functionalities.
-The returned object includes standard contract methods (`abi`, `address`, `createEventFilter`, etc.)
-and shielded-specific methods (`write`, `read`, `sread`).
 
 ## Throws
 
@@ -100,7 +95,8 @@ If the wallet client does not have an account configured for signed reads.
 
 ## Remarks
 
-- The `write` property allows dynamic invocation of `nonpayable` and `payable` functions.
-- The `read` property will toggle between public reads and signed reads, depending on whether an `account` is provided
-- The `sread` property does the same as `read`, except provides `account` as a parameter (so it always makes a signed read)
-- The client must be a `ShieldedWalletClient` or provide a wallet client for shielded-specific operations.
+- The `read` property will always call a signed read
+- The `tread` property will toggle between public reads and signed reads, depending on whether an `account` is provided
+- The `write` property will encrypt calldata of the transaction
+- The `twrite` property will make a normal write, e.g. with transparent calldata
+- The client must be a [ShieldedWalletClient](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)

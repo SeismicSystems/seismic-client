@@ -19,7 +19,16 @@ export type UseSignedReadContractConfig<
   args?: TArgs
 }
 
-// NOTE: Must use ShieldedWalletProvider to use this hook
+/**
+ * Similar to wagmi's {@link https://wagmi.sh/react/api/hooks/useReadContract useReadContract} hook,
+ * but uses {@link signedReadContract} instead
+ *
+ *  * @returns {Object}
+ * - `signedRead` (function) - to make signed reads
+ * - `isLoading` (bool)
+ * - `hash` (string) - Transaction hash of last successful call to `signedRead`
+ * - `error` (string) - Error from most recent call to `signedRead`, if any
+ */
 export function useSignedReadContract<
   TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
@@ -40,7 +49,7 @@ export function useSignedReadContract<
   const [error, setError] = useState<Error | null>(null)
 
   // The write function that executes the shielded contract write
-  const read = useCallback(async () => {
+  const signedRead = useCallback(async () => {
     setIsLoading(true)
     setError(null)
 
@@ -69,7 +78,8 @@ export function useSignedReadContract<
   }, [walletClient, address, abi, functionName, args])
 
   return {
-    read,
+    signedRead,
+    read: signedRead,
     isLoading,
     error,
   }

@@ -13,12 +13,20 @@ function signedReadContract<TChain, TAccount, TAbi, TFunctionName, TArgs>(
 ): Promise<ReadContractReturnType>
 ```
 
-Defined in: [packages/seismic-viem/src/contract/read.ts:76](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/contract/read.ts#L76)
+Defined in: [packages/seismic-viem/src/contract/read.ts:122](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/contract/read.ts#L122)
 
 Executes a signed read operation on a smart contract.
 
-This function securely interacts with a contract's `nonpayable` or `payable` function by signing the request.
-It supports advanced functionality such as parameter encoding and ABI remapping for shielded operations.
+A signed read is an operation unique to Seismic's blockchain.
+In Ethereum, users can make an eth_call and specify any `from` address.
+However Seismic restricts this feature: any eth_call made to Seismic
+will have the from address overridden to zero. We do this so contract
+developers can check against `msg.sender` inside non-transactions knowing
+that these calls will not be spoofed
+
+To make a read that specifies a from address on Seismic, use signed reads.
+Essentially a signed read sends a signed, raw transaction to the eth_call endpoint.
+The msg.sender for the call is set to the transaction's signer
 
 ## Example
 
@@ -38,7 +46,7 @@ console.log('Balance:', result)
 
 The blockchain chain type (extends `Chain` or `undefined`).
 
-• **TAccount** _extends_ `undefined` \| [`Account`](https://github.com/wevm/viem)
+• **TAccount** _extends_ [`Account`](https://github.com/wevm/viem)
 
 The account type used for signing the read operation (extends `Account` or `undefined`).
 
@@ -58,13 +66,13 @@ The arguments for the function call, derived from the ABI and function name.
 
 ### client
 
-`SignedReadClient`\<`TChain`, `TAccount`\>
+[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<[`Transport`](https://github.com/wevm/viem), `TChain`, `TAccount`\>
 
 The client used to execute the signed read operation. Must be a [ShieldedPublicClient](/seismic-viem/type-aliases/ShieldedPublicClient.mdx) or [ShieldedWalletClient](/seismic-viem/type-aliases/ShieldedWalletClient.mdx).
 
 ### parameters
 
-[`ReadContractParameters`](https://github.com/wevm/viem)\<`TAbi`, `TFunctionName`, `TArgs`\>
+`SignedReadContractParameters`\<`TAbi`, `TFunctionName`, `TArgs`\>
 
 The [parameters](https://viem.sh/docs/contract/readContract.html#parameters) for the read operation, including:
 

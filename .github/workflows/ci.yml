@@ -37,7 +37,6 @@ jobs:
     runs-on: self-hosted
     concurrency:
       group: global-self-hosted-runner
-      cancel-in-progress: false
     env:
       SFOUNDRY_ROOT: /home/azureuser/seismic/seismic-foundry
     steps:
@@ -60,11 +59,12 @@ jobs:
         run: bun viem:test:anvil
 
   test-devnet:
+    needs: [test-anvil]
     runs-on: self-hosted
     concurrency:
       group: global-self-hosted-runner
-      cancel-in-progress: false
     env:
+      SFOUNDRY_ROOT: /home/azureuser/seismic/seismic-foundry
       SRETH_ROOT: /home/azureuser/seismic/seismic-reth
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files

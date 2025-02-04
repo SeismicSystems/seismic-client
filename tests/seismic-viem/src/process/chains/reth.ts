@@ -21,7 +21,7 @@ const runRethLocally = async (
     port = 8545,
     silent = true,
     dev = true,
-    waitMs = 5_000,
+    waitMs = 10_000,
     verbosity,
     devBlockMaxTx = 1,
     teeMockServer = true,

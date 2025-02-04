@@ -1,8 +1,8 @@
 import { defineConfig } from 'vocs'
 
 export default defineConfig({
-  title: 'Seismic Viem',
-  description: 'Build Seismic apps by extending viem',
+  title: 'Seismic Client',
+  description: 'Build apps on the Seismic network',
   theme: {
     variables: {
       content: {

@@ -1,0 +1,34 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-viem](/seismic-viem/globals.mdx) / seismicChainFormatters
+
+# Variable: seismicChainFormatters
+
+```ts
+const seismicChainFormatters: ChainFormatters;
+```
+
+Defined in: [packages/seismic-viem/src/chain.ts:166](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/chain.ts#L166)
+
+Chain formatters for Seismic transactions, providing formatting utilities for transaction requests.
+
+## Param
+
+The transaction request to be formatted
+
+## Returns
+
+A formatted transaction request object containing:
+
+- All properties from the formatted RPC request
+- `type` (optional) - Set to '0x4a' if encryption public key is present
+- `data` (optional) - Transaction data if present
+- `encryptionPubkey` (optional) - Public key for transaction encryption
+- `chainId` (optional) - Chain ID for the transaction
+
+## Remarks
+
+This function is called by viem's call, estimateGas, and sendTransaction.
+We can use this to parse transaction request before sending it to the node

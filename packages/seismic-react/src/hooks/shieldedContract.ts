@@ -5,7 +5,9 @@ import type { Abi, Address } from 'viem'
 
 import { useShieldedWallet } from '@sreact/context/shieldedWallet'
 
-// NOTE: Must use ShieldedWalletProvider to use this hook
+/**
+ * A react hook that exposes `contract`, which is returned by a call to {@link getShieldedContract}
+ */
 export function useShieldedContract<
   TAddress extends Address,
   const TAbi extends Abi | readonly unknown[],

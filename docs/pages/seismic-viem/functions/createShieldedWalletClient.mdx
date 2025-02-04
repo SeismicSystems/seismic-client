@@ -7,60 +7,56 @@
 # Function: createShieldedWalletClient()
 
 ```ts
-function createShieldedWalletClient(
-  __namedParameters
-): Promise<ShieldedWalletClient<Transport, Chain, Account>>
+function createShieldedWalletClient<TTransport, TChain, TAccount>(
+  parameters
+): Promise<ShieldedWalletClient<TTransport, TChain, TAccount>>
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:286](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/client.ts#L286)
+Defined in: [packages/seismic-viem/src/client.ts:247](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/client.ts#L247)
 
-Creates a shielded wallet client with extended functionality for interacting
-with shielded blockchain features, wallet operations, and encryption.
-
-This function builds upon the `getSeismicClients` helper to initialize and configure
-a shielded wallet client using a provided private key. The client supports standard
-wallet operations, public actions, and shielded-specific actions.
+Creates a wallet client to perform reads & writes on the Seismic network
 
 ## Example
 
 ```typescript
+import { http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { seismicDevnet, createShieldedWalletClient } from 'seismic-viem'
+
 const walletClient = await createShieldedWalletClient({
-  chain: seismicChain,
-  transport: httpTransport,
+  chain: seismicDevnet,
+  transport: http(),
+  account: privateKeyToAccount('0x0123...')
   privateKey: '0xabcdef...',
-})
+});
 
 // Perform wallet operations
 const result = await walletClient.writeContract({
   address: '0x1234...',
   data: '0xdeadbeef...',
-})
+});
 
 // Access shielded-specific actions
-const encryptionKey = walletClient.getEncryption()
-console.log('Encryption Key:', encryptionKey)
+const { aesKey } = walletClient.getEncryption();
+console.info('AES Key:', aesKey);
 ```
+
+## Type Parameters
+
+• **TTransport** _extends_ [`Transport`](https://github.com/wevm/viem)
+
+• **TChain** _extends_ `undefined` \| [`Chain`](https://github.com/wevm/viem)
+
+• **TAccount** _extends_ [`Account`](https://github.com/wevm/viem)
 
 ## Parameters
 
-### \_\_namedParameters
+### parameters
 
-`GetSeismicClientsParameters`
+`GetSeismicClientsParameters`\<`TTransport`, `TChain`, `TAccount`\>
+
+GetSeismicClientsParameters
 
 ## Returns
 
-`Promise`\<[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<[`Transport`](https://github.com/wevm/viem), [`Chain`](https://github.com/wevm/viem), [`Account`](https://github.com/wevm/viem)\>\>
-
-A promise that resolves
-to a fully configured shielded wallet client.
-
-## Remarks
-
-This function is a wrapper around `getSeismicClients`, extracting and returning the wallet
-client from the generated clients. The shielded wallet client is equipped with:
-
-- Public actions
-- Wallet-specific actions
-- Shielded-specific actions
-
-The encryption key is derived from the provided private key and the TEE public key of the network.
+`Promise`\<[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`TTransport`, `TChain`, `TAccount`\>\>

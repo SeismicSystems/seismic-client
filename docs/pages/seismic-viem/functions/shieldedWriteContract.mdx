@@ -18,18 +18,31 @@ function shieldedWriteContract<
 >(client, parameters): Promise<WriteContractReturnType>
 ```
 
-Defined in: [packages/seismic-viem/src/contract/write.ts:88](https://github.com/SeismicSystems/seismic-client/blob/300c8753de1f4a82b4ad878ae2bf31226abf8257/packages/seismic-viem/src/contract/write.ts#L88)
+Defined in: [packages/seismic-viem/src/contract/write.ts:59](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/contract/write.ts#L59)
 
-Executes a write function on a contract.
+Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's [writeContract](https://viem.sh/docs/contract/writeContract)
 
-- Docs: https://viem.sh/docs/contract/writeContract
-- Examples: https://stackblitz.com/github/wevm/viem/tree/main/examples/contracts/writing-to-contracts
+## Example
 
-A "write" function on a Solidity contract modifies the state of the blockchain. These types of functions require gas to be executed, and hence a [Transaction](https://viem.sh/docs/glossary/terms) is needed to be broadcast in order to change the state.
+```ts
+import {
+  createShieldedWalletContract,
+  seismicDevnet,
+  shieldedWriteContract,
+} from 'seismic-viem'
+import { custom, parseAbi } from 'viem'
 
-Internally, uses a [Wallet Client](https://viem.sh/docs/clients/wallet) to call the [`sendTransaction` action](https://viem.sh/docs/actions/wallet/sendTransaction) with [ABI-encoded `data`](https://viem.sh/docs/contract/encodeFunctionData).
-
-**Warning: The `write` internally sends a transaction – it does not validate if the contract write will succeed (the contract may throw an error). It is highly recommended to [simulate the contract write with `contract.simulate`](https://viem.sh/docs/contract/writeContract#usage) before you execute it.**
+const client = createShieldedWalletClient({
+  chain: seismicDevnet,
+  transport: custom(window.ethereum),
+})
+const hash = await shieldedWriteContract(client, {
+  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
+  functionName: 'mint',
+  args: [69420],
+})
+```
 
 ## Type Parameters
 
@@ -37,7 +50,7 @@ Internally, uses a [Wallet Client](https://viem.sh/docs/clients/wallet) to call 
 
 • **TChain** _extends_ `undefined` \| [`Chain`](https://github.com/wevm/viem)
 
-• **TAccount** _extends_ `undefined` \| [`Account`](https://github.com/wevm/viem)
+• **TAccount** _extends_ [`Account`](https://github.com/wevm/viem)
 
 • **TAbi** _extends_ `Abi` \| readonly `unknown`[]
 
@@ -66,41 +79,3 @@ Client to use
 `Promise`\<[`WriteContractReturnType`](https://github.com/wevm/viem)\>
 
 A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). [WriteContractReturnType](https://viem.sh/docs/glossary/types#hash)
-
-## Examples
-
-```ts
-import { createWalletClient, custom, parseAbi } from 'viem'
-import { mainnet } from 'viem/chains'
-import { writeContract } from 'viem/contract'
-
-const client = createWalletClient({
-  chain: mainnet,
-  transport: custom(window.ethereum),
-})
-const hash = await writeContract(client, {
-  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
-  functionName: 'mint',
-  args: [69420],
-})
-```
-
-```ts
-// With Validation
-import { createWalletClient, http, parseAbi } from 'viem'
-import { mainnet } from 'viem/chains'
-import { simulateContract, writeContract } from 'viem/contract'
-
-const client = createWalletClient({
-  chain: mainnet,
-  transport: http(),
-})
-const { request } = await simulateContract(client, {
-  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
-  functionName: 'mint',
-  args: [69420],
-}
-const hash = await writeContract(client, request)
-```
