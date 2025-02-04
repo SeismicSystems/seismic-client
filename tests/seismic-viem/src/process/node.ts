@@ -1,4 +1,4 @@
-import { Chain, anvil } from 'viem/chains'
+import type { Chain } from 'viem'
 
 import { anvilChain, seismicDevnetChain } from '@sviem/chain'
 import { setupAnvilNode } from '@test/process/chains/anvil'
@@ -27,9 +27,9 @@ enum ChainName {
 const nameToChain = (name: ChainName): Chain => {
   switch (name) {
     case ChainName.Anvil:
-      return anvilChain
+      return anvilChain as Chain
     case ChainName.Devnet:
-      return seismicDevnetChain
+      return seismicDevnetChain as Chain
     default:
       throw new Error(`Unable to map ${name} to Chain`)
   }
@@ -49,7 +49,7 @@ export const parseVerbosity = (verbosity: number | undefined): string[] => {
 
 export const setupNode = async (chain: Chain): Promise<SpawnedNode> => {
   switch (chain.id) {
-    case anvil.id:
+    case anvilChain.id:
       return setupAnvilNode()
     case seismicDevnetChain.id:
       return setupRethNode()

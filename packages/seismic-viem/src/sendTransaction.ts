@@ -11,10 +11,8 @@ import type {
   GetChainParameter,
   GetTransactionRequestKzgParameter,
   Hash,
-  Hex,
   PrepareTransactionRequestErrorType,
   SendRawTransactionErrorType,
-  TransactionRequest,
   Transport,
   UnionOmit,
 } from 'viem'
@@ -42,7 +40,11 @@ import {
   getTransactionError,
 } from 'viem/utils'
 
-import { serializeSeismicTransaction } from '@sviem/chain'
+import {
+  SeismicTxExtras,
+  TransactionSerializableSeismic,
+  serializeSeismicTransaction,
+} from '@sviem/chain'
 import type {
   AccountNotFoundErrorType,
   AccountTypeNotSupportedErrorType,
@@ -51,6 +53,7 @@ import {
   AccountNotFoundError,
   AccountTypeNotSupportedError,
 } from '@sviem/error/account'
+import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
 import type { GetAccountParameter } from '@sviem/viem-internal/account'
 import type { ErrorType } from '@sviem/viem-internal/error'
 import type { AssertRequestParameters } from '@sviem/viem-internal/request'
@@ -60,9 +63,8 @@ export type SendSeismicTransactionRequest<
   chainOverride extends Chain | undefined = Chain | undefined,
   _derivedChain extends Chain | undefined = DeriveChain<chain, chainOverride>,
 > = UnionOmit<FormattedTransactionRequest<_derivedChain>, 'from'> &
-  GetTransactionRequestKzgParameter & {
-    encryptionPubkey: Hex
-  }
+  GetTransactionRequestKzgParameter &
+  SeismicTxExtras
 
 export type SendSeismicTransactionParameters<
   chain extends Chain | undefined = Chain | undefined,
@@ -99,7 +101,7 @@ export type SendSeismicTransactionErrorType =
  * Sends a shielded transaction on the Seismic network.
  *
  * This function facilitates sending a transaction that includes shielded inputs such as blobs,
- * authorization lists, and a special `seismicInput`. The transaction is prepared, signed, and
+ * authorization lists, and encrypted calldata. The transaction is prepared, signed, and
  * submitted to the network based on the provided parameters.
  *
  * @template TChain - The type of the blockchain chain (extends `Chain` or `undefined`).
@@ -109,18 +111,17 @@ export type SendSeismicTransactionErrorType =
  *
  * @param client - The client instance used to execute the transaction, including chain, account,
  * and transport configurations.
- * @param parameters - The transaction parameters, including gas, value, blobs, seismicInput,
- * and other details.
+ * @param parameters - The transaction parameters, including gas, value, blobs, and other details.
  *
  * @returns A promise that resolves to the result of the shielded transaction submission.
  *
  * @throws {AccountNotFoundError} If no account is provided in the client or parameters.
  * @throws {AccountTypeNotSupportedError} If the account type is unsupported for shielded transactions.
- * @throws {Error} If the `seismicInput` is invalid or missing.
+ * @throws {Error} If the `data` is invalid or missing.
  *
  * @remarks
  * - Supports various account types, including `json-rpc` and `local`.
- * - Requires a valid `seismicInput` in hexadecimal format.
+ * - Requires a valid `data` in hexadecimal format.
  * - Throws specific errors for unsupported account types or missing account configurations.
  * - Uses the `sendRawTransaction` method for final transaction submission.
  *
@@ -129,7 +130,7 @@ export type SendSeismicTransactionErrorType =
  * const result = await sendShieldedTransaction(client, {
  *   account: { address: '0x1234...' },
  *   chain: seismicChain,
- *   seismicInput: '0xabcdef...',
+ *   data: '0xabcdef...',
  *   value: 1000n,
  *   gas: 21000n,
  * });
@@ -138,7 +139,7 @@ export type SendSeismicTransactionErrorType =
  */
 export async function sendShieldedTransaction<
   TChain extends Chain | undefined,
-  TAccount extends Account | undefined,
+  TAccount extends Account,
   const TRequest extends SendSeismicTransactionRequest<TChain, TChainOverride>,
   TChainOverride extends Chain | undefined = undefined,
 >(
@@ -167,7 +168,6 @@ export async function sendShieldedTransaction<
     encryptionPubkey,
     ...rest
   } = parameters
-  console.log('send shielded transaction request', parameters)
 
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
@@ -185,9 +185,9 @@ export async function sendShieldedTransaction<
     })()
 
     if (
-      account?.type === 'json-rpc' ||
       account === null ||
-      account?.type === 'local'
+      account?.type === 'local' ||
+      account?.type === 'json-rpc'
     ) {
       let chainId: number | undefined
       if (chain !== null) {
@@ -219,18 +219,34 @@ export async function sendShieldedTransaction<
         type: 'legacy', // prepareTransactionRequest will fill the required fields using legacy spec
         encryptionPubkey,
         ...rest,
-      } as TransactionRequest
+      } as any
 
-      // @ts-ignore
-      console.log('sendShieldedTransaction request', request)
-      // @ts-ignore
       const preparedTx = await prepareTransactionRequest(client, request)
-      console.log('sendShieldedTransaction preparedTx', preparedTx)
-      const serializedTransaction = await account!.signTransaction!(
-        { encryptionPubkey, ...preparedTx },
-        { serializer: serializeSeismicTransaction }
-      )
-      return await sendRawTransaction(client, { serializedTransaction })
+      const txRequest = {
+        encryptionPubkey,
+        ...preparedTx,
+      } as TransactionSerializableSeismic
+      if (account?.type === 'json-rpc') {
+        const { typedData, signature } = await signSeismicTxTypedData(
+          client,
+          txRequest
+        )
+        const action = getAction(
+          client,
+          sendRawTransaction,
+          'sendRawTransaction'
+        )
+        return await action({
+          // @ts-ignore
+          serializedTransaction: { data: typedData, signature },
+        })
+      } else {
+        const serializedTransaction = await account!.signTransaction!(
+          txRequest,
+          { serializer: serializeSeismicTransaction }
+        )
+        return await sendRawTransaction(client, { serializedTransaction })
+      }
     }
 
     if (account?.type === 'smart')

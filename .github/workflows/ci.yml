@@ -65,6 +65,7 @@ jobs:
       group: global-self-hosted-runner
       cancel-in-progress: false
     env:
+      SFOUNDRY_ROOT: /home/azureuser/seismic/seismic-foundry
       SRETH_ROOT: /home/azureuser/seismic/seismic-reth
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files

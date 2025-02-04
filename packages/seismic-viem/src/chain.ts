@@ -6,6 +6,7 @@ import {
   toRlp,
 } from 'viem'
 import type {
+  Address,
   BlockIdentifier,
   BlockNumber,
   BlockTag,
@@ -14,26 +15,46 @@ import type {
   Hex,
   RpcSchema,
   RpcStateOverride,
+  SerializeTransactionFn,
   Signature,
   TransactionRequest,
   TransactionSerializable,
+  TransactionSerializableGeneric,
 } from 'viem'
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
 
-export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
-
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
+  messageVersion?: number | undefined
 }
+
+export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
+export type TransactionSerializableSeismic = TransactionSerializable &
+  SeismicTxExtras
+
+export type TxSeismic = {
+  chainId?: number | undefined
+  nonce?: bigint | undefined
+  gasPrice?: bigint | undefined
+  gasLimit?: bigint | undefined
+  to?: Address | null | undefined
+  value?: bigint | undefined
+  input?: Hex | undefined
+  encryptionPubkey: Hex
+  messageVersion: number | undefined
+}
+
 export const stringifyBigInt = (_: any, v: any) =>
   typeof v === 'bigint' ? v.toString() : v
 
-export const serializeSeismicTransaction = (
-  transaction: TransactionSerializable & SeismicTxExtras,
+export type SeismicTxSerializer =
+  SerializeTransactionFn<TransactionSerializableSeismic>
+
+export const serializeSeismicTransaction: SeismicTxSerializer = (
+  transaction: TransactionSerializableSeismic,
   signature?: Signature
 ): Hex => {
-  console.log('serializeSeismicTransaction transaction', transaction)
   const {
     chainId,
     nonce,
@@ -43,6 +64,7 @@ export const serializeSeismicTransaction = (
     data,
     value = 0n,
     encryptionPubkey,
+    messageVersion = 0,
   } = transaction
 
   if (!chainId) {
@@ -56,9 +78,13 @@ export const serializeSeismicTransaction = (
     gas ? toHex(gas) : '0x',
     to ?? '0x',
     value ? toHex(value) : '0x',
-    data ?? '0x',
     encryptionPubkey ?? '0x',
-    ...toYParitySignatureArray(transaction, signature),
+    messageVersion ? toHex(messageVersion) : '0x',
+    data ?? '0x',
+    ...toYParitySignatureArray(
+      transaction as TransactionSerializableGeneric,
+      signature
+    ),
   ])
   const encodedTx = concatHex([
     toHex(74), // seismic tx type '0x4a'
@@ -105,11 +131,9 @@ export const allTransactionTypes = {
 
 // This function is called by viem's call, estimateGas, and sendTransaction, ...
 // We can use this to parse transaction request before sending it to the node
-const seismicChainFormatters: ChainFormatters = {
+export const seismicChainFormatters: ChainFormatters = {
   transactionRequest: {
     format: (request: SeismicTransactionRequest) => {
-      console.log('formatter input', request)
-
       const formattedRpcRequest = formatTransactionRequest(request)
 
       let data = formattedRpcRequest.data
@@ -131,7 +155,6 @@ const seismicChainFormatters: ChainFormatters = {
         ...(chainId !== undefined && { chainId }),
       }
 
-      console.log('formatter output', ret)
       return ret
     },
     type: 'transactionRequest',
