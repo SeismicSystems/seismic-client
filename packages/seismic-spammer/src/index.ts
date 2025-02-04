@@ -1,14 +1,14 @@
-import { createPublicClient, http, parseGwei } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { Chain } from 'viem/chains'
-
 import {
   ShieldedContract,
   ShieldedPublicClient,
   ShieldedWalletClient,
   getSeismicClients,
   getShieldedContract,
-} from '@sviem/index'
+} from 'seismic-viem'
+import { createPublicClient, http, parseGwei } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { Chain } from 'viem/chains'
+
 import { contractABI } from '@test/contract/abi'
 import { bytecode } from '@test/contract/bytecode'
 import { getDeployedAddress } from '@test/utils'

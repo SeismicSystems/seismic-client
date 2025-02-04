@@ -10,6 +10,7 @@ import type {
   BlockIdentifier,
   BlockNumber,
   BlockTag,
+  Chain,
   ChainFormatters,
   ExactPartial,
   Hex,
@@ -161,6 +162,27 @@ export const seismicChainFormatters: ChainFormatters = {
   },
 }
 
+export const createSeismicDevnet = /*#__PURE__*/ (node: number): Chain => {
+  return defineChain({
+    id: 1337,
+    name: 'Seismic',
+    nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
+    rpcUrls: {
+      default: {
+        http: [`https://node-${node}.seismicdev.net/rpc`],
+        webSocket: [`wss://node-${node}.seismicdev.net/ws`],
+      },
+    },
+    blockExplorers: {
+      default: {
+        name: 'SeismicScan',
+        url: `https://explorer-${node}.seismicdev.net`,
+      },
+    },
+    formatters: seismicChainFormatters,
+  })
+}
+
 /**
  * Defines the Seismic development network configuration.
  *
@@ -180,31 +202,32 @@ export const seismicChainFormatters: ChainFormatters = {
  * @property {string[]} rpcUrls.default.http - HTTP URLs for RPC access.
  * @property {string[]} rpcUrls.default.webSocket - WebSocket URLs for RPC access.
  */
-export const seismicDevnetChain = /*#__PURE__*/ defineChain({
+export const seismicDevnet1 = createSeismicDevnet(1)
+export const seismicDevnet2 = createSeismicDevnet(2)
+export const seismicDevnet = seismicDevnet1
+
+export const localSeismicDevnet = /*#__PURE__*/ defineChain({
   // TODO
   id: 1337,
   name: 'Seismic',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
     default: {
-      // TODO: publish real URLs
-      // http: ['https://seismicdev.net/rpc'],
-      // http: ['https://seismicdev.net/ws'],
       http: ['http://127.0.0.1:8545'],
-      webSocket: ['ws://127.0.0.1:8545'],
+      ws: ['ws://127.0.0.1:8546'],
     },
   },
   formatters: seismicChainFormatters,
 })
 
-export const anvilChain = /*#__PURE__*/ defineChain({
+export const sanvil = /*#__PURE__*/ defineChain({
   id: 31_337,
   name: 'Anvil',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
     default: {
       http: ['http://127.0.0.1:8545'],
-      webSocket: ['ws://127.0.0.1:8545'],
+      webSocket: ['ws://127.0.0.1:8546'],
     },
   },
   formatters: seismicChainFormatters,

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist/_types",
+    "tsBuildInfoFile": "./dist/_types/.tsbuildinfo",
+    "rootDir": "./src",
+    "baseUrl": "src",
+    "paths": {
+      "@sviem/*": ["../seismic-viem/src/*"],
+      "@sreact/*": ["./*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

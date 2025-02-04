@@ -1,4 +1,12 @@
-export { seismicDevnetChain, seismicChainFormatters } from '@sviem/chain'
+export {
+  sanvil,
+  seismicDevnet1,
+  seismicDevnet2,
+  seismicDevnet,
+  localSeismicDevnet,
+  createSeismicDevnet,
+  seismicChainFormatters,
+} from '@sviem/chain'
 
 export { getShieldedContract } from '@sviem/contract/contract'
 export { signedReadContract } from '@sviem/contract/read'
