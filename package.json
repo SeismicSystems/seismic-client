@@ -28,15 +28,11 @@
     "viem:docs:gen": "bun run --cwd packages/seismic-viem docs:gen",
     "viem:docs:check": "bun run --cwd packages/seismic-viem docs:check",
     "react:build": "bun run --cwd packages/seismic-react build",
-<<<<<<< HEAD
-    "react:publish": "npm publish -w packages/seismic-react"
-=======
     "react:publish": "npm publish -w packages/seismic-react",
     "react:docs:build": "bun run --cwd packages/seismic-react vocs build",
     "react:docs:preview": "bun run --cwd packages/seismic-react vocs preview",
     "react:docs:gen": "bun run --cwd packages/seismic-react docs:gen",
     "react:docs:check": "bun run --cwd packages/seismic-react docs:check"
->>>>>>> main
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
