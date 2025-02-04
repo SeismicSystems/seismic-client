@@ -1,11 +1,20 @@
 {
   "name": "seismic-react",
   "version": "1.0.0-alpha.experimental.6",
-  "description": "React components for Seismic.",
-  "type": "module",
+  "author": "Seismic Systems",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SeismicSystems/seismic-client"
+  },
   "main": "dist/_cjs/index.js",
   "module": "dist/_esm/index.js",
-  "types": "dist/_types/index.d.ts",
+  "peerDependencies": {
+    "@rainbow-me/rainbowkit": "^2.0.0",
+    "react": ">=18",
+    "typescript": ">=5.0.4",
+    "viem": "2.x",
+    "wagmi": "^2.0.0"
+  },
   "exports": {
     ".": {
       "require": "./dist/_cjs/index.js",
@@ -13,12 +22,28 @@
       "types": "./dist/_types/index.d.ts"
     }
   },
+  "description": "React components for Seismic.",
   "files": [
     "dist/_cjs/*.js",
     "dist/_esm/*.js",
     "dist/_types/**/*.d.ts",
     "README.md"
   ],
+  "homepage": "https://seismic.systems",
+  "keywords": [
+    "seismic",
+    "hooks",
+    "react",
+    "dapps",
+    "typescript",
+    "ethereum"
+  ],
+  "license": "MIT",
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
   "scripts": {
     "clean": "bun run rimraf dist",
     "typecheck": "tsc --noEmit --project tsconfig.types.json",
@@ -31,33 +56,9 @@
     "docs:gen": "bun run typedoc src/index.ts --out ../../docs/pages/seismic-react",
     "docs:check": "bun run typedoc src/index.ts --json ./typedoc.out.json && rm ./typedoc.out.json"
   },
-  "dependencies": {},
-  "peerDependencies": {
-    "typescript": ">=5.0.4",
-    "react": ">=18",
-    "viem": "2.x",
-    "wagmi": "^2.0.0",
-    "@rainbow-me/rainbowkit": "^2.0.0",
+  "type": "module",
+  "types": "dist/_types/index.d.ts",
+  "dependencies": {
     "seismic-viem": "1.0.11-alpha.experimental.3"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
-  "license": "MIT",
-  "author": "Seismic Systems",
-  "homepage": "https://seismic.systems",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/SeismicSystems/seismic-client"
-  },
-  "keywords": [
-    "seismic",
-    "hooks",
-    "react",
-    "dapps",
-    "typescript",
-    "ethereum"
-  ]
+  }
 }
