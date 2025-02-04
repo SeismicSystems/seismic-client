@@ -57,5 +57,8 @@
     "typedoc-plugin-markdown": "^4.4.1",
     "vocs": "^1.0.0-alpha.62"
   },
-  "dependencies": {}
+  "dependencies": {
+    "react": "18.3.0",
+    "react-dom": "18.3.0"
+  }
 }
