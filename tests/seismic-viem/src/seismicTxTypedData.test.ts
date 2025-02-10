@@ -77,13 +77,16 @@ const testSeismicTxTypedData = async () => {
 
   const preTxBalance = await client.getBalance({ address: recipientAddress })
 
+  const nonce = await client.getTransactionCount({
+    address: testAccount.address,
+  })
   const baseTx: TransactionSerializableLegacy = {
     to: recipientAddress,
     chainId: chain.id,
     type: 'legacy',
     gas: 100_000n,
     value,
-    nonce: 0,
+    nonce,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
   const tx = { ...preparedTx, encryptionPubkey: ENC_PK }
