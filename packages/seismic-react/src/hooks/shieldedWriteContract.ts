@@ -17,6 +17,8 @@ export type UseShieldedWriteContractConfig<
   abi: TAbi
   functionName: TFunctionName
   args?: TArgs
+  gas?: bigint
+  gasPrice?: bigint
 }
 
 /**
@@ -42,6 +44,8 @@ export function useShieldedWriteContract<
   abi,
   functionName,
   args,
+  gas,
+  gasPrice,
 }: UseShieldedWriteContractConfig<TAbi, TFunctionName, TArgs>) {
   const { walletClient } = useShieldedWallet()
 
@@ -66,6 +70,8 @@ export function useShieldedWriteContract<
         abi,
         functionName,
         ...(args && { args }),
+        ...(gas && { gas }),
+        ...(gasPrice && { gasPrice }),
       } as any)
       console.log('tx', tx)
       setHash(tx)
@@ -78,7 +84,7 @@ export function useShieldedWriteContract<
     } finally {
       setIsLoading(false)
     }
-  }, [walletClient, address, abi, functionName, args])
+  }, [walletClient, address, abi, functionName, args, gas, gasPrice])
 
   return {
     writeContract,
