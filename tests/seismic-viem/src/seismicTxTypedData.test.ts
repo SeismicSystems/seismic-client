@@ -28,7 +28,7 @@ const recipientAddress = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
 
 const testSeismicCallTypedData = async () => {
   const client = await createShieldedWalletClient({
-    chain: anvil,
+    chain,
     account: testAccount,
     transport: http(url),
     encryptionSk: ENC_SK,
@@ -46,7 +46,7 @@ const testSeismicCallTypedData = async () => {
     nonce,
     to: '0x0000000000000000000000000000000000000002',
     data: encrypted,
-    chainId: anvil.id,
+    chainId: chain.id,
     type: 'legacy',
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)

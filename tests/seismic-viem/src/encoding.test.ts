@@ -3,7 +3,6 @@ import { http } from 'viem'
 import type { TransactionSerializableLegacy } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { prepareTransactionRequest } from 'viem/actions'
-import { anvil } from 'viem/chains'
 
 import { SeismicTxExtras, serializeSeismicTransaction } from '@sviem/chain'
 import { createShieldedWalletClient } from '@sviem/client'
@@ -20,12 +19,13 @@ const TEST_ACCOUNT_PRIVATE_KEY =
 const testAccount = privateKeyToAccount(TEST_ACCOUNT_PRIVATE_KEY)
 
 // Running on a different port because contract.test.ts uses 8545
-const { url, exitProcess } = await setupNode(envChain(), 8546)
+const chain = envChain()
+const { url, exitProcess } = await setupNode(chain, 8546)
 
 const testSeismicTxEncoding = async () => {
   expect(ENC_PK).toBe(compressPublicKey(privateKeyToAccount(ENC_SK).publicKey))
   const tx: TransactionSerializableLegacy = {
-    chainId: anvil.id,
+    chainId: chain.id,
     nonce: 2,
     gasPrice: 1000000000n,
     gas: 100000n,
@@ -39,7 +39,7 @@ const testSeismicTxEncoding = async () => {
   }
 
   const client = await createShieldedWalletClient({
-    chain: anvil,
+    chain,
     account: testAccount,
     transport: http(url),
     encryptionSk: ENC_SK,
