@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.5",
+  "version": "1.0.14",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
