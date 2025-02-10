@@ -239,7 +239,7 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
     (node ? `https://explorer-${node}.seismicdev.net` : undefined)
 
   return defineChain({
-    id: 1337,
+    id: 5174,
     name: 'Seismic',
     nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
     rpcUrls: {
