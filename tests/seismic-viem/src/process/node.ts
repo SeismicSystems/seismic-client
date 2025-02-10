@@ -47,12 +47,15 @@ export const parseVerbosity = (verbosity: number | undefined): string[] => {
   return verbosity ? [`-${'v'.repeat(Math.min(verbosity, 5))}`] : []
 }
 
-export const setupNode = async (chain: Chain): Promise<SpawnedNode> => {
+export const setupNode = async (
+  chain: Chain,
+  port: number = 8545
+): Promise<SpawnedNode> => {
   switch (chain.id) {
     case sanvil.id:
-      return setupAnvilNode()
+      return setupAnvilNode({ port })
     case seismicDevnet.id:
-      return setupRethNode()
+      return setupRethNode({ port })
     default:
       throw new Error(`Unable to map Chain ${chain.id} to Backend`)
   }
