@@ -3,7 +3,6 @@ import { http } from 'viem'
 import type { TransactionSerializableLegacy } from 'viem'
 import type { Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { anvil } from 'viem/chains'
 import { parseEther } from 'viem/utils'
 
 import { createShieldedWalletClient } from '@sviem/client'
@@ -70,7 +69,7 @@ const testSeismicTxTypedData = async () => {
   const value = parseEther('1', 'wei')
 
   const client = await createShieldedWalletClient({
-    chain: anvil,
+    chain,
     account: testAccount,
     transport: http(url),
     encryptionSk: ENC_SK,
@@ -80,7 +79,7 @@ const testSeismicTxTypedData = async () => {
 
   const baseTx: TransactionSerializableLegacy = {
     to: recipientAddress,
-    chainId: anvil.id,
+    chainId: chain.id,
     type: 'legacy',
     gas: 100_000n,
     value,
