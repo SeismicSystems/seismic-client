@@ -9,10 +9,11 @@ import { parseEther } from 'viem/utils'
 import { createShieldedWalletClient } from '@sviem/client'
 import { AesGcmCrypto } from '@sviem/crypto/aes'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
-import { setupAnvilNode } from '@test/process/chains/anvil'
+import { envChain, setupNode } from '@test/process/node'
 
 // Running on a different port because contract.test.ts uses 8545
-const { url, exitProcess } = await setupAnvilNode({ port: 8547 })
+const chain = envChain()
+const { url, exitProcess } = await setupNode(chain, 8547)
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
@@ -101,7 +102,9 @@ const testSeismicTxTypedData = async () => {
 }
 
 describe('Seismic Transaction Encoding', async () => {
-  // test('client can sign a seismic typed message', testSeismicCallTypedData)
+  test('client can sign a seismic typed message', testSeismicCallTypedData, {
+    timeout: 20_000,
+  })
 
   test('client can sign via eth_signTypedData', testSeismicTxTypedData, {
     timeout: 20000,

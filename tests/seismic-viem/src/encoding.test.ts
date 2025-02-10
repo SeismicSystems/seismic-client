@@ -8,7 +8,7 @@ import { anvil } from 'viem/chains'
 import { SeismicTxExtras, serializeSeismicTransaction } from '@sviem/chain'
 import { createShieldedWalletClient } from '@sviem/client'
 import { compressPublicKey } from '@sviem/crypto/secp'
-import { setupAnvilNode } from '@test/process/chains/anvil'
+import { envChain, setupNode } from '@test/process/node'
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
@@ -20,7 +20,7 @@ const TEST_ACCOUNT_PRIVATE_KEY =
 const testAccount = privateKeyToAccount(TEST_ACCOUNT_PRIVATE_KEY)
 
 // Running on a different port because contract.test.ts uses 8545
-const { url, exitProcess } = await setupAnvilNode({ port: 8546 })
+const { url, exitProcess } = await setupNode(envChain(), 8546)
 
 const testSeismicTxEncoding = async () => {
   expect(ENC_PK).toBe(compressPublicKey(privateKeyToAccount(ENC_SK).publicKey))
