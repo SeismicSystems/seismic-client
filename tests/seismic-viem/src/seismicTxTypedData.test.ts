@@ -48,6 +48,7 @@ const testSeismicCallTypedData = async () => {
     data: encrypted,
     chainId: chain.id,
     type: 'legacy',
+    gas: 30_000_000n,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
   const tx = { ...preparedTx, encryptionPubkey: ENC_PK }
