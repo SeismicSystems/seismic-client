@@ -284,8 +284,7 @@ export const seismicDevnet = seismicDevnet1
  * For connecting to a locally-running seismic-reth instance on --dev mode
  */
 export const localSeismicDevnet = /*#__PURE__*/ defineChain({
-  // TODO: change network ID
-  id: 1337,
+  id: 5124,
   name: 'Seismic',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
