@@ -63,7 +63,7 @@ export const localSeismicDevnet = toRainbowKitChain(
  *                                       defaults to `https://explorer-{node}.seismicdev.net`
  * @throws {Error} Throws if neither node number nor nodeHost is provided
  * @returns {RainbowKitChain} A chain configuration object containing:
- *   - Chain ID: 1337
+ *   - Chain ID: 5124
  *   - Network name: 'Seismic'
  *   - Native ETH currency configuration
  *   - RPC URLs (HTTP and WebSocket endpoints)

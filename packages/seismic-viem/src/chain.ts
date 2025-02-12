@@ -208,7 +208,7 @@ export type CreateSeismicDevnetParams = { explorerUrl?: string } & (
  *                                       defaults to `https://explorer-{node}.seismicdev.net`
  * @throws {Error} Throws if neither node number nor nodeHost is provided
  * @returns {Chain} A chain configuration object containing:
- *   - Chain ID: 1337
+ *   - Chain ID: 5124
  *   - Network name: 'Seismic'
  *   - Native ETH currency configuration
  *   - RPC URLs (HTTP and WebSocket endpoints)
@@ -284,8 +284,7 @@ export const seismicDevnet = seismicDevnet1
  * For connecting to a locally-running seismic-reth instance on --dev mode
  */
 export const localSeismicDevnet = /*#__PURE__*/ defineChain({
-  // TODO: change network ID
-  id: 1337,
+  id: 5124,
   name: 'Seismic',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
   rpcUrls: {
