@@ -1,6 +1,9 @@
 # Seismic Client
 
-Seismic's typescript client using Viem actions
+Seismic's typescript client. This repository contains:
+
+- [seismic-viem](packages/seismic-viem), a set of extensions for [viem](https://viem.sh/)
+- [seismic-react](packages/seismic-react), a set of React hooks compatible with [wagmi](https://wagmi.sh/)
 
 ## Docs
 
