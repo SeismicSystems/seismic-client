@@ -1,12 +1,10 @@
 import type {
   Abi,
   AbiFunction,
-  AbiItemName,
   Account,
   Chain,
   ContractFunctionArgs,
   ContractFunctionName,
-  GetAbiItemParameters,
   Transport,
   WriteContractParameters,
   WriteContractReturnType,
@@ -15,31 +13,26 @@ import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
 import { formatAbiItem } from 'viem/utils'
 
 import type { ShieldedWalletClient } from '@sviem/client'
-import { hasShieldedInputs, remapSeismicAbiInputs } from '@sviem/contract/abi'
+import { remapSeismicAbiInputs } from '@sviem/contract/abi'
 import { AesGcmCrypto } from '@sviem/crypto/aes'
 import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.js'
 import { sendShieldedTransaction } from '@sviem/sendTransaction.js'
 
 /**
-  Determine whether the contract has shielded parameters.
-  If so, we will encrypt the entire payload;
-  If not, we will send a normal Ethereum transaction
-  */
-export function useSeismicWrite<
-  const abi extends Abi | readonly unknown[],
-  name extends AbiItemName<abi>,
->(parameters: GetAbiItemParameters<abi, name, undefined>): boolean {
-  const { abi, name } = parameters as unknown as GetAbiItemParameters
-  const abiItem = getAbiItem({ abi, name }) as AbiFunction
-  return hasShieldedInputs(abiItem)
-}
-
-/**
  * Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's {@link https://viem.sh/docs/contract/writeContract writeContract}
  *
- * @param client - Client to use
- * @param parameters - {@link https://viem.sh/docs/contract/writeContract.html#parameters WriteContractParameters}
- * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms#hash). {@link https://viem.sh/docs/glossary/types#hash WriteContractReturnType}
+ *
+ * @param {ShieldedWalletClient} client - The client to use.
+ * @param {WriteContractParameters} parameters - The configuration object for the write operation.
+ *   - `address` ({@link Hex}) - The address of the contract.
+ *   - `abi` ({@link Abi}) - The contract's ABI.
+ *   - `functionName` (string) - The name of the contract function to call.
+ *   - `args` (array) - The arguments to pass to the contract function.
+ *   - `gas` (bigint, optional) - Optional gas limit for the transaction.
+ *   - `gasPrice` (bigint, optional) - Optional gas price for the transaction.
+ *   - `value` (bigint, optional) - Optional value (native token amount) to send with the transaction.
+ *
+ * @returns {Promise<WriteContractReturnType>} A promise that resolves to a transaction hash.
  *
  * @example
  * import { custom, parseAbi } from 'viem'

@@ -12,7 +12,7 @@ function createShieldedWalletClient<TTransport, TChain, TAccount>(
 ): Promise<ShieldedWalletClient<TTransport, TChain, TAccount>>
 ```
 
-Defined in: [packages/seismic-viem/src/client.ts:247](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/client.ts#L247)
+Defined in: [packages/seismic-viem/src/client.ts:255](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-viem/src/client.ts#L255)
 
 Creates a wallet client to perform reads & writes on the Seismic network
 
@@ -55,8 +55,16 @@ console.info('AES Key:', aesKey);
 
 `GetSeismicClientsParameters`\<`TTransport`, `TChain`, `TAccount`\>
 
-GetSeismicClientsParameters
+The configuration object.
+
+- `chain` ([Chain](https://github.com/wevm/viem) | undefined) - The chain configuration to target (e.g., `seismicDevnet`).
+- `transport` ([Transport](https://github.com/wevm/viem)) - The transport layer to use (e.g., an HTTP transport).
+- `account` ([Account](https://github.com/wevm/viem)) - The account to use for wallet operations.
+- `encryptionSk` (string) - The secret key used for shielded encryption.
+- `publicClient` (object, optional) - An optional public client instance for additional network interactions.
 
 ## Returns
 
 `Promise`\<[`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`TTransport`, `TChain`, `TAccount`\>\>
+
+A promise that resolves to a shielded wallet client instance.

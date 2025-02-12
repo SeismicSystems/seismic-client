@@ -5,13 +5,24 @@ import type { Abi, Address } from 'viem'
 
 import { useShieldedWallet } from '@sreact/context/shieldedWallet'
 
+export type UseShieldedContractConfig<
+  TAddress extends Address,
+  TAbi extends Abi | readonly unknown[],
+> = { abi: TAbi; address: TAddress }
+
 /**
- * A react hook that exposes `contract`, which is returned by a call to {@link getShieldedContract}
+ * A React hook that exposes `contract`, which is returned by a call to {@link getShieldedContract}.
+ *
+ * @param {UseShieldedContractConfig} config - The configuration object.
+ *   - `abi` ({@link Abi}) - The contract ABI.
+ *   - `address` ({@link Address}) - The contract address.
+ *
+ * @returns The shielded contract instance.
  */
 export function useShieldedContract<
   TAddress extends Address,
   const TAbi extends Abi | readonly unknown[],
->({ abi, address }: { abi: TAbi; address: TAddress }) {
+>({ abi, address }: UseShieldedContractConfig<TAddress, TAbi>) {
   const { walletClient } = useShieldedWallet()
   const [contract, setContract] = useState<ShieldedContract | null>(null)
 

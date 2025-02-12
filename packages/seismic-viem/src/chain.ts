@@ -199,28 +199,32 @@ export type CreateSeismicDevnetParams = { explorerUrl?: string } & (
 )
 
 /**
- * Creates a Seismic development network chain configuration
- * @param {Object} params - The parameters for creating a Seismic devnet
- * @param {number} [params.node] - Node number for the devnet. If provided without nodeHost,
- *                                will generate hostname as `node-{number}.seismicdev.net`
- * @param {string} [params.nodeHost] - Direct hostname for the node. Required if node number not provided
- * @param {string} [params.explorerUrl] - Custom block explorer URL. If not provided and node number exists,
- *                                       defaults to `https://explorer-{node}.seismicdev.net`
- * @throws {Error} Throws if neither node number nor nodeHost is provided
+ * Creates a Seismic development network chain configuration.
+ *
+ * @param {CreateSeismicDevnetParams} params - The parameters for creating a Seismic devnet.
+ *   - `node` (number, optional) - The node number for the devnet. If provided without `nodeHost`,
+ *     the hostname will be generated as `node-{node}.seismicdev.net`.
+ *   - `nodeHost` (string, optional) - The direct hostname for the node. Required if `node` is not provided.
+ *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided and `node` exists,
+ *     defaults to `https://explorer-{node}.seismicdev.net`.
+ *
+ * @throws {Error} Throws if neither node number nor nodeHost is provided.
+ *
  * @returns {Chain} A chain configuration object containing:
- *   - Chain ID: 5124
- *   - Network name: 'Seismic'
- *   - Native ETH currency configuration
- *   - RPC URLs (HTTP and WebSocket endpoints)
- *   - Block explorer configuration (if applicable)
- *   - Seismic-specific transaction formatters
+ *   - Chain ID: 5124.
+ *   - Network name: 'Seismic'.
+ *   - Native ETH currency configuration.
+ *   - RPC URLs (HTTP and WebSocket endpoints).
+ *   - Block explorer configuration (if applicable).
+ *   - Seismic-specific transaction formatters.
+ *
  * @example
  * ```typescript
  * // Create using node number
- * const devnet1 = createSeismicDevnet({ node: 1 })
+ * const devnet1 = createSeismicDevnet({ node: 1 });
  *
  * // Create using custom host
- * const devnet2 = createSeismicDevnet({ nodeHost: 'custom.node.example.com' })
+ * const devnet2 = createSeismicDevnet({ nodeHost: 'custom.node.example.com' });
  * ```
  */
 export const createSeismicDevnet = /*#__PURE__*/ ({

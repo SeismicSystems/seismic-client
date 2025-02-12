@@ -133,7 +133,9 @@ export const getEncryption = (
 /**
  * Creates a public client for the Seismic network.
  *
- * @param parameters {@link https://viem.sh/docs/clients/public.html#parameters PublicClientConfig}: The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html | createPublicClient}
+ * @param parameters {@link https://viem.sh/docs/clients/public.html#parameters PublicClientConfig}: The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html | createPublicClient}. Two common args are:
+ *   - `chain` ({@link Chain} | undefined) - The chain configuration to target (e.g., `seismicDevnet`).
+ *   - `transport` ({@link Transport}) - The transport layer to use (e.g., an HTTP transport).
  *
  * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>}
  *
@@ -217,8 +219,14 @@ export const getSeismicClients = async <
 /**
  * Creates a wallet client to perform reads & writes on the Seismic network
  *
- * @param parameters {@link GetSeismicClientsParameters}
- * @returns {Promise<ShieldedWalletClient<Transport, Chain, Account>>}
+ * @param {GetSeismicClientsParameters} parameters - The configuration object.
+ *   - `chain` ({@link Chain} | undefined) - The chain configuration to target (e.g., `seismicDevnet`).
+ *   - `transport` ({@link Transport}) - The transport layer to use (e.g., an HTTP transport).
+ *   - `account` ({@link Account}) - The account to use for wallet operations.
+ *   - `encryptionSk` (string) - The secret key used for shielded encryption.
+ *   - `publicClient` (object, optional) - An optional public client instance for additional network interactions.
+ *
+ * @returns {Promise<ShieldedWalletClient>} A promise that resolves to a shielded wallet client instance.
  *
  * @example
  * ```typescript

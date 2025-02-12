@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { shieldedWriteContract } from 'seismic-viem'
-import type { Abi, ContractFunctionArgs, ContractFunctionName } from 'viem'
+import type { Abi, ContractFunctionArgs, ContractFunctionName, Hex } from 'viem'
 
 import { useShieldedWallet } from '@sreact/context/shieldedWallet'
 
@@ -13,7 +13,7 @@ export type UseShieldedWriteContractConfig<
     TFunctionName
   >,
 > = {
-  address: `0x${string}`
+  address: Hex
   abi: TAbi
   functionName: TFunctionName
   args?: TArgs
@@ -23,13 +23,21 @@ export type UseShieldedWriteContractConfig<
 
 /**
  * Similar to wagmi's {@link https://wagmi.sh/react/api/hooks/useWriteContract useWriteContract} hook,
- * but uses {@link shieldedWriteContract} instead
+ * but uses {@link shieldedWriteContract} instead.
  *
- * @returns {Object}
- * - `writeContract` (function) - to make writes
- * - `isLoading` (bool)
- * - `hash` (string) - Transaction hash of last successful call to `writeContract`
- * - `error` (string) - Error from most recent call to `writeContract`, if any
+ * @param {UseShieldedWriteContractConfig} config - The configuration object.
+ *   - `address` ({@link Hex}) - The address of the contract.
+ *   - `abi` ({@link Abi}) - The contract ABI.
+ *   - `functionName` (string) - The name of the contract function to call.
+ *   - `args` (array) - The arguments to pass to the contract function.
+ *   - `gas` (bigint) - Optional gas limit for the transaction.
+ *   - `gasPrice` (bigint) - Optional gas price for the transaction.
+ *
+ * @returns {object} An object containing:
+ *   - `writeContract` (function): A function to execute contract writes.
+ *   - `isLoading` (boolean): Indicates if the write operation is in progress.
+ *   - `hash` (string): The transaction hash from the last successful call to `writeContract`.
+ *   - `error` (string): Any error message from the most recent call to `writeContract`, if present.
  */
 export function useShieldedWriteContract<
   TAbi extends Abi | readonly unknown[],

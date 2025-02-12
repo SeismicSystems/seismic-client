@@ -122,19 +122,10 @@ export type ShieldedContract<
  * - `tread`: transparently read from a contract using an unsigned read (from the zero address)
  * - `twrite`: transparently write to a contract using non-encrypted calldata
  *
- * @template TTransport - The transport mechanism used for communication (extends `Transport`).
- * @template TAddress - The address type of the contract.
- * @template TAbi - The ABI (Application Binary Interface) of the contract, either strict `Abi` or unknown array.
- * @template TClient - The client type, supporting either a `ShieldedWalletClient` or `KeyedClient`.
- * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
- * @template TAccount - The account type associated with the wallet client (extends `Account` or `undefined`).
- *
- * @param params
- * @property abi - The contract's ABI
- * @property address - The contract's address
- * @property client - The client instance to use for interacting with the contract. Must be a {@link ShieldedWalletClient}.
- *
- * @returns A contract instance with extended shielded write and signed read functionalities.
+ * @param {GetContractParameters} params - The configuration object.
+ *   - `abi` ({@link Abi}) - The contract's ABI.
+ *   - `address` ({@link Address}) - The contract's address.
+ *   - `client` ({@link ShieldedWalletClient}) - The client instance to use for interacting with the contract.
  *
  * @throws {Error} If the wallet client is not provided for shielded write or signed read operations.
  * @throws {Error} If the wallet client does not have an account configured for signed reads.

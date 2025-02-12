@@ -1,0 +1,32 @@
+[**seismic-react**](/seismic-react/README.mdx)
+
+---
+
+[seismic-react](/seismic-react/globals.mdx) / UseShieldedWriteContractConfig
+
+# Type Alias: UseShieldedWriteContractConfig\<TAbi, TFunctionName, TArgs\>
+
+```ts
+type UseShieldedWriteContractConfig<TAbi, TFunctionName, TArgs> = object
+```
+
+Defined in: [packages/seismic-react/src/hooks/shieldedWriteContract.ts:7](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L7)
+
+## Type Parameters
+
+• **TAbi** _extends_ `Abi` \| readonly `unknown`[]
+
+• **TFunctionName** _extends_ [`ContractFunctionName`](https://github.com/wevm/viem)\<`TAbi`, `"nonpayable"` \| `"payable"`\>
+
+• **TArgs** _extends_ [`ContractFunctionArgs`](https://github.com/wevm/viem)\<`TAbi`, `"nonpayable"` \| `"payable"`, `TFunctionName`\>
+
+## Type declaration
+
+| Name                                     | Type                                  | Defined in                                                                                                                                                                                                                   |
+| ---------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a id="abi"></a> `abi`                   | `TAbi`                                | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:17](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L17) |
+| <a id="address"></a> `address`           | [`Hex`](https://github.com/wevm/viem) | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:16](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L16) |
+| <a id="args"></a> `args`?                | `TArgs`                               | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:19](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L19) |
+| <a id="functionname"></a> `functionName` | `TFunctionName`                       | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:18](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L18) |
+| <a id="gas"></a> `gas`?                  | `bigint`                              | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:20](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L20) |
+| <a id="gasprice"></a> `gasPrice`?        | `bigint`                              | [packages/seismic-react/src/hooks/shieldedWriteContract.ts:21](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedWriteContract.ts#L21) |

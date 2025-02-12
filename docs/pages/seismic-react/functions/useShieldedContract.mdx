@@ -7,12 +7,12 @@
 # Function: useShieldedContract()
 
 ```ts
-function useShieldedContract<TAddress, TAbi>(__namedParameters): object
+function useShieldedContract<TAddress, TAbi>(config): object
 ```
 
-Defined in: [packages/seismic-react/src/hooks/shieldedContract.ts:11](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-react/src/hooks/shieldedContract.ts#L11)
+Defined in: [packages/seismic-react/src/hooks/shieldedContract.ts:22](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedContract.ts#L22)
 
-A react hook that exposes `contract`, which is returned by a call to getShieldedContract
+A React hook that exposes `contract`, which is returned by a call to getShieldedContract.
 
 ## Type Parameters
 
@@ -22,21 +22,22 @@ A react hook that exposes `contract`, which is returned by a call to getShielded
 
 ## Parameters
 
-### \_\_namedParameters
+### config
 
-#### abi
+[`UseShieldedContractConfig`](/seismic-react/type-aliases/UseShieldedContractConfig.mdx)\<`TAddress`, `TAbi`\>
 
-`TAbi`
+The configuration object.
 
-#### address
-
-`TAddress`
+- `abi` (Abi) - The contract ABI.
+- `address` (Address) - The contract address.
 
 ## Returns
 
 `object`
 
+The shielded contract instance.
+
 | Name                             | Type                         | Defined in                                                                                                                                                                                                         |
 | -------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="contract"></a> `contract` | `null` \| `ShieldedContract` | [packages/seismic-react/src/hooks/shieldedContract.ts:31](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-react/src/hooks/shieldedContract.ts#L31) |
-| <a id="error"></a> `error`       | `null` \| `Error`            | [packages/seismic-react/src/hooks/shieldedContract.ts:32](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-react/src/hooks/shieldedContract.ts#L32) |
+| <a id="contract"></a> `contract` | `null` \| `ShieldedContract` | [packages/seismic-react/src/hooks/shieldedContract.ts:42](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedContract.ts#L42) |
+| <a id="error"></a> `error`       | `null` \| `Error`            | [packages/seismic-react/src/hooks/shieldedContract.ts:43](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/hooks/shieldedContract.ts#L43) |

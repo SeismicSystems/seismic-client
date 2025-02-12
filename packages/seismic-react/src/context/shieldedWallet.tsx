@@ -26,15 +26,10 @@ const WalletClientContext = createContext<WalletClientContextType | undefined>(
  *
  * @example
  * ```typescript
- * import { useShieldedWriteContract } from 'seismic-react'
+ * import { useShieldedWallet } from 'seismic-react'
  *
  * // inside your component:
- *
- * const { write } = useShieldedWriteContract({
- *   address: '0x01234...',
- *   abi: YOUR_ABI,
- *   functionName: 'myFunctionName'
- * })
+ * const { publicClient, walletClient } = useShieldedWallet()
  * ```
  */
 export const useShieldedWallet = () => {
