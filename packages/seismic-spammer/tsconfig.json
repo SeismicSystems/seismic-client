@@ -14,6 +14,7 @@
     "composite": true,
     "baseUrl": ".",
     "rootDir": "../..",
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "moduleResolution": "bundler"
   }
 }

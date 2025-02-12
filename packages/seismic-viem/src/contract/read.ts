@@ -84,21 +84,16 @@ const fillNonce = async <
  * Essentially a signed read sends a signed, raw transaction to the eth_call endpoint.
  * The msg.sender for the call is set to the transaction's signer
  *
- * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
- * @template TAccount - The account type used for signing the read operation (extends `Account` or `undefined`).
- * @template TAbi - The ABI (Application Binary Interface) of the contract, supporting `Abi` or unknown arrays.
- * @template TFunctionName - The name of the contract function to call (`nonpayable` or `payable`).
- * @template TArgs - The arguments for the function call, derived from the ABI and function name.
+ * @param {ShieldedWalletClient} client - The client used to execute the signed read operation.
+ *   Must be a {@link ShieldedPublicClient} or {@link ShieldedWalletClient}.
+ * @param {SignedReadContractParameters} parameters - The parameters for the read operation, including:
+ *   - `abi` ({@link Abi}) - The contract's ABI.
+ *   - `functionName` (string) - The name of the function to call.
+ *   - `args` (array) - The arguments for the function.
+ *   - `address` ({@link Hex}) - The contract's address on the blockchain.
+ *   - Additional options for customizing the call request.
  *
- * @param client - The client used to execute the signed read operation. Must be a {@link ShieldedPublicClient} or {@link ShieldedWalletClient}.
- * @param parameters - The {@link https://viem.sh/docs/contract/readContract.html#parameters parameters} for the read operation, including:
- * - `abi`: The contract's ABI.
- * - `functionName`: The name of the function to call.
- * - `args`: The arguments for the function.
- * - `address`: The contract's address on the blockchain.
- * - Additional options for customizing the call request.
- *
- * @returns {Promise<ReadContractReturnType>} A promise that resolves to the response from the contract. Type is inferred from the ABI
+ * @returns {Promise<ReadContractReturnType>} A promise that resolves to the response from the contract.
  *
  * @throws {Error} If the account is not specified for the operation.
  *

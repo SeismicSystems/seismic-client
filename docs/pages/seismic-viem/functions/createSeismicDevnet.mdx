@@ -10,9 +10,9 @@
 function createSeismicDevnet(params): Chain
 ```
 
-Defined in: [packages/seismic-viem/src/chain.ts:226](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/chain.ts#L226)
+Defined in: [packages/seismic-viem/src/chain.ts:230](https://github.com/SeismicSystems/seismic-client/blob/63496655224ae1d3e8c312c6d8d80f51a6b6de42/packages/seismic-viem/src/chain.ts#L230)
 
-Creates a Seismic development network chain configuration
+Creates a Seismic development network chain configuration.
 
 ## Example
 
@@ -30,7 +30,13 @@ const devnet2 = createSeismicDevnet({ nodeHost: 'custom.node.example.com' })
 
 [`CreateSeismicDevnetParams`](/seismic-viem/type-aliases/CreateSeismicDevnetParams.mdx)
 
-The parameters for creating a Seismic devnet
+The parameters for creating a Seismic devnet.
+
+- `node` (number, optional) - The node number for the devnet. If provided without `nodeHost`,
+  the hostname will be generated as `node-{node}.seismicdev.net`.
+- `nodeHost` (string, optional) - The direct hostname for the node. Required if `node` is not provided.
+- `explorerUrl` (string, optional) - Custom block explorer URL. If not provided and `node` exists,
+  defaults to `https://explorer-{node}.seismicdev.net`.
 
 ## Returns
 
@@ -38,13 +44,13 @@ The parameters for creating a Seismic devnet
 
 A chain configuration object containing:
 
-- Chain ID: 5124
-- Network name: 'Seismic'
-- Native ETH currency configuration
-- RPC URLs (HTTP and WebSocket endpoints)
-- Block explorer configuration (if applicable)
-- Seismic-specific transaction formatters
+- Chain ID: 5124.
+- Network name: 'Seismic'.
+- Native ETH currency configuration.
+- RPC URLs (HTTP and WebSocket endpoints).
+- Block explorer configuration (if applicable).
+- Seismic-specific transaction formatters.
 
 ## Throws
 
-Throws if neither node number nor nodeHost is provided
+Throws if neither node number nor nodeHost is provided.

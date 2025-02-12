@@ -26,15 +26,10 @@ const WalletClientContext = createContext<WalletClientContextType | undefined>(
  *
  * @example
  * ```typescript
- * import { useShieldedWriteContract } from 'seismic-react'
+ * import { useShieldedWallet } from 'seismic-react'
  *
  * // inside your component:
- *
- * const { write } = useShieldedWriteContract({
- *   address: '0x01234...',
- *   abi: YOUR_ABI,
- *   functionName: 'myFunctionName'
- * })
+ * const { publicClient, walletClient } = useShieldedWallet()
  * ```
  */
 export const useShieldedWallet = () => {
@@ -55,6 +50,12 @@ type ShieldedWalletProviderProps = {
 
 /**
  * React context that provides a shielded wallet client
+ *
+ * @param {ShieldedWalletProviderProps} props - The properties for the ShieldedWalletProvider component.
+ *   - `config` (Config) - The configuration for initializing the shielded wallet client.
+ *   - `options` (object, optional) - Additional options:
+ *     - `publicTransport` (Transport, optional) - An optional transport layer for public interactions.
+ *     - `publicChain` (Chain, optional) - An optional chain configuration for public interactions.
  *
  * @example
  * An example next.js app might look like:

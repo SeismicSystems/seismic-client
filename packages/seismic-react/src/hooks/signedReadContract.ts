@@ -21,13 +21,19 @@ export type UseSignedReadContractConfig<
 
 /**
  * Similar to wagmi's {@link https://wagmi.sh/react/api/hooks/useReadContract useReadContract} hook,
- * but uses {@link signedReadContract} instead
+ * but uses {@link signedReadContract} instead.
  *
- *  * @returns {Object}
- * - `signedRead` (function) - to make signed reads
- * - `isLoading` (bool)
- * - `hash` (string) - Transaction hash of last successful call to `signedRead`
- * - `error` (string) - Error from most recent call to `signedRead`, if any
+ * @param {UseSignedReadContractConfig} config - The configuration object.
+ *   - `address` ({@link Hex}) - The address of the contract.
+ *   - `abi` ({@link Abi}) - The contract ABI.
+ *   - `functionName` (string) - The name of the contract function to call.
+ *   - `args` (array) - The arguments to pass to the contract function.
+ *
+ * @returns {object} An object containing:
+ *   - `signedRead` (function): A function to execute signed reads.
+ *   - `isLoading` (boolean): Indicates if the read operation is in progress.
+ *   - `hash` (string): The transaction hash from the last successful call to `signedRead`.
+ *   - `error` (string): Any error message from the most recent call to `signedRead`, if present.
  */
 export function useSignedReadContract<
   TAbi extends Abi | readonly unknown[],

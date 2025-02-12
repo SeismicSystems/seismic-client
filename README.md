@@ -2,6 +2,10 @@
 
 Seismic's typescript client using Viem actions
 
+## Docs
+
+View the docs [here](https://seismic-docs.netlify.app)
+
 ## Install
 
 ### nvm

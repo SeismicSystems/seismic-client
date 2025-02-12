@@ -2,7 +2,8 @@ import {
   ShieldedContract,
   ShieldedPublicClient,
   ShieldedWalletClient,
-  getSeismicClients,
+  createShieldedPublicClient,
+  createShieldedWalletClient,
   getShieldedContract,
 } from 'seismic-viem'
 import { createPublicClient, http, parseGwei } from 'viem'
@@ -27,7 +28,7 @@ function getNewPrivateKey(): string {
   )
 }
 
-async function getNonce(client: ShieldedWalletClient): BigInt {
+async function getNonce(client: ShieldedWalletClient): Promise<bigint> {
   return BigInt(
     await client.getTransactionCount({
       address: client.account?.address,
@@ -70,6 +71,7 @@ const callSeismicTx = async (
   nonce: BigInt
 ) => {
   const isOdd1 = await seismicContract.read.isOdd([], {
+    // @ts-ignore
     gas: 210000n,
     gasPrice: parseGwei('20'),
     nonce: nonce,
@@ -105,22 +107,22 @@ const testSeismicTx = async (
   detectedChain: Chain,
   rpcUrl: string
 ) => {
-  const seismicClient = await getSeismicClients({
+  const publicClient = await createShieldedPublicClient({
+    chain: detectedChain,
+    transport: http(rpcUrl),
+  })
+  const fundedWalletClient = await createShieldedWalletClient({
     chain: detectedChain,
     transport: http(rpcUrl),
     account: privateKeyToAccount(privateKey as `0x${string}`),
   })
-  const fundedPublicClient = seismicClient.public
-  const fundedWalletClient = seismicClient.wallet
   console.log('Getting Seismic Client for funded wallet...')
 
-  const newSeismicClient = await getSeismicClients({
+  const poorWalletClient = await createShieldedWalletClient({
     chain: detectedChain,
     transport: http(rpcUrl),
     account: privateKeyToAccount(getNewPrivateKey() as `0x${string}`),
   })
-  const poorPublicClient = newSeismicClient.public
-  const poorWalletClient = newSeismicClient.wallet
 
   console.log('Sending some ETH to the poor wallet...')
 
@@ -131,7 +133,7 @@ const testSeismicTx = async (
     gas: 21000n,
     gasPrice: parseGwei('20'),
   })
-  await fundedPublicClient.waitForTransactionReceipt({ hash: transferTx })
+  await publicClient.waitForTransactionReceipt({ hash: transferTx })
 
   // =========== wallet creation completion ===========
 
@@ -141,10 +143,10 @@ const testSeismicTx = async (
     gas: 210000n,
     gasPrice: parseGwei('20'),
   })
-  await fundedPublicClient.waitForTransactionReceipt({ hash: deployTx })
+  await publicClient.waitForTransactionReceipt({ hash: deployTx })
 
   const deployedContractAddress = await getDeployedAddress(
-    fundedPublicClient,
+    publicClient,
     fundedWalletClient.account.address
   )
   console.info(`Deployed contract address: ${deployedContractAddress}`)
@@ -175,11 +177,13 @@ const testSeismicTx = async (
 
     for (let i = 0; i < TX_CNT_PER_SPIKE; i++) {
       promises.push(
-        sendSeismicTx(fundedSeismicContract, fundedPublicClient, fundedNonce)
+        // @ts-ignore
+        sendSeismicTx(fundedSeismicContract, publicClient, fundedNonce)
       ) // Start the async task
       fundedNonce = fundedNonce + 1n
     }
     for (let i = 0; i < CALL_CNT_PER_SPIKE; i++) {
+      // @ts-ignore
       promises.push(callSeismicTx(poorSeismicContract, poorNonce))
     }
 

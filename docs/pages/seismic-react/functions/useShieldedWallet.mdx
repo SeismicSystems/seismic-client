@@ -10,22 +10,17 @@
 function useShieldedWallet(): WalletClientContextType
 ```
 
-Defined in: [packages/seismic-react/src/context/shieldedWallet.tsx:40](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-react/src/context/shieldedWallet.tsx#L40)
+Defined in: [packages/seismic-react/src/context/shieldedWallet.tsx:35](https://github.com/SeismicSystems/seismic-client/blob/63496655224ae1d3e8c312c6d8d80f51a6b6de42/packages/seismic-react/src/context/shieldedWallet.tsx#L35)
 
 A react hook callable when there is a WalletClientProvider present
 
 ## Example
 
 ```typescript
-import { useShieldedWriteContract } from 'seismic-react'
+import { useShieldedWallet } from 'seismic-react'
 
 // inside your component:
-
-const { write } = useShieldedWriteContract({
-  address: '0x01234...',
-  abi: YOUR_ABI,
-  functionName: 'myFunctionName',
-})
+const { publicClient, walletClient } = useShieldedWallet()
 ```
 
 ## Returns

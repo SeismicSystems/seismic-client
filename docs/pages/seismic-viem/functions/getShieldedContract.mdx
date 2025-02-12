@@ -19,7 +19,7 @@ function getShieldedContract<
 ): ShieldedContract<TTransport, TAddress, TAbi, TChain, TAccount, TClient>
 ```
 
-Defined in: [packages/seismic-viem/src/contract/contract.ts:165](https://github.com/SeismicSystems/seismic-client/blob/cb75194f66fb66f27bff97f628b52821e148b5ec/packages/seismic-viem/src/contract/contract.ts#L165)
+Defined in: [packages/seismic-viem/src/contract/contract.ts:156](https://github.com/SeismicSystems/seismic-client/blob/63496655224ae1d3e8c312c6d8d80f51a6b6de42/packages/seismic-viem/src/contract/contract.ts#L156)
 
 This function extends viem's base [getContract](https://viem.sh/docs/contract/getContract.html) functionality by adding:
 
@@ -49,29 +49,17 @@ console.log('Value:', value)
 
 • **TTransport** _extends_ [`Transport`](https://github.com/wevm/viem)
 
-The transport mechanism used for communication (extends `Transport`).
-
 • **TAddress** _extends_ `` `0x${string}` ``
 
-The address type of the contract.
-
 • **TAbi** _extends_ `Abi` \| readonly `unknown`[]
-
-The ABI (Application Binary Interface) of the contract, either strict `Abi` or unknown array.
 
 • **TClient** _extends_
 \| [`ShieldedWalletClient`](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)\<`TTransport`, `TChain`, `TAccount`\>
 \| `KeyedClient`\<`TTransport`, `TChain`, `TAccount`\>
 
-The client type, supporting either a `ShieldedWalletClient` or `KeyedClient`.
-
 • **TChain** _extends_ `undefined` \| [`Chain`](https://github.com/wevm/viem) = `undefined` \| [`Chain`](https://github.com/wevm/viem)
 
-The blockchain chain type (extends `Chain` or `undefined`).
-
 • **TAccount** _extends_ [`Account`](https://github.com/wevm/viem) = [`Account`](https://github.com/wevm/viem)
-
-The account type associated with the wallet client (extends `Account` or `undefined`).
 
 ## Parameters
 
@@ -79,11 +67,15 @@ The account type associated with the wallet client (extends `Account` or `undefi
 
 [`GetContractParameters`](https://github.com/wevm/viem)\<`TTransport`, `TChain`, `TAccount`, `TAbi`, `TClient`, `TAddress`\>
 
+The configuration object.
+
+- `abi` (Abi) - The contract's ABI.
+- `address` (Address) - The contract's address.
+- `client` ([ShieldedWalletClient](/seismic-viem/type-aliases/ShieldedWalletClient.mdx)) - The client instance to use for interacting with the contract.
+
 ## Returns
 
 [`ShieldedContract`](/seismic-viem/type-aliases/ShieldedContract.mdx)\<`TTransport`, `TAddress`, `TAbi`, `TChain`, `TAccount`, `TClient`\>
-
-A contract instance with extended shielded write and signed read functionalities.
 
 ## Throws
 
