@@ -10,7 +10,7 @@
 function ShieldedWalletProvider(props): ReactNode | Promise<ReactNode>
 ```
 
-Defined in: [packages/seismic-react/src/context/shieldedWallet.tsx:80](https://github.com/SeismicSystems/seismic-client/blob/1cf28f7efa87d88dbbf125297b22238c4b4e0bba/packages/seismic-react/src/context/shieldedWallet.tsx#L80)
+Defined in: [packages/seismic-react/src/context/shieldedWallet.tsx:86](https://github.com/SeismicSystems/seismic-client/blob/63496655224ae1d3e8c312c6d8d80f51a6b6de42/packages/seismic-react/src/context/shieldedWallet.tsx#L86)
 
 React context that provides a shielded wallet client
 
@@ -47,6 +47,13 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 ### props
 
 `ShieldedWalletProviderProps`
+
+The properties for the ShieldedWalletProvider component.
+
+- `config` (Config) - The configuration for initializing the shielded wallet client.
+- `options` (object, optional) - Additional options:
+  - `publicTransport` (Transport, optional) - An optional transport layer for public interactions.
+  - `publicChain` (Chain, optional) - An optional chain configuration for public interactions.
 
 ## Returns
 

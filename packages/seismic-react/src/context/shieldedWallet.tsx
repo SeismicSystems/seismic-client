@@ -51,6 +51,12 @@ type ShieldedWalletProviderProps = {
 /**
  * React context that provides a shielded wallet client
  *
+ * @param {ShieldedWalletProviderProps} props - The properties for the ShieldedWalletProvider component.
+ *   - `config` (Config) - The configuration for initializing the shielded wallet client.
+ *   - `options` (object, optional) - Additional options:
+ *     - `publicTransport` (Transport, optional) - An optional transport layer for public interactions.
+ *     - `publicChain` (Chain, optional) - An optional chain configuration for public interactions.
+ *
  * @example
  * An example next.js app might look like:
  * ```typescript
