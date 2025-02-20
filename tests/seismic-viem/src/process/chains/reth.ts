@@ -11,7 +11,7 @@ import {
 type RethProcessOptions = NodeProcessOptions & {
   dev?: boolean
   devBlockMaxTx?: number
-  teeMockServer?: boolean
+  enclaveMockServer?: boolean
 }
 
 const runRethLocally = async (
@@ -24,7 +24,7 @@ const runRethLocally = async (
     waitMs = 10_000,
     verbosity,
     devBlockMaxTx = 1,
-    teeMockServer = true,
+    enclaveMockServer = true,
   } = options
 
   const devArg = dev ? ['--dev'] : []
@@ -34,7 +34,9 @@ const runRethLocally = async (
   const quietArg = silent ? ['--quiet'] : []
   const httpArgs = port ? ['--http', '--http.port', port.toString()] : []
   const verbosityArg = parseVerbosity(verbosity)
-  const teeMockServerArg = teeMockServer ? ['--tee.mock-server'] : []
+  const enclaveMockServerArg = enclaveMockServer
+    ? ['--enclave.mock-server']
+    : []
 
   const dataDirArg = process.env.RETH_DATA_DIR
     ? ['--datadir', process.env.RETH_DATA_DIR]
@@ -63,7 +65,7 @@ const runRethLocally = async (
       ...devArg,
       ...devBlockMaxTxArg,
       ...httpArgs,
-      ...teeMockServerArg,
+      ...enclaveMockServerArg,
       ...dataDirArg,
       ...staticFilesArg,
       ...verbosityArg,
