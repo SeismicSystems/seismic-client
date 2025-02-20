@@ -32,3 +32,6 @@ export type {
 } from '@sviem/client'
 
 export type { ShieldedContract } from '@sviem/contract/contract'
+
+export type { CheckFaucetParams } from '@sviem/faucet'
+export { checkFaucet } from '@sviem/faucet'

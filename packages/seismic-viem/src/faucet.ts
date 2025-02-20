@@ -1,6 +1,7 @@
-import { type Hex, type PublicClient, parseEther } from 'viem'
+import type { Hex, PublicClient } from 'viem'
+import { parseEther } from 'viem/utils'
 
-type CheckFaucetParams = {
+export type CheckFaucetParams = {
   address: Hex
   publicClient: PublicClient
   faucetUrl: string
