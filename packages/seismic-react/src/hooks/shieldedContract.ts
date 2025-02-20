@@ -40,6 +40,7 @@ export function useShieldedContract<
 
   return {
     contract,
+    address,
     error,
   }
 }

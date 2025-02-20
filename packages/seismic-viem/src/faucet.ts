@@ -1,8 +1,5 @@
 import type { Hex, PublicClient } from 'viem'
-import { createPublicClient, http } from 'viem'
 import { parseEther } from 'viem/utils'
-
-import { seismicDevnet } from '@sviem/chain'
 
 export type CheckFaucetParams = {
   address: Hex
@@ -32,15 +29,3 @@ export const checkFaucet = async ({
   // returns string like 'Txhash: 0xca59c...7cf1'
   return msg
 }
-
-const publicClient = createPublicClient({
-  chain: seismicDevnet,
-  transport: http(),
-})
-const msg = await checkFaucet({
-  address: '0x0000000000000000000000000000000000000000',
-  publicClient,
-  faucetUrl: 'https://faucet-1.seismicdev.net',
-})
-
-console.log(msg)
