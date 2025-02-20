@@ -76,7 +76,7 @@ type TransparentWriteContractReturnType<
   ? IsNever<_writeFunctionNames> extends true
     ? unknown
     : {
-        write: {
+        twrite: {
           [functionName in _writeFunctionNames]: GetWriteFunction<
             _narrowable,
             _walletClient['chain'],
