@@ -5,18 +5,27 @@
     "../seismic-viem/src/**/*",
     "../../tests/seismic-viem/src/**/*"
   ],
-  "exclude": ["node_modules", "dist"],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "compilerOptions": {
     "paths": {
-      "@sviem/*": ["../seismic-viem/src/*"],
-      "@test/*": ["../../tests/seismic-viem/src/*"],
-      "@sreact/*": ["./src/*"]
+      "@sviem/*": [
+        "../seismic-viem/src/*"
+      ],
+      "@test/*": [
+        "../../tests/seismic-viem/src/*"
+      ],
+      "@sreact/*": [
+        "./src/*"
+      ]
     },
     "composite": true,
     "baseUrl": ".",
     "rootDir": "../..",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "moduleResolution": "bundler"
   }
 }
