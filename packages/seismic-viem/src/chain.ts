@@ -127,14 +127,14 @@ export const seismicRpcSchema: RpcSchema = [
     Parameters: ['SeismicTransactionRequest'] as
       | [ExactPartial<SeismicTransactionRequest>]
       | [
-          ExactPartial<SeismicTransactionRequest>,
-          BlockNumber | BlockTag | BlockIdentifier,
-        ]
+        ExactPartial<SeismicTransactionRequest>,
+        BlockNumber | BlockTag | BlockIdentifier,
+      ]
       | [
-          ExactPartial<SeismicTransactionRequest>,
-          BlockNumber | BlockTag | BlockIdentifier,
-          RpcStateOverride,
-        ],
+        ExactPartial<SeismicTransactionRequest>,
+        BlockNumber | BlockTag | BlockIdentifier,
+        RpcStateOverride,
+      ],
     ReturnType: 'Hex',
   },
 ]
@@ -254,11 +254,11 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
     },
     blockExplorers: blockExplorerUrl
       ? {
-          default: {
-            name: 'SeismicScan',
-            url: blockExplorerUrl,
-          },
-        }
+        default: {
+          name: 'SeismicScan',
+          url: blockExplorerUrl,
+        },
+      }
       : undefined,
     formatters: seismicChainFormatters,
   })
@@ -277,7 +277,7 @@ export const seismicDevnet1 = createSeismicDevnet({ node: 1 })
  *
  * This is a single-node network running seismic's fork of reth on --dev mode
  */
-export const seismicDevnet2 = createSeismicDevnet({ node: 1 })
+export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
 
 /**
  * An alias for {@link seismicDevnet1}
