@@ -277,7 +277,7 @@ export const seismicDevnet1 = createSeismicDevnet({ node: 1 })
  *
  * This is a single-node network running seismic's fork of reth on --dev mode
  */
-export const seismicDevnet2 = createSeismicDevnet({ node: 1 })
+export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
 
 /**
  * An alias for {@link seismicDevnet1}
