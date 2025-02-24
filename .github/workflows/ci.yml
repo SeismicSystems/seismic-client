@@ -48,8 +48,7 @@ jobs:
           git checkout seismic
           git pull
           cargo build --bin sanvil
-      - name: Return to main repo
-        run: cd "$GITHUB_WORKSPACE"
+          cd "$GITHUB_WORKSPACE"
       - name: Create .env
         # So bun doesn't log a warning about no .env file
         run: touch .env
@@ -77,8 +76,7 @@ jobs:
           git checkout seismic
           git pull
           cargo build --bin seismic-reth
-      - name: Return to main repo
-        run: cd "$GITHUB_WORKSPACE"
+          cd "$GITHUB_WORKSPACE"
       - name: Create .env
         # So bun doesn't log a warning about no .env file
         run: touch .env
