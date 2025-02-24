@@ -23,8 +23,8 @@
     "clean": "bun run rimraf dist",
     "typecheck": "tsc --noEmit --project tsconfig.types.json",
     "build": "bun build:cjs && bun build:esm && bun build:types",
-    "build:cjs": "BUN_ENV=production bun build src/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
-    "build:esm": "BUN_ENV=production bun build src/index.ts --outdir dist/_esm --target browser --format esm --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
+    "build:cjs": "BUN_ENV=production bun build src/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external wagmi --external @reown/appkit --external @reown/appkit-adapter-wagmi --external viem --external seismic-viem",
+    "build:esm": "BUN_ENV=production bun build src/index.ts --outdir dist/_esm --target browser --format esm --external react --external wagmi --external @reown/appkit --external @reown/appkit-adapter-wagmi --external viem --external seismic-viem",
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
     "test": "bun test",
@@ -33,13 +33,14 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@rainbow-me/rainbowkit": "^2.0.0",
+    "@reown/appkit": "^1.6.8",
+    "@reown/appkit-adapter-wagmi": "^1.6.8",
     "react": ">=18",
-    "react-dom": "18.3.0",
+    "react-dom": ">=18",
+    "seismic-viem": "1.0.18",
     "typescript": ">=5.0.4",
     "viem": "2.x",
-    "wagmi": "^2.0.0",
-    "seismic-viem": "1.0.18"
+    "wagmi": "2.x"
   },
   "peerDependenciesMeta": {
     "typescript": {
