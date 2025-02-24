@@ -35,27 +35,25 @@
     "react:docs:check": "bun run --cwd packages/seismic-react docs:check"
   },
   "peerDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^5.2.1",
-    "@types/bun": "^1.1.14",
-    "@typescript-eslint/eslint-plugin": "^8.19.0",
-    "@typescript-eslint/parser": "^8.19.0",
-    "bun-types": "^1.1.42",
-    "eslint": "^9.17.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "bun-types": "^1.2.3",
+    "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-mdx": "^3.1.5",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-mdx": "^3.1.5",
-    "eslint-plugin-no-relative-import-paths": "^1.5.5",
+    "eslint-plugin-no-relative-import-paths": "^1.6.1",
     "eslint-plugin-unused-imports": "^4.1.4",
-    "prettier": "^3.4.2",
+    "prettier": "^3.5.2",
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",
-    "typedoc": "^0.27.6",
-    "typedoc-plugin-markdown": "^4.4.1",
+    "typedoc": "^0.27.8",
+    "typedoc-plugin-markdown": "^4.4.2",
     "vocs": "^1.0.0-alpha.62"
-  },
-  "dependencies": {}
+  }
 }

@@ -7,15 +7,17 @@ import {
 } from 'seismic-viem'
 import type { CreateSeismicDevnetParams } from 'seismic-viem'
 import type { Chain as ViemChain } from 'viem'
+import type { AppKitNetwork } from '@reown/appkit/networks'
 
-import { Chain as RainbowKitChain } from '@rainbow-me/rainbowkit'
-
-const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
+const toAppKitChain = (chain: ViemChain): AppKitNetwork => {
   return {
     id: chain.id,
     name: chain.name,
-    iconUrl:
-      'https://seismic-public-assets.s3.us-east-1.amazonaws.com/seismic-logo-light.png',
+    assets: {
+      imageId: 'seismic-logo-light',
+      imageUrl:
+        'https://seismic-public-assets.s3.us-east-1.amazonaws.com/seismic-logo-light.png',
+    },
     nativeCurrency: chain.nativeCurrency,
     rpcUrls: chain.rpcUrls,
     blockExplorers: chain.blockExplorers,
@@ -28,28 +30,28 @@ const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
  * - wss: https://node-1.seismicdev.net/ws
  * - explorer: https://explorer-1.seismicdev.net
  * */
-export const seismicDevnet1 = toRainbowKitChain(seismicDevnetViem1)
+export const seismicDevnet1 = toAppKitChain(seismicDevnetViem1)
 
 /** The Seismic devnet at:
  * - https: https://node-2.seismicdev.net/rpc
  * - wss: https://node-2.seismicdev.net/ws
  * - explorer: https://explorer-2.seismicdev.net
  * */
-export const seismicDevnet2 = toRainbowKitChain(seismicDevnetViem2)
+export const seismicDevnet2 = toAppKitChain(seismicDevnetViem2)
 
 /** An alias for {@link seismicDevnet1} */
-export const seismicDevnet = toRainbowKitChain(seismicDevnetViem1)
+export const seismicDevnet = toAppKitChain(seismicDevnetViem1)
 
 /**
  * For connecting to a locally-running seismic anvil instance.
  * Use {@link https://seismic-2.gitbook.io/seismic-book/getting-started/publish-your-docs#sforge-sanvil-and-ssolc sfoundryup}  to install this
  */
-export const sanvil = toRainbowKitChain(sanvilViem as ViemChain)
+export const sanvil = toAppKitChain(sanvilViem as ViemChain)
 
 /**
  * For connecting to a locally-running seismic-reth instance on --dev mode
  */
-export const localSeismicDevnet = toRainbowKitChain(
+export const localSeismicDevnet = toAppKitChain(
   localSeismicDevnetViem as ViemChain
 )
 
@@ -84,6 +86,6 @@ export const localSeismicDevnet = toRainbowKitChain(
  */
 export const createSeismicDevnet = (
   params: CreateSeismicDevnetParams
-): RainbowKitChain => {
-  return toRainbowKitChain(createSeismicDevnetViem(params))
+): AppKitNetwork => {
+  return toAppKitChain(createSeismicDevnetViem(params))
 }
