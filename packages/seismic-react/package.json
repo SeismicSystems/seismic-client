@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.18-experimental.1",
+  "version": "1.0.18-experimental.2",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -23,8 +23,8 @@
     "clean": "bun run rimraf dist",
     "typecheck": "tsc --noEmit --project tsconfig.types.json",
     "build": "bun build:cjs && bun build:esm && bun build:types",
-    "build:cjs": "bun build src/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
-    "build:esm": "bun build src/index.ts --outdir dist/_esm --target browser --format esm --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
+    "build:cjs": "BUN_ENV=production bun build src/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
+    "build:esm": "BUN_ENV=production bun build src/index.ts --outdir dist/_esm --target browser --format esm --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
     "test": "bun test",
