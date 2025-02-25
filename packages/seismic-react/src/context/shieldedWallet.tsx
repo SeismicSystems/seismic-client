@@ -43,13 +43,19 @@ export const useShieldedWallet = () => {
   return context
 }
 
+export type OnAddressChangeParams = {
+  publicClient: ShieldedPublicClient
+  walletClient: ShieldedWalletClient
+  address: Hex
+}
+
 type ShieldedWalletProviderProps = {
   children: React.ReactNode
   config: Config
   options?: {
     publicTransport?: Transport
     publicChain?: Chain
-    onAddressChange?: (address: Hex) => Promise<void>
+    onAddressChange?: (params: OnAddressChangeParams) => Promise<void>
   }
 }
 
@@ -179,15 +185,21 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   }, [publicClient, isFetched, data])
 
   useEffect(() => {
-    if (address && options.onAddressChange) {
-      options.onAddressChange(address).catch((error) => {
-        console.error(
-          'useShieldedWallet threw error calling onAddressChange: ',
-          error
-        )
-      })
+    if (!options.onAddressChange) {
+      return
     }
-  }, [address, options.onAddressChange])
+
+    if (publicClient && walletClient && address) {
+      options
+        .onAddressChange({ publicClient, walletClient, address })
+        .catch((error) => {
+          console.error(
+            'useShieldedWallet threw error calling onAddressChange: ',
+            error
+          )
+        })
+    }
+  }, [options.onAddressChange, publicClient, walletClient, address])
 
   // Create the value object that will be provided to consumers
   const value = {
