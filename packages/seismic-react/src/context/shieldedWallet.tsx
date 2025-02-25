@@ -5,8 +5,8 @@ import {
   createShieldedPublicClient,
   createShieldedWalletClient,
 } from 'seismic-viem'
-import { Hex, custom, http } from 'viem'
-import type { Chain, Transport } from 'viem'
+import { custom, http } from 'viem'
+import type { Chain, Hex, Transport } from 'viem'
 import { useConnectorClient } from 'wagmi'
 import type { Config } from 'wagmi'
 
