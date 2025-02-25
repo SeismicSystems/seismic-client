@@ -39,9 +39,9 @@ export const checkFaucet = async ({
   minBalanceWei,
   minBalanceEther,
 }: CheckFaucetParams): Promise<string | null> => {
-  const balance = await publicClient.getBalance({ address })
+  const originalBalance = await publicClient.getBalance({ address })
   const minBalance = parseMinBalance(minBalanceWei, minBalanceEther)
-  if (balance > minBalance) {
+  if (originalBalance > minBalance) {
     return null
   }
   const response = await fetch(`${faucetUrl}/api/claim`, {
@@ -54,7 +54,22 @@ export const checkFaucet = async ({
     )
   }
   const { msg } = await response.json()
-  // returns string like 'Txhash: 0xca59c...7cf1'
-  console.debug(`Faucet sent eth to ${address}: ${msg}`)
-  return msg
+
+  if (msg.startsWith('Txhash:')) {
+    const hash = msg.slice(8)
+    if (hash.startsWith('0x') && hash.length === 66) {
+      const explorerUrl = publicClient.chain?.blockExplorers?.default.url
+      if (explorerUrl) {
+        const txUrl = `${explorerUrl}/tx/${hash}`
+        console.debug(`Faucet sent eth to ${address}: ${txUrl}`)
+        // only return after the tx is confirmed, to prevent double-requesting
+      }
+      await publicClient.waitForTransactionReceipt({ hash })
+      return hash
+    } else {
+      throw new Error(`Invalid hash from faucet claim: ${hash}`)
+    }
+  }
+
+  throw new Error(`Faucet claim failed: ${msg}`)
 }
