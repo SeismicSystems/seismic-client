@@ -9,6 +9,10 @@ export type CheckFaucetParams = {
   minBalanceEther?: bigint | number
 }
 
+export type CheckFaucetResult =
+  | { sent: false }
+  | { sent: true; hash: Hex; txUrl?: string }
+
 const DEFAULT_MIN_BALANCE_WEI = parseEther('0.5')
 
 const parseMinBalance = (
@@ -38,7 +42,7 @@ export const checkFaucet = async ({
   faucetUrl,
   minBalanceWei,
   minBalanceEther,
-}: CheckFaucetParams): Promise<{ sent: boolean; hash?: Hex; txUrl?: string }> => {
+}: CheckFaucetParams): Promise<CheckFaucetResult> => {
   const balance = await publicClient.getBalance({ address })
   const minBalance = parseMinBalance(minBalanceWei, minBalanceEther)
   if (balance > minBalance) {
