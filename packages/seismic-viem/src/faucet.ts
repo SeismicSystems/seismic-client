@@ -47,6 +47,7 @@ export const checkFaucet = async ({
   const response = await fetch(`${faucetUrl}/api/claim`, {
     method: 'POST',
     body: JSON.stringify({ address }),
+    mode: 'no-cors',
   })
   if (!response.ok) {
     throw new Error(
