@@ -55,7 +55,7 @@ export const checkFaucet = async ({
   }
   const { msg } = await response.json()
 
-  if (msg.startsWith('Txhash:')) {
+  if (msg.startsWith('Txhash: ')) {
     const hash = msg.slice(8)
     if (hash.startsWith('0x') && hash.length === 66) {
       const explorerUrl = publicClient.chain?.blockExplorers?.default.url
