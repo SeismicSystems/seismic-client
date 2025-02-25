@@ -108,6 +108,7 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
     null
   )
   const [address, setAddress] = useState<Hex | null>(null)
+  const [callingOnAddressChange, setCallingOnAddressChange] = useState(false)
 
   useEffect(() => {
     if (!publicClient) {
@@ -185,11 +186,12 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   }, [publicClient, isFetched, data])
 
   useEffect(() => {
-    if (!options.onAddressChange) {
+    if (!options.onAddressChange || callingOnAddressChange) {
       return
     }
 
     if (publicClient && walletClient && address) {
+      setCallingOnAddressChange(true)
       options
         .onAddressChange({ publicClient, walletClient, address })
         .catch((error) => {
@@ -197,6 +199,9 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
             'useShieldedWallet threw error calling onAddressChange: ',
             error
           )
+        })
+        .finally(() => {
+          setCallingOnAddressChange(false)
         })
     }
   }, [options.onAddressChange, publicClient, walletClient, address])
