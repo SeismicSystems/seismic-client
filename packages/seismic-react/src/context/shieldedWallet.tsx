@@ -181,7 +181,10 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   useEffect(() => {
     if (address && options.onAddressChange) {
       options.onAddressChange(address).catch((error) => {
-        console.error('useShieldedWallet threw error calling onAddressChange: ', error)
+        console.error(
+          'useShieldedWallet threw error calling onAddressChange: ',
+          error
+        )
       })
     }
   }, [address, options.onAddressChange])
