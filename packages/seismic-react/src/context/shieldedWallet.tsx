@@ -5,7 +5,7 @@ import {
   createShieldedPublicClient,
   createShieldedWalletClient,
 } from 'seismic-viem'
-import { custom, http } from 'viem'
+import { Hex, custom, http } from 'viem'
 import type { Chain, Transport } from 'viem'
 import { useConnectorClient } from 'wagmi'
 import type { Config } from 'wagmi'
@@ -13,6 +13,7 @@ import type { Config } from 'wagmi'
 interface WalletClientContextType {
   publicClient: ShieldedPublicClient | null
   walletClient: ShieldedWalletClient | null
+  address: Hex | null
   error: string | null
 }
 
@@ -45,7 +46,11 @@ export const useShieldedWallet = () => {
 type ShieldedWalletProviderProps = {
   children: React.ReactNode
   config: Config
-  options?: { publicTransport?: Transport; publicChain?: Chain }
+  options?: {
+    publicTransport?: Transport
+    publicChain?: Chain
+    onAddressChange?: (address: Hex) => void
+  }
 }
 
 /**
@@ -96,6 +101,8 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   const [walletClient, setWalletClient] = useState<ShieldedWalletClient | null>(
     null
   )
+  const [address, setAddress] = useState<Hex | null>(null)
+
   useEffect(() => {
     if (!publicClient) {
       // don't overwrite any errors coming from second effect
@@ -165,13 +172,23 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
       // @ts-ignore
       transport: custom(transport),
       publicClient,
-    }).then((wc) => setWalletClient(wc))
+    }).then((wc: ShieldedWalletClient) => {
+      setWalletClient(wc)
+      setAddress(wc.account.address)
+    })
   }, [publicClient, isFetched, data])
+
+  useEffect(() => {
+    if (address && options.onAddressChange) {
+      options.onAddressChange(address)
+    }
+  }, [address, options.onAddressChange])
 
   // Create the value object that will be provided to consumers
   const value = {
     publicClient,
     walletClient,
+    address,
     error,
   }
 
