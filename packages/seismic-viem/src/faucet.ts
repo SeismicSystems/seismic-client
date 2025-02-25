@@ -38,11 +38,11 @@ export const checkFaucet = async ({
   faucetUrl,
   minBalanceWei,
   minBalanceEther,
-}: CheckFaucetParams): Promise<{ hash?: Hex; txUrl?: string }> => {
+}: CheckFaucetParams): Promise<{ sent: boolean; hash?: Hex; txUrl?: string }> => {
   const balance = await publicClient.getBalance({ address })
   const minBalance = parseMinBalance(minBalanceWei, minBalanceEther)
   if (balance > minBalance) {
-    return {}
+    return { sent: false }
   }
   const response = await fetch(`${faucetUrl}/api/claim`, {
     method: 'POST',
@@ -66,7 +66,7 @@ export const checkFaucet = async ({
         // only return after the tx is confirmed, to prevent double-requesting
       }
       await publicClient.waitForTransactionReceipt({ hash })
-      return { hash, txUrl }
+      return { sent: true, hash, txUrl }
     } else {
       throw new Error(`Invalid hash from faucet claim: ${hash}`)
     }
