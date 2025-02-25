@@ -39,9 +39,9 @@ export const checkFaucet = async ({
   minBalanceWei,
   minBalanceEther,
 }: CheckFaucetParams): Promise<string | null> => {
-  const originalBalance = await publicClient.getBalance({ address })
+  const balance = await publicClient.getBalance({ address })
   const minBalance = parseMinBalance(minBalanceWei, minBalanceEther)
-  if (originalBalance > minBalance) {
+  if (balance > minBalance) {
     return null
   }
   const response = await fetch(`${faucetUrl}/api/claim`, {
