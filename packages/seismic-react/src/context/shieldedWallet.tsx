@@ -49,7 +49,7 @@ type ShieldedWalletProviderProps = {
   options?: {
     publicTransport?: Transport
     publicChain?: Chain
-    onAddressChange?: (address: Hex) => void
+    onAddressChange?: (address: Hex) => Promise<void>
   }
 }
 
