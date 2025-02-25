@@ -6,13 +6,14 @@ import {
   createShieldedWalletClient,
 } from 'seismic-viem'
 import { custom, http } from 'viem'
-import type { Chain, Transport } from 'viem'
+import type { Chain, Hex, Transport } from 'viem'
 import { useConnectorClient } from 'wagmi'
 import type { Config } from 'wagmi'
 
 interface WalletClientContextType {
   publicClient: ShieldedPublicClient | null
   walletClient: ShieldedWalletClient | null
+  address: Hex | null
   error: string | null
 }
 
@@ -42,10 +43,20 @@ export const useShieldedWallet = () => {
   return context
 }
 
+export type OnAddressChangeParams = {
+  publicClient: ShieldedPublicClient
+  walletClient: ShieldedWalletClient
+  address: Hex
+}
+
 type ShieldedWalletProviderProps = {
   children: React.ReactNode
   config: Config
-  options?: { publicTransport?: Transport; publicChain?: Chain }
+  options?: {
+    publicTransport?: Transport
+    publicChain?: Chain
+    onAddressChange?: (params: OnAddressChangeParams) => Promise<void>
+  }
 }
 
 /**
@@ -96,6 +107,8 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   const [walletClient, setWalletClient] = useState<ShieldedWalletClient | null>(
     null
   )
+  const [address, setAddress] = useState<Hex | null>(null)
+
   useEffect(() => {
     if (!publicClient) {
       // don't overwrite any errors coming from second effect
@@ -165,13 +178,34 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
       // @ts-ignore
       transport: custom(transport),
       publicClient,
-    }).then((wc) => setWalletClient(wc))
+    }).then((wc: ShieldedWalletClient) => {
+      setWalletClient(wc)
+      setAddress(wc.account.address)
+    })
   }, [publicClient, isFetched, data])
+
+  useEffect(() => {
+    if (!options.onAddressChange) {
+      return
+    }
+
+    if (publicClient && walletClient && address) {
+      options
+        .onAddressChange({ publicClient, walletClient, address })
+        .catch((error) => {
+          console.error(
+            'useShieldedWallet threw error calling onAddressChange: ',
+            error
+          )
+        })
+    }
+  }, [options.onAddressChange, publicClient, walletClient, address])
 
   // Create the value object that will be provided to consumers
   const value = {
     publicClient,
     walletClient,
+    address,
     error,
   }
 
