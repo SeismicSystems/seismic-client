@@ -4,17 +4,22 @@ import { parseEther } from 'viem/utils'
 export type CheckFaucetParams = {
   address: Hex
   publicClient: PublicClient
-  faucetUrl: string,
+  faucetUrl: string
   minBalanceWei?: bigint | number
   minBalanceEther?: bigint | number
 }
 
 const DEFAULT_MIN_BALANCE_WEI = parseEther('0.5')
 
-const parseMinBalance = (minBalanceWei?: bigint | number, minBalanceEther?: bigint | number): bigint => {
+const parseMinBalance = (
+  minBalanceWei?: bigint | number,
+  minBalanceEther?: bigint | number
+): bigint => {
   if (minBalanceWei && minBalanceEther) {
     if (BigInt(minBalanceWei) !== parseEther(minBalanceEther.toString())) {
-      console.warn('Both minBalanceWei and minBalanceEther provided, using minBalanceWei')
+      console.warn(
+        'Both minBalanceWei and minBalanceEther provided, using minBalanceWei'
+      )
     }
   }
 
