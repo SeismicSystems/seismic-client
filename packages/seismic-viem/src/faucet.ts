@@ -1,6 +1,8 @@
 import type { Hex, PublicClient } from 'viem'
 import { parseEther } from 'viem/utils'
 
+import { getExplorerUrl } from '@sviem/explorer'
+
 export type CheckFaucetParams = {
   address: Hex
   publicClient: PublicClient
@@ -61,14 +63,12 @@ export const checkFaucet = async ({
 
   if (msg.startsWith('Txhash: ')) {
     const hash = msg.slice(8)
-    let txUrl: string | undefined
     if (hash.startsWith('0x') && hash.length === 66) {
-      const explorerUrl = publicClient.chain?.blockExplorers?.default.url
-      if (explorerUrl) {
-        txUrl = `${explorerUrl}/tx/${hash}`
+      const txUrl = getExplorerUrl({ publicClient, txHash: hash })
+      if (txUrl) {
         console.debug(`Faucet sent eth to ${address}: ${txUrl}`)
-        // only return after the tx is confirmed, to prevent double-requesting
       }
+      // only return after the tx is confirmed, to prevent double-requesting
       await publicClient.waitForTransactionReceipt({ hash })
       return { sent: true, hash, txUrl }
     } else {

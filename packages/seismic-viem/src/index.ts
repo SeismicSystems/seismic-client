@@ -35,3 +35,6 @@ export type { ShieldedContract } from '@sviem/contract/contract'
 
 export type { CheckFaucetParams } from '@sviem/faucet'
 export { checkFaucet } from '@sviem/faucet'
+
+export type { GetExplorerUrlParams } from '@sviem/explorer'
+export { getExplorerUrl } from '@sviem/explorer'
