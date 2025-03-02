@@ -20,7 +20,7 @@ import { getContract } from 'viem'
 
 import type { ShieldedWalletClient } from '@sviem/client'
 import { signedReadContract } from '@sviem/contract/read'
-import { shieldedWriteContract } from '@sviem/contract/write'
+import { shieldedWriteContract, shieldedWriteContractDebug } from '@sviem/contract/write'
 import type { KeyedClient } from '@sviem/viem-internal/client'
 import type {
   GetReadFunction,
@@ -113,6 +113,7 @@ export type ShieldedContract<
   >,
 > = GetContractReturnType<TAbi, TClient, TAddress> &
   TransparentReadContractReturnType<TAbi, TClient> &
+  TransparentWriteContractReturnType<TAbi, TClient, TAddress> &
   TransparentWriteContractReturnType<TAbi, TClient, TAddress>
 
 /**
@@ -121,6 +122,7 @@ export type ShieldedContract<
  * - `read`: read from a contract using a signed read
  * - `tread`: transparently read from a contract using an unsigned read (from the zero address)
  * - `twrite`: transparently write to a contract using non-encrypted calldata
+ * - `dwrite`: get plaintext and encrypted transaction without broadcasting
  *
  * @param {GetContractParameters} params - The configuration object.
  *   - `abi` ({@link Abi}) - The contract's ABI.
@@ -151,6 +153,7 @@ export type ShieldedContract<
  * - The `tread` property will toggle between public reads and signed reads, depending on whether an `account` is provided
  * - The `write` property will encrypt calldata of the transaction
  * - The `twrite` property will make a normal write, e.g. with transparent calldata
+ * - The `dwrite` property will make the encrypted tx without writing
  * - The client must be a {@link ShieldedWalletClient}
  */
 export function getShieldedContract<
@@ -210,6 +213,31 @@ export function getShieldedContract<
     })
   }
 
+  function shieldedWriteDebug<
+    functionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+    args extends ContractFunctionArgs<
+      TAbi,
+      'payable' | 'nonpayable',
+      functionName
+    > = ContractFunctionArgs<TAbi, 'payable' | 'nonpayable', functionName>,
+  >({
+    functionName,
+    args,
+    ...options
+  }: WriteContractParameters<TAbi, functionName, args, TChain, TAccount>) {
+    if (walletClient === undefined) {
+      throw new Error('Must provide wallet client to write seismic contract')
+    }
+
+    return shieldedWriteContractDebug(walletClient, {
+      abi,
+      address,
+      functionName,
+      args,
+      ...(options as any),
+    })
+  }
+
   const shieldedWriteAction = new Proxy(
     {},
     {
@@ -225,6 +253,32 @@ export function getShieldedContract<
         ) => {
           const { args, options } = getFunctionParameters(parameters)
           return shieldedWrite({
+            abi,
+            address,
+            functionName,
+            args,
+            ...(options as any),
+          })
+        }
+      },
+    }
+  )
+
+  const shieldedWriteDebugAction = new Proxy(
+    {},
+    {
+      get(_, functionName: string) {
+        return (
+          ...parameters: [
+            args?: readonly unknown[],
+            options?: UnionOmit<
+              WriteContractParameters,
+              'abi' | 'address' | 'functionName' | 'args'
+            >,
+          ]
+        ) => {
+          const { args, options } = getFunctionParameters(parameters)
+          return shieldedWriteDebug({
             abi,
             address,
             functionName,
@@ -301,7 +355,7 @@ export function getShieldedContract<
           ]
         ) => {
           if (!walletClient?.account) {
-            console.error(JSON.stringify(walletClient, null, 2))
+            console.error(JSON.stringify(walletClient, null, 2)) 
             throw new Error(
               'Wallet must have an account with address to perform signed reads'
             )
@@ -337,7 +391,8 @@ export function getShieldedContract<
       | 'read'
       | 'tread'
       | 'write'
-      | 'twrite']?: unknown
+      | 'twrite'
+      | 'dwrite']?: unknown
   } = viemContract
   // Transparent writes use the standard writeContract
   contract.twrite = contract.write
@@ -346,6 +401,8 @@ export function getShieldedContract<
   contract.tread = readAction
   // Shielded writes use seismic transactions
   contract.write = shieldedWriteAction
+  // Debug writes use seismic debug transactions
+  contract.dwrite = shieldedWriteDebugAction
   // The default read is signed read, where we sign the raw tx with user's account
   contract.read = signedReadAction
   return contract as ShieldedContract<
