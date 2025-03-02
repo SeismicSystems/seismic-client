@@ -113,7 +113,6 @@ export type ShieldedContract<
   >,
 > = GetContractReturnType<TAbi, TClient, TAddress> &
   TransparentReadContractReturnType<TAbi, TClient> &
-  TransparentWriteContractReturnType<TAbi, TClient, TAddress> &
   TransparentWriteContractReturnType<TAbi, TClient, TAddress>
 
 /**
@@ -355,7 +354,7 @@ export function getShieldedContract<
           ]
         ) => {
           if (!walletClient?.account) {
-            console.error(JSON.stringify(walletClient, null, 2)) 
+            console.error(JSON.stringify(walletClient, null, 2))
             throw new Error(
               'Wallet must have an account with address to perform signed reads'
             )
