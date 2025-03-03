@@ -111,8 +111,10 @@ export async function shieldedWriteContract<
   return sendShieldedTransaction(client, request)
 }
 
-
-type PlaintextTransactionParameters<TChain extends Chain | undefined, TAccount extends Account> = {
+type PlaintextTransactionParameters<
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+> = {
   to: `0x${string}`
   data: `0x${string}`
   gas: bigint
@@ -120,14 +122,18 @@ type PlaintextTransactionParameters<TChain extends Chain | undefined, TAccount e
   nonce: number
   value?: bigint
 }
-export type ShieldedWriteContractDebugResult<TChain extends Chain | undefined, TAccount extends Account> = {
-  plaintextTx: PlaintextTransactionParameters<TChain, TAccount>;
-  shieldedTx: SendSeismicTransactionParameters<TChain, TAccount>;
+
+export type ShieldedWriteContractDebugResult<
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+> = {
+  plaintextTx: PlaintextTransactionParameters<TChain, TAccount>
+  shieldedTx: SendSeismicTransactionParameters<TChain, TAccount>
 }
 
 /**
  * Creates a transaction for a shielded write. Returns both plaintext and shielded transaction versions. Useful for debugging.
- * 
+ *
  * @param {ShieldedWalletClient} client - The client to use.
  * @param {WriteContractParameters} parameters - The configuration object for the write operation.
  *   - `address` ({@link Hex}) - The address of the contract.
@@ -138,7 +144,7 @@ export type ShieldedWriteContractDebugResult<TChain extends Chain | undefined, T
  *   - `gasPrice` (bigint, optional) - Optional gas price for the transaction.
  *   - `value` (bigint, optional) - Optional value (native token amount) to send with the transaction.
  *
- * @returns {ShieldedWriteContractDebugResult} Object containing both the plaintext and shielded transactions.
+ * @returns {ShieldedWriteContractDebugResult} Object containing both the plaintext and shielded transaction parameters.
  */
 export async function shieldedWriteContractDebug<
   TTransport extends Transport,

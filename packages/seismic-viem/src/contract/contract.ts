@@ -20,7 +20,10 @@ import { getContract } from 'viem'
 
 import type { ShieldedWalletClient } from '@sviem/client'
 import { signedReadContract } from '@sviem/contract/read'
-import { shieldedWriteContract, shieldedWriteContractDebug } from '@sviem/contract/write'
+import {
+  shieldedWriteContract,
+  shieldedWriteContractDebug,
+} from '@sviem/contract/write'
 import type { KeyedClient } from '@sviem/viem-internal/client'
 import type {
   GetReadFunction,
