@@ -40,6 +40,7 @@ export type {
   GetTxExplorerUrlParams,
   GetAddressExplorerUrlParams,
   GetBlockExplorerUrlParams,
+  GetTokenExplorerUrlParams,
   GetExplorerUrlOptions,
 } from '@sviem/explorer'
 export {
@@ -47,4 +48,5 @@ export {
   txExplorerUrl,
   addressExplorerUrl,
   blockExplorerUrl,
+  tokenExplorerUrl,
 } from '@sviem/explorer'
