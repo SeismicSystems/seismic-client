@@ -37,6 +37,8 @@ class SlackNotifier {
     const postParams: ChatPostMessageArguments = {
       channel,
       attachments: [defaultAttachment],
+      // @ts-expect-error: legacy slack api
+      fallback: `${title}\n${message}`,
     }
 
     console.log(`Posting to ${channel}: ${JSON.stringify({ title, message })}`)
