@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "paths": {
+      "@sviem/*": ["./*"],
+      "@sbot/*": ["./*"]
+    },
+    "composite": true,
+    "downlevelIteration": true,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "types": ["bun-types"],
+    "rootDir": ".",
+    "baseUrl": "src"
+  }
+}

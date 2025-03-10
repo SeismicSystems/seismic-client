@@ -50,3 +50,5 @@ export {
   blockExplorerUrl,
   tokenExplorerUrl,
 } from '@sviem/explorer'
+
+export { stringifyBigInt } from '@sviem/utils'

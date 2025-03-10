@@ -1,0 +1,16 @@
+{
+  "name": "seismic-bot",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5",
+    "seismic-viem": "workspace:*",
+    "viem": "2.x"
+  },
+  "dependencies": {
+    "@slack/web-api": "^7.8.0"
+  }
+}
