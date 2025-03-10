@@ -1,7 +1,3 @@
-import {
-  type ShieldedWalletClient,
-  createShieldedWalletClient,
-} from 'seismic-viem'
 import type {
   Chain,
   Hex,
@@ -13,6 +9,10 @@ import { createPublicClient, formatUnits, http, parseEther } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 import SlackNotifier from '@sbot/slack'
+import {
+  type ShieldedWalletClient,
+  createShieldedWalletClient,
+} from '@sviem/client'
 
 const formatUnitsRounded = (
   value: bigint,

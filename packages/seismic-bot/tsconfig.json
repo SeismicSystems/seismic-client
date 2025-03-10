@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*", "index.ts"],
+  "include": ["./src/**/*", "index.ts", "../seismic-viem/src/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
-      "@sviem/*": ["./*"],
-      "@sbot/*": ["./*"]
+      "@sviem/*": ["../seismic-viem/src/*"],
+      "@sbot/*": ["./src/*"]
     },
     "composite": true,
     "downlevelIteration": true,
@@ -14,7 +14,7 @@
     "emitDeclarationOnly": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "types": ["bun-types"],
-    "rootDir": ".",
-    "baseUrl": "src"
+    "baseUrl": ".",
+    "rootDir": "../.."
   }
 }

@@ -44,7 +44,7 @@ class SlackNotifier {
 
   async urgent(message: string, title?: string) {
     return this.send({
-      channel: '#urgent',
+      channel: '#log-urgent',
       color: 'danger',
       message,
       title,
