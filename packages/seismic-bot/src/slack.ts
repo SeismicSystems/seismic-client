@@ -39,6 +39,7 @@ class SlackNotifier {
       attachments: [defaultAttachment],
     }
 
+    console.log(`Posting to ${channel}: ${JSON.stringify({ title, message })}`)
     return this.web.chat.postMessage(postParams)
   }
 
