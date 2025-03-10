@@ -91,24 +91,23 @@ export class FaucetManager {
       console.log(
         `devnet=${this.chain.rpcUrls.default.http[0]}, Faucet balance is too low, sending 100 eth`
       )
-      this.slack.status(
-        `Faucet balance on ${this.chainName()} is ${formatUnitsRounded(originalBalance)}. Topping up...`
-      )
+      const response = await this.slack.status({
+        message: `Faucet balance on ${this.chainName()} is ${formatUnitsRounded(originalBalance)}. Topping up...`,
+      })
       const reserveWallet = await this.getReserveWallet()
       const tx = await reserveWallet.sendTransaction({
         to: this.faucetAccount.address,
         value: parseEther('100', 'wei'),
         chain: this.chain,
       })
-      const receipt = await this.publicClient.waitForTransactionReceipt({
+      const _receipt = await this.publicClient.waitForTransactionReceipt({
         hash: tx,
       })
       const newBalance = await this.faucetBalance()
-      this.slack.status(
-        `Faucet balance on ${this.chainName()} is now ${formatUnitsRounded(
-          newBalance
-        )}`
-      )
+      this.slack.status({
+        message: `Faucet balance on ${this.chainName()} is now ${formatUnitsRounded(newBalance)}`,
+        threadTs: response.ts,
+      })
     }
   }
 
@@ -133,10 +132,10 @@ export class FaucetManager {
    * @param confirmedNonce - The confirmed nonce value.
    */
   private async unclogNonce(confirmedNonce: number, pendingNonce: number) {
-    this.slack.urgent(
-      `confirmed nonce: ${confirmedNonce}, pending: ${pendingNonce}`,
-      `Faucet nonce on ${this.chainName()} is out of sync`
-    )
+    const response = await this.slack.urgent({
+      message: `confirmed nonce: ${confirmedNonce}, pending: ${pendingNonce}`,
+      title: `Faucet nonce on ${this.chainName()} is out of sync`,
+    })
     const faucetWallet = await this.getFaucetWallet()
     const baseTx: TransactionSerializableLegacy = {
       to: this.faucetAccount.address,
@@ -155,10 +154,17 @@ export class FaucetManager {
     Bun.sleep(5_000)
     const { synced, ...state } = await this.checkNonces()
     if (!synced) {
-      this.slack.urgent(
-        `Confirmed nonce: ${state.confirmedNonce}, pending: ${state.pendingNonce}`,
-        'Faucet nonce still out of sync'
-      )
+      this.slack.urgent({
+        message: `Confirmed nonce: ${state.confirmedNonce}, pending: ${state.pendingNonce}`,
+        title: 'Faucet nonce still out of sync',
+      })
+    } else {
+      this.slack.urgent({
+        message: `Faucet nonce is now synced on ${this.chainName()}`,
+        title: 'Faucet nonce is now synced',
+        color: 'good',
+        threadTs: response.ts,
+      })
     }
   }
 
