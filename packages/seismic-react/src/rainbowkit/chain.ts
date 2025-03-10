@@ -8,7 +8,7 @@ import {
 import type { CreateSeismicDevnetParams } from 'seismic-viem'
 import type { Chain as ViemChain } from 'viem'
 
-import { Chain as RainbowKitChain } from '@rainbow-me/rainbowkit'
+import type { Chain as RainbowKitChain } from '@rainbow-me/rainbowkit'
 
 const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
   return {
