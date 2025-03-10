@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "dist/_cjs/index.js",
@@ -11,6 +11,18 @@
       "require": "./dist/_cjs/index.js",
       "import": "./dist/_esm/index.js",
       "types": "./dist/_types/index.d.ts"
+    },
+    "./rainbowkit": {
+      "require": "./dist/_cjs/rainbowkit/index.js",
+      "import": "./dist/_esm/rainbowkit/index.js",
+      "types": "./dist/_types/rainbowkit/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "rainbowkit": [
+        "./_types/rainbowkit/index.d.ts"
+      ]
     }
   },
   "files": [
@@ -39,7 +51,7 @@
     "typescript": ">=5.0.4",
     "viem": "2.x",
     "wagmi": "^2.0.0",
-    "seismic-viem": "1.0.25"
+    "seismic-viem": "1.0.26"
   },
   "peerDependenciesMeta": {
     "typescript": {

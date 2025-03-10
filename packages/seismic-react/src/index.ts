@@ -1,13 +1,3 @@
-// shielded write contract
-export {
-  sanvil,
-  localSeismicDevnet,
-  seismicDevnet1,
-  seismicDevnet2,
-  seismicDevnet,
-  createSeismicDevnet,
-} from '@sreact/config/chain'
-
 export {
   ShieldedWalletProvider,
   useShieldedWallet,
