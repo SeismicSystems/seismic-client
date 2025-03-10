@@ -116,14 +116,18 @@ export class FaucetManager {
    * @param client - The public client for the chain.
    */
   private async getNonces() {
-    const confirmedNonce = await this.publicClient.getTransactionCount({
+    const confirmedNoncePromise = this.publicClient.getTransactionCount({
       address: this.faucetAccount.address,
     })
-    const pendingNonce = await this.publicClient.getTransactionCount({
+    const pendingNoncePromise = this.publicClient.getTransactionCount({
       address: this.faucetAccount.address,
       blockTag: 'pending',
     })
-    return { confirmedNonce, pendingNonce }
+    const [confirmed, pending] = await Promise.all([
+      confirmedNoncePromise,
+      pendingNoncePromise,
+    ])
+    return { confirmed, pending }
   }
 
   /**
@@ -168,30 +172,35 @@ export class FaucetManager {
     }
   }
 
+  private async checkNonces(): Promise<{
+    synced: boolean
+    confirmed: number
+    pending: number
+  }> {
+    const nonces = await this.getNonces()
+    if (nonces.confirmed === nonces.pending) {
+      return { synced: true, ...nonces }
+    }
+    // sleep for 5 seconds to see if they unclog naturally
+    await Bun.sleep(5_000)
+    const nonces2 = await this.getNonces()
+    if (nonces2.confirmed === nonces2.pending) {
+      return { synced: true, ...nonces2 }
+    }
+    return { synced: false, ...nonces2 }
+  }
+
   /**
    * Orchestrates the overall check-chain logic:
    *  1. Funds the faucet if needed.
    *  2. Retrieves nonce values.
    *  3. Sends a test transaction if confirmed and pending nonces differ.
    */
-  private async checkNonces(): Promise<{
-    synced: boolean
-    confirmedNonce: number
-    pendingNonce: number
-  }> {
-    const { confirmedNonce, pendingNonce } = await this.getNonces()
-    if (confirmedNonce === pendingNonce) {
-      return { synced: true, confirmedNonce, pendingNonce }
-    }
-
-    return { synced: false, confirmedNonce, pendingNonce }
-  }
-
   public async checkChain(): Promise<void> {
     await this.fundFaucetIfNeeded()
-    const { synced, confirmedNonce, pendingNonce } = await this.checkNonces()
+    const { synced, ...nonces } = await this.checkNonces()
     if (!synced) {
-      await this.unclogNonce(confirmedNonce, pendingNonce)
+      await this.unclogNonce(nonces.confirmed, nonces.pending)
     }
   }
 }
