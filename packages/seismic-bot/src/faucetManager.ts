@@ -136,9 +136,10 @@ export class FaucetManager {
    * @param confirmedNonce - The confirmed nonce value.
    */
   private async unclogNonce(confirmedNonce: number, pendingNonce: number) {
-    const response = await this.slack.urgent({
+    const response = await this.slack.status({
       message: `confirmed nonce: ${confirmedNonce}, pending: ${pendingNonce}`,
       title: `Faucet nonce on ${this.chainName()} is out of sync`,
+      color: 'warning',
     })
     const faucetWallet = await this.getFaucetWallet()
     const baseTx: TransactionSerializableLegacy = {
@@ -156,14 +157,14 @@ export class FaucetManager {
     })
     const _receipt = await this.publicClient.waitForTransactionReceipt({ hash })
     Bun.sleep(5_000)
-    const { synced, ...state } = await this.checkNonces()
+    const { synced, ...nonces } = await this.checkNonces()
     if (!synced) {
       this.slack.urgent({
-        message: `Confirmed nonce: ${state.confirmedNonce}, pending: ${state.pendingNonce}`,
+        message: `Confirmed nonce: ${nonces.confirmed}, pending: ${nonces.pending}`,
         title: 'Faucet nonce still out of sync',
       })
     } else {
-      this.slack.urgent({
+      this.slack.status({
         message: `Faucet nonce is now synced on ${this.chainName()}`,
         title: 'Faucet nonce is now synced',
         color: 'good',
