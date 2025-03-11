@@ -7,10 +7,25 @@ import type {
   GetStorageAtReturnType,
   Hex,
   RpcSchema,
+  Signature,
   Transport,
 } from 'viem'
 
 import type { ShieldedPublicClient } from '@sviem/client'
+import {
+  AesGcmDecryptionParams,
+  AesGcmEncryptionParams,
+  aesGcmDecryption,
+  aesGcmEncryption,
+} from '@sviem/precompiles/aes'
+import { EcdhParams, ecdh } from '@sviem/precompiles/ecdh'
+import { hdfk } from '@sviem/precompiles/hkdf'
+import { callPrecompile } from '@sviem/precompiles/precompile'
+import { rng } from '@sviem/precompiles/rng'
+import {
+  Secp256K1SigParams,
+  secp256k1Signature,
+} from '@sviem/precompiles/secp256k1'
 import { RpcRequest } from '@sviem/viem-internal/rpc'
 
 /**
@@ -42,6 +57,12 @@ export type ShieldedPublicActions<
   ) => EIP1193RequestFn<
     rpcSchema extends undefined ? EIP1474Methods : rpcSchema
   >
+  rng: (size: bigint | number) => Promise<bigint>
+  ecdh: (params: EcdhParams) => Promise<Hex>
+  aesGcmEncryption: (params: AesGcmEncryptionParams) => Promise<Hex>
+  aesGcmDecryption: (params: AesGcmDecryptionParams) => Promise<string>
+  hdfk: (ikm: string | Hex) => Promise<Hex>
+  secp256k1Signature: (params: Secp256K1SigParams) => Promise<Signature>
 }
 
 /**
@@ -93,4 +114,40 @@ export const shieldedPublicActions = <
   },
   // @ts-ignore
   publicRequest: async (_args) => client.request<TRpcSchema>(_args),
+  rng: async (size) =>
+    callPrecompile({
+      call: client.call,
+      precompile: rng,
+      args: size,
+    }),
+  ecdh: (args) =>
+    callPrecompile({
+      call: client.call,
+      precompile: ecdh,
+      args,
+    }),
+  hdfk: (input) =>
+    callPrecompile({
+      call: client.call,
+      precompile: hdfk,
+      args: input,
+    }),
+  secp256k1Signature: (params) =>
+    callPrecompile({
+      call: client.call,
+      precompile: secp256k1Signature,
+      args: params,
+    }),
+  aesGcmEncryption: (params) =>
+    callPrecompile({
+      call: client.call,
+      precompile: aesGcmEncryption,
+      args: params,
+    }),
+  aesGcmDecryption: (params) =>
+    callPrecompile({
+      call: client.call,
+      precompile: aesGcmDecryption,
+      args: params,
+    }),
 })
