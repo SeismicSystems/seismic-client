@@ -1,36 +1,34 @@
-import { Hex, hexToBytes, stringToHex } from 'viem'
+import { Hex, decodeAbiParameters, hexToBytes, isHex, stringToHex } from 'viem'
 
 import { Precompile, calcLinearGasCostU32 } from '@sviem/precompiles/precompile'
 
-export const HDFK_ADDRESS = '0x68'
+export const HDFK_ADDRESS = '0x0000000000000000000000000000000000000068'
 
-export const SHA256_BASE_GAS = 60n
-export const SHA256_PER_WORD = 12n
+const SHA256_BASE_GAS = 60n
+const SHA256_PER_WORD = 12n
 
 export const HDFK_EXPAND_COST_GAS = 2n * SHA256_BASE_GAS
 export const SHARED_SECRET_GAS = 3000n
 
-export const hdfk: Precompile<[string]> = {
+export const hdfk: Precompile<string | Hex, Hex> = {
   address: HDFK_ADDRESS,
-  abi: [
-    {
-      name: 'hkdfDeriveSymmetricKey',
-      inputs: [{ type: 'bytes' }],
-      outputs: [{ type: 'bytes32' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ],
-  gas: ([input]: readonly unknown[]) => {
+  gasLimit: ([ikmHex]: readonly unknown[]) => {
     const linearGasCost = calcLinearGasCostU32({
       bus: 32,
-      len: hexToBytes(input as Hex).length,
+      len: hexToBytes(ikmHex as Hex).length,
       base: SHARED_SECRET_GAS,
       word: SHA256_PER_WORD,
     })
     return 2n * linearGasCost + HDFK_EXPAND_COST_GAS
   },
-  transformParams: ([input]: [string]) => {
-    return [stringToHex(input)]
+  encodeParams: (input) => {
+    if (isHex(input)) {
+      return input
+    }
+    return stringToHex(input)
+  },
+  decodeResult: (result: Hex) => {
+    const [output] = decodeAbiParameters([{ type: 'bytes32' }], result)
+    return output as Hex
   },
 }

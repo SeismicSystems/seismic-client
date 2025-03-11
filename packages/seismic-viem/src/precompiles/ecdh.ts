@@ -1,4 +1,4 @@
-import { hexToBytes } from 'viem'
+import { Address, decodeAbiParameters, hexToBytes } from 'viem'
 import { Hex } from 'viem'
 
 import {
@@ -7,38 +7,36 @@ import {
 } from '@sviem/precompiles/hkdf'
 import { Precompile } from '@sviem/precompiles/precompile'
 
-export const ECDH_ADDRESS = '0x65'
+export const ECDH_ADDRESS: Address =
+  '0x0000000000000000000000000000000000000065'
+const SECRET_KEY_LENGTH = 32
+const PUBLIC_KEY_LENGTH = 33
 
-export const ecdh: Precompile<[Hex, Hex]> = {
+export type EcdhParams = {
+  sk: Hex
+  pk: Hex
+}
+
+const validateKey = (key: Hex, sk: boolean) => {
+  const bytes = hexToBytes(key)
+  const expectedLength = sk ? SECRET_KEY_LENGTH : PUBLIC_KEY_LENGTH
+  if (bytes.length !== expectedLength) {
+    throw new Error(
+      `Invalid ${sk ? 'secret' : 'public'} key: must be ${expectedLength} bytes (received ${bytes.length})`
+    )
+  }
+}
+
+export const ecdh: Precompile<EcdhParams, Hex> = {
   address: ECDH_ADDRESS,
-  abi: [
-    {
-      name: 'ecdhSymmetricKey',
-      inputs: [
-        { name: 'secretKey', type: 'bytes32' },
-        { name: 'publicKey', type: 'bytes32' },
-      ],
-      outputs: [{ type: 'bytes32' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ],
-  gas: () => SHARED_SECRET_GAS + HDFK_EXPAND_COST_GAS,
-  transformParams: ([sk, pk]: readonly unknown[]) => {
-    const skHex = sk as Hex
-    const pkHex = pk as Hex
-    const skBytes = hexToBytes(skHex)
-    const pkBytes = hexToBytes(pkHex)
-    if (skBytes.length !== 32) {
-      throw new Error(
-        `Invalid secret key: must be 32 bytes (received ${skBytes.length})`
-      )
-    }
-    if (pkBytes.length !== 32) {
-      throw new Error(
-        `Invalid public key: must be 32 bytes (received ${pkBytes.length})`
-      )
-    }
-    return [skHex, pkHex]
+  gasLimit: () => SHARED_SECRET_GAS + HDFK_EXPAND_COST_GAS,
+  encodeParams: ({ sk, pk }) => {
+    validateKey(sk, true)
+    validateKey(pk, false)
+    return `${sk}${pk.slice(2)}`
+  },
+  decodeResult: (result: Hex) => {
+    const [output] = decodeAbiParameters([{ type: 'bytes32' }], result)
+    return output as Hex
   },
 }

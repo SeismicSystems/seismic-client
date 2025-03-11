@@ -1,43 +1,47 @@
 import {
-  Abi,
+  Address,
   CallParameters,
   CallReturnType,
   Hex,
-  ReadContractReturnType,
-  decodeAbiParameters,
-  encodeAbiParameters,
+  hexToBytes,
+  pad,
 } from 'viem'
 
-export type Precompile<P> = {
-  address: Hex
-  abi: Abi
+export type Precompile<P, R> = {
+  address: Address
   // return the gas cost given transformed args
-  gas: (targs: readonly unknown[]) => bigint
+  gasLimit: (targs: readonly unknown[]) => bigint
   // Transform from typescript types to abi types
-  transformParams: (args: P) => readonly unknown[]
+  encodeParams: (args: P) => Hex
+  decodeResult: (result: Hex) => R
 }
 
-export const callPrecompile = async <P, F extends Precompile<P>>({
+export const callPrecompile = async <P, R>({
   call,
   precompile,
   args,
 }: {
   call: (params: CallParameters) => Promise<CallReturnType>
-  precompile: F
+  precompile: Precompile<P, R>
   args: P
-}): Promise<ReadContractReturnType<F['abi']>> => {
-  const input = precompile.transformParams(args)
-  const data = encodeAbiParameters(precompile.abi, input)
+}): Promise<R> => {
+  const data = precompile.encodeParams(args)
+  // console.log('data is')
+  // console.log(data)
   const result = await call({
     data,
-    gas: precompile.gas(input),
+    // gas: precompile.gasLimit(input),
     to: precompile.address,
   })
   if (!result.data) {
     throw new Error('No data returned from precompile')
   }
-  const decoded = decodeAbiParameters(precompile.abi, result.data)
-  return decoded as ReadContractReturnType<F['abi']>
+  // console.log(result.data, typeof result.data)
+  if (hexToBytes(result.data).length < 32) {
+    // RNG gives back length ${size} bytes, but viem wants 32+
+    result.data = pad(result.data)
+  }
+  return precompile.decodeResult(result.data)
 }
 
 export const calcLinearGasCostU32 = ({
