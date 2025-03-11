@@ -7,6 +7,7 @@ import type {
   GetStorageAtReturnType,
   Hex,
   RpcSchema,
+  Signature,
   Transport,
 } from 'viem'
 
@@ -61,7 +62,7 @@ export type ShieldedPublicActions<
   aesGcmEncryption: (params: AesGcmEncryptionParams) => Promise<Hex>
   aesGcmDecryption: (params: AesGcmDecryptionParams) => Promise<string>
   hdfk: (ikm: string | Hex) => Promise<Hex>
-  secp256k1Signature: (params: Secp256K1SigParams) => Promise<Hex>
+  secp256k1Signature: (params: Secp256K1SigParams) => Promise<Signature>
 }
 
 /**

@@ -26,8 +26,6 @@ export const callPrecompile = async <P, R>({
   args: P
 }): Promise<R> => {
   const data = precompile.encodeParams(args)
-  // console.log('data is')
-  // console.log(data)
   const result = await call({
     data,
     // gas: precompile.gasLimit(input),
@@ -36,7 +34,6 @@ export const callPrecompile = async <P, R>({
   if (!result.data) {
     throw new Error('No data returned from precompile')
   }
-  // console.log(result.data, typeof result.data)
   if (hexToBytes(result.data).length < 32) {
     // RNG gives back length ${size} bytes, but viem wants 32+
     result.data = pad(result.data)

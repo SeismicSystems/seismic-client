@@ -1,9 +1,12 @@
 import {
   Hex,
-  encodeAbiParameters,
   hexToBytes,
+  hexToString,
   numberToBytes,
+  numberToHex,
   stringToBytes,
+  stringToHex,
+  trim,
 } from 'viem'
 
 import { Precompile, calcLinearGasCostU32 } from '@sviem/precompiles/precompile'
@@ -70,21 +73,15 @@ export const aesGcmEncryption: Precompile<AesGcmEncryptionParams, Hex> = {
   address: AES_GCM_ENCRYPTION_ADDRESS,
   gasLimit: aesGcmGasCost,
   encodeParams: (args) => {
-    console.log(args)
-    const values = validateParams<string>(
+    const [aesKey, nonce, plaintext] = validateParams<string>(
       [args.aesKey, args.nonce, args.plaintext],
       true
     )
-    return encodeAbiParameters(
-      [
-        { name: 'aesKey', type: 'bytes32' },
-        { name: 'nonce', type: 'uint96' },
-        { name: 'plaintext', type: 'string' },
-      ],
-      values
-    )
+    const nonceHex = numberToHex(nonce, { size: 12 })
+    const plaintextHex = stringToHex(plaintext)
+    return `${aesKey}${nonceHex.slice(2)}${plaintextHex.slice(2)}`
   },
-  decodeResult: (result: Hex) => result,
+  decodeResult: (result: Hex) => trim(result),
 }
 
 type AesGcmCommonParams = {
@@ -108,14 +105,8 @@ export const aesGcmDecryption: Precompile<AesGcmDecryptionParams, string> = {
       [args.aesKey, args.nonce, args.ciphertext],
       false
     )
-    const calldata = encodeAbiParameters(
-      [
-        { name: 'aesKey', type: 'bytes32' },
-        { name: 'nonce', type: 'uint96' },
-      ],
-      [aesKey, nonce]
-    )
-    return `${calldata}${cipherText.slice(2)}`
+    const nonceHex = numberToHex(nonce, { size: 12 })
+    return `${aesKey}${nonceHex.slice(2)}${cipherText.slice(2)}`
   },
-  decodeResult: (result: Hex) => result,
+  decodeResult: (result: Hex) => hexToString(trim(result)),
 }

@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from 'bun:test'
-import { hexToBytes, http } from 'viem'
+import { hexToBytes, http, recoverMessageAddress } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
 import { createShieldedPublicClient } from '@sviem/client'
@@ -51,16 +51,14 @@ const testAesGcm = async () => {
     '0x0000000000000000000000000000000000000000000000000000000000000000'
   const nonce = 0
   const plaintext = 'HelloAESGCM'
-  console.log('calling encrypt')
   const ciphertext = await publicClient.aesGcmEncryption({
     aesKey,
     nonce,
     plaintext,
   })
   expect(ciphertext).toBe(
-    '0xcea7403d4d606b6e074ec5d3baf39d18726003ca37a62a74d1a2f58e7506358edd4ab1284d4ae17b41e85924470c36f74741cb8181bb7f30617c1de3ab0c3a1fd0c48f7321a82d376095ace0419167a0bcaf49bb88abca4189fd5935131d50adabfa77cd6e85da245fb0bdc5e52cfc29ba0ae1abb15c680f740428faef70746d1fec8857'
+    '0x86c22c5122212e3d400d886f80dfcfcbacb96cbc815db886e1a6cd'
   )
-  console.log('calling decrypt')
   const decrypted = await publicClient.aesGcmDecryption({
     aesKey,
     nonce,
@@ -69,14 +67,30 @@ const testAesGcm = async () => {
   expect(decrypted).toBe(plaintext)
 }
 
+const testSecp256k1 = async () => {
+  const sk =
+    '0xaac6ccf1fdec03b4838a3c97628f381b34a949967f46d3f8a9a9c741ce982a87'
+  const address = privateKeyToAccount(sk).address
+  const signature = await publicClient.secp256k1Signature({
+    sk,
+    message: 'i signed this',
+  })
+  const recoveredAddress = await recoverMessageAddress({
+    message: 'i signed this',
+    signature: signature,
+  })
+  expect(recoveredAddress).toBe(address)
+}
+
 describe('Seismic Precompiles', async () => {
-  // test('RNG(1)', () => testRng(1), { timeout: 20_000 })
-  // test('RNG(8)', () => testRng(8), { timeout: 20_000 })
-  // test('RNG(16)', () => testRng(16), { timeout: 20_000 })
-  // test('RNG(32)', () => testRng(32), { timeout: 20_000 })
-  // test('ECDH', testEcdh, { timeout: 20_000 })
-  // test('HKDF', testHkdf, { timeout: 20_000 })
+  test('RNG(1)', () => testRng(1), { timeout: 20_000 })
+  test('RNG(8)', () => testRng(8), { timeout: 20_000 })
+  test('RNG(16)', () => testRng(16), { timeout: 20_000 })
+  test('RNG(32)', () => testRng(32), { timeout: 20_000 })
+  test('ECDH', testEcdh, { timeout: 20_000 })
+  test('HKDF', testHkdf, { timeout: 20_000 })
   test('AES-GCM', testAesGcm, { timeout: 20_000 })
+  test('secp256k1 with string input', testSecp256k1, { timeout: 20_000 })
 })
 
 afterAll(async () => {
