@@ -21,7 +21,10 @@ const testAccount = privateKeyToAccount(TEST_ACCOUNT_PRIVATE_KEY)
 
 // Running on a different port because contract.test.ts uses 8545
 const chain = envChain()
-const { url, exitProcess } = await setupNode(chain, 8546)
+const { url, exitProcess } = await setupNode(chain, {
+  port: 8546,
+  silent: true,
+})
 
 const testSeismicTxEncoding = async () => {
   expect(ENC_PK).toBe(compressPublicKey(privateKeyToAccount(ENC_SK).publicKey))

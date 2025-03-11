@@ -49,13 +49,13 @@ export const parseVerbosity = (verbosity: number | undefined): string[] => {
 
 export const setupNode = async (
   chain: Chain,
-  port: number = 8545
+  { port = 8545, ...rest }: NodeProcessOptions = {}
 ): Promise<SpawnedNode> => {
   switch (chain.id) {
     case sanvil.id:
-      return setupAnvilNode({ port })
+      return setupAnvilNode({ port, ...rest })
     case seismicDevnet.id:
-      return setupRethNode({ port })
+      return setupRethNode({ port, ...rest })
     default:
       throw new Error(`Unable to map Chain ${chain.id} to Backend`)
   }

@@ -84,9 +84,7 @@ const runRethLocally = async (
 
 export const setupRethNode = async ({
   port = 8545,
-}: {
-  port: number
-}): Promise<SpawnedNode> => {
+}: NodeProcessOptions = {}): Promise<SpawnedNode> => {
   const rethProcess = await runRethLocally({
     port,
     silent: false,

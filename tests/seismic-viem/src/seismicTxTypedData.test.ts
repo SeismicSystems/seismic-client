@@ -12,7 +12,10 @@ import { envChain, setupNode } from '@test/process/node'
 
 // Running on a different port because contract.test.ts uses 8545
 const chain = envChain()
-const { url, exitProcess } = await setupNode(chain, 8547)
+const { url, exitProcess } = await setupNode(chain, {
+  port: 8547,
+  silent: true,
+})
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'

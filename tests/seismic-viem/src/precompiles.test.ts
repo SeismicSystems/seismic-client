@@ -5,12 +5,14 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { createShieldedPublicClient } from '@sviem/client'
 import { generateAesKey } from '@sviem/crypto/aes'
 import { compressPublicKey } from '@sviem/crypto/secp'
-import { envChain } from '@test/process/node'
+import { envChain, setupNode } from '@test/process/node'
 
 // Running on a different port because contract.test.ts uses 8545
 const chain = envChain()
-// const { url, exitProcess } = await setupNode(chain, 8547)
-const url = 'http://localhost:8545'
+const { url, exitProcess } = await setupNode(chain, {
+  port: 8548,
+  silent: true,
+})
 
 const publicClient = createShieldedPublicClient({
   chain,
@@ -94,5 +96,5 @@ describe('Seismic Precompiles', async () => {
 })
 
 afterAll(async () => {
-  process.exit(0)
+  await exitProcess()
 })
