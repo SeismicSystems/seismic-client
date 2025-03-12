@@ -7,7 +7,7 @@
     "start": "bun src/index.ts"
   },
   "dependencies": {
-    "viem": "^2.21.50",
+    "viem": "^2.23.10",
     "seismic-viem": "1.0.15"
   }
 }

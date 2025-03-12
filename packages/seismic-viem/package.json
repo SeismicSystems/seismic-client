@@ -35,7 +35,7 @@
     "@noble/hashes": "^1.7.0",
     "@noble/curves": "^1.8.0",
     "@noble/ciphers": "^1.2.0",
-    "viem": "^2.21.50"
+    "viem": "^2.23.10"
   },
   "devDependencies": {},
   "license": "MIT",
