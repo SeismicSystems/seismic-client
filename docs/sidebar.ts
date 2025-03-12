@@ -6,17 +6,16 @@ const viemSidebar = [
     items: [
       { text: 'Shielded Public Client', link: '/viem/clients/public' },
       { text: 'Shielded Wallet Client', link: '/viem/clients/wallet' },
+      { text: 'Encryption', link: '/viem/clients/encryption' },
     ],
   },
   {
     text: 'Public Actions',
-    collapsed: true,
-    items: [],
+    link: '/viem/actions/public',
   },
   {
     text: 'Wallet Actions',
-    collapsed: true,
-    items: [],
+    link: '/viem/actions/wallet',
   },
   {
     text: 'Contract',
@@ -24,18 +23,18 @@ const viemSidebar = [
     items: [
       {
         text: 'Contract Instances',
-        link: '/viem/contract/getShieldedContract',
+        link: '/viem/contract/instance',
       },
       {
         text: 'Actions',
         items: [
           {
             text: 'signedReadContract',
-            link: '/viem/contract/signedReadContract',
+            link: '/viem/contract/signed-read',
           },
           {
             text: 'shieldedWriteContract',
-            link: '/viem/contract/shieldedWriteContract',
+            link: '/viem/contract/shielded-write',
           },
         ],
       },
@@ -46,20 +45,22 @@ const viemSidebar = [
     collapsed: true,
     items: [
       {
-        text: 'Introduction',
-        link: '/viem/chains/introduction',
-      },
-      {
         text: 'Chain Specs',
         items: [
+          { text: 'sanvil', link: '/viem/chains/sanvil' },
           { text: 'devnet1', link: '/viem/chains/devnet1' },
           { text: 'devnet2', link: '/viem/chains/devnet2' },
-          { text: 'sanvil', link: '/viem/chains/sanvil' },
+          { text: 'devnet', link: '/viem/chains/devnet' },
+          { text: 'local-devnet', link: '/viem/chains/local-devnet' },
         ],
       },
       {
-        text: 'Custom',
-        items: [{ text: 'devnet', link: '/viem/chains/custom/devnet' }],
+        text: 'Create a new spec',
+        link: '/viem/chains/create',
+      },
+      {
+        text: 'Formatters',
+        link: '/viem/chains/formatters',
       },
     ],
   },
@@ -67,6 +68,10 @@ const viemSidebar = [
     text: 'Precompiles',
     collapsed: true,
     items: [
+      {
+        text: 'Introduction',
+        link: '/viem/precompiles/precompile',
+      },
       {
         text: 'RNG',
         link: '/viem/precompiles/rng',
@@ -89,12 +94,66 @@ const viemSidebar = [
       },
     ],
   },
+  {
+    text: 'Explorer',
+    collapsed: true,
+    items: [
+      {
+        text: 'URL',
+        link: '/viem/explorer/url',
+      },
+      {
+        text: 'Address',
+        link: '/viem/explorer/address',
+      },
+      {
+        text: 'Transaction',
+        link: '/viem/explorer/tx',
+      },
+      {
+        text: 'Block',
+        link: '/viem/explorer/block',
+      },
+      {
+        text: 'Token',
+        link: '/viem/explorer/token',
+      },
+    ],
+  },
 ]
 
 const reactSidebar = [
   {
-    text: 'Introduction',
-    link: '/react/introduction',
+    text: 'Context',
+    collapsed: false,
+    items: [
+      {
+        text: 'Shielded Wallet Provider',
+        link: '/react/context/provider',
+      },
+    ],
+  },
+  {
+    text: 'Hooks',
+    collapsed: false,
+    items: [
+      {
+        text: 'Shielded Wallet',
+        link: '/react/hooks/wallet',
+      },
+      {
+        text: 'Shielded Contract Instance',
+        link: '/react/hooks/contract',
+      },
+      {
+        text: 'Shielded Read Contract',
+        link: '/react/hooks/read',
+      },
+      {
+        text: 'Shielded Write Contract',
+        link: '/react/hooks/write',
+      },
+    ],
   },
 ]
 

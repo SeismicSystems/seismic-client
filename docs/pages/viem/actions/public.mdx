@@ -1,65 +1,12 @@
 ---
-description: Creates a public client for the Seismic blockchain
+description: Actions for the shielded public client
 ---
 
-# createShieldedPublicClient
-
-## Import
-
-```ts
-import { createShieldedPublicClient } from 'seismic-viem'
-```
-
-## Usage
-
-Creates a public client for the Seismic network with additional privacy-preserving features.
-
-```ts
-import { createShieldedPublicClient, seismicDevnet } from 'seismic-viem'
-import { http } from 'viem'
-
-const client = await createShieldedPublicClient({
-  transport: http(),
-  chain: seismicDevnet,
-})
-
-const teePublicKey = await client.getTeePublicKey()
-```
-
-## Return Value
-
-A ShieldedPublicClient instance that extends viem's PublicClient with additional methods for privacy-preserving operations.
-
-## Parameters
-
-### parameters
-
-The same parameters passed into viem's [createPublicClient](https://viem.sh/docs/clients/public.html).
-
-```ts
-const client = await createShieldedPublicClient({
-  transport: http(), // [!code focus]
-  chain: seismicDevnet, // [!code focus]
-})
-```
-
-#### transport
-
-- **Type:** `Transport`
-
-The transport layer to use (e.g., an HTTP transport).
-
-#### chain
-
-- **Type:** `Chain | undefined`
-
-The chain configuration to target (e.g., `seismicDevnet`).
-
-## Shielded Public Actions
+# Shielded Public Actions
 
 In addition to all standard viem PublicClient methods, the following Seismic-specific methods are available:
 
-### getTeePublicKey
+## getTeePublicKey
 
 ```ts
 const teePublicKey = await client.getTeePublicKey()
@@ -67,7 +14,7 @@ const teePublicKey = await client.getTeePublicKey()
 
 Retrieves the public key of the Trusted Execution Environment (TEE).
 
-### rng
+## rng
 
 ```ts
 const randomValue = await client.rng({ max: 100n })
@@ -75,7 +22,7 @@ const randomValue = await client.rng({ max: 100n })
 
 Generates a secure random number. See [RNG Precompile](/viem/precompiles/rng) for more details.
 
-### ecdh
+## ecdh
 
 ```ts
 const result = await client.ecdh({ publicKey: '0x...' })
@@ -83,9 +30,9 @@ const result = await client.ecdh({ publicKey: '0x...' })
 
 Performs Elliptic Curve Diffie-Hellman key exchange. See [ECDH Precompile](/viem/precompiles/ecdh) for more details.
 
-### AES-GCM
+## AES-GCM
 
-#### Encryption
+### Encryption
 
 ```ts
 const encryptedData = await client.aesGcmEncryption({
@@ -96,7 +43,7 @@ const encryptedData = await client.aesGcmEncryption({
 
 Encrypts data using AES-GCM encryption.
 
-#### Decryption
+### Decryption
 
 ```ts
 const decryptedData = await client.aesGcmDecryption({
@@ -109,7 +56,7 @@ Decrypts AES-GCM encrypted data.
 
 See [AES Precompile](/viem/precompiles/aes) for more details.
 
-### hdfk
+## HDFK
 
 ```ts
 const derivedKey = await client.hdfk('0x...')
@@ -117,7 +64,7 @@ const derivedKey = await client.hdfk('0x...')
 
 Derives a key from the initial key material. See [HDKF Precompile](/viem/precompiles/hdfk) for more details.
 
-### SECP256K1
+## SECP256K1
 
 ```ts
 const signature = await client.secp256k1({
