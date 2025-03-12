@@ -14,11 +14,7 @@ module.exports = [
       // Added languageOptions block
       parser: require('@typescript-eslint/parser'),
       parserOptions: {
-        project: [
-          'tsconfig.json',
-          'packages/*/tsconfig.json',
-          'tests/*/tsconfig.json',
-        ],
+        projectService: true,
       },
     },
     rules: {

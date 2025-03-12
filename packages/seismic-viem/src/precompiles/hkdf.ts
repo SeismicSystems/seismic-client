@@ -14,20 +14,20 @@ import {
   callPrecompile,
 } from '@sviem/precompiles/precompile'
 
-export const HDFK_ADDRESS = '0x0000000000000000000000000000000000000068'
+export const HKDF_ADDRESS = '0x0000000000000000000000000000000000000068'
 
 const SHA256_BASE_GAS = 60n
 const SHA256_PER_WORD = 12n
 
-export const HDFK_EXPAND_COST_GAS = 2n * SHA256_BASE_GAS
+export const HKDF_EXPAND_COST_GAS = 2n * SHA256_BASE_GAS
 export const SHARED_SECRET_GAS = 3000n
 
 /**
- * Precompile contract configuration for HDFK (Hash-based Derivation Function Keyed) operations.
+ * Precompile contract configuration for HKDF (Hash-based Derivation Function Keyed) operations.
  *
  * @type {Precompile<string | Hex, Hex>}
- * @property {Hex} address - The address of the HDFK precompile contract.
- * @property {Function} gasLimit - Function that calculates the gas cost for the HDFK operation.
+ * @property {Hex} address - The address of the HKDF precompile contract.
+ * @property {Function} gasLimit - Function that calculates the gas cost for the HKDF operation.
  *   - Takes a string or Hex input key material (ikm).
  *   - Converts the input to bytes based on its type.
  *   - Calculates a linear gas cost based on input length.
@@ -40,7 +40,7 @@ export const SHARED_SECRET_GAS = 3000n
  *   - Returns the decoded value as a Hex string.
  */
 export const hdfkPrecompile: Precompile<string | Hex, Hex> = {
-  address: HDFK_ADDRESS,
+  address: HKDF_ADDRESS,
   gasCost: (ikmHex: string | Hex) => {
     const ikmBytes = isHex(ikmHex) ? hexToBytes(ikmHex) : stringToBytes(ikmHex)
     const linearGasCost = calcLinearGasCost({
@@ -49,7 +49,7 @@ export const hdfkPrecompile: Precompile<string | Hex, Hex> = {
       base: SHARED_SECRET_GAS,
       word: SHA256_PER_WORD,
     })
-    return 2n * linearGasCost + HDFK_EXPAND_COST_GAS
+    return 2n * linearGasCost + HKDF_EXPAND_COST_GAS
   },
   encodeParams: (input) => {
     if (isHex(input)) {
@@ -64,14 +64,14 @@ export const hdfkPrecompile: Precompile<string | Hex, Hex> = {
 }
 
 /**
- * Executes the HDFK (Hash-based Derivation Function Keyed) precompile.
+ * Executes the HKDF (Hash-based Derivation Function Keyed) precompile.
  *
  * @param {CallClient} client - The public client to use for the precompile call.
- * @param {string | Hex} input - The input to the HDFK precompile, either as a string or hexadecimal value.
+ * @param {string | Hex} input - The input to the HKDF precompile, either as a string or hexadecimal value.
  *
  * @throws {Error} May throw if the precompile call fails.
  *
- * @returns {Promise<Hex>} A promise that resolves to the 32-byte output of the HDFK precompile as a hexadecimal string.
+ * @returns {Promise<Hex>} A promise that resolves to the 32-byte output of the HKDF precompile as a hexadecimal string.
  *
  * @example
  * ```typescript

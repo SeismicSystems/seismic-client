@@ -1,0 +1,116 @@
+---
+description: Performs a cryptographic signature operation using the secp256k1 elliptic curve algorithm.
+---
+
+# secp256k1Sig
+
+## Import
+
+```ts
+import { secp256k1Sig } from 'seismic-viem'
+```
+
+## Usage
+
+Performs a cryptographic signature operation using the secp256k1 elliptic curve algorithm, which is commonly used in blockchain and cryptocurrency systems for digital signatures.
+
+```ts
+import { secp256k1Sig } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+})
+
+// Sign a message using a private key
+const signature = await secp256k1Sig(client, {
+  sk: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+  message: 'Hello, world!',
+})
+// Returns: { r: '0x...', s: '0x...', v: 27 }
+```
+
+## Return Value
+
+`Promise<Signature>` - A promise that resolves to a signature object containing:
+
+- `r`: The R component of the ECDSA signature
+- `s`: The S component of the ECDSA signature
+- `v`: The recovery identifier (typically 27 or 28)
+
+## Parameters
+
+### client
+
+- **Type:** `CallClient`
+
+The public client to use for the precompile call.
+
+```ts
+const signature = await secp256k1Sig(client, {
+  // [!code focus]
+  sk: '0x1234...',
+  message: 'Hello, world!',
+})
+```
+
+### args
+
+- **Type:** `Secp256K1SigParams`
+
+An object containing parameters for the signature operation.
+
+#### sk
+
+- **Type:** `Hex`
+- **Required:** Yes
+
+The private key in hexadecimal format used for signing the message. Must be a 32-byte hexadecimal string representing the secret key.
+
+```ts
+const signature = await secp256k1Sig(client, {
+  sk: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // [!code focus]
+  message: 'Hello, world!',
+})
+```
+
+#### message
+
+- **Type:** `string`
+- **Required:** Yes
+
+The message to be signed. Can be any string that will be hashed before signing.
+
+```ts
+const signature = await secp256k1Sig(client, {
+  sk: '0x1234...',
+  message: 'Hello, world!', // [!code focus]
+})
+```
+
+## Throws
+
+The function may throw an error in the following scenarios:
+
+- If the private key is invalid or improperly formatted
+- If the message cannot be processed
+- If the precompile call fails
+- If there are cryptographic errors during the signing process
+
+## Remarks
+
+The secp256k1 signature algorithm is a critical component of many blockchain and cryptocurrency systems, including Bitcoin and Ethereum. This precompile provides an efficient, secure way to generate digital signatures directly on the blockchain.
+
+Key characteristics:
+
+- Uses the secp256k1 elliptic curve, which is widely used in cryptographic systems
+- Generates a signature that can be verified without revealing the private key
+- Provides a standard method for cryptographic signing within the blockchain environment
+
+### Security Considerations
+
+- Keep private keys confidential and secure
+- Never share or expose private keys
+- Use appropriate key management practices

@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "paths": {
+      "~/*": ["./*"]
+    },
+    "composite": true,
+    "downlevelIteration": true,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": ".",
+    "baseUrl": "."
+  }
+}

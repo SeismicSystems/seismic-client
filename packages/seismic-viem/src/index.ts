@@ -18,6 +18,7 @@ export {
 export { getShieldedContract } from '@sviem/contract/contract'
 export { signedReadContract } from '@sviem/contract/read'
 export { shieldedWriteContract } from '@sviem/contract/write'
+export { remapSeismicAbiInputs } from '@sviem/contract/abi'
 
 export {
   createShieldedPublicClient,

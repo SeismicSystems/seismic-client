@@ -1,0 +1,163 @@
+---
+description: A React context provider for managing shielded wallet interactions with enhanced privacy and security.
+---
+
+# ShieldedWalletProvider
+
+## Import
+
+```ts
+import { ShieldedWalletProvider } from 'seismic-react'
+```
+
+## Overview
+
+`ShieldedWalletProvider` is a React context provider that enables secure, privacy-focused wallet interactions. It integrates seamlessly with existing React and Web3 ecosystem libraries, providing an additional layer of privacy for blockchain applications.
+
+## Usage
+
+### Basic Integration
+
+```tsx
+import type { AppProps } from 'next/app'
+import { ShieldedWalletProvider, seismicDevnet } from 'seismic-react'
+import { WagmiProvider } from 'wagmi'
+
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+// Create query client
+const queryClient = new QueryClient()
+
+// Wagmi configuration
+const config = getDefaultConfig({
+  appName: 'My Shielded App',
+  projectId: 'YOUR_WALLETCONNECT_PROJECT_ID',
+  chains: [seismicDevnet],
+})
+
+export default function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+          <ShieldedWalletProvider config={config}>
+            <Component {...pageProps} />
+          </ShieldedWalletProvider>
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+### Advanced Configuration
+
+```tsx
+<ShieldedWalletProvider
+  config={config}
+  options={{
+    publicTransport: customTransport,
+    publicChain: customChain,
+  }}
+>
+  {/* App components */}
+</ShieldedWalletProvider>
+```
+
+## Parameters
+
+### props
+
+- **Type:** `ShieldedWalletProviderProps`
+
+#### config
+
+- **Type:** `Config`
+- **Required:** Yes
+
+The Wagmi configuration used to initialize the shielded wallet client. Typically created using `getDefaultConfig()` from RainbowKit or Wagmi.
+
+```tsx
+const config = getDefaultConfig({
+  appName: 'My Shielded App',
+  projectId: 'YOUR_WALLETCONNECT_PROJECT_ID',
+  chains: [seismicDevnet],
+})
+```
+
+#### options
+
+- **Type:** `object`
+- **Required:** No
+
+Additional configuration options for the shielded wallet provider.
+
+##### publicTransport
+
+- **Type:** `Transport`
+- **Optional:** Yes
+
+A custom transport layer for public blockchain interactions. Allows more granular control over network communications.
+
+##### publicChain
+
+- **Type:** `Chain`
+- **Optional:** Yes
+
+A custom chain configuration for public interactions. Useful for connecting to specific blockchain networks or testnets.
+
+## Return Value
+
+`ReactNode | Promise<ReactNode>` - Renders the shielded wallet context and its children, potentially asynchronously.
+
+## Remarks
+
+### Key Features
+
+- Seamless integration with Web3 ecosystem libraries
+- Enhanced privacy for wallet interactions
+- Supports custom transport and chain configurations
+- Works with Next.js and other React frameworks
+
+### Security Considerations
+
+- Provides an additional layer of privacy for blockchain transactions
+- Helps protect sensitive wallet information
+- Enables more secure and confidential blockchain interactions
+
+## Error Handling
+
+The provider may throw errors if:
+
+- Invalid configuration is provided
+- Network connectivity issues occur
+- Incompatible wallet or chain configurations are used
+
+## Compatibility
+
+- Works with Wagmi v2
+- Compatible with RainbowKit
+- Supports major Web3 React frameworks
+- Tested with Next.js applications
+
+## Example: Using Shielded Wallet Context
+
+```tsx
+import { useShieldedWallet } from 'seismic-react'
+
+function MyComponent() {
+  const { walletClient } = useShieldedWallet()
+
+  const handleTransaction = async () => {
+    // Perform shielded transactions
+    const result = await walletClient.sendTransaction(...)
+  }
+
+  return (
+    <div>
+      {/* Wallet interaction UI */}
+    </div>
+  )
+}
+```

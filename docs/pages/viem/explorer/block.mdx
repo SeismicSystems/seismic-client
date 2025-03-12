@@ -1,0 +1,72 @@
+---
+description: Generates a URL for viewing a block on a block explorer for Seismic networks.
+---
+
+# blockExplorerUrl
+
+## Import
+
+```ts
+import { blockExplorerUrl } from 'seismic-viem'
+```
+
+## Usage
+
+Generates a URL for viewing a block on a block explorer for Seismic networks.
+
+```ts
+import { blockExplorerUrl } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+
+// Generate an explorer URL for a block
+const url = blockExplorerUrl({
+  blockNumber: 123456,
+  chain: seismicDevnet,
+})
+// Will return: "https://explorer-1.seismicdev.net/block/123456"
+
+// Generate a URL for a specific block tab (transactions)
+const txsUrl = blockExplorerUrl({
+  blockNumber: 123456,
+  chain: seismicDevnet,
+  tab: 'txs',
+})
+// Will return: "https://explorer-1.seismicdev.net/block/123456/txs"
+```
+
+## Return Value
+
+`string | undefined` - A URL for viewing the block on a block explorer, or `undefined` if no block explorer is configured for the chain.
+
+## Parameters
+
+### parameters
+
+```ts
+const url = blockExplorerUrl({
+  blockNumber: 123456, // [!code focus]
+  chain: seismicDevnet, // [!code focus]
+  tab: 'txs', // [!code focus] (optional)
+})
+```
+
+#### blockNumber
+
+- **Type:** `number`
+
+The block number to generate an explorer URL for.
+
+#### chain
+
+- **Type:** `Chain`
+
+The chain configuration object containing block explorer information.
+
+#### tab (optional)
+
+- **Type:** `BlockExplorerTab`
+
+The specific tab to view on the block explorer page. Available options:
+
+- `'index'` - Main block information
+- `'txs'` - Transactions included in the block

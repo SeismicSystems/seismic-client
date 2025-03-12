@@ -2,7 +2,7 @@ import { Address, decodeAbiParameters, hexToBytes } from 'viem'
 import { Hex } from 'viem'
 
 import {
-  HDFK_EXPAND_COST_GAS,
+  HKDF_EXPAND_COST_GAS,
   SHARED_SECRET_GAS,
 } from '@sviem/precompiles/hkdf'
 import {
@@ -44,7 +44,7 @@ export type EcdhParams = {
  * @type {Precompile<EcdhParams, Hex>}
  * @property {Hex} address - The address of the ECDH precompile contract.
  * @property {Function} gasLimit - Function that returns the gas cost for the ECDH operation.
- *   - Returns the sum of the shared secret gas cost and HDFK expansion cost.
+ *   - Returns the sum of the shared secret gas cost and HKDF expansion cost.
  * @property {Function} encodeParams - Function that encodes the input parameters for the precompile call.
  *   - Validates both the secret key and public key.
  *   - Concatenates the secret key and public key (without the '0x' prefix on the public key).
@@ -54,7 +54,7 @@ export type EcdhParams = {
  */
 export const ecdhPrecompile: Precompile<EcdhParams, Hex> = {
   address: ECDH_ADDRESS,
-  gasCost: () => SHARED_SECRET_GAS + HDFK_EXPAND_COST_GAS,
+  gasCost: () => SHARED_SECRET_GAS + HKDF_EXPAND_COST_GAS,
   encodeParams: ({ sk, pk }) => {
     validateKey(sk, true)
     validateKey(pk, false)

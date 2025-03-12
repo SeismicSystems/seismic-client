@@ -1,0 +1,97 @@
+---
+description: Reference implementations for Seismic's precompiles. These are meant for use directly in your contracts; these are here to show how you would call these directly
+---
+
+# Precompile Utility
+
+## Import
+
+```ts
+import { CallClient, Precompile, callPrecompile } from 'seismic-viem'
+```
+
+## Overview
+
+The precompile utility provides a robust, type-safe mechanism for interacting with precompiled contracts on the blockchain. It handles gas cost calculation, parameter encoding, and result decoding with a generic, reusable approach.
+
+## Usage
+
+### Basic Precompile Call
+
+```ts
+import { callPrecompile, rngPrecompile, seismicDevnet1 } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicDevnet1,
+  transport: http(),
+})
+
+// Accessing the precompile address
+console.log('RNG Precompile Address:', rngPrecompile.address)
+
+// Making a precompile call
+const randomNumber = await callPrecompile({
+  client,
+  precompile: rngPrecompile,
+  args: { numBytes: 32 },
+})
+```
+
+## Types
+
+### Precompile\<P, R\>
+
+A generic type representing a precompiled contract with type-safe parameters and return values.
+
+```ts
+import { Hex } from 'viem'
+
+type Precompile<P, R> = {
+  address: Address // Blockchain address of the precompile
+  gasCost: (args: P) => BigInt // Calculates gas cost for the call
+  encodeParams: (args: P) => Hex // Converts arguments to ABI-encoded data
+  decodeResult: (result: Hex) => R // Converts returned data to expected type
+}
+```
+
+### CallClient
+
+An interface for blockchain clients supporting contract calls.
+
+```ts
+type CallClient = {
+  call: (params: CallParameters) => Promise<CallReturnType>
+}
+```
+
+## Function: callPrecompile()
+
+### Parameters
+
+#### client
+
+- **Type:** `CallClient`
+- The blockchain client used to make the precompile call
+
+#### precompile
+
+- **Type:** `Precompile<P, R>`
+- The precompiled contract definition
+
+#### args
+
+- **Type:** `P`
+- Arguments specific to the precompile being called
+
+### Return Value
+
+`Promise<R>` - The decoded result of the precompile call
+
+## Error Handling
+
+Throws an error if:
+
+- No data is returned from the precompile call
+- Invalid parameters are provided
+- Encoding or decoding fails

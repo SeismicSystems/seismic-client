@@ -1,0 +1,177 @@
+---
+description: Encrypt and decrypt with AES-GCM through a Seismic precompile contract.
+---
+
+# aesGcmEncrypt
+
+## Import
+
+```ts
+import { aesGcmEncrypt } from 'seismic-viem'
+```
+
+## Usage
+
+Encrypts plaintext using AES-GCM encryption through a precompile contract on the Seismic network.
+
+```ts
+import { aesGcmEncrypt } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+})
+
+const ciphertext = await aesGcmEncrypt(client, {
+  aesKey: '0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+  nonce: 123456,
+  plaintext: 'Secret message',
+})
+
+// Returns: '0x...' (encrypted data in hexadecimal format)
+```
+
+## Return Value
+
+`Promise<'0x${string}'>` - A promise that resolves to the encrypted ciphertext in hexadecimal format.
+
+## Parameters
+
+### client
+
+- **Type:** `CallClient`
+
+The public client to use for the precompile call.
+
+```ts
+const ciphertext = await aesGcmEncrypt(client, { ... }) // [!code focus]
+```
+
+### args
+
+- **Type:** `AesGcmEncryptionParams`
+
+The parameters for the AES-GCM encryption operation.
+
+```ts
+const ciphertext = await aesGcmEncrypt(client, {
+  aesKey: '0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f', // [!code focus]
+  nonce: 123456, // [!code focus]
+  plaintext: 'Secret message', // [!code focus]
+})
+```
+
+#### aesKey
+
+- **Type:** `Hex`
+
+The AES key in hexadecimal format to use for encryption. Must be 256 bits (32 bytes).
+
+#### nonce
+
+- **Type:** `number`
+
+The nonce value to use for encryption. This should be a unique value for each encryption operation with the same key.
+
+#### plaintext
+
+- **Type:** `string`
+
+The plaintext string to encrypt.
+
+## Throws
+
+May throw if parameter validation fails or if the precompile call fails.
+
+## Remarks
+
+AES-GCM is an authenticated encryption algorithm that provides both confidentiality and integrity. In Seismic, this operation is performed through a precompile contract for efficiency.
+
+# aesGcmDecrypt
+
+## Import
+
+```ts
+import { aesGcmDecrypt } from 'seismic-viem'
+```
+
+## Usage
+
+Decrypts ciphertext using AES-GCM decryption through a precompile contract on the Seismic network.
+
+```ts
+import { aesGcmDecrypt } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+})
+
+const plaintext = await aesGcmDecrypt(client, {
+  aesKey: '0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+  nonce: 123456,
+  ciphertext: '0x7b226d657373616765223a22656e63727970746564227d',
+})
+
+// Returns: 'Secret message'
+```
+
+## Return Value
+
+`Promise<string>` - A promise that resolves to the decrypted plaintext as a string.
+
+## Parameters
+
+### client
+
+- **Type:** `CallClient`
+
+The public client to use for the precompile call.
+
+```ts
+const plaintext = await aesGcmDecrypt(client, { ... }) // [!code focus]
+```
+
+### args
+
+- **Type:** `AesGcmDecryptionParams`
+
+The parameters for the AES-GCM decryption operation.
+
+```ts
+const plaintext = await aesGcmDecrypt(client, {
+  aesKey: '0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f', // [!code focus]
+  nonce: 123456, // [!code focus]
+  ciphertext: '0x7b226d657373616765223a22656e63727970746564227d', // [!code focus]
+})
+```
+
+#### aesKey
+
+- **Type:** `Hex`
+
+The AES key in hexadecimal format to use for decryption. Must be 256 bits (32 bytes).
+
+#### nonce
+
+- **Type:** `number`
+
+The nonce value to use for decryption. Must be the same value that was used during encryption.
+
+#### ciphertext
+
+- **Type:** `Hex`
+
+The ciphertext in hexadecimal format to decrypt.
+
+## Throws
+
+May throw if parameter validation fails, if the precompile call fails, or if the ciphertext has been tampered with (authentication failure).
+
+## Remarks
+
+AES-GCM is an authenticated encryption algorithm. If the ciphertext has been modified or if an incorrect key or nonce is used, the decryption will fail with an authentication error.

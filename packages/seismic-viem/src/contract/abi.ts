@@ -73,11 +73,6 @@ export const remapSeismicAbiInputs = (
   }
 }
 
-export const hasShieldedInputs = (abiFunction: AbiFunction): boolean =>
-  isAnyTrue(
-    abiFunction.inputs.map(remapSeismicParam).map(({ shielded }) => shielded)
-  )
-
 /*
  * Utility function to process arguments including fetching the ABI item
  */

@@ -1,0 +1,73 @@
+---
+description: Generates a URL for viewing a token on a block explorer for Seismic networks.
+---
+
+# tokenExplorerUrl
+
+## Import
+
+```ts
+import { tokenExplorerUrl } from 'seismic-viem'
+```
+
+## Usage
+
+Generates a URL for viewing a token on a block explorer for Seismic networks.
+
+```ts
+import { tokenExplorerUrl } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+
+// Generate a basic explorer URL for a token
+const url = tokenExplorerUrl({
+  address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  chain: seismicDevnet,
+})
+// Will return something like: "https://explorer-1.seismicdev.net/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+
+// Generate a URL for a specific token tab (holders)
+const holdersUrl = tokenExplorerUrl({
+  address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  chain: seismicDevnet,
+  tab: 'holders',
+})
+// Will return something like: "https://explorer-1.seismicdev.net/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/holders"
+```
+
+## Return Value
+
+`string | undefined` - A URL for viewing the token on a block explorer, or `undefined` if no block explorer is configured for the chain.
+
+## Parameters
+
+### parameters
+
+```ts
+const url = tokenExplorerUrl({
+  address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // [!code focus]
+  chain: seismicDevnet, // [!code focus]
+  tab: 'holders', // [!code focus] (optional)
+})
+```
+
+#### address
+
+- **Type:** `Address`
+
+The token contract address to generate an explorer URL for.
+
+#### chain
+
+- **Type:** `Chain`
+
+The chain configuration object containing block explorer information.
+
+#### tab (optional)
+
+- **Type:** `TokenExplorerTab`
+
+The specific tab to view on the token explorer page. Available options:
+
+- `'token_transfers'` - Token transfers
+- `'holders'` - Token holders
+- `'contract'` - Token contract code
