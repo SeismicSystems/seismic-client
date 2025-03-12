@@ -41,7 +41,11 @@ export type {
   GetAddressExplorerUrlParams,
   GetBlockExplorerUrlParams,
   GetTokenExplorerUrlParams,
-  GetExplorerUrlOptions as GetExplorerUrlOptions,
+  GetExplorerUrlOptions,
+  GetTxExplorerOptions,
+  GetAddressExplorerOptions,
+  GetBlockExplorerOptions,
+  GetTokenExplorerOptions,
 } from '@sviem/explorer'
 export {
   getExplorerUrl,
