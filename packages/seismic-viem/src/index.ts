@@ -52,3 +52,25 @@ export {
 } from '@sviem/explorer'
 
 export { stringifyBigInt } from '@sviem/utils'
+
+export { rng, rngPrecompile } from '@sviem/precompiles/rng'
+export { hdfk, hdfkPrecompile } from '@sviem/precompiles/hkdf'
+export { ecdh, ecdhPrecompile } from '@sviem/precompiles/ecdh'
+export type { EcdhParams } from '@sviem/precompiles/ecdh'
+export {
+  aesGcmEncrypt,
+  aesGcmDecrypt,
+  aesGcmEncryptPrecompile,
+  aesGcmDecryptPrecompile,
+} from '@sviem/precompiles/aes'
+export type {
+  AesGcmEncryptionParams,
+  AesGcmDecryptionParams,
+} from '@sviem/precompiles/aes'
+export {
+  secp256k1Sig,
+  secp256k1SigPrecompile,
+} from '@sviem/precompiles/secp256k1'
+export type { Secp256K1SigParams } from '@sviem/precompiles/secp256k1'
+
+export type { CallClient, Precompile } from '@sviem/precompiles/precompile'

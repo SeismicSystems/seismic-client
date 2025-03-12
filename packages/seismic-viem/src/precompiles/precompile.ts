@@ -10,25 +10,29 @@ import {
 export type Precompile<P, R> = {
   address: Address
   // return the gas cost given transformed args
-  gasLimit: (targs: readonly unknown[]) => bigint
+  gasLimit: (args: P) => bigint
   // Transform from typescript types to abi types
   encodeParams: (args: P) => Hex
   decodeResult: (result: Hex) => R
 }
 
+export type CallClient = {
+  call: (params: CallParameters) => Promise<CallReturnType>
+}
+
 export const callPrecompile = async <P, R>({
-  call,
+  client,
   precompile,
   args,
 }: {
-  call: (params: CallParameters) => Promise<CallReturnType>
+  client: CallClient
   precompile: Precompile<P, R>
   args: P
 }): Promise<R> => {
   const data = precompile.encodeParams(args)
-  const result = await call({
+  const result = await client.call({
     data,
-    // gas: precompile.gasLimit(input),
+    // gas: precompile.gasLimit(args),
     to: precompile.address,
   })
   if (!result.data) {

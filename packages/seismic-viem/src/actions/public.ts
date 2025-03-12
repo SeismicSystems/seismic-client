@@ -15,16 +15,16 @@ import type { ShieldedPublicClient } from '@sviem/client'
 import {
   AesGcmDecryptionParams,
   AesGcmEncryptionParams,
-  aesGcmDecryption,
-  aesGcmEncryption,
+  aesGcmDecrypt,
+  aesGcmEncrypt,
 } from '@sviem/precompiles/aes'
-import { EcdhParams, ecdh } from '@sviem/precompiles/ecdh'
-import { hdfk } from '@sviem/precompiles/hkdf'
+import { EcdhParams, ecdhPrecompile } from '@sviem/precompiles/ecdh'
+import { hdfkPrecompile } from '@sviem/precompiles/hkdf'
 import { callPrecompile } from '@sviem/precompiles/precompile'
-import { rng } from '@sviem/precompiles/rng'
+import { rngPrecompile } from '@sviem/precompiles/rng'
 import {
   Secp256K1SigParams,
-  secp256k1Signature,
+  secp256k1SigPrecompile,
 } from '@sviem/precompiles/secp256k1'
 import { RpcRequest } from '@sviem/viem-internal/rpc'
 
@@ -34,8 +34,6 @@ import { RpcRequest } from '@sviem/viem-internal/rpc'
  * These actions provide functionality specific to shielded interactions,
  * such as retrieving the TEE public key or interacting with storage and transactions.
  *
- * @template TChain - The type of the blockchain chain (extends `Chain` or `undefined`).
- *
  * @property getTeePublicKey - Retrieves the public key for the Trusted Execution Environment (TEE).
  * @returns A promise that resolves to the public key in hexadecimal or string format.
  *
@@ -44,6 +42,30 @@ import { RpcRequest } from '@sviem/viem-internal/rpc'
  *
  * @property getTransaction - (Not Supported) Attempts to retrieve a transaction by its parameters.
  * Throws an error when called on a shielded public client.
+ *
+ * @property rng - Generates a random number of the specified size.
+ * @param size - The size of the random number to generate.
+ * @returns A promise that resolves to the random number in hexadecimal format.
+ *
+ * @property ecdh - Performs Elliptic Curve Diffie-Hellman key exchange.
+ * @param params - The parameters for the ECDH operation.
+ * @returns A promise that resolves to the shared secret in hexadecimal format.
+ *
+ * @property aesGcmEncryption - Encrypts a plaintext using AES-GCM.
+ * @param params - The parameters for the AES-GCM operation.
+ * @returns A promise that resolves to the encrypted ciphertext in hexadecimal format.
+ *
+ * @property aesGcmDecryption - Decrypts a ciphertext using AES-GCM.
+ * @param params - The parameters for the AES-GCM operation.
+ * @returns A promise that resolves to the decrypted plaintext.
+ *
+ * @property hdfk - Performs HKDF key derivation.
+ * @param ikm - The input key material in hexadecimal format.
+ * @returns A promise that resolves to the derived key in hexadecimal format.
+ *
+ * @property secp256k1Signature - Signs a message using secp256k1.
+ * @param params - The parameters for the secp256k1 operation.
+ * @returns A promise that resolves to the signature in hexadecimal format.
  */
 export type ShieldedPublicActions<
   rpcSchema extends RpcSchema | undefined = undefined,
@@ -71,11 +93,6 @@ export type ShieldedPublicActions<
  * This function defines the behavior of the shielded-specific actions, such as
  * retrieving the TEE public key. It also disables unsupported actions like
  * `getStorageAt` and `getTransaction`, throwing errors if they are called.
- *
- * @template TTransport - The transport type used by the client (extends `Transport`).
- * @template TChain - The blockchain chain type (extends `Chain` or `undefined`).
- * @template TAccount - The account type associated with the client (extends `Account` or `undefined`).
- * @template TRpcSchema - The RPC schema type (extends `RpcSchema` or `undefined`).
  *
  * @param client - The shielded public client instance.
  *
@@ -116,38 +133,28 @@ export const shieldedPublicActions = <
   publicRequest: async (_args) => client.request<TRpcSchema>(_args),
   rng: async (size) =>
     callPrecompile({
-      call: client.call,
-      precompile: rng,
+      client,
+      precompile: rngPrecompile,
       args: size,
     }),
   ecdh: (args) =>
     callPrecompile({
-      call: client.call,
-      precompile: ecdh,
+      client,
+      precompile: ecdhPrecompile,
       args,
     }),
   hdfk: (input) =>
     callPrecompile({
-      call: client.call,
-      precompile: hdfk,
+      client,
+      precompile: hdfkPrecompile,
       args: input,
     }),
   secp256k1Signature: (params) =>
     callPrecompile({
-      call: client.call,
-      precompile: secp256k1Signature,
+      client,
+      precompile: secp256k1SigPrecompile,
       args: params,
     }),
-  aesGcmEncryption: (params) =>
-    callPrecompile({
-      call: client.call,
-      precompile: aesGcmEncryption,
-      args: params,
-    }),
-  aesGcmDecryption: (params) =>
-    callPrecompile({
-      call: client.call,
-      precompile: aesGcmDecryption,
-      args: params,
-    }),
+  aesGcmEncryption: (params) => aesGcmEncrypt(client, params),
+  aesGcmDecryption: (params) => aesGcmDecrypt(client, params),
 })
