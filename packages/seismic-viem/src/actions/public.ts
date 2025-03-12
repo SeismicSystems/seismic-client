@@ -13,6 +13,18 @@ import type {
 
 import type { ShieldedPublicClient } from '@sviem/client'
 import {
+  GetAddressExplorerOptions,
+  GetBlockExplorerOptions,
+  GetExplorerUrlOptions,
+  GetTokenExplorerOptions,
+  GetTxExplorerOptions,
+  addressExplorerUrl,
+  blockExplorerUrl,
+  getExplorerUrl,
+  tokenExplorerUrl,
+  txExplorerUrl,
+} from '@sviem/explorer'
+import {
   AesGcmDecryptionParams,
   AesGcmEncryptionParams,
   aesGcmDecryption,
@@ -57,6 +69,11 @@ export type ShieldedPublicActions<
   ) => EIP1193RequestFn<
     rpcSchema extends undefined ? EIP1474Methods : rpcSchema
   >
+  explorerUrl: (options: GetExplorerUrlOptions) => string | undefined
+  addressExplorerUrl: (options: GetAddressExplorerOptions) => string | undefined
+  blockExplorerUrl: (options: GetBlockExplorerOptions) => string | undefined
+  txExplorerUrl: (options: GetTxExplorerOptions) => string | undefined
+  tokenExplorerUrl: (options: GetTokenExplorerOptions) => string | undefined
   rng: (size: bigint | number) => Promise<bigint>
   ecdh: (params: EcdhParams) => Promise<Hex>
   aesGcmEncryption: (params: AesGcmEncryptionParams) => Promise<Hex>
@@ -112,8 +129,17 @@ export const shieldedPublicActions = <
   getStorageAt: async (_args) => {
     throw new Error('Cannot call getStorageAt with a shielded public client')
   },
-  // @ts-ignore
+  // @ts-expect-error: TODO: fix this typing
   publicRequest: async (_args) => client.request<TRpcSchema>(_args),
+  explorerUrl: (options) => getExplorerUrl(client.chain, options),
+  addressExplorerUrl: (options) =>
+    addressExplorerUrl({ chain: client.chain, ...options }),
+  blockExplorerUrl: (options) =>
+    blockExplorerUrl({ chain: client.chain, ...options }),
+  txExplorerUrl: (options) =>
+    txExplorerUrl({ chain: client.chain, ...options }),
+  tokenExplorerUrl: (options) =>
+    tokenExplorerUrl({ chain: client.chain, ...options }),
   rng: async (size) =>
     callPrecompile({
       call: client.call,
