@@ -13,6 +13,18 @@ import type {
 
 import type { ShieldedPublicClient } from '@sviem/client'
 import {
+  GetAddressExplorerOptions,
+  GetBlockExplorerOptions,
+  GetExplorerUrlOptions,
+  GetTokenExplorerOptions,
+  GetTxExplorerOptions,
+  addressExplorerUrl,
+  blockExplorerUrl,
+  getExplorerUrl,
+  tokenExplorerUrl,
+  txExplorerUrl,
+} from '@sviem/explorer'
+import {
   AesGcmDecryptionParams,
   AesGcmEncryptionParams,
   aesGcmDecrypt,
@@ -34,38 +46,85 @@ import { RpcRequest } from '@sviem/viem-internal/rpc'
  * These actions provide functionality specific to shielded interactions,
  * such as retrieving the TEE public key or interacting with storage and transactions.
  *
- * @property getTeePublicKey - Retrieves the public key for the Trusted Execution Environment (TEE).
- * @returns A promise that resolves to the public key in hexadecimal or string format.
+ * @type {Object}
+ * @template {rpcSchema} - The RPC schema type, which may be undefined.
+ * @property {Function} getTeePublicKey - Retrieves the public key for the Trusted Execution Environment (TEE).
+ *   @returns {Promise<Hex | string>} A promise that resolves to the public key in hexadecimal or string format.
  *
- * @property getStorageAt - (Not Supported) Attempts to retrieve a storage value at a specified location.
- * Throws an error when called on a shielded public client.
+ * @property {Function} getStorageAt - (Not Supported) Attempts to retrieve a storage value at a specified location.
+ *   @param {GetStorageAtParameters} args - The parameters for the storage retrieval.
+ *   @returns {Promise<GetStorageAtReturnType>} Throws an error when called on a shielded public client.
  *
- * @property getTransaction - (Not Supported) Attempts to retrieve a transaction by its parameters.
- * Throws an error when called on a shielded public client.
+ * @property {Function} publicRequest - Performs a public RPC request.
+ *   @param {RpcRequest} args - The RPC request parameters.
+ *   @returns {EIP1193RequestFn} A function that performs the EIP-1193 request.
  *
- * @property rng - Generates a random number of the specified size.
- * @param size - The size of the random number to generate.
- * @returns A promise that resolves to the random number in hexadecimal format.
+ * @property {Function} explorerUrl - Generates a URL for the block explorer based on the provided options.
+ *   @param {GetExplorerUrlOptions} options - Options containing:
+ *     - `id` {string} - The identifier for the item (address, transaction hash, etc.).
+ *     - `item` {'tx'|'address'|'token'|'block'} - The type of item to explore.
+ *     - `tab` {TxExplorerTab|AddressExplorerTab|TokenExplorerTab|BlockExplorerTab} [optional] - Specific tab to open in the explorer.
+ *   @returns {string|undefined} The generated URL or undefined if not available.
  *
- * @property ecdh - Performs Elliptic Curve Diffie-Hellman key exchange.
- * @param params - The parameters for the ECDH operation.
- * @returns A promise that resolves to the shared secret in hexadecimal format.
+ * @property {Function} addressExplorerUrl - Generates a URL for exploring an address in the block explorer.
+ *   @param {GetAddressExplorerOptions} options - Options containing:
+ *     - `address` {Address} - The address to explore.
+ *     - `tab` {AddressExplorerTab} [optional] - Specific tab to open in the explorer.
+ *   @returns {string|undefined} The generated URL or undefined if not available.
  *
- * @property aesGcmEncryption - Encrypts a plaintext using AES-GCM.
- * @param params - The parameters for the AES-GCM operation.
- * @returns A promise that resolves to the encrypted ciphertext in hexadecimal format.
+ * @property {Function} blockExplorerUrl - Generates a URL for exploring a block in the block explorer.
+ *   @param {GetBlockExplorerOptions} options - Options containing:
+ *     - `blockNumber` {number} - The block number to explore.
+ *     - `tab` {BlockExplorerTab} [optional] - Specific tab to open in the explorer.
+ *   @returns {string|undefined} The generated URL or undefined if not available.
  *
- * @property aesGcmDecryption - Decrypts a ciphertext using AES-GCM.
- * @param params - The parameters for the AES-GCM operation.
- * @returns A promise that resolves to the decrypted plaintext.
+ * @property {Function} txExplorerUrl - Generates a URL for exploring a transaction in the block explorer.
+ *   @param {GetTxExplorerOptions} options - Options containing:
+ *     - `txHash` {Hex} - The transaction hash to explore.
+ *     - `tab` {TxExplorerTab} [optional] - Specific tab to open in the explorer.
+ *   @returns {string|undefined} The generated URL or undefined if not available.
  *
- * @property hdfk - Performs HKDF key derivation.
- * @param ikm - The input key material in hexadecimal format.
- * @returns A promise that resolves to the derived key in hexadecimal format.
+ * @property {Function} tokenExplorerUrl - Generates a URL for exploring a token in the block explorer.
+ *   @param {GetTokenExplorerOptions} options - Options containing:
+ *     - `address` {Address} - The token contract address to explore.
+ *     - `tab` {TokenExplorerTab} [optional] - Specific tab to open in the explorer.
+ *   @returns {string|undefined} The generated URL or undefined if not available.
  *
- * @property secp256k1Signature - Signs a message using secp256k1.
- * @param params - The parameters for the secp256k1 operation.
- * @returns A promise that resolves to the signature in hexadecimal format.
+ * @property {Function} rng - Generates a random number of the specified size.
+ *   @param {RngParams} args - The parameters for random number generation.
+ *     - `numBytes` {bigint | number} - The number of bytes to generate (must be less than or equal to 32).
+ *     - `pers` {Hex | ByteArray} [optional] - Personalization string to seed the random number generator.
+ *   @returns {Promise<bigint>} A promise that resolves to the random number as a bigint.
+ *
+ * @property {Function} ecdh - Performs Elliptic Curve Diffie-Hellman key exchange.
+ *   @param {EcdhParams} args - The parameters for the ECDH operation.
+ *     - `sk` {Hex} - The private key of the local party.
+ *     - `pk` {Hex} - The public key of the remote party.
+ *   @returns {Promise<Hex>} A promise that resolves to the shared secret in hexadecimal format.
+ *
+ * @property {Function} aesGcmEncryption - Encrypts a plaintext using AES-GCM.
+ *   @param {AesGcmEncryptionParams} args - The parameters for the AES-GCM encryption operation.
+ *     - `aesKey` {Hex} - The AES key in hexadecimal format to use for encryption.
+ *     - `nonce` {number} - The nonce value to use for encryption.
+ *     - `plaintext` {string} - The plaintext string to encrypt.
+ *   @returns {Promise<Hex>} A promise that resolves to the encrypted ciphertext in hexadecimal format.
+ *
+ * @property {Function} aesGcmDecryption - Decrypts a ciphertext using AES-GCM.
+ *   @param {AesGcmDecryptionParams} args - The parameters for the AES-GCM decryption operation.
+ *     - `aesKey` {Hex} - The AES key in hexadecimal format to use for decryption.
+ *     - `nonce` {number} - The nonce value to use for decryption.
+ *     - `ciphertext` {Hex} - The ciphertext in hexadecimal format to decrypt.
+ *   @returns {Promise<string>} A promise that resolves to the decrypted plaintext as a string.
+ *
+ * @property {Function} hdfk - Performs HKDF key derivation function.
+ *   @param {string | Hex} ikm - The input key material as a string or in hexadecimal format.
+ *   @returns {Promise<Hex>} A promise that resolves to the derived key in hexadecimal format.
+ *
+ * @property {Function} secp256k1Signature - Signs a message using secp256k1.
+ *   @param {Secp256K1SigParams} args - The parameters for the secp256k1 signing operation.
+ *     - `sk` {Hex} - The private key in hexadecimal format.
+ *     - `message` {string} - The message to sign.
+ *   @returns {Promise<Signature>} A promise that resolves to the signature object.
  */
 export type ShieldedPublicActions<
   rpcSchema extends RpcSchema | undefined = undefined,
@@ -79,12 +138,17 @@ export type ShieldedPublicActions<
   ) => EIP1193RequestFn<
     rpcSchema extends undefined ? EIP1474Methods : rpcSchema
   >
+  explorerUrl: (options: GetExplorerUrlOptions) => string | undefined
+  addressExplorerUrl: (options: GetAddressExplorerOptions) => string | undefined
+  blockExplorerUrl: (options: GetBlockExplorerOptions) => string | undefined
+  txExplorerUrl: (options: GetTxExplorerOptions) => string | undefined
+  tokenExplorerUrl: (options: GetTokenExplorerOptions) => string | undefined
   rng: (args: RngParams) => Promise<bigint>
-  ecdh: (params: EcdhParams) => Promise<Hex>
-  aesGcmEncryption: (params: AesGcmEncryptionParams) => Promise<Hex>
-  aesGcmDecryption: (params: AesGcmDecryptionParams) => Promise<string>
+  ecdh: (args: EcdhParams) => Promise<Hex>
+  aesGcmEncryption: (args: AesGcmEncryptionParams) => Promise<Hex>
+  aesGcmDecryption: (args: AesGcmDecryptionParams) => Promise<string>
   hdfk: (ikm: string | Hex) => Promise<Hex>
-  secp256k1Signature: (params: Secp256K1SigParams) => Promise<Signature>
+  secp256k1Signature: (args: Secp256K1SigParams) => Promise<Signature>
 }
 
 /**
@@ -109,6 +173,10 @@ export type ShieldedPublicActions<
  * // Attempting to call unsupported actions
  * actions.getStorageAt(...); // Throws an error
  * actions.getTransaction(...); // Throws an error
+ *
+ * // Generate a random number
+ * const randomNumber = await actions.rng({ numBytes: 32 });
+ * console.log('Random Number:', randomNumber);
  * ```
  */
 export const shieldedPublicActions = <
@@ -129,13 +197,22 @@ export const shieldedPublicActions = <
   getStorageAt: async (_args) => {
     throw new Error('Cannot call getStorageAt with a shielded public client')
   },
-  // @ts-ignore
+  // @ts-expect-error: TODO: fix this typing
   publicRequest: async (_args) => client.request<TRpcSchema>(_args),
-  rng: async (size) =>
+  explorerUrl: (options) => getExplorerUrl(client.chain, options),
+  addressExplorerUrl: (options) =>
+    addressExplorerUrl({ chain: client.chain, ...options }),
+  blockExplorerUrl: (options) =>
+    blockExplorerUrl({ chain: client.chain, ...options }),
+  txExplorerUrl: (options) =>
+    txExplorerUrl({ chain: client.chain, ...options }),
+  tokenExplorerUrl: (options) =>
+    tokenExplorerUrl({ chain: client.chain, ...options }),
+  rng: async (args) =>
     callPrecompile({
       client,
       precompile: rngPrecompile,
-      args: size,
+      args,
     }),
   ecdh: (args) =>
     callPrecompile({
@@ -149,12 +226,12 @@ export const shieldedPublicActions = <
       precompile: hdfkPrecompile,
       args: input,
     }),
-  secp256k1Signature: (params) =>
+  secp256k1Signature: (args) =>
     callPrecompile({
       client,
       precompile: secp256k1SigPrecompile,
-      args: params,
+      args,
     }),
-  aesGcmEncryption: (params) => aesGcmEncrypt(client, params),
-  aesGcmDecryption: (params) => aesGcmDecrypt(client, params),
+  aesGcmEncryption: (args) => aesGcmEncrypt(client, args),
+  aesGcmDecryption: (args) => aesGcmDecrypt(client, args),
 })

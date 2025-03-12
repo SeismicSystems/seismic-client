@@ -33,6 +33,13 @@ const persToBytes = (pers?: Hex | ByteArray): ByteArray => {
   throw new Error('Invalid pers: must be a hex or bytes array')
 }
 
+/**
+ * Parameters required for random number generation operations.
+ *
+ * @type {Object}
+ * @property {bigint | number} numBytes - The number of bytes to generate (must be less than or equal to 32).
+ * @property {Hex | ByteArray} [pers] - Optional personalization string to seed the random number generator.
+ */
 export type RngParams = {
   numBytes: bigint | number
   pers?: Hex | ByteArray
@@ -41,14 +48,18 @@ export type RngParams = {
 /**
  * Precompile contract configuration for random number generation.
  *
- * @type {Precompile<bigint | number, bigint>}
+ * @type {Precompile<RngParams, bigint>}
  * @property {Hex} address - The address of the random number generator precompile contract.
- * @property {Function} gasLimit - Function that returns the gas cost for the RNG operation.
- * @property {Function} encodeParams - Function that encodes the input parameter for the precompile call.
- *   - Takes a number or bigint parameter representing the desired number of bytes.
- *   - Converts the bytes to a hex value and encodes it as bytes4.
- *   - Throws an error if the bytes is not a number or bigint, or if the bytes is greater than 32.
+ * @property {Function} gasCost - Function that calculates the gas cost for the RNG operation.
+ *   - Calculates an initialization cost based on the length of the personalization string.
+ *   - Calculates a fill cost based on the number of bytes requested.
+ *   - Returns the sum of initialization and fill costs.
+ * @property {Function} encodeParams - Function that encodes the input parameters for the precompile call.
+ *   - Validates that numBytes is a number or bigint and is less than or equal to 32.
+ *   - Encodes numBytes as a 4-byte hex value.
+ *   - If personalization is provided, encodes and appends it to the parameters.
  * @property {Function} decodeResult - Function that decodes the result from the precompile call.
+ *   - Pads the result to ensure proper ABI decoding.
  *   - Parses the returned hex value as a uint256.
  *   - Returns the decoded value as a bigint.
  */
@@ -94,11 +105,13 @@ export const rngPrecompile: Precompile<RngParams, bigint> = {
  * Generates a random number using the RNG precompile.
  *
  * @param {CallClient} client - The public client to use for the precompile call.
- * @param {bigint | number} bytes - The number of bytes to generate.
+ * @param {RngParams} args - The parameters for random number generation.
+ *   - `numBytes` {bigint | number} - The number of bytes to generate (must be less than or equal to 32).
+ *   - `pers` {Hex | ByteArray} [optional] - Personalization string to seed the random number generator.
  *
  * @throws {Error} Throws if:
- *   - The bytes argument is not a number or bigint.
- *   - The bytes argument is greater than 32.
+ *   - The numBytes argument is not a number or bigint.
+ *   - The numBytes argument is greater than 32.
  *   - The precompile call fails.
  *
  * @returns {Promise<bigint>} A promise that resolves to the randomly generated number as a bigint.
@@ -106,10 +119,17 @@ export const rngPrecompile: Precompile<RngParams, bigint> = {
  * @example
  * ```typescript
  * // Generate a random uint8
- * const randomUint8 = await rng(client, 1);
+ * const randomUint8 = await rng(client, { numBytes: 1 });
  *
  * // Generate a random uint256
- * const randomUint256 = await rng(client, 32);
+ * const randomUint256 = await rng(client, { numBytes: 32 });
+ *
+ * // Generate a random number with personalization
+ * const randomWithPers = await rng(client, {
+ *   numBytes: 16,
+ *   pers: "0x1234567890abcdef"
+ * });
+ * ```
  */
 export const rng = async (
   client: CallClient,
