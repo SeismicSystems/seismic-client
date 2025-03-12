@@ -10,7 +10,8 @@
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
       "@test/*": ["../../tests/seismic-viem/src/*"],
-      "@sreact/*": ["./src/*"]
+      "@sreact/*": ["./src/*"],
+      "seismic-viem": ["../seismic-viem/src"]
     },
     "composite": true,
     "baseUrl": ".",

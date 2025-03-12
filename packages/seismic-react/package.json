@@ -43,7 +43,9 @@
     "docs:gen": "bun run typedoc src/index.ts --out ../../docs/pages/seismic-react && bash ../../docs/replace_sources.sh ../../docs/pages/seismic-react",
     "docs:check": "bun run typedoc src/index.ts --json ./typedoc.out.json && rm ./typedoc.out.json"
   },
-  "dependencies": {},
+  "dependencies": {
+    "seismic-viem": "1.0.27"
+  },
   "peerDependencies": {
     "@rainbow-me/rainbowkit": "^2.0.0",
     "react": ">=18",
@@ -51,7 +53,7 @@
     "typescript": ">=5.0.4",
     "viem": "2.x",
     "wagmi": "^2.0.0",
-    "seismic-viem": "1.0.27"
+    "seismic-viem": "*"
   },
   "peerDependenciesMeta": {
     "typescript": {

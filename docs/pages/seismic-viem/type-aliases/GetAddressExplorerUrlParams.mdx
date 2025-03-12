@@ -7,15 +7,13 @@
 # Type Alias: GetAddressExplorerUrlParams
 
 ```ts
-type GetAddressExplorerUrlParams = object
+type GetAddressExplorerUrlParams = object & GetAddressExplorerOptions
 ```
 
-Defined in: [packages/seismic-viem/src/explorer.ts:58](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/explorer.ts#L58)
+Defined in: [packages/seismic-viem/src/explorer.ts:62](https://github.com/SeismicSystems/seismic-client/blob/9fcfa5c0984a89e84539dc512bd70bb63c77e3ef/packages/seismic-viem/src/explorer.ts#L62)
 
 ## Type declaration
 
-| Name                                     | Type                                           | Defined in                                                                                                                                                                           |
-| ---------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="address"></a> `address`           | `Address`                                      | [packages/seismic-viem/src/explorer.ts:60](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/explorer.ts#L60) |
-| <a id="publicclient"></a> `publicClient` | [`PublicClient`](https://github.com/wevm/viem) | [packages/seismic-viem/src/explorer.ts:59](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/explorer.ts#L59) |
-| <a id="tab"></a> `tab`?                  | `AddressExplorerTab`                           | [packages/seismic-viem/src/explorer.ts:61](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/explorer.ts#L61) |
+| Name     | Type                                    | Defined in                                                                                                                                                                           |
+| -------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `chain`? | [`Chain`](https://github.com/wevm/viem) | [packages/seismic-viem/src/explorer.ts:63](https://github.com/SeismicSystems/seismic-client/blob/9fcfa5c0984a89e84539dc512bd70bb63c77e3ef/packages/seismic-viem/src/explorer.ts#L63) |
