@@ -90,7 +90,7 @@ const viemSidebar = [
       },
       {
         text: 'Secp256k1 Signature',
-        link: '/viem/precompiles/secp256k1',
+        link: '/viem/precompiles/secp256k1-sig',
       },
     ],
   },
