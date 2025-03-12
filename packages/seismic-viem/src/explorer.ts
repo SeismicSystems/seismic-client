@@ -1,4 +1,4 @@
-import { Address, Hex, PublicClient } from 'viem'
+import type { Address, Chain, Hex } from 'viem'
 
 export type AddressExplorerTab =
   | 'txs'
@@ -50,34 +50,34 @@ export type GetItemExplorerUrlOptions =
 export type GetExplorerUrlOptions = { id: string } & GetItemExplorerUrlOptions
 
 export type GetTxExplorerUrlParams = {
-  publicClient: PublicClient
+  chain: Chain
   txHash: Hex
   tab?: TxExplorerTab
 }
 
 export type GetAddressExplorerUrlParams = {
-  publicClient: PublicClient
+  chain: Chain
   address: Address
   tab?: AddressExplorerTab
 }
 
 export type GetTokenExplorerUrlParams = {
-  publicClient: PublicClient
+  chain: Chain
   address: Address
   tab?: TokenExplorerTab
 }
 
 export type GetBlockExplorerUrlParams = {
-  publicClient: PublicClient
+  chain: Chain
   blockNumber: number
   tab?: BlockExplorerTab
 }
 
 export const getExplorerUrl = (
-  publicClient: PublicClient,
+  chain: Chain,
   options?: GetExplorerUrlOptions
 ): string | undefined => {
-  const explorerUrl = publicClient.chain?.blockExplorers?.default.url
+  const explorerUrl = chain.blockExplorers?.default.url
   if (!explorerUrl) {
     return undefined
   }
@@ -92,11 +92,11 @@ export const getExplorerUrl = (
 }
 
 export const addressExplorerUrl = ({
-  publicClient,
+  chain,
   address,
   tab,
 }: GetAddressExplorerUrlParams): string | undefined => {
-  return getExplorerUrl(publicClient, {
+  return getExplorerUrl(chain, {
     item: 'address',
     id: address,
     tab,
@@ -104,11 +104,11 @@ export const addressExplorerUrl = ({
 }
 
 export const blockExplorerUrl = ({
-  publicClient,
+  chain,
   blockNumber,
   tab,
 }: GetBlockExplorerUrlParams): string | undefined => {
-  return getExplorerUrl(publicClient, {
+  return getExplorerUrl(chain, {
     item: 'block',
     id: blockNumber.toString(),
     tab,
@@ -116,11 +116,11 @@ export const blockExplorerUrl = ({
 }
 
 export const txExplorerUrl = ({
-  publicClient,
+  chain,
   txHash,
   tab,
 }: GetTxExplorerUrlParams): string | undefined => {
-  return getExplorerUrl(publicClient, {
+  return getExplorerUrl(chain, {
     item: 'tx',
     id: txHash,
     tab,
@@ -128,11 +128,11 @@ export const txExplorerUrl = ({
 }
 
 export const tokenExplorerUrl = ({
-  publicClient,
+  chain,
   address,
   tab,
 }: GetTokenExplorerUrlParams): string | undefined => {
-  return getExplorerUrl(publicClient, {
+  return getExplorerUrl(chain, {
     item: 'token',
     id: address,
     tab,
