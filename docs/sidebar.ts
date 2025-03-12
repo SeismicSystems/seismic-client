@@ -22,7 +22,7 @@ const viemSidebar = [
     collapsed: true,
     items: [
       {
-        text: 'Contract Instances',
+        text: 'Contract Instance',
         link: '/viem/contract/instance',
       },
       {
