@@ -10,7 +10,7 @@ import {
 import {
   CallClient,
   Precompile,
-  calcLinearGasCostU32,
+  calcLinearGasCost,
   callPrecompile,
 } from '@sviem/precompiles/precompile'
 
@@ -41,9 +41,9 @@ export const SHARED_SECRET_GAS = 3000n
  */
 export const hdfkPrecompile: Precompile<string | Hex, Hex> = {
   address: HDFK_ADDRESS,
-  gasLimit: (ikmHex: string | Hex) => {
+  gasCost: (ikmHex: string | Hex) => {
     const ikmBytes = isHex(ikmHex) ? hexToBytes(ikmHex) : stringToBytes(ikmHex)
-    const linearGasCost = calcLinearGasCostU32({
+    const linearGasCost = calcLinearGasCost({
       bus: 32,
       len: ikmBytes.length,
       base: SHARED_SECRET_GAS,

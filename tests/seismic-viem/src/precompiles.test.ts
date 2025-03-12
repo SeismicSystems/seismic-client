@@ -20,7 +20,14 @@ const publicClient = createShieldedPublicClient({
 })
 
 const testRng = async (size: number) => {
-  const randomU8 = await publicClient.rng(size)
+  const randomU8 = await publicClient.rng({ numBytes: size })
+  expect(randomU8).toBeGreaterThan(0n)
+  expect(randomU8).toBeLessThan(2n ** BigInt(8 * size))
+}
+
+const testRngWithPers = async (size: number) => {
+  const pers = new Uint8Array([1, 2, 3, 4])
+  const randomU8 = await publicClient.rng({ numBytes: size, pers })
   expect(randomU8).toBeGreaterThan(0n)
   expect(randomU8).toBeLessThan(2n ** BigInt(8 * size))
 }
@@ -98,11 +105,12 @@ describe('Seismic Precompiles', async () => {
   test('RNG(8)', () => testRng(8), { timeout: 20_000 })
   test('RNG(16)', () => testRng(16), { timeout: 20_000 })
   test('RNG(32)', () => testRng(32), { timeout: 20_000 })
+  test('RNG(32, pers)', () => testRngWithPers(32), { timeout: 20_000 })
   test('ECDH', testEcdh, { timeout: 20_000 })
   test('HKDF(string)', testHkdfString, { timeout: 20_000 })
   test('HKDF(hex)', testHkdfHex, { timeout: 20_000 })
   test('AES-GCM', testAesGcm, { timeout: 20_000 })
-  test('secp256k1 with string input', testSecp256k1, { timeout: 20_000 })
+  test('secp256k1', testSecp256k1, { timeout: 20_000 })
 })
 
 afterAll(async () => {

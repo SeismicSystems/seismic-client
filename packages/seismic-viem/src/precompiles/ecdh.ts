@@ -54,7 +54,7 @@ export type EcdhParams = {
  */
 export const ecdhPrecompile: Precompile<EcdhParams, Hex> = {
   address: ECDH_ADDRESS,
-  gasLimit: () => SHARED_SECRET_GAS + HDFK_EXPAND_COST_GAS,
+  gasCost: () => SHARED_SECRET_GAS + HDFK_EXPAND_COST_GAS,
   encodeParams: ({ sk, pk }) => {
     validateKey(sk, true)
     validateKey(pk, false)

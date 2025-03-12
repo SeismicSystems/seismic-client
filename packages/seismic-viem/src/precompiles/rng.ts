@@ -1,18 +1,42 @@
 import {
+  ByteArray,
   Hex,
+  bytesToHex,
   decodeAbiParameters,
-  encodeAbiParameters,
+  hexToBytes,
+  isBytes,
+  isHex,
   numberToHex,
+  pad,
 } from 'viem'
 
 import {
   CallClient,
   Precompile,
+  calcLinearGasCostU32,
   callPrecompile,
 } from '@sviem/precompiles/precompile'
 
 export const RNG_ADDRESS = '0x0000000000000000000000000000000000000064'
-export const RNG_GAS = 3505n
+const RNG_INIT_BASE_GAS = 3500n
+const STROBE_128_WORD_GAS = 5n
+
+const persToBytes = (pers?: Hex | ByteArray): ByteArray => {
+  if (!pers) {
+    return new Uint8Array()
+  }
+  if (isHex(pers)) {
+    return hexToBytes(pers)
+  } else if (isBytes(pers)) {
+    return pers
+  }
+  throw new Error('Invalid pers: must be a hex or bytes array')
+}
+
+export type RngParams = {
+  numBytes: bigint | number
+  pers?: Hex | ByteArray
+}
 
 /**
  * Precompile contract configuration for random number generation.
@@ -28,24 +52,40 @@ export const RNG_GAS = 3505n
  *   - Parses the returned hex value as a uint256.
  *   - Returns the decoded value as a bigint.
  */
-export const rngPrecompile: Precompile<bigint | number, bigint> = {
+export const rngPrecompile: Precompile<RngParams, bigint> = {
   address: RNG_ADDRESS,
-  gasLimit: () => RNG_GAS,
-  encodeParams: (bytes) => {
-    if (typeof bytes !== 'bigint' && typeof bytes !== 'number') {
+  gasCost: ({ numBytes, pers }) => {
+    // calls to rng from here will always require an init cost,
+    // so we assume it in the gas calculation.
+    // if one tx makes multiple calls to rng, it will only pay the init cost once.
+    const initCost = calcLinearGasCostU32({
+      len: persToBytes(pers).length,
+      base: RNG_INIT_BASE_GAS,
+      word: STROBE_128_WORD_GAS,
+    })
+    const fillCost = calcLinearGasCostU32({
+      len: Number(numBytes),
+      base: 0n,
+      word: STROBE_128_WORD_GAS,
+    })
+    return initCost + fillCost
+  },
+  encodeParams: ({ numBytes, pers }) => {
+    if (typeof numBytes !== 'bigint' && typeof numBytes !== 'number') {
       throw new Error('Invalid length: must be a number or bigint')
     }
-    if (BigInt(bytes) > 32n) {
+    if (BigInt(numBytes) > 32n) {
       throw new Error('Invalid length: must be less than or equal to 32')
     }
-    const encodedBytes = numberToHex(bytes, { size: 4 })
-    return encodeAbiParameters(
-      [{ name: 'bytes', type: 'bytes4' }],
-      [encodedBytes]
-    )
+    const encodedBytes = numberToHex(numBytes, { size: 4 })
+    if (!pers) {
+      return encodedBytes
+    }
+    const encodedPers = bytesToHex(persToBytes(pers))
+    return `${encodedBytes}${encodedPers.slice(2)}`
   },
   decodeResult: (result: Hex) => {
-    const [output] = decodeAbiParameters([{ type: 'uint256' }], result)
+    const [output] = decodeAbiParameters([{ type: 'uint256' }], pad(result))
     return output as bigint
   },
 }
@@ -73,11 +113,11 @@ export const rngPrecompile: Precompile<bigint | number, bigint> = {
  */
 export const rng = async (
   client: CallClient,
-  bytes: bigint | number
+  args: RngParams
 ): Promise<bigint> => {
   return callPrecompile({
     client,
     precompile: rngPrecompile,
-    args: bytes,
+    args,
   })
 }

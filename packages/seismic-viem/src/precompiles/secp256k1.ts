@@ -39,7 +39,7 @@ export type Secp256K1SigParams = { sk: Hex; message: string }
 export const secp256k1SigPrecompile: Precompile<Secp256K1SigParams, Signature> =
   {
     address: SECP256K1_SIG_ADDRESS,
-    gasLimit: () => SECP256K1_SIG_BASE_GAS,
+    gasCost: () => SECP256K1_SIG_BASE_GAS,
     encodeParams: ({ sk, message }) => {
       const params = [
         { name: 'sk', type: 'bytes32' },

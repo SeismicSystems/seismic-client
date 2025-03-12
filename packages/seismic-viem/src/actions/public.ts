@@ -21,7 +21,7 @@ import {
 import { EcdhParams, ecdhPrecompile } from '@sviem/precompiles/ecdh'
 import { hdfkPrecompile } from '@sviem/precompiles/hkdf'
 import { callPrecompile } from '@sviem/precompiles/precompile'
-import { rngPrecompile } from '@sviem/precompiles/rng'
+import { RngParams, rngPrecompile } from '@sviem/precompiles/rng'
 import {
   Secp256K1SigParams,
   secp256k1SigPrecompile,
@@ -79,7 +79,7 @@ export type ShieldedPublicActions<
   ) => EIP1193RequestFn<
     rpcSchema extends undefined ? EIP1474Methods : rpcSchema
   >
-  rng: (size: bigint | number) => Promise<bigint>
+  rng: (args: RngParams) => Promise<bigint>
   ecdh: (params: EcdhParams) => Promise<Hex>
   aesGcmEncryption: (params: AesGcmEncryptionParams) => Promise<Hex>
   aesGcmDecryption: (params: AesGcmDecryptionParams) => Promise<string>

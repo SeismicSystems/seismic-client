@@ -13,7 +13,7 @@ import {
 import {
   CallClient,
   Precompile,
-  calcLinearGasCostU32,
+  calcLinearGasCost,
   callPrecompile,
 } from '@sviem/precompiles/precompile'
 
@@ -32,7 +32,7 @@ const aesGcmGasCost = (value: string | Hex) => {
   const valueBytes = isHex(value)
     ? hexToBytes(value as Hex)
     : stringToBytes(value as string)
-  return calcLinearGasCostU32({
+  return calcLinearGasCost({
     bus: 16,
     len: valueBytes.length,
     base: AES_GCM_BASE_GAS,
@@ -128,7 +128,7 @@ export type AesGcmDecryptionParams = AesGcmCommonParams & {
 export const aesGcmEncryptPrecompile: Precompile<AesGcmEncryptionParams, Hex> =
   {
     address: AES_GCM_ENCRYPT_ADDRESS,
-    gasLimit: (args) => aesGcmGasCost(args.plaintext as string),
+    gasCost: (args) => aesGcmGasCost(args.plaintext as string),
     encodeParams: (args) => {
       const [aesKey, nonce, plaintext] = validateParams<string>(
         [args.aesKey, args.nonce, args.plaintext],
@@ -158,7 +158,7 @@ export const aesGcmDecryptPrecompile: Precompile<
   string
 > = {
   address: AES_GCM_DECRYPT_ADDRESS,
-  gasLimit: (args) => aesGcmGasCost(args.ciphertext as Hex),
+  gasCost: (args) => aesGcmGasCost(args.ciphertext as Hex),
   encodeParams: (args) => {
     const [aesKey, nonce, cipherText] = validateParams<Hex>(
       [args.aesKey, args.nonce, args.ciphertext],
