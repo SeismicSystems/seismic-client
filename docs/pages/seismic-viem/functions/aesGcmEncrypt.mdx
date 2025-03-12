@@ -1,0 +1,53 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-viem](/seismic-viem/globals.mdx) / aesGcmEncrypt
+
+# Function: aesGcmEncrypt()
+
+```ts
+function aesGcmEncrypt(client, args): Promise<`0x${string}`>
+```
+
+Defined in: [packages/seismic-viem/src/precompiles/aes.ts:195](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/precompiles/aes.ts#L195)
+
+Encrypts plaintext using AES-GCM encryption through a precompile contract.
+
+## Example
+
+```typescript
+const ciphertext = await aesGcmEncrypt(client, {
+  aesKey: '0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+  nonce: 123456,
+  plaintext: 'Secret message',
+})
+```
+
+## Parameters
+
+### client
+
+[`CallClient`](/seismic-viem/type-aliases/CallClient.mdx)
+
+The public client to use for the precompile call.
+
+### args
+
+[`AesGcmEncryptionParams`](/seismic-viem/type-aliases/AesGcmEncryptionParams.mdx)
+
+The parameters for the AES-GCM encryption operation.
+
+- `aesKey` {Hex} - The AES key in hexadecimal format to use for encryption.
+- `nonce` {number} - The nonce value to use for encryption.
+- `plaintext` {string} - The plaintext string to encrypt.
+
+## Returns
+
+`Promise`\<`` `0x${string}` ``\>
+
+A promise that resolves to the encrypted ciphertext in hexadecimal format.
+
+## Throws
+
+May throw if parameter validation fails or if the precompile call fails.

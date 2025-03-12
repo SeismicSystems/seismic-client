@@ -7,9 +7,9 @@ import { generateAesKey } from '@sviem/crypto/aes'
 import { compressPublicKey } from '@sviem/crypto/secp'
 import { envChain, setupNode } from '@test/process/node'
 
-// Running on a different port because contract.test.ts uses 8545
 const chain = envChain()
 const { url, exitProcess } = await setupNode(chain, {
+  // Running on a different port because contract.test.ts uses 8545
   port: 8548,
   silent: true,
 })

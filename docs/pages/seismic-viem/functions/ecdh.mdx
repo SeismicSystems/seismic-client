@@ -1,0 +1,51 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-viem](/seismic-viem/globals.mdx) / ecdh
+
+# Function: ecdh()
+
+```ts
+function ecdh(client, args): Promise<`0x${string}`>
+```
+
+Defined in: [packages/seismic-viem/src/precompiles/ecdh.ts:89](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/precompiles/ecdh.ts#L89)
+
+Performs an ECDH (Elliptic Curve Diffie-Hellman) key exchange operation to derive a shared secret.
+
+## Example
+
+```typescript
+const sharedSecret = await ecdh(client, {
+  sk: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+  pk: '0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
+})
+```
+
+## Parameters
+
+### client
+
+[`CallClient`](/seismic-viem/type-aliases/CallClient.mdx)
+
+The public client to use for the precompile call.
+
+### args
+
+[`EcdhParams`](/seismic-viem/type-aliases/EcdhParams.mdx)
+
+The parameters for the ECDH operation.
+
+- `sk` {Hex} - The secret key in hexadecimal format.
+- `pk` {Hex} - The public key in hexadecimal format.
+
+## Returns
+
+`Promise`\<`` `0x${string}` ``\>
+
+A promise that resolves to the 32-byte shared secret in hexadecimal format.
+
+## Throws
+
+May throw if key validation fails or if the precompile call fails.

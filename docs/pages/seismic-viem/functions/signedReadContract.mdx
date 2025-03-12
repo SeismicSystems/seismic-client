@@ -10,10 +10,10 @@
 function signedReadContract<TChain, TAccount, TAbi, TFunctionName, TArgs>(
   client,
   parameters
-): Promise<ReadContractReturnType>
+): Promise<unknown>
 ```
 
-Defined in: [packages/seismic-viem/src/contract/read.ts:117](https://github.com/SeismicSystems/seismic-client/blob/63496655224ae1d3e8c312c6d8d80f51a6b6de42/packages/seismic-viem/src/contract/read.ts#L117)
+Defined in: [packages/seismic-viem/src/contract/read.ts:117](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/contract/read.ts#L117)
 
 Executes a signed read operation on a smart contract.
 
@@ -75,7 +75,7 @@ The parameters for the read operation, including:
 
 ## Returns
 
-`Promise`\<[`ReadContractReturnType`](https://github.com/wevm/viem)\>
+`Promise`\<`unknown`\>
 
 A promise that resolves to the response from the contract.
 

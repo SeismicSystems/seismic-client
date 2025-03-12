@@ -15,10 +15,10 @@ function shieldedWriteContract<
   TFunctionName,
   TArgs,
   chainOverride,
->(client, parameters): Promise<WriteContractReturnType>
+>(client, parameters): Promise<`0x${string}`>
 ```
 
-Defined in: [packages/seismic-viem/src/contract/write.ts:52](https://github.com/SeismicSystems/seismic-client/blob/63496655224ae1d3e8c312c6d8d80f51a6b6de42/packages/seismic-viem/src/contract/write.ts#L52)
+Defined in: [packages/seismic-viem/src/contract/write.ts:52](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/contract/write.ts#L52)
 
 Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's [writeContract](https://viem.sh/docs/contract/writeContract)
 
@@ -84,6 +84,6 @@ The configuration object for the write operation.
 
 ## Returns
 
-`Promise`\<[`WriteContractReturnType`](https://github.com/wevm/viem)\>
+`Promise`\<`` `0x${string}` ``\>
 
 A promise that resolves to a transaction hash.

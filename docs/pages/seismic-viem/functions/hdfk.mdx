@@ -1,0 +1,49 @@
+[**seismic-viem**](/seismic-viem/README.mdx)
+
+---
+
+[seismic-viem](/seismic-viem/globals.mdx) / hdfk
+
+# Function: hdfk()
+
+```ts
+function hdfk(client, input): Promise<`0x${string}`>
+```
+
+Defined in: [packages/seismic-viem/src/precompiles/hkdf.ts:85](https://github.com/SeismicSystems/seismic-client/blob/658575a2378fa3042cad6a13bb56490931591f61/packages/seismic-viem/src/precompiles/hkdf.ts#L85)
+
+Executes the HDFK (Hash-based Derivation Function Keyed) precompile.
+
+## Example
+
+```typescript
+// Using a string input
+const result1 = await hdfk(client, 'my input string')
+
+// Using a hex input
+const result2 = await hdfk(client, '0x1234abcd...')
+```
+
+## Parameters
+
+### client
+
+[`CallClient`](/seismic-viem/type-aliases/CallClient.mdx)
+
+The public client to use for the precompile call.
+
+### input
+
+`string`
+
+The input to the HDFK precompile, either as a string or hexadecimal value.
+
+## Returns
+
+`Promise`\<`` `0x${string}` ``\>
+
+A promise that resolves to the 32-byte output of the HDFK precompile as a hexadecimal string.
+
+## Throws
+
+May throw if the precompile call fails.
