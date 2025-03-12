@@ -63,7 +63,7 @@ export const checkFaucet = async ({
 
   if (msg.startsWith('Txhash: ')) {
     const hash = msg.slice(8)
-    if (hash.startsWith('0x') && hash.length === 66 && publicClient.chain) {
+    if (hash.startsWith('0x') && hash.length === 66) {
       const txUrl = txExplorerUrl({ chain: publicClient.chain, txHash: hash })
       if (txUrl) {
         console.debug(`Faucet sent eth to ${address}: ${txUrl}`)

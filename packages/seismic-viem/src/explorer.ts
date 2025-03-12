@@ -49,34 +49,42 @@ export type GetItemExplorerUrlOptions =
 
 export type GetExplorerUrlOptions = { id: string } & GetItemExplorerUrlOptions
 
-export type GetTxExplorerUrlParams = {
-  chain: Chain
+export type ExplorerChainParam = { chain?: Chain }
+
+export type GetTxExplorerOptions = {
   txHash: Hex
   tab?: TxExplorerTab
 }
+export type GetTxExplorerUrlParams = ExplorerChainParam & GetTxExplorerOptions
 
-export type GetAddressExplorerUrlParams = {
-  chain: Chain
+export type GetAddressExplorerOptions = {
   address: Address
   tab?: AddressExplorerTab
 }
+export type GetAddressExplorerUrlParams = ExplorerChainParam &
+  GetAddressExplorerOptions
 
-export type GetTokenExplorerUrlParams = {
-  chain: Chain
+export type GetTokenExplorerOptions = {
   address: Address
   tab?: TokenExplorerTab
 }
+export type GetTokenExplorerUrlParams = ExplorerChainParam &
+  GetTokenExplorerOptions
 
-export type GetBlockExplorerUrlParams = {
-  chain: Chain
+export type GetBlockExplorerOptions = {
   blockNumber: number
   tab?: BlockExplorerTab
 }
+export type GetBlockExplorerUrlParams = ExplorerChainParam &
+  GetBlockExplorerOptions
 
 export const getExplorerUrl = (
-  chain: Chain,
+  chain?: Chain,
   options?: GetExplorerUrlOptions
 ): string | undefined => {
+  if (!chain) {
+    return undefined
+  }
   const explorerUrl = chain.blockExplorers?.default.url
   if (!explorerUrl) {
     return undefined
