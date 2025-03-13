@@ -7,7 +7,7 @@ Seismic's typescript client. This repository contains:
 
 ## Docs
 
-View the docs [here](https://seismic-docs.netlify.app)
+View the docs [here](https://client.seismic.systems)
 
 ## Install
 
@@ -52,7 +52,6 @@ Optionally, you may set these variables to specify where `reth` will store its s
 - `RETH_STATIC_FILES`: absolute path to store static files
 
 See `.env.example` for more information
-
 
     "seismic-viem": "1.0.27-experimental.1",
     "seismic-react": "1.0.27-experimental.1",
