@@ -4,12 +4,12 @@ import { Hex } from 'viem'
 import {
   HKDF_EXPAND_COST_GAS,
   SHARED_SECRET_GAS,
-} from '@sviem/precompiles/hkdf'
+} from '@sviem/precompiles/hkdf.ts'
 import {
   CallClient,
   Precompile,
   callPrecompile,
-} from '@sviem/precompiles/precompile'
+} from '@sviem/precompiles/precompile.ts'
 
 export const ECDH_ADDRESS: Address =
   '0x0000000000000000000000000000000000000065'

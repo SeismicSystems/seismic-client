@@ -15,7 +15,7 @@ import {
   Precompile,
   calcLinearGasCostU32,
   callPrecompile,
-} from '@sviem/precompiles/precompile'
+} from '@sviem/precompiles/precompile.ts'
 
 export const RNG_ADDRESS = '0x0000000000000000000000000000000000000064'
 const RNG_INIT_BASE_GAS = 3500n

@@ -10,7 +10,7 @@ import {
   CallClient,
   Precompile,
   callPrecompile,
-} from '@sviem/precompiles/precompile'
+} from '@sviem/precompiles/precompile.ts'
 
 export const SECP256K1_SIG_ADDRESS =
   '0x0000000000000000000000000000000000000069'

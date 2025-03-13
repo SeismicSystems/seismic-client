@@ -21,11 +21,11 @@ import { parseAccount } from 'viem/accounts'
 import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
-import { ShieldedWalletClient } from '@sviem/client'
-import { remapSeismicAbiInputs } from '@sviem/contract/abi'
-import { AesGcmCrypto } from '@sviem/crypto/aes'
-import type { SignedCallParameters } from '@sviem/signedCall'
-import { signedCall } from '@sviem/signedCall'
+import { ShieldedWalletClient } from '@sviem/client.ts'
+import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
+import type { SignedCallParameters } from '@sviem/signedCall.ts'
+import { signedCall } from '@sviem/signedCall.ts'
 
 export type SignedReadContractParameters<
   TAbi extends Abi | readonly unknown[],

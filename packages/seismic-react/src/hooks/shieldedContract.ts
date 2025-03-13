@@ -3,7 +3,7 @@ import type { ShieldedContract } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
 import type { Abi, Address } from 'viem'
 
-import { useShieldedWallet } from '@sreact/context/shieldedWallet'
+import { useShieldedWallet } from '@sreact/context/shieldedWallet.tsx'
 
 export type UseShieldedContractConfig<
   TAddress extends Address,

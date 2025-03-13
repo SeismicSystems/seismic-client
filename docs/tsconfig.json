@@ -6,6 +6,10 @@
     "paths": {
       "~/*": ["./*"]
     },
+    "types": ["bun-types"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
     "composite": true,
     "downlevelIteration": true,
     "noEmit": false,

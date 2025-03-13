@@ -13,7 +13,7 @@ import { SignTypedDataParameters, signTypedData } from 'viem/actions'
 import {
   type TransactionSerializableSeismic,
   type TxSeismic,
-} from '@sviem/chain'
+} from '@sviem/chain.ts'
 
 // reserve 0 for normal seismic tx
 // reserve 1 for personal_sign (ledger/trezor compatible)

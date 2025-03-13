@@ -1,9 +1,10 @@
 import { defineConfig } from 'vocs'
+import type { Config } from 'vocs'
 
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import { sidebar } from './sidebar'
+import { sidebar } from './sidebar.ts'
 
-export default defineConfig({
+const config: Config = defineConfig({
   title: 'Seismic Client',
   description: 'Build apps on the Seismic network',
   theme: {
@@ -31,4 +32,9 @@ export default defineConfig({
       link: 'https://x.com/SeismicSys',
     },
   ],
+  twoslash: {
+    tsLibDirectory: '../node_modules',
+  },
 })
+
+export default config

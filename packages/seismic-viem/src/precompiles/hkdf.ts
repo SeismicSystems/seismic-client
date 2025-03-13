@@ -12,7 +12,7 @@ import {
   Precompile,
   calcLinearGasCost,
   callPrecompile,
-} from '@sviem/precompiles/precompile'
+} from '@sviem/precompiles/precompile.ts'
 
 export const HKDF_ADDRESS = '0x0000000000000000000000000000000000000068'
 

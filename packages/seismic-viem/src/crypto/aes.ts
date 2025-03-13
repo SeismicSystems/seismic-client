@@ -6,8 +6,6 @@ import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
 export class AesGcmCrypto {
-  private readonly ALGORITHM = 'aes-256-gcm'
-  private readonly TAG_LENGTH = 16 // Authentication tag length in bytes
   private readonly NONCE_LENGTH = 12 // 96 bits is the recommended nonce length for GCM
   private readonly U64_SIZE = 8 // Size of u64 in bytes
 

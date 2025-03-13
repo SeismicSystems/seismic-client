@@ -13,11 +13,8 @@
       "@sreact/*": ["./src/*"],
       "seismic-viem": ["../seismic-viem/src"]
     },
-    "composite": true,
     "baseUrl": ".",
     "rootDir": "../..",
-    "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "jsx": "preserve",
-    "moduleResolution": "bundler"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   }
 }

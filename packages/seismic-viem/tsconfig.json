@@ -6,13 +6,7 @@
     "paths": {
       "@sviem/*": ["./*"]
     },
-    "composite": true,
-    "downlevelIteration": true,
-    "noEmit": false,
-    "declaration": true,
-    "emitDeclarationOnly": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "types": ["bun-types"],
     "rootDir": ".",
     "baseUrl": "src"
   }

@@ -11,7 +11,7 @@ import type {
   Transport,
 } from 'viem'
 
-import type { ShieldedPublicClient } from '@sviem/client'
+import type { ShieldedPublicClient } from '@sviem/client.ts'
 import {
   GetAddressExplorerOptions,
   GetBlockExplorerOptions,
@@ -23,22 +23,22 @@ import {
   getExplorerUrl,
   tokenExplorerUrl,
   txExplorerUrl,
-} from '@sviem/explorer'
+} from '@sviem/explorer.ts'
 import {
   AesGcmDecryptionParams,
   AesGcmEncryptionParams,
   aesGcmDecrypt,
   aesGcmEncrypt,
-} from '@sviem/precompiles/aes'
-import { EcdhParams, ecdhPrecompile } from '@sviem/precompiles/ecdh'
-import { hdfkPrecompile } from '@sviem/precompiles/hkdf'
-import { callPrecompile } from '@sviem/precompiles/precompile'
-import { RngParams, rngPrecompile } from '@sviem/precompiles/rng'
+} from '@sviem/precompiles/aes.ts'
+import { EcdhParams, ecdhPrecompile } from '@sviem/precompiles/ecdh.ts'
+import { hdfkPrecompile } from '@sviem/precompiles/hkdf.ts'
+import { callPrecompile } from '@sviem/precompiles/precompile.ts'
+import { RngParams, rngPrecompile } from '@sviem/precompiles/rng.ts'
 import {
   Secp256K1SigParams,
   secp256k1SigPrecompile,
-} from '@sviem/precompiles/secp256k1'
-import { RpcRequest } from '@sviem/viem-internal/rpc'
+} from '@sviem/precompiles/secp256k1.ts'
+import { RpcRequest } from '@sviem/viem-internal/rpc.ts'
 
 /**
  * Defines the additional actions available on a shielded public client.

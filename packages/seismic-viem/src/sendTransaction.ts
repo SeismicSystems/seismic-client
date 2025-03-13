@@ -44,19 +44,19 @@ import {
   SeismicTxExtras,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
-} from '@sviem/chain'
+} from '@sviem/chain.ts'
 import type {
   AccountNotFoundErrorType,
   AccountTypeNotSupportedErrorType,
-} from '@sviem/error/account'
+} from '@sviem/error/account.ts'
 import {
   AccountNotFoundError,
   AccountTypeNotSupportedError,
-} from '@sviem/error/account'
-import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
-import type { GetAccountParameter } from '@sviem/viem-internal/account'
-import type { ErrorType } from '@sviem/viem-internal/error'
-import type { AssertRequestParameters } from '@sviem/viem-internal/request'
+} from '@sviem/error/account.ts'
+import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
+import type { GetAccountParameter } from '@sviem/viem-internal/account.ts'
+import type { ErrorType } from '@sviem/viem-internal/error.ts'
+import type { AssertRequestParameters } from '@sviem/viem-internal/request.ts'
 
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
