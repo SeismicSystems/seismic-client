@@ -7,6 +7,7 @@ const viemSidebar = [
   },
   {
     text: 'Clients',
+    collapsed: false,
     items: [
       { text: 'Shielded Public Client', link: '/viem/clients/public' },
       { text: 'Shielded Wallet Client', link: '/viem/clients/wallet' },
