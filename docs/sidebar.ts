@@ -2,6 +2,10 @@ import type { Sidebar } from 'vocs'
 
 const viemSidebar = [
   {
+    text: 'Introduction',
+    link: '/viem/intro',
+  },
+  {
     text: 'Clients',
     items: [
       { text: 'Shielded Public Client', link: '/viem/clients/public' },
@@ -129,6 +133,10 @@ const viemSidebar = [
 ]
 
 const reactSidebar = [
+  {
+    text: 'Introduction',
+    link: '/react/intro',
+  },
   {
     text: 'Context',
     collapsed: false,

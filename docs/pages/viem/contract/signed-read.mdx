@@ -2,7 +2,19 @@
 description: Executes a signed read operation on a smart contract, allowing authenticated contract reads with msg.sender verification on Seismic's blockchain.
 ---
 
-# signedReadContract
+# Signed Read Contract
+
+Executes a signed read operation on a smart contract
+
+## What is a signed read?
+
+In Ethereum, anyone can read from a contract by impersonating any address, by specifying the `from` parameter in an `eth_call`.
+
+On Seismic, this is not the case. If you perform a standard `eth_call` and set the `from` address, Seismic will ignore this input.
+
+To read from a specific address, instead use a Signed Read, which sends a signed message to the `eth_call` endpoint. When the signature is verified, it will execute the underlying call, also providing the from address
+
+The purpose of signed reads is to allow contract developers to check against `msg.sender` inside non-transactional contract calls knowing that these calls cannot be spoofed. Therefore the developer can conditionally reveal data inside a Solidity view function based on `msg.sender`.
 
 ## Import
 
@@ -21,11 +33,11 @@ To make a read that specifies a from address on Seismic, use signed reads. Essen
 ```ts
 const result = await signedReadContract(client, {
   abi: myContractAbi,
-  functionName: 'getBalance',
-  args: ['0x1234...'],
+  functionName: 'balanceOf',
   address: '0x5678...',
+  args: [],
 })
-console.log('Balance:', result)
+console.log('Shielded balance:', result)
 ```
 
 ## Return Value
@@ -41,11 +53,10 @@ console.log('Balance:', result)
 The client used to execute the signed read operation. Must be a `ShieldedPublicClient` or `ShieldedWalletClient`.
 
 ```ts
+// [!code focus:2]
 const result = await signedReadContract(client, {
-  // [!code focus]
   abi: myContractAbi,
-  functionName: 'getBalance',
-  args: ['0x1234...'],
+  functionName: 'balanceOf',
   address: '0x5678...',
 })
 ```
@@ -59,9 +70,9 @@ The parameters for the read operation.
 ```ts
 const result = await signedReadContract(client, {
   abi: myContractAbi, // [!code focus]
-  functionName: 'getBalance', // [!code focus]
-  args: ['0x1234...'], // [!code focus]
+  functionName: 'balanceOf', // [!code focus]
   address: '0x5678...', // [!code focus]
+  args: [], // [!code focus]
   // Additional options for customizing the call request
 })
 ```

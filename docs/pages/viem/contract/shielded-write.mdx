@@ -2,7 +2,29 @@
 description: Executes a shielded write function on a contract, where the calldata is encrypted, with the same API as viem's writeContract.
 ---
 
-# shieldedWriteContract
+# Shielded Write Contract
+
+Executes a shielded write function on a contract, where the calldata is encrypted, with the same API as viem's writeContract.
+
+## What is a shielded write?
+
+A shielded write is a function unique to Seismic's blockchain. It allows you to write to a contract with encrypted calldata.
+
+A [ShieldedWalletClient](/viem/clients/wallet) will perform this encryption automatically. Under the hood, what happens:
+
+#### When you instantiate the client, it will:
+
+1. request a public key from Seismic's TEE
+2. generate an ephemeral private key
+3. create a shared secret & AES key from those two keys
+
+#### When you build a shielded transaction:
+
+1. The client will encrypt calldata with the AES key
+2. It then includes the public key of the ephemerally generated key into the transaction payload
+3. The user will be prompted to sign the transaction
+4. The client sends the signed transaction to a Seismic node
+5. Seismic's blockchain will decrypt the calldata inside the TEE and execute the transaction
 
 ## Import
 

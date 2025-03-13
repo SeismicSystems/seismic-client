@@ -1,8 +1,10 @@
 ---
-description: A ShieldedContract instance is a type-safe interface for performing contract-related actions with privacy features, created by the `getShieldedContract function.
+description: A ShieldedContract instance is a type-safe interface for performing contract-related actions with privacy features, created by the getShieldedContract function.
 ---
 
-# Contract Instances
+# Contract Instance
+
+A ShieldedContract instance is a type-safe interface for performing contract-related actions on the Seismic blockchain. Create an instance with the `getShieldedContract` function.
 
 ## Import
 
@@ -12,7 +14,7 @@ import { getShieldedContract } from 'seismic-viem'
 
 ## Usage
 
-You can create a ShieldedContract instance with the `getShieldedContract` function by passing in an ABI, address, and a ShieldedWalletClient. Once created, you can call contract methods with privacy-preserving features.
+You can create a ShieldedContract instance with the `getShieldedContract` function by passing in an ABI, address, and a [ShieldedWalletClient](/viem/clients/wallet).
 
 ```ts
 const contract = getShieldedContract({

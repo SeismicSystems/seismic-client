@@ -1,8 +1,17 @@
 ---
-description: Generates a customizable URL for viewing various blockchain entities on a Seismic block explorer.
+description: Generates a customizable URL for viewing various data on a block explorer
 ---
 
-# getExplorerUrl
+# Explorer URL
+
+Generates a customizable URL for viewing various data on a block explorer
+
+There are several higher-level functions for generating URLs. Under the hood, they all call `getExplorerUrl`:
+
+- [`addressExplorerUrl`](/viem/explorer/address) - link to an address
+- [`blockExplorerUrl`](/viem/explorer/block) - link to a block
+- [`tokenExplorerUrl`](/viem/explorer/token) - link to a token
+- [`txExplorerUrl`](/viem/explorer/tx) - link to a transaction
 
 ## Import
 
