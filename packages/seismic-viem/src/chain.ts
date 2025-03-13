@@ -33,7 +33,7 @@ import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
  */
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
-  encryptionNonce?: bigint | undefined
+  encryptionNonce?: Hex | undefined
   messageVersion?: number | undefined
 }
 
@@ -65,7 +65,7 @@ export type TxSeismic = {
   value?: bigint | undefined
   input?: Hex | undefined
   encryptionPubkey: Hex
-  encryptionNonce: bigint
+  encryptionNonce: Hex
   messageVersion: number | undefined
 }
 
@@ -176,10 +176,14 @@ export const seismicChainFormatters: ChainFormatters = {
       // @ts-ignore
       let chainId = request.chainId // anvil requires chainId to be set but estimateGas doesn't set it
 
-      let encryptionPubkey
       let type
+      let seismicElements
       if (request.encryptionPubkey) {
-        encryptionPubkey = request.encryptionPubkey
+        seismicElements = {
+          encryptionPubkey: request.encryptionPubkey,
+          encryptionNonce: request.encryptionNonce,
+          messageVersion: '0x0',
+        }
         type = '0x4a'
       }
 
@@ -187,9 +191,11 @@ export const seismicChainFormatters: ChainFormatters = {
         ...formattedRpcRequest,
         ...(type !== undefined && { type }),
         ...(data !== undefined && { data }),
-        ...(encryptionPubkey !== undefined && { encryptionPubkey }),
+        ...(seismicElements !== undefined && seismicElements),
         ...(chainId !== undefined && { chainId }),
       }
+
+      console.log(ret)
 
       return ret
     },

@@ -53,7 +53,8 @@ const testSeismicCallTypedData = async () => {
     gas: 30_000_000n,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
-  const tx = { ...preparedTx, encryptionPubkey: ENC_PK, encryptionNonce: 0n }
+  const encryptionNonce = 0n
+  const tx = { ...preparedTx, encryptionPubkey: ENC_PK, encryptionNonce }
 
   // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
@@ -62,7 +63,7 @@ const testSeismicCallTypedData = async () => {
     params: [{ data: typedData, signature }],
   })
 
-  const decrypted = await aes.decrypt(ciphertext, nonce)
+  const decrypted = await aes.decrypt(ciphertext, encryptionNonce)
   const expectedPlaintext =
     '0xb94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9'
   expect(decrypted).toBe(expectedPlaintext)

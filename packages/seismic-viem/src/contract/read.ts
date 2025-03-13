@@ -154,9 +154,12 @@ export async function signedReadContract<
 
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
-  const encryptedCalldata = await aesCipher.encrypt(plaintextCalldata, nonce)
 
   const encryptionNonce = randomEncryptionNonce()
+  const encryptedCalldata = await aesCipher.encrypt(
+    plaintextCalldata,
+    encryptionNonce
+  )
 
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
@@ -167,7 +170,7 @@ export async function signedReadContract<
     encryptionNonce,
   }
   const { data: encryptedData } = await signedCall(client, request)
-  const data = await aesCipher.decrypt(encryptedData, nonce)
+  const data = await aesCipher.decrypt(encryptedData, encryptionNonce)
   return decodeFunctionResult({
     abi,
     args,

@@ -1,6 +1,5 @@
-import { bytesToBigInt } from 'viem'
+import { Hex, bytesToHex } from 'viem'
 
 import { randomBytes } from '@noble/ciphers/webcrypto'
 
-export const randomEncryptionNonce = (): bigint =>
-  bytesToBigInt(randomBytes(32))
+export const randomEncryptionNonce = (): Hex => bytesToHex(randomBytes(12))
