@@ -33,7 +33,9 @@ const config: Config = defineConfig({
     },
   ],
   twoslash: {
-    tsLibDirectory: '../node_modules',
+    compilerOptions: {
+      traceResolution: true,
+    },
   },
 })
 

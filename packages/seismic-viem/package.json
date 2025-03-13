@@ -1,18 +1,19 @@
 {
   "name": "seismic-viem",
-  "version": "1.0.27-experimental.1",
+  "version": "1.0.27-experimental.3",
   "description": "Typescript interface for Seismic",
   "type": "module",
-  "main": "dist/_cjs/index.js",
-  "module": "dist/_esm/index.ts",
-  "types": "dist/_types/index.d.ts",
-  "typings": "./_types/index.d.ts",
+  "main": "./dist/_cjs/index.js",
+  "module": "./dist/_esm/index.js",
+  "types": "./dist/_types/index.d.ts",
+  "typings": "./dist/_types/index.d.ts",
   "exports": {
     ".": {
       "require": "./dist/_cjs/index.js",
       "import": "./dist/_esm/index.js",
       "types": "./dist/_types/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist/_cjs/*.js",

@@ -1,12 +1,12 @@
 {
   "name": "seismic-react",
-  "version": "1.0.27-experimental.1",
+  "version": "1.0.27-experimental.3",
   "description": "React components for Seismic.",
   "type": "module",
-  "main": "dist/_cjs/index.js",
-  "module": "dist/_esm/index.js",
-  "types": "dist/_types/index.d.ts",
-  "typings": "./_types/index.d.ts",
+  "main": "d./ist/_cjs/index.js",
+  "module": "./dist/_esm/index.js",
+  "types": "./dist/_types/index.d.ts",
+  "typings": "./dist/_types/index.d.ts",
   "exports": {
     ".": {
       "require": "./dist/_cjs/index.js",
@@ -17,7 +17,8 @@
       "require": "./dist/_cjs/rainbowkit/index.js",
       "import": "./dist/_esm/rainbowkit/index.js",
       "types": "./dist/_types/rainbowkit/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
@@ -43,7 +44,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "seismic-viem": "1.0.27-experimental.1"
+    "seismic-viem": "1.0.27-experimental.3"
   },
   "peerDependencies": {
     "@rainbow-me/rainbowkit": "^2.0.0",

@@ -13,14 +13,7 @@
     "react-dom": "^19",
     "tailwindcss": "^4.0.6",
     "vocs": "^1",
-    "seismic-viem": "1.0.27",
-    "seismic-react": "1.0.27",
-    "viem": "2.x",
-    "wagmi": "2.x",
-    "@privy-io/react-auth": "^2.6.2",
-    "@privy-io/wagmi": "^1.0.3",
-    "@rainbow-me/rainbowkit": "^2.2.4",
-    "@tanstack/react-query": "^5.67.3",
-    "@walletconnect/ethereum-provider": "^2.19.1"
+    "typescript": "^5.5.4",
+    "seismic-viem": "workspace:*"
   }
 }

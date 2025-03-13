@@ -1,14 +1,17 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "../vocs.config.ts"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
       "~/*": ["./*"]
     },
-    "types": ["bun-types"],
-    "module": "NodeNext",
+    // "types": ["bun-types"],
     "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "composite": true,
     "downlevelIteration": true,

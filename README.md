@@ -52,3 +52,14 @@ Optionally, you may set these variables to specify where `reth` will store its s
 - `RETH_STATIC_FILES`: absolute path to store static files
 
 See `.env.example` for more information
+
+
+    "seismic-viem": "1.0.27-experimental.1",
+    "seismic-react": "1.0.27-experimental.1",
+    "viem": "2.x",
+    "wagmi": "2.x",
+    "@privy-io/react-auth": "^2.6.2",
+    "@privy-io/wagmi": "^1.0.3",
+    "@rainbow-me/rainbowkit": "^2.2.4",
+    "@tanstack/react-query": "^5.67.3",
+    "@walletconnect/ethereum-provider": "^2.19.1"
