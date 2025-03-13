@@ -19,6 +19,7 @@
     "docs:dev": "bun run --cwd docs dev",
     "docs:build": "bun run --cwd docs build",
     "docs:preview": "bun run --cwd docs preview",
+    "docs:twoslash": "bun run --cwd docs twoslash",
     "viem:build": "bun run --cwd packages/seismic-viem build",
     "viem:publish": "npm publish -w packages/seismic-viem",
     "viem:test:anvil": "bun run --cwd tests/seismic-viem test:anvil",
