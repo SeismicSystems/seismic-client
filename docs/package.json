@@ -14,7 +14,7 @@
     "tailwindcss": "^4.0.6",
     "vocs": "^1",
     "typescript": "^5.5.4",
-    "seismic-viem": "1.0.27-experimental.3",
-    "seismic-react": "1.0.27-experimental.3"
+    "seismic-viem": "workspace:*",
+    "seismic-react": "workspace:*"
   }
 }
