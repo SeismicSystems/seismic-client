@@ -201,12 +201,10 @@ export const sidebar = {
   '/': [
     {
       text: 'Viem',
-      collapsed: false,
       items: viemSidebar,
     },
     {
       text: 'React',
-      collapsed: false,
       items: reactSidebar,
     },
   ],
