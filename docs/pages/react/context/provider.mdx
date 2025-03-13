@@ -19,50 +19,33 @@ import { ShieldedWalletProvider } from 'seismic-react'
 ### Basic Integration
 
 ```tsx
-import type { AppProps } from 'next/app'
+import React from 'react'
 import { ShieldedWalletProvider, seismicDevnet } from 'seismic-react'
-import { WagmiProvider } from 'wagmi'
+import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { http } from 'viem'
+import { WagmiProvider, createConfig } from 'wagmi'
 
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
-// Create query client
-const queryClient = new QueryClient()
-
-// Wagmi configuration
-const config = getDefaultConfig({
-  appName: 'My Shielded App',
-  projectId: 'YOUR_WALLETCONNECT_PROJECT_ID',
-  chains: [seismicDevnet],
+const CHAINS = [seismicDevnet1, sanvil]
+const config = createConfig({
+  chains: CHAINS,
+  transports: {
+    [sanvil.id]: http(),
+    [seismicDevnet1.id]: http(),
+  },
 })
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+export default function App(): React.FC {
   return (
     <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          <ShieldedWalletProvider config={config}>
-            <Component {...pageProps} />
-          </ShieldedWalletProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
+      <ShieldedWalletProvider
+        config={config}
+        options={{ publicChain: CHAINS[0] }}
+      >
+        <h1>Hello World</h1>
+      </ShieldedWalletProvider>
     </WagmiProvider>
   )
 }
-```
-
-### Advanced Configuration
-
-```tsx
-<ShieldedWalletProvider
-  config={config}
-  options={{
-    publicTransport: customTransport,
-    publicChain: customChain,
-  }}
->
-  {/* App components */}
-</ShieldedWalletProvider>
 ```
 
 ## Parameters
@@ -76,13 +59,19 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 - **Type:** `Config`
 - **Required:** Yes
 
-The Wagmi configuration used to initialize the shielded wallet client. Typically created using `getDefaultConfig()` from RainbowKit or Wagmi.
+The Wagmi configuration used to initialize the shielded wallet client
 
 ```tsx
-const config = getDefaultConfig({
-  appName: 'My Shielded App',
-  projectId: 'YOUR_WALLETCONNECT_PROJECT_ID',
-  chains: [seismicDevnet],
+import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { http } from 'viem'
+import { createConfig } from 'wagmi'
+
+const config = createConfig({
+  chains: [seismicDevnet1, sanvil],
+  transports: {
+    [sanvil.id]: http(),
+    [seismicDevnet1.id]: http(),
+  },
 })
 ```
 
@@ -98,18 +87,18 @@ Additional configuration options for the shielded wallet provider.
 - **Type:** `Transport`
 - **Optional:** Yes
 
-A custom transport layer for public blockchain interactions. Allows more granular control over network communications.
+Define the transport method for your public client. This should be your preferred RPC provider.
 
 ##### publicChain
 
 - **Type:** `Chain`
 - **Optional:** Yes
 
-A custom chain configuration for public interactions. Useful for connecting to specific blockchain networks or testnets.
+Define the chain for your public client to use. This will allow `seismic-viem` to directly send signed payloads (e.g. transactions) to the RPC provider
 
 ## Return Value
 
-`ReactNode | Promise<ReactNode>` - Renders the shielded wallet context and its children, potentially asynchronously.
+`ReactNode` - Renders the shielded wallet context and its children
 
 ## Remarks
 
@@ -141,16 +130,16 @@ The provider may throw errors if:
 - Supports major Web3 React frameworks
 - Tested with Next.js applications
 
-## Example: Using Shielded Wallet Context
+## Example: Using shielded wallet after setting up the provider context
 
 ```tsx
 import { useShieldedWallet } from 'seismic-react'
 
 function MyComponent() {
-  const { walletClient } = useShieldedWallet()
+  const { loaded, walletClient } = useShieldedWallet()
 
   const handleTransaction = async () => {
-    // Perform shielded transactions
+    if (!loaded || !walletClient) return
     const result = await walletClient.sendTransaction(...)
   }
 

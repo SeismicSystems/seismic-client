@@ -10,16 +10,8 @@ const viemSidebar = [
     ],
   },
   {
-    text: 'Public Actions',
-    link: '/viem/actions/public',
-  },
-  {
-    text: 'Wallet Actions',
-    link: '/viem/actions/wallet',
-  },
-  {
     text: 'Contract',
-    collapsed: true,
+    collapsed: false,
     items: [
       {
         text: 'Contract Instance',
@@ -37,6 +29,20 @@ const viemSidebar = [
             link: '/viem/contract/shielded-write',
           },
         ],
+      },
+    ],
+  },
+  {
+    text: 'Actions',
+    collapsed: true,
+    items: [
+      {
+        text: 'Public',
+        link: '/viem/actions/public',
+      },
+      {
+        text: 'Wallet',
+        link: '/viem/actions/wallet',
       },
     ],
   },
@@ -138,7 +144,7 @@ const reactSidebar = [
     collapsed: false,
     items: [
       {
-        text: 'Shielded Wallet',
+        text: 'Shielded Wallet Provider',
         link: '/react/hooks/wallet',
       },
       {
@@ -147,18 +153,54 @@ const reactSidebar = [
       },
       {
         text: 'Shielded Read Contract',
-        link: '/react/hooks/read',
+        link: '/react/hooks/signed-read-contract',
       },
       {
         text: 'Shielded Write Contract',
-        link: '/react/hooks/write',
+        link: '/react/hooks/shielded-write-contract',
       },
+    ],
+  },
+  {
+    text: 'Guides',
+    collapsed: false,
+    items: [
+      {
+        text: 'RainbowKit',
+        link: '/react/guides/rainbowkit',
+      },
+      {
+        text: 'Privy',
+        link: '/react/guides/privy',
+      },
+      // TODO(christian): Make walletconnect work
+      // {
+      //   text: 'WalletConnect',
+      //   link: '/react/guides/walletconnect',
+      // },
+      // TODO(christian): Add AppKit guide
+      // {
+      //   text: 'AppKit',
+      //   link: '/react/guides/appkit',
+      // },
     ],
   },
 ]
 
 export const sidebar = {
-  '/': [...viemSidebar, ...reactSidebar],
+  // '/': [...viemSidebar, ...reactSidebar],
+  '/': [
+    {
+      text: 'Viem',
+      collapsed: false,
+      items: viemSidebar,
+    },
+    {
+      text: 'React',
+      collapsed: false,
+      items: reactSidebar,
+    },
+  ],
   // '/viem': viemSidebar,
   // '/react': reactSidebar,
   // {
