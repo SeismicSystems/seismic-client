@@ -15,6 +15,7 @@ import { formatAbiItem } from 'viem/utils'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
+import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.ts'
 import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
 
@@ -99,6 +100,8 @@ export async function shieldedWriteContract<
   const aesCipher = new AesGcmCrypto(aesKey)
   const data = await aesCipher.encrypt(plaintextCalldata, nonce)
 
+  const encryptionNonce = randomEncryptionNonce()
+
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
     data,
@@ -107,6 +110,7 @@ export async function shieldedWriteContract<
     nonce: nonce!,
     value,
     encryptionPubkey: client.getEncryptionPublicKey(),
+    encryptionNonce,
   }
   return sendShieldedTransaction(client, request)
 }

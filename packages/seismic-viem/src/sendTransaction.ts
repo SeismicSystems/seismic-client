@@ -166,6 +166,7 @@ export async function sendShieldedTransaction<
     nonce,
     value,
     encryptionPubkey,
+    encryptionNonce,
     ...rest
   } = parameters
 
@@ -218,12 +219,14 @@ export async function sendShieldedTransaction<
         value,
         type: 'legacy', // prepareTransactionRequest will fill the required fields using legacy spec
         encryptionPubkey,
+        encryptionNonce,
         ...rest,
       } as any
 
       const preparedTx = await prepareTransactionRequest(client, request)
       const txRequest = {
         encryptionPubkey,
+        encryptionNonce,
         ...preparedTx,
       } as TransactionSerializableSeismic
       if (account?.type === 'json-rpc') {

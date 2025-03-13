@@ -24,6 +24,7 @@ import { formatAbiItem } from 'viem/utils'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
+import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import type { SignedCallParameters } from '@sviem/signedCall.ts'
 import { signedCall } from '@sviem/signedCall.ts'
 
@@ -155,12 +156,15 @@ export async function signedReadContract<
   const aesCipher = new AesGcmCrypto(aesKey)
   const encryptedCalldata = await aesCipher.encrypt(plaintextCalldata, nonce)
 
+  const encryptionNonce = randomEncryptionNonce()
+
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
     nonce,
     to: address!,
     data: encryptedCalldata,
     encryptionPubkey: client.getEncryptionPublicKey(),
+    encryptionNonce,
   }
   const { data: encryptedData } = await signedCall(client, request)
   const data = await aesCipher.decrypt(encryptedData, nonce)

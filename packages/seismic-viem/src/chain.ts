@@ -33,6 +33,7 @@ import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
  */
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
+  encryptionNonce?: bigint | undefined
   messageVersion?: number | undefined
 }
 
@@ -64,6 +65,7 @@ export type TxSeismic = {
   value?: bigint | undefined
   input?: Hex | undefined
   encryptionPubkey: Hex
+  encryptionNonce: bigint
   messageVersion: number | undefined
 }
 
@@ -83,6 +85,7 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     data,
     value = 0n,
     encryptionPubkey,
+    encryptionNonce,
     messageVersion = 0,
   } = transaction
 
@@ -98,6 +101,7 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     to ?? '0x',
     value ? toHex(value) : '0x',
     encryptionPubkey ?? '0x',
+    encryptionNonce ? toHex(encryptionNonce) : '0x',
     messageVersion ? toHex(messageVersion) : '0x',
     data ?? '0x',
     ...toYParitySignatureArray(

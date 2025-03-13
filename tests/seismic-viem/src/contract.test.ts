@@ -5,14 +5,14 @@ import { privateKeyToAccount } from 'viem/accounts'
 import {
   createShieldedPublicClient,
   createShieldedWalletClient,
-} from '@sviem/client'
-import { getShieldedContract } from '@sviem/contract/contract'
-import { stringifyBigInt } from '@sviem/utils'
-import { contractABI } from '@test/contract/abi'
-import { bytecode } from '@test/contract/bytecode'
-import { loadDotenv } from '@test/env'
-import { envChain, setupNode } from '@test/process/node'
-import { getDeployedAddress } from '@test/utils'
+} from '@sviem/client.ts'
+import { getShieldedContract } from '@sviem/contract/contract.ts'
+import { stringifyBigInt } from '@sviem/utils.ts'
+import { contractABI } from '@test/contract/abi.ts'
+import { bytecode } from '@test/contract/bytecode.ts'
+import { loadDotenv } from '@test/env.ts'
+import { envChain, setupNode } from '@test/process/node.ts'
+import { getDeployedAddress } from '@test/utils.ts'
 
 /* Test Contract:
 // SPDX-License-Identifier: UNLICENSED

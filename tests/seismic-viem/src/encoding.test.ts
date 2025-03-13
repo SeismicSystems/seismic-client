@@ -5,10 +5,10 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { prepareTransactionRequest } from 'viem/actions'
 import { anvil } from 'viem/chains'
 
-import { SeismicTxExtras, serializeSeismicTransaction } from '@sviem/chain'
-import { createShieldedWalletClient } from '@sviem/client'
-import { compressPublicKey } from '@sviem/crypto/secp'
-import { envChain, setupNode } from '@test/process/node'
+import { SeismicTxExtras, serializeSeismicTransaction } from '@sviem/chain.ts'
+import { createShieldedWalletClient } from '@sviem/client.ts'
+import { compressPublicKey } from '@sviem/crypto/secp.ts'
+import { envChain, setupNode } from '@test/process/node.ts'
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'

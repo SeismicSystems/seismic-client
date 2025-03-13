@@ -6,7 +6,7 @@ import {
   deriveAesKey,
   sharedKeyFromPoint,
   sharedSecretPoint,
-} from '@sviem/crypto/aes'
+} from '@sviem/crypto/aes.ts'
 
 describe('AES', async () => {
   test('generates AES key correctly', () => {
