@@ -1,0 +1,92 @@
+---
+description: Creates a wallet client to perform writes on the Seismic blockchain
+---
+
+# Shielded Wallet Client
+
+Creates a wallet client to perform writes on the Seismic blockchain
+
+## Import
+
+```ts
+import { createShieldedWalletClient } from 'seismic-viem'
+```
+
+## Usage
+
+Creates a wallet client to perform privacy-preserving reads and writes on the Seismic network.
+
+```ts
+import { createShieldedWalletClient, seismicDevnet } from 'seismic-viem'
+import { http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const walletClient = await createShieldedWalletClient({
+  chain: seismicDevnet,
+  transport: http(),
+  account: privateKeyToAccount('0x0123...'),
+  privateKey: '0xabcdef...',
+})
+
+// Perform wallet operations
+const result = await walletClient.writeContract({
+  address: '0x1234...',
+  data: '0xdeadbeef...',
+})
+
+// Access shielded-specific actions
+const { aesKey } = walletClient.getEncryption()
+console.info('AES Key:', aesKey)
+```
+
+## Return Value
+
+`Promise<ShieldedWalletClient>` - A promise that resolves to a shielded wallet client instance.
+
+The ShieldedWalletClient extends viem's WalletClient with additional methods for privacy-preserving operations.
+
+## Parameters
+
+### parameters
+
+The configuration object for creating a ShieldedWalletClient.
+
+```ts
+const walletClient = await createShieldedWalletClient({
+  chain: seismicDevnet, // [!code focus]
+  transport: http(), // [!code focus]
+  account: privateKeyToAccount('0x0123...'), // [!code focus]
+  encryptionSk: '0xabcdef...', // [!code focus]
+  publicClient: publicClient, // Optional [!code focus]
+})
+```
+
+#### chain
+
+- **Type:** `Chain | undefined`
+
+The chain configuration to target (e.g., `seismicDevnet`).
+
+#### transport
+
+- **Type:** `Transport`
+
+The transport layer to use (e.g., an HTTP transport).
+
+#### account
+
+- **Type:** `Account`
+
+The account to use for wallet operations.
+
+#### encryptionSk
+
+- **Type:** `string`
+
+The secret key used for shielded encryption.
+
+#### publicClient (optional)
+
+- **Type:** `object`
+
+An optional public client instance for additional network interactions.

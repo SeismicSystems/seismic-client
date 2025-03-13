@@ -1,7 +1,7 @@
 import type { Hex, PublicClient } from 'viem'
 import { parseEther } from 'viem/utils'
 
-import { txExplorerUrl } from '@sviem/explorer'
+import { txExplorerUrl } from '@sviem/explorer.ts'
 
 export type CheckFaucetParams = {
   address: Hex

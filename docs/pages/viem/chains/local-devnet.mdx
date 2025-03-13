@@ -1,0 +1,77 @@
+---
+description: Chain configuration for connecting to a locally-running seismic-reth instance in development mode
+---
+
+# Local devnet
+
+Chain configuration for connecting to a locally-running seismic-reth instance in development mode
+
+## Import
+
+```ts
+import { localSeismicDevnet } from 'seismic-viem'
+```
+
+## Usage
+
+`localSeismicDevnet` provides a chain configuration for connecting to a locally-running Seismic reth instance in development mode.
+
+```ts
+import { localSeismicDevnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: localSeismicDevnet,
+  transport: http(),
+})
+```
+
+## Properties
+
+The `localSeismicDevnet` chain configuration contains the following properties:
+
+### id
+
+- **Type:** `number`
+- **Value:** `5124`
+
+The chain identifier.
+
+### name
+
+- **Type:** `string`
+- **Value:** `"Seismic"`
+
+Human-readable name of the chain.
+
+### nativeCurrency
+
+- **Type:** `object`
+- **Value:** `{ decimals: 18, name: "Ether", symbol: "ETH" }`
+
+The native currency configuration of the chain.
+
+### rpcUrls
+
+- **Type:** `object`
+- **Value:**
+  ```ts
+  {
+    default: {
+      http: ["http://127.0.0.1:8545"],
+      ws: ["ws://127.0.0.1:8546"]
+    }
+  }
+  ```
+
+Collection of RPC endpoints for connecting to the local Seismic node.
+
+### formatters
+
+- **Type:** `ChainFormatters`
+
+Custom formatters for Seismic-specific data structures.
+
+## Remarks
+
+This chain configuration is designed for local development and testing of Seismic applications. It connects to a Seismic node running on your local machine, which must be started separately using seismic-reth with the `--dev` flag.

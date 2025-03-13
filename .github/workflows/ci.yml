@@ -47,6 +47,7 @@ jobs:
           cd "$SFOUNDRY_ROOT"
           git checkout seismic
           git pull
+          git checkout 86379796502893c5292b54e43c24e88d7fc665f4
           cargo build --bin sanvil
           cd "$GITHUB_WORKSPACE"
       - name: Create .env
@@ -75,6 +76,7 @@ jobs:
           cd "$SRETH_ROOT"
           git checkout seismic
           git pull
+          git checkout e65a29ffbea55425b798902cac8fb36daeb5601e
           cargo build --bin seismic-reth
           cd "$GITHUB_WORKSPACE"
       - name: Create .env

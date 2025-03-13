@@ -18,15 +18,15 @@ import type {
 } from 'viem'
 import { getContract } from 'viem'
 
-import type { ShieldedWalletClient } from '@sviem/client'
-import { signedReadContract } from '@sviem/contract/read'
-import { shieldedWriteContract } from '@sviem/contract/write'
-import type { KeyedClient } from '@sviem/viem-internal/client'
+import type { ShieldedWalletClient } from '@sviem/client.ts'
+import { signedReadContract } from '@sviem/contract/read.ts'
+import { shieldedWriteContract } from '@sviem/contract/write.ts'
+import type { KeyedClient } from '@sviem/viem-internal/client.ts'
 import type {
   GetReadFunction,
   GetWriteFunction,
-} from '@sviem/viem-internal/function'
-import { getFunctionParameters } from '@sviem/viem-internal/function'
+} from '@sviem/viem-internal/function.ts'
+import { getFunctionParameters } from '@sviem/viem-internal/function.ts'
 
 type TransparentReadContractReturnType<
   TAbi extends Abi | readonly unknown[],

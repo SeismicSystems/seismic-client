@@ -1,0 +1,111 @@
+---
+description: Generates cryptographically secure random numbers using the RNG precompile
+---
+
+# RNG
+
+Generates cryptographically secure random numbers using the RNG precompile
+
+## Import
+
+```ts
+import { rng } from 'seismic-viem'
+```
+
+## Usage
+
+Generates cryptographically secure random numbers using the RNG precompile. The function allows generating random numbers of various sizes with optional personalization.
+
+```ts
+import { rng } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+})
+
+// Generate a random uint8
+const randomUint8 = await rng(client, { numBytes: 1 })
+// Returns: 42n (as a bigint)
+
+// Generate a random uint256
+const randomUint256 = await rng(client, { numBytes: 32 })
+// Returns: 1234567890123456789012345678901234567890n (as a bigint)
+
+// Generate a random number with personalization
+const randomWithPers = await rng(client, {
+  numBytes: 16,
+  pers: '0x1234567890abcdef',
+})
+// Returns: 9876543210987654n (as a bigint)
+```
+
+## Return Value
+
+`Promise<bigint>` - A promise that resolves to a cryptographically secure random number represented as a bigint.
+
+## Parameters
+
+### client
+
+- **Type:** `CallClient`
+
+The public client to use for the precompile call.
+
+```ts
+const randomNumber = await rng(client, { numBytes: 1 }) // [!code focus]
+```
+
+### args
+
+- **Type:** `RngParams`
+
+An object containing parameters for random number generation.
+
+#### numBytes
+
+- **Type:** `bigint | number`
+- **Required:** Yes
+- **Constraints:** Must be less than or equal to 32
+
+The number of bytes to generate for the random number.
+
+```ts
+const randomUint8 = await rng(client, { numBytes: 1 }) // [!code focus]
+const randomUint256 = await rng(client, { numBytes: 32 }) // [!code focus]
+```
+
+#### pers
+
+- **Type:** `Hex | ByteArray`
+- **Required:** No
+
+An optional personalization string to seed the random number generator. This can help introduce additional entropy or domain separation.
+
+```ts
+const randomWithPers = await rng(client, {
+  numBytes: 16,
+  pers: '0x1234567890abcdef', // [!code focus]
+})
+```
+
+## Throws
+
+The function may throw an error in the following scenarios:
+
+- If `numBytes` is not a number or bigint
+- If `numBytes` is greater than 32
+- If the precompile call fails
+
+## Remarks
+
+The RNG (Random Number Generator) precompile provides a cryptographically secure method of generating random numbers directly on the blockchain. This can be useful for various applications requiring unpredictable, verifiable randomness such as:
+
+- Generating cryptographic keys
+- Creating unique identifiers
+- Implementing randomness in blockchain games or protocols
+- Seeding probabilistic algorithms
+
+The optional personalization parameter allows additional control over the randomness generation, which can be useful in scenarios requiring domain-specific randomness.

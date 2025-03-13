@@ -23,7 +23,7 @@ import type {
   TransactionSerializableGeneric,
 } from 'viem'
 
-import { toYParitySignatureArray } from '@sviem/viem-internal/signature'
+import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 
 /**
  * The additional fields added to a Seismic transaction

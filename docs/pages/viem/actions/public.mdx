@@ -1,0 +1,76 @@
+---
+description: Actions for the shielded public client
+---
+
+# Shielded Public Actions
+
+In addition to all standard viem PublicClient methods, the following Seismic-specific methods are available:
+
+## getTeePublicKey
+
+```ts
+const teePublicKey = await client.getTeePublicKey()
+```
+
+Retrieves the public key of the Trusted Execution Environment (TEE).
+
+## rng
+
+```ts
+const randomValue = await client.rng({ max: 100n })
+```
+
+Generates a secure random number. See [RNG Precompile](/viem/precompiles/rng) for more details.
+
+## ecdh
+
+```ts
+const result = await client.ecdh({ publicKey: '0x...' })
+```
+
+Performs Elliptic Curve Diffie-Hellman key exchange. See [ECDH Precompile](/viem/precompiles/ecdh) for more details.
+
+## AES-GCM
+
+### Encryption
+
+```ts
+const encryptedData = await client.aesGcmEncryption({
+  data: 'text to encrypt',
+  key: '0x...',
+})
+```
+
+Encrypts data using AES-GCM encryption.
+
+### Decryption
+
+```ts
+const decryptedData = await client.aesGcmDecryption({
+  data: '0x...',
+  key: '0x...',
+})
+```
+
+Decrypts AES-GCM encrypted data.
+
+See [AES Precompile](/viem/precompiles/aes) for more details.
+
+## HDFK
+
+```ts
+const derivedKey = await client.hdfk('0x...')
+```
+
+Derives a key from the initial key material. See [HDKF Precompile](/viem/precompiles/hdfk) for more details.
+
+## SECP256K1
+
+```ts
+const signature = await client.secp256k1({
+  sk: '0x123...', // Your secret key
+  message: 'Hello, world!', // The message to sign
+})
+```
+
+Signs a message using SECP256K1. See [SECP256K1 Precompile](/viem/precompiles/secp256k1-sig) for more details.

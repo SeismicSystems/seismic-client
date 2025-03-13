@@ -24,17 +24,17 @@ import {
   SeismicTxSerializer,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
-} from '@sviem/chain'
-import { ShieldedWalletClient } from '@sviem/client'
-import { SignedCallError } from '@sviem/error/signedCall'
-import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
+} from '@sviem/chain.ts'
+import { ShieldedWalletClient } from '@sviem/client.ts'
+import { SignedCallError } from '@sviem/error/signedCall.ts'
+import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 import {
   getRevertErrorData,
   toDeploylessCallViaBytecodeData,
   toDeploylessCallViaFactoryData,
-} from '@sviem/viem-internal/call'
-import type { ErrorType } from '@sviem/viem-internal/error'
-import type { AssertRequestParameters } from '@sviem/viem-internal/request'
+} from '@sviem/viem-internal/call.ts'
+import type { ErrorType } from '@sviem/viem-internal/error.ts'
+import type { AssertRequestParameters } from '@sviem/viem-internal/request.ts'
 
 const doSignedCall = async <
   TTransport extends Transport,

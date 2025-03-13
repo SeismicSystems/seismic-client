@@ -1,0 +1,79 @@
+---
+description: Generates a URL for viewing an address on a block explorer
+---
+
+# Explorer URL: Address
+
+Generates a URL for viewing an address on a block explorer
+
+## Import
+
+```ts
+import { addressExplorerUrl } from 'seismic-viem'
+```
+
+## Usage
+
+Generates a URL for viewing an address on a block explorer for Seismic networks.
+
+```ts
+import { addressExplorerUrl } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+
+// Generate a basic explorer URL for an address
+const url = addressExplorerUrl({
+  address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+  chain: seismicDevnet,
+})
+// Will return: "https://explorer-1.seismicdev.net/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+
+// Generate a URL for a specific address tab (logs)
+const logsUrl = addressExplorerUrl({
+  address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+  chain: seismicDevnet,
+  tab: 'logs',
+})
+// Will return: "https://explorer-1.seismicdev.net/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266/logs"
+```
+
+## Return Value
+
+`string | undefined` - A URL for viewing the address on a block explorer, or `undefined` if no block explorer is configured for the chain.
+
+## Parameters
+
+### parameters
+
+```ts
+const url = addressExplorerUrl({
+  address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // [!code focus]
+  chain: seismicDevnet, // [!code focus]
+  tab: 'logs', // [!code focus] (optional)
+})
+```
+
+#### address
+
+- **Type:** `Address`
+
+The Ethereum address to generate an explorer URL for.
+
+#### chain
+
+- **Type:** `Chain`
+
+The chain configuration object containing block explorer information.
+
+#### tab (optional)
+
+- **Type:** `AddressExplorerTab`
+
+The specific tab to view on the address explorer page. Available options:
+
+- `'txs'` - Transactions related to the address
+- `'token_transfers'` - Token transfers for the address
+- `'tokens'` - Token holdings
+- `'internal_txns'` - Internal transactions
+- `'coin_balance_history'` - Balance history
+- `'logs'` - Event logs
+- `'contract'` - Contract code (if address is a contract)

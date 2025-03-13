@@ -1,0 +1,48 @@
+---
+description: Custom chain formatters for Seismic transactions
+---
+
+# Seismic chain formatters
+
+Custom chain formatters for Seismic transactions
+
+## Import
+
+```ts
+import { seismicChainFormatters } from 'seismic-viem'
+```
+
+## Usage
+
+Chain formatters that provide formatting utilities for Seismic transaction requests. These formatters handle privacy-preserving transaction properties such as transaction encryption public keys.
+
+```ts
+import { seismicChainFormatters } from 'seismic-viem'
+import { defineChain } from 'viem'
+
+// Used internally by Seismic chain configurations
+const chain = defineChain({
+  id: 5124,
+  // ...other chain configs
+  formatters: seismicChainFormatters,
+})
+```
+
+## Implementation Details
+
+The `seismicChainFormatters` extend viem's standard chain formatters with Seismic-specific handling.
+
+### Transaction Formatting
+
+When formatting transaction requests, the formatters process these properties:
+
+- `type` - Set to '0x4a' if encryption public key is present
+- `data` - Transaction data if present
+- `encryptionPubkey` - Public key for transaction encryption
+- `chainId` - Chain ID for the transaction
+
+## Remarks
+
+These formatters are called automatically by viem's `call`, `estimateGas`, and `sendTransaction` functions. They parse transaction requests before sending them to the node, handling any Seismic-specific formats or properties.
+
+You typically don't need to use these formatters directly, as they are already included in the Seismic chain configurations like `seismicDevnet` and `sanvil`.

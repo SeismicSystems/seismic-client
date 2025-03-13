@@ -4,7 +4,7 @@ This is a package to integrate [seismic-viem](../seismic-viem/) with React, [wag
 
 ## Docs
 
-The docs are hosted [here](https://seismic-docs.netlify.app/seismic-react/globals)
+The docs are hosted [here](https://client.seismic.systems/react/intro)
 
 ## Example Implementation
 

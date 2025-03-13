@@ -1,0 +1,78 @@
+---
+description: Generates a URL for viewing a transaction on a block explorer
+---
+
+# Explorer URL: Transaction
+
+Generates a URL for viewing a transaction on a block explorer
+
+## Import
+
+```ts
+import { txExplorerUrl } from 'seismic-viem'
+```
+
+## Usage
+
+Generates a URL for viewing a transaction on a block explorer for Seismic networks.
+
+```ts
+import { txExplorerUrl } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+
+// Generate a basic explorer URL for a transaction
+const url = txExplorerUrl({
+  hash: '0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048',
+  chain: seismicDevnet,
+})
+// Will return something like: "https://explorer-1.seismicdev.net/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048"
+
+// Generate a URL for a specific transaction tab (logs)
+const logsUrl = txExplorerUrl({
+  hash: '0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048',
+  chain: seismicDevnet,
+  tab: 'logs',
+})
+// Will return something like: "https://explorer-1.seismicdev.net/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048/logs"
+```
+
+## Return Value
+
+`string | undefined` - A URL for viewing the transaction on a block explorer, or `undefined` if no block explorer is configured for the chain.
+
+## Parameters
+
+### parameters
+
+```ts
+const url = txExplorerUrl({
+  hash: '0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048', // [!code focus]
+  chain: seismicDevnet, // [!code focus]
+  tab: 'logs', // [!code focus] (optional)
+})
+```
+
+#### hash
+
+- **Type:** `Hash`
+
+The transaction hash to generate an explorer URL for.
+
+#### chain
+
+- **Type:** `Chain`
+
+The chain configuration object containing block explorer information.
+
+#### tab (optional)
+
+- **Type:** `TxExplorerTab`
+
+The specific tab to view on the transaction explorer page. Available options:
+
+- `'index'` - Main transaction information
+- `'token_transfers'` - Token transfers in the transaction
+- `'internal'` - Internal transactions
+- `'logs'` - Event logs
+- `'state'` - State changes
+- `'raw_trace'` - Raw trace data

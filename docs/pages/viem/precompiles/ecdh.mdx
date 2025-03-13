@@ -1,0 +1,86 @@
+---
+description: Performs an ECDH (Elliptic Curve Diffie-Hellman) key exchange operation to derive a shared secret through a Seismic precompile contract
+---
+
+# ECDH
+
+Performs an ECDH (Elliptic Curve Diffie-Hellman) key exchange operation to derive a shared secret through a Seismic precompile contract
+
+## Import
+
+```ts
+import { ecdh } from 'seismic-viem'
+```
+
+## Usage
+
+Performs an ECDH (Elliptic Curve Diffie-Hellman) key exchange operation to derive a shared secret using a precompile contract on the Seismic network.
+
+```ts
+import { ecdh } from 'seismic-viem'
+import { seismicDevnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+})
+
+const sharedSecret = await ecdh(client, {
+  sk: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+  pk: '0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
+})
+
+// Returns: '0x...' (32-byte shared secret in hexadecimal format)
+```
+
+## Return Value
+
+`Promise<'0x${string}'>` - A promise that resolves to the 32-byte shared secret in hexadecimal format.
+
+## Parameters
+
+### client
+
+- **Type:** `CallClient`
+
+The public client to use for the precompile call.
+
+```ts
+const sharedSecret = await ecdh(client, { ... }) // [!code focus]
+```
+
+### args
+
+- **Type:** `EcdhParams`
+
+The parameters for the ECDH operation.
+
+```ts
+const sharedSecret = await ecdh(client, {
+  sk: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', // [!code focus]
+  pk: '0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba', // [!code focus]
+})
+```
+
+#### sk
+
+- **Type:** `Hex`
+
+The secret key (private key) in hexadecimal format. Must be a valid secp256k1 private key.
+
+#### pk
+
+- **Type:** `Hex`
+
+The public key in hexadecimal format. Must be a valid secp256k1 public key.
+
+## Throws
+
+May throw if key validation fails or if the precompile call fails.
+
+## Remarks
+
+ECDH is a key agreement protocol that allows two parties to establish a shared secret over an insecure channel. In Seismic, this operation is performed through a precompile contract for efficiency and security.
+
+This function is commonly used in privacy-preserving applications to establish encrypted communication channels between parties.

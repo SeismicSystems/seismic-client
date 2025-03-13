@@ -1,18 +1,21 @@
 import type { Account, Chain, Transport } from 'viem'
 import { readContract, writeContract } from 'viem/actions'
 
-import { ShieldedWalletClient } from '@sviem/client'
-import { signedReadContract } from '@sviem/contract/read'
-import { shieldedWriteContract } from '@sviem/contract/write'
+import { ShieldedWalletClient } from '@sviem/client.ts'
+import { signedReadContract } from '@sviem/contract/read.ts'
+import { shieldedWriteContract } from '@sviem/contract/write.ts'
 import type {
   SendSeismicTransactionParameters,
   SendSeismicTransactionRequest,
   SendSeismicTransactionReturnType,
-} from '@sviem/sendTransaction.js'
-import { sendShieldedTransaction } from '@sviem/sendTransaction.js'
-import { signedCall } from '@sviem/signedCall'
-import type { SignedCall } from '@sviem/signedCall'
-import type { ReadContract, WriteContract } from '@sviem/viem-internal/contract'
+} from '@sviem/sendTransaction.ts'
+import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
+import { signedCall } from '@sviem/signedCall.ts'
+import type { SignedCall } from '@sviem/signedCall.ts'
+import type {
+  ReadContract,
+  WriteContract,
+} from '@sviem/viem-internal/contract.ts'
 
 /**
  * Defines the actions available for a shielded wallet client.
