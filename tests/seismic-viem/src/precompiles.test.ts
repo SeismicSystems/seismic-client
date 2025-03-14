@@ -2,10 +2,10 @@ import { afterAll, describe, expect, test } from 'bun:test'
 import { hexToBytes, http, recoverMessageAddress } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
-import { createShieldedPublicClient } from '@sviem/client'
-import { generateAesKey } from '@sviem/crypto/aes'
-import { compressPublicKey } from '@sviem/crypto/secp'
-import { envChain, setupNode } from '@test/process/node'
+import { createShieldedPublicClient } from '@sviem/client.ts'
+import { generateAesKey } from '@sviem/crypto/aes.ts'
+import { compressPublicKey } from '@sviem/crypto/secp.ts'
+import { envChain, setupNode } from '@test/process/node.ts'
 
 const chain = envChain()
 const { url, exitProcess } = await setupNode(chain, {

@@ -35,6 +35,10 @@ const seismicTxTypedData = <
     throw new Error('Seismic transactions require encryptionPubkey argument')
   }
 
+  if (!tx.encryptionNonce) {
+    throw new Error('Seismic transactions require encryptionNonce argument')
+  }
+
   const message: TxSeismic = {
     chainId: tx.chainId,
     nonce: tx.nonce !== undefined ? BigInt(tx.nonce) : undefined,
@@ -44,6 +48,7 @@ const seismicTxTypedData = <
     value: tx.value ? BigInt(tx.value) : 0n,
     input: tx.data ?? '0x',
     encryptionPubkey: tx.encryptionPubkey,
+    encryptionNonce: tx.encryptionNonce,
     messageVersion: parseInt(MESSAGE_VERSION),
   }
   // @ts-ignore
@@ -65,6 +70,7 @@ const seismicTxTypedData = <
         { name: 'value', type: 'uint256' },
         // compressed secp256k1 public key (33 bytes)
         { name: 'encryptionPubkey', type: 'bytes' },
+        { name: 'encryptionNonce', type: 'uint64' },
         { name: 'messageVersion', type: 'uint8' },
         { name: 'input', type: 'bytes' },
       ],

@@ -5,10 +5,10 @@ import type { Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { parseEther } from 'viem/utils'
 
-import { createShieldedWalletClient } from '@sviem/client'
-import { AesGcmCrypto } from '@sviem/crypto/aes'
-import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
-import { envChain, setupNode } from '@test/process/node'
+import { createShieldedWalletClient } from '@sviem/client.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
+import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
+import { envChain, setupNode } from '@test/process/node.ts'
 
 // Running on a different port because contract.test.ts uses 8545
 const chain = envChain()
@@ -53,7 +53,8 @@ const testSeismicCallTypedData = async () => {
     gas: 30_000_000n,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
-  const tx = { ...preparedTx, encryptionPubkey: ENC_PK }
+  const encryptionNonce = 0n
+  const tx = { ...preparedTx, encryptionPubkey: ENC_PK, encryptionNonce }
 
   // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
@@ -62,7 +63,7 @@ const testSeismicCallTypedData = async () => {
     params: [{ data: typedData, signature }],
   })
 
-  const decrypted = await aes.decrypt(ciphertext, nonce)
+  const decrypted = await aes.decrypt(ciphertext, encryptionNonce)
   const expectedPlaintext =
     '0xb94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9'
   expect(decrypted).toBe(expectedPlaintext)
