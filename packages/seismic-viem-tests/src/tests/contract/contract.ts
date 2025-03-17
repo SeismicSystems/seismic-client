@@ -1,20 +1,31 @@
 import { expect } from 'bun:test'
+import { Account, Chain } from 'viem'
+import { http } from 'viem'
 
 import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
 import { bytecode } from '@sviem-tests/tests/contract/bytecode.ts'
-import { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client.ts'
+import {
+  createShieldedPublicClient,
+  createShieldedWalletClient,
+} from '@sviem/client.ts'
 import { getShieldedContract } from '@sviem/contract/contract.ts'
 import { stringifyBigInt } from '@sviem/utils.ts'
 
 type ContractTestArgs = {
-  publicClient: ShieldedPublicClient
-  walletClient: ShieldedWalletClient
+  chain: Chain
+  account: Account
 }
 
-export const testSeismicTx = async ({
-  publicClient,
-  walletClient,
-}: ContractTestArgs) => {
+export const testSeismicTx = async ({ chain, account }: ContractTestArgs) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
+  const walletClient = await createShieldedWalletClient({
+    chain,
+    transport: http(),
+    account,
+  })
   const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
   const TEST_NUMBER = BigInt(11)
 

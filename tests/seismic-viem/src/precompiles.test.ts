@@ -25,20 +25,20 @@ const publicClient = createShieldedPublicClient({
 })
 
 describe('Seismic Precompiles', async () => {
-  test('RNG(1)', () => testRng(publicClient, 1), { timeout: 20_000 })
-  test('RNG(8)', () => testRng(publicClient, 8), { timeout: 20_000 })
-  test('RNG(16)', () => testRng(publicClient, 16), { timeout: 20_000 })
-  test('RNG(32)', () => testRng(publicClient, 32), { timeout: 20_000 })
-  test('RNG(32, pers)', () => testRngWithPers(publicClient, 32), {
+  test('RNG(1)', () => testRng(chain, 1), { timeout: 20_000 })
+  test('RNG(8)', () => testRng(chain, 8), { timeout: 20_000 })
+  test('RNG(16)', () => testRng(chain, 16), { timeout: 20_000 })
+  test('RNG(32)', () => testRng(chain, 32), { timeout: 20_000 })
+  test('RNG(32, pers)', () => testRngWithPers(chain, 32), {
     timeout: 20_000,
   })
-  test('ECDH', () => testEcdh(publicClient), { timeout: 20_000 })
-  test('HKDF(string)', () => testHkdfString(publicClient), {
+  test('ECDH', () => testEcdh(chain), { timeout: 20_000 })
+  test('HKDF(string)', () => testHkdfString(chain), {
     timeout: 20_000,
   })
-  test('HKDF(hex)', () => testHkdfHex(publicClient), { timeout: 20_000 })
-  test('AES-GCM', () => testAesGcm(publicClient), { timeout: 20_000 })
-  test('secp256k1', () => testSecp256k1(publicClient), { timeout: 20_000 })
+  test('HKDF(hex)', () => testHkdfHex(chain), { timeout: 20_000 })
+  test('AES-GCM', () => testAesGcm(chain), { timeout: 20_000 })
+  test('secp256k1', () => testSecp256k1(chain), { timeout: 20_000 })
 })
 
 afterAll(async () => {

@@ -1,31 +1,37 @@
 import { expect } from 'bun:test'
-import { hexToBytes, recoverMessageAddress } from 'viem'
+import { Chain, hexToBytes, http, recoverMessageAddress } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
-import { ShieldedPublicClient } from '@sviem/client.ts'
+import { createShieldedPublicClient } from '@sviem/client.ts'
 import { generateAesKey } from '@sviem/crypto/aes.ts'
 import { compressPublicKey } from '@sviem/crypto/secp.ts'
 
-export const testRng = async (
-  publicClient: ShieldedPublicClient,
-  size: number
-) => {
+export const testRng = async (chain: Chain, size: number) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
   const randomU8 = await publicClient.rng({ numBytes: size })
   expect(randomU8).toBeGreaterThan(0n)
   expect(randomU8).toBeLessThan(2n ** BigInt(8 * size))
 }
 
-export const testRngWithPers = async (
-  publicClient: ShieldedPublicClient,
-  size: number
-) => {
+export const testRngWithPers = async (chain: Chain, size: number) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
   const pers = new Uint8Array([1, 2, 3, 4])
   const randomU8 = await publicClient.rng({ numBytes: size, pers })
   expect(randomU8).toBeGreaterThan(0n)
   expect(randomU8).toBeLessThan(2n ** BigInt(8 * size))
 }
 
-export const testEcdh = async (publicClient: ShieldedPublicClient) => {
+export const testEcdh = async (chain: Chain) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
   const sk1 = generatePrivateKey()
   const sk2 = generatePrivateKey()
   const pk2 = compressPublicKey(privateKeyToAccount(sk2).publicKey)
@@ -39,7 +45,11 @@ export const testEcdh = async (publicClient: ShieldedPublicClient) => {
   expect(sharedSecret).toBe(expected)
 }
 
-export const testHkdfString = async (publicClient: ShieldedPublicClient) => {
+export const testHkdfString = async (chain: Chain) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
   const inputString = 'HelloHKDF'
   const key = await publicClient.hdfk(inputString)
   // from revm test
@@ -48,7 +58,11 @@ export const testHkdfString = async (publicClient: ShieldedPublicClient) => {
   )
 }
 
-export const testHkdfHex = async (publicClient: ShieldedPublicClient) => {
+export const testHkdfHex = async (chain: Chain) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
   const inputHex = '0x1234abcd'
   const key = await publicClient.hdfk(inputHex)
   // from revm test
@@ -57,7 +71,11 @@ export const testHkdfHex = async (publicClient: ShieldedPublicClient) => {
   )
 }
 
-export const testAesGcm = async (publicClient: ShieldedPublicClient) => {
+export const testAesGcm = async (chain: Chain) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
   const aesKey =
     '0x0000000000000000000000000000000000000000000000000000000000000000'
   const nonce = 0
@@ -78,7 +96,11 @@ export const testAesGcm = async (publicClient: ShieldedPublicClient) => {
   expect(decrypted).toBe(plaintext)
 }
 
-export const testSecp256k1 = async (publicClient: ShieldedPublicClient) => {
+export const testSecp256k1 = async (chain: Chain) => {
+  const publicClient = createShieldedPublicClient({
+    chain,
+    transport: http(),
+  })
   const sk =
     '0xaac6ccf1fdec03b4838a3c97628f381b34a949967f46d3f8a9a9c741ce982a87'
   const address = privateKeyToAccount(sk).address

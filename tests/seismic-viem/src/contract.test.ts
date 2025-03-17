@@ -1,13 +1,8 @@
 import { afterAll, describe, test } from 'bun:test'
-import { http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 import { envChain, setupNode } from '@sviem-tests/process/node.ts'
 import { testSeismicTx } from '@sviem-tests/tests/contract/contract.ts'
-import {
-  createShieldedPublicClient,
-  createShieldedWalletClient,
-} from '@sviem/client.ts'
 import { loadDotenv } from '@test/env.ts'
 
 /* Test Contract:
@@ -39,20 +34,12 @@ const TEST_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 const account = privateKeyToAccount(TEST_PRIVATE_KEY)
 
-const { url, exitProcess } = await setupNode(chain)
-
-const transport = http(url)
-const publicClient = await createShieldedPublicClient({ chain, transport })
-const walletClient = await createShieldedWalletClient({
-  chain,
-  transport,
-  account,
-})
+const { exitProcess } = await setupNode(chain)
 
 describe('Seismic Contract', async () => {
   test(
     'deploy & call contracts with seismic tx',
-    () => testSeismicTx({ publicClient, walletClient }),
+    () => testSeismicTx({ chain, account }),
     {
       timeout: 20_000,
     }
