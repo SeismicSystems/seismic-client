@@ -3,13 +3,13 @@
   "include": [
     "src/**/*",
     "../seismic-viem/src/**/*",
-    "../seismic-tests/src/**/*"
+    "../seismic-viem-tests/src/**/*"
   ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
-      "@sviem-tests/*": ["../seismic-tests/src/*"]
+      "@sviem-tests/*": ["../seismic-viem-tests/src/*"]
     },
     "composite": true,
     "baseUrl": ".",
