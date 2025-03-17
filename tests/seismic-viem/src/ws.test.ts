@@ -1,8 +1,8 @@
 import { describe, it } from 'bun:test'
 import { webSocket } from 'viem'
 
-import { seismicDevnet } from '@sviem/chain'
-import { createShieldedPublicClient } from '@sviem/client'
+import { seismicDevnet } from '@sviem/chain.ts'
+import { createShieldedPublicClient } from '@sviem/client.ts'
 
 describe('ws', () => {
   it('should connect to the ws', async () => {

@@ -79,3 +79,12 @@ export {
 export type { Secp256K1SigParams } from '@sviem/precompiles/secp256k1.ts'
 
 export type { CallClient, Precompile } from '@sviem/precompiles/precompile.ts'
+
+export { envChain, setupNode } from '@sviem/process/node.ts'
+export type {
+  NodeProcess,
+  NodeProcessOptions,
+  SpawnedNode,
+} from '@sviem/process/node.ts'
+
+export { testSeismicTxEncoding } from '@sviem/tests/encoding.ts'
