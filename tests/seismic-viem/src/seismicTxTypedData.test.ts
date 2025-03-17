@@ -5,9 +5,9 @@ import type { Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { parseEther } from 'viem/utils'
 
+import { envChain, setupNode } from '@sviem-tests/process/node.ts'
 import { createShieldedWalletClient } from '@sviem/client.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
-import { envChain, setupNode } from '@sviem/process/node.ts'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 
 // Running on a different port because contract.test.ts uses 8545

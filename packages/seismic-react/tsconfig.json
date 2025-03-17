@@ -3,7 +3,9 @@
   "include": [
     "src/**/*",
     "../seismic-viem/src/**/*",
-    "../../tests/seismic-viem/src/**/*"
+    "../../tests/seismic-viem/src/**/*",
+    "../seismic-viem-tests/src/tests/encoding.ts",
+    "../seismic-viem-tests/src/index.ts"
   ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {

@@ -1,8 +1,8 @@
 import { afterAll, describe, test } from 'bun:test'
 import { privateKeyToAccount } from 'viem/accounts'
 
-import { envChain, setupNode } from '@sviem/process/node.ts'
-import { testSeismicTxEncoding } from '@sviem/tests/encoding.ts'
+import { envChain, setupNode } from '@sviem-tests/process/node.ts'
+import { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
@@ -28,7 +28,6 @@ describe('Seismic Transaction Encoding', async () => {
         chain,
         account: testAccount,
         url,
-        exitProcess,
         encryptionSk: ENC_SK,
         encryptionPubkey: ENC_PK,
       }),

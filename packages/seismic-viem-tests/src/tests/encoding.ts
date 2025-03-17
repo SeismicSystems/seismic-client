@@ -12,7 +12,6 @@ import { compressPublicKey } from '@sviem/crypto/secp.ts'
 type EncodingParams = {
   chain: Chain
   url: string
-  exitProcess: () => Promise<void>
   encryptionSk: Hex
   encryptionPubkey: Hex
   account: Account
@@ -21,7 +20,6 @@ type EncodingParams = {
 export const testSeismicTxEncoding = async ({
   chain,
   url,
-  exitProcess,
   account,
   encryptionSk,
   encryptionPubkey,

@@ -2,12 +2,12 @@ import { afterAll, describe, expect, test } from 'bun:test'
 import { http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
+import { envChain, setupNode } from '@sviem-tests/process/node.ts'
 import {
   createShieldedPublicClient,
   createShieldedWalletClient,
 } from '@sviem/client.ts'
 import { getShieldedContract } from '@sviem/contract/contract.ts'
-import { envChain, setupNode } from '@sviem/process/node.ts'
 import { stringifyBigInt } from '@sviem/utils.ts'
 import { contractABI } from '@test/contract/abi.ts'
 import { bytecode } from '@test/contract/bytecode.ts'
