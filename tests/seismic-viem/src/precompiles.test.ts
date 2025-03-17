@@ -11,7 +11,7 @@ import { testRngWithPers } from '@sviem-tests/tests/precompiles.ts'
 
 const chain = envChain()
 
-const { url, exitProcess } = await setupNode(chain, {
+const { exitProcess } = await setupNode(chain, {
   // Running on a different port because contract.test.ts uses 8545
   port: 8548,
   silent: true,
