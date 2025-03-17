@@ -1,12 +1,11 @@
 import { expect } from 'bun:test'
+import { createShieldedWalletClient } from 'seismic-viem'
+import { AesGcmCrypto } from 'seismic-viem'
+import { signSeismicTxTypedData } from 'seismic-viem'
 import { http } from 'viem'
 import type { Account, Chain, TransactionSerializableLegacy } from 'viem'
 import type { Hex } from 'viem'
 import { parseEther } from 'viem/utils'
-
-import { createShieldedWalletClient } from '@sviem/client.ts'
-import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
-import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 
 type TestSeismicCallTypeDataArgs = {
   chain: Chain

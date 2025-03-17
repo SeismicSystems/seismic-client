@@ -58,6 +58,12 @@ export {
 
 export { stringifyBigInt } from '@sviem/utils.ts'
 export { compressPublicKey } from '@sviem/crypto/secp.ts'
+export {
+  AesGcmCrypto,
+  deriveAesKey,
+  sharedKeyFromPoint,
+  sharedSecretPoint,
+} from '@sviem/crypto/aes.ts'
 
 export { rng, rngPrecompile } from '@sviem/precompiles/rng.ts'
 export { hdfk, hdfkPrecompile } from '@sviem/precompiles/hkdf.ts'

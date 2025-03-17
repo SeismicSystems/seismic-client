@@ -1,10 +1,9 @@
 import { expect } from 'bun:test'
+import { createShieldedPublicClient } from 'seismic-viem'
+import { generateAesKey } from 'seismic-viem'
+import { compressPublicKey } from 'seismic-viem'
 import { Chain, hexToBytes, http, recoverMessageAddress } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-
-import { createShieldedPublicClient } from '@sviem/client.ts'
-import { generateAesKey } from '@sviem/crypto/aes.ts'
-import { compressPublicKey } from '@sviem/crypto/secp.ts'
 
 export type PublicClientConfig = {
   chain: Chain

@@ -1,7 +1,5 @@
+import { createShieldedPublicClient, seismicDevnet } from 'seismic-viem'
 import { webSocket } from 'viem'
-
-import { seismicDevnet } from '@sviem/chain.ts'
-import { createShieldedPublicClient } from '@sviem/client.ts'
 
 export const testWsConnection = async () => {
   const client = await createShieldedPublicClient({

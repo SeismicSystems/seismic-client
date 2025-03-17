@@ -5,7 +5,7 @@
   "compilerOptions": {
     "paths": {
       "@sviem-tests/*": ["./src/*"],
-      "seismic-viem": ["../seismic-viem/src/*"]
+      "seismic-viem": ["../seismic-viem/src"]
     },
     "composite": true,
     "baseUrl": ".",
