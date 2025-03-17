@@ -1,7 +1,10 @@
 import { expect } from 'bun:test'
-import { SeismicTxExtras, serializeSeismicTransaction } from 'seismic-viem'
-import { createShieldedWalletClient } from 'seismic-viem'
-import { compressPublicKey } from 'seismic-viem'
+import {
+  SeismicTxExtras,
+  compressPublicKey,
+  createShieldedWalletClient,
+  serializeSeismicTransaction,
+} from 'seismic-viem'
 import { http } from 'viem'
 import type { Account, Chain, Hex, TransactionSerializableLegacy } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'

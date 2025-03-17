@@ -5,8 +5,7 @@
   "compilerOptions": {
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
-      "@sreact/*": ["./src/*"],
-      "seismic-viem": ["../seismic-viem/src"]
+      "@sreact/*": ["./src/*"]
     },
     "baseUrl": ".",
     "rootDir": "../..",

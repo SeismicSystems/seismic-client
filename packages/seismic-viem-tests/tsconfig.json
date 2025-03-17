@@ -4,8 +4,7 @@
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
-      "@sviem-tests/*": ["./src/*"],
-      "seismic-viem": ["../seismic-viem/src"]
+      "@sviem-tests/*": ["./src/*"]
     },
     "composite": true,
     "baseUrl": ".",
