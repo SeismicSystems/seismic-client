@@ -26,11 +26,11 @@ const viemSidebar = [
         text: 'Actions',
         items: [
           {
-            text: 'signedReadContract',
+            text: 'Signed Read',
             link: '/viem/contract/signed-read',
           },
           {
-            text: 'shieldedWriteContract',
+            text: 'Shielded Write',
             link: '/viem/contract/shielded-write',
           },
         ],
