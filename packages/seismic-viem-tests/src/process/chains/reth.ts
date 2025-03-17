@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs'
 
-import { killProcess, runProcess } from '@sviem/process/manage.ts'
+import { killProcess, runProcess } from '@sviem-tests/process/manage.ts'
 import {
   NodeProcess,
   NodeProcessOptions,
   SpawnedNode,
   parseVerbosity,
-} from '@sviem/process/node.ts'
+} from '@sviem-tests/process/node.ts'
 
 type RethProcessOptions = NodeProcessOptions & {
   dev?: boolean
