@@ -1,10 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": [
-    "src/**/*",
-    "../../packages/seismic-viem/src/**/*",
-    "../../packages/seismic-viem/process"
-  ],
+  "include": ["src/**/*", "../../packages/seismic-viem/src/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
