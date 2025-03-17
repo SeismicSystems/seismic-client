@@ -1,5 +1,4 @@
 import { afterAll, describe, test } from 'bun:test'
-import { http } from 'viem'
 
 import { envChain, setupNode } from '@sviem-tests/process/node.ts'
 import { testRng } from '@sviem-tests/tests/precompiles.ts'
@@ -9,7 +8,6 @@ import { testSecp256k1 } from '@sviem-tests/tests/precompiles.ts'
 import { testHkdfString } from '@sviem-tests/tests/precompiles.ts'
 import { testEcdh } from '@sviem-tests/tests/precompiles.ts'
 import { testRngWithPers } from '@sviem-tests/tests/precompiles.ts'
-import { createShieldedPublicClient } from '@sviem/client.ts'
 
 const chain = envChain()
 
@@ -17,11 +15,6 @@ const { url, exitProcess } = await setupNode(chain, {
   // Running on a different port because contract.test.ts uses 8545
   port: 8548,
   silent: true,
-})
-
-const publicClient = createShieldedPublicClient({
-  chain,
-  transport: http(url),
 })
 
 describe('Seismic Precompiles', async () => {
