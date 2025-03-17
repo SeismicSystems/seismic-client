@@ -76,6 +76,7 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   transaction: TransactionSerializableSeismic,
   signature?: Signature
 ): Hex => {
+  console.log('transaction', transaction)
   const {
     chainId,
     nonce,
@@ -93,7 +94,8 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     throw new Error('Seismic transactions require chainId argument')
   }
 
-  const rlpEncoded = toRlp([
+  // Log all transaction properties for debugging
+  let rlpArray = [
     toHex(chainId),
     nonce ? toHex(nonce) : '0x',
     gasPrice ? toHex(gasPrice) : '0x',
@@ -101,18 +103,40 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     to ?? '0x',
     value ? toHex(value) : '0x',
     encryptionPubkey ?? '0x',
-    encryptionNonce ? toHex(encryptionNonce) : '0x',
+    encryptionNonce ?? '0x',
     messageVersion ? toHex(messageVersion) : '0x',
     data ?? '0x',
     ...toYParitySignatureArray(
       transaction as TransactionSerializableGeneric,
       signature
     ),
-  ])
+  ]
+
+  console.log('rlpArray', rlpArray)
+
+  console.log('RLP Array elements:')
+  console.log('0 (chainId):', rlpArray[0])
+  console.log('1 (nonce):', rlpArray[1])
+  console.log('2 (gasPrice):', rlpArray[2])
+  console.log('3 (gas):', rlpArray[3])
+  console.log('4 (to):', rlpArray[4])
+  console.log('5 (value):', rlpArray[5])
+  console.log('6 (encryptionPubkey):', rlpArray[6])
+  console.log('7 (encryptionNonce):', rlpArray[7])
+  console.log('8 (messageVersion):', rlpArray[8])
+  console.log('9 (data):', rlpArray[9])
+  if (rlpArray.length > 10) {
+    console.log('10+ (signature):', rlpArray.slice(10))
+  }
+
+  const rlpEncoded = toRlp(rlpArray)
+  console.log('rlpEncoded', rlpEncoded)
+
   const encodedTx = concatHex([
     toHex(74), // seismic tx type '0x4a'
     rlpEncoded,
   ])
+  console.log('encodedTx', encodedTx)
 
   return encodedTx
 }

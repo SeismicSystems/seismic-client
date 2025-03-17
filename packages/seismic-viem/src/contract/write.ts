@@ -100,6 +100,7 @@ export async function shieldedWriteContract<
   const aesCipher = new AesGcmCrypto(aesKey)
 
   const encryptionNonce = randomEncryptionNonce()
+  console.log('generated encryptionNonce', encryptionNonce)
   const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
 
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
