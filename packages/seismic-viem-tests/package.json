@@ -1,0 +1,11 @@
+{
+  "name": "seismic-viem-tests",
+  "version": "0.0.1",
+  "type": "module",
+  "devDependencies": {
+    "seismic-viem": "workspace:*",
+    "viem": "2.x",
+    "terminate": "^2.8.0",
+    "dotenv": "^16.4.7"
+  }
+}

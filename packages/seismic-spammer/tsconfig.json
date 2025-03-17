@@ -3,18 +3,19 @@
   "include": [
     "src/**/*",
     "../seismic-viem/src/**/*",
-    "../../tests/seismic-viem/src/**/*"
+    "../seismic-viem-tests/src/**/*"
   ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
-      "@test/*": ["../../tests/seismic-viem/src/*"]
+      "@sviem-tests/*": ["../seismic-viem-tests/src/*"]
     },
     "composite": true,
     "baseUrl": ".",
     "rootDir": "../..",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "module": "ES2015",
     "moduleResolution": "bundler"
   }
 }

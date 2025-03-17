@@ -1,9 +1,9 @@
 import type { Chain } from 'viem'
 
-import { sanvil, seismicDevnet } from '@sviem/chain'
-import { setupAnvilNode } from '@test/process/chains/anvil'
-import { setupRethNode } from '@test/process/chains/reth'
-import { ServerProcess } from '@test/process/manage'
+import { setupAnvilNode } from '@sviem-tests/process/chains/anvil.ts'
+import { setupRethNode } from '@sviem-tests/process/chains/reth.ts'
+import { ServerProcess } from '@sviem-tests/process/manage.ts'
+import { sanvil, seismicDevnet } from '@sviem/chain.ts'
 
 export type NodeProcessOptions = {
   port?: number

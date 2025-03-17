@@ -1,12 +1,12 @@
 import type { ChildProcess } from 'node:child_process'
 
-import { killProcess, runProcess } from '@test/process/manage'
+import { killProcess, runProcess } from '@sviem-tests/process/manage.ts'
 import {
   NodeProcess,
   NodeProcessOptions,
   SpawnedNode,
   parseVerbosity,
-} from '@test/process/node'
+} from '@sviem-tests/process/node.ts'
 
 const DEFAULT_PORT = 8545
 
