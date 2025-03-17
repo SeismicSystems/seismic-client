@@ -19,6 +19,7 @@ const runRethLocally = async (
 ): Promise<NodeProcess> => {
   const {
     port = 8545,
+    wsPort,
     silent = true,
     dev = true,
     waitMs = 10_000,
@@ -33,6 +34,7 @@ const runRethLocally = async (
     : []
   const quietArg = silent ? ['--quiet'] : []
   const httpArgs = port ? ['--http', '--http.port', port.toString()] : []
+  const wsArgs = wsPort ? ['--ws', '--ws.port', wsPort.toString()] : []
   const verbosityArg = parseVerbosity(verbosity)
   const enclaveMockServerArg = enclaveMockServer
     ? ['--enclave.mock-server']
@@ -65,6 +67,7 @@ const runRethLocally = async (
       ...devArg,
       ...devBlockMaxTxArg,
       ...httpArgs,
+      ...wsArgs,
       ...enclaveMockServerArg,
       ...dataDirArg,
       ...staticFilesArg,
@@ -84,11 +87,11 @@ const runRethLocally = async (
 
 export const setupRethNode = async ({
   port = 8545,
+  ...rest
 }: NodeProcessOptions = {}): Promise<SpawnedNode> => {
   const rethProcess = await runRethLocally({
     port,
-    silent: false,
-    verbosity: 0,
+    ...rest,
   })
   return {
     url: rethProcess.url,
