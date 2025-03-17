@@ -86,5 +86,3 @@ export type {
   NodeProcessOptions,
   SpawnedNode,
 } from '@sviem/process/node.ts'
-
-export { testSeismicTxEncoding } from '@sviem/tests/encoding.ts'

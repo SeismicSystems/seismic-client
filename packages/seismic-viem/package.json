@@ -13,6 +13,11 @@
       "import": "./dist/_esm/index.js",
       "types": "./dist/_types/index.d.ts"
     },
+    "./tests": {
+      "require": "./dist/_cjs/tests/index.js",
+      "import": "./dist/_esm/tests/index.js",
+      "types": "./dist/_types/tests/index.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": [
