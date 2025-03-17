@@ -8,7 +8,7 @@
     "outDir": "./dist/_types",
     "tsBuildInfoFile": "./dist/_types/.tsbuildinfo",
     "rootDir": "./src",
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
       "@sreact/*": ["./*"]

@@ -3,7 +3,6 @@
   "include": ["src/**/*.ts"],
   "compilerOptions": {
     "paths": {
-      "@sviem/*": ["../seismic-viem/src/*"],
       "@sviem-tests/*": ["./src/*"]
     },
     "noEmit": false,
@@ -12,7 +11,7 @@
     "declarationMap": true,
     "outDir": "./dist/_types",
     "tsBuildInfoFile": "./dist/_types/.tsbuildinfo",
-    "rootDir": "../..",
+    "rootDir": "./src",
     "baseUrl": "."
   }
 }

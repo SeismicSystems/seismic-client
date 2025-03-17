@@ -1,10 +1,16 @@
-import { createShieldedPublicClient, seismicDevnet } from 'seismic-viem'
-import { webSocket } from 'viem'
+import { createShieldedPublicClient } from 'seismic-viem'
+import { Chain, webSocket } from 'viem'
 
-export const testWsConnection = async () => {
+export const testWsConnection = async ({
+  chain,
+  wsUrl,
+}: {
+  chain: Chain
+  wsUrl: string
+}) => {
   const client = await createShieldedPublicClient({
-    chain: seismicDevnet,
-    transport: webSocket('wss://node-1.seismicdev.net/ws'),
+    chain,
+    transport: webSocket(wsUrl),
   })
   const pk = await client.getTeePublicKey()
   console.log(pk)
