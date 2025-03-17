@@ -5,7 +5,9 @@
     "../seismic-viem/src/**/*",
     "../../tests/seismic-viem/src/**/*",
     "../seismic-viem-tests/src/tests/encoding.ts",
-    "../seismic-viem-tests/src/index.ts"
+    "../seismic-viem-tests/src/index.ts",
+    "../seismic-viem-tests/src/tests/contract/abi.ts",
+    "../seismic-viem-tests/src/tests/contract/bytecode.ts"
   ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
