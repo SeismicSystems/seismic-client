@@ -1,10 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": [
-    "src/**/*",
-    "../seismic-viem-tests/src/tests/encoding.ts",
-    "../seismic-viem-tests/src/index.ts"
-  ],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {

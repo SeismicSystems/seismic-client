@@ -1,19 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": [
-    "src/**/*",
-    "../seismic-viem/src/**/*",
-    "../../tests/seismic-viem/src/**/*",
-    "../seismic-viem-tests/src/tests/encoding.ts",
-    "../seismic-viem-tests/src/index.ts",
-    "../seismic-viem-tests/src/tests/contract/abi.ts",
-    "../seismic-viem-tests/src/tests/contract/bytecode.ts"
-  ],
+  "include": ["src/**/*", "../seismic-viem/src/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
-      "@test/*": ["../../tests/seismic-viem/src/*"],
       "@sreact/*": ["./src/*"],
       "seismic-viem": ["../seismic-viem/src"]
     },
