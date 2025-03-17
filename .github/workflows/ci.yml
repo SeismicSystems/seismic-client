@@ -55,6 +55,8 @@ jobs:
         run: touch .env
       - name: Install dependencies
         run: bun install
+      - name: build seismic-viem
+        run: bun build:viem
       - name: Test anvil
         run: bun viem:test:anvil
 
@@ -84,6 +86,8 @@ jobs:
         run: touch .env
       - name: Install dependencies
         run: bun install
+      - name: build seismic-viem
+        run: bun build:viem
       - name: Clear reth files
         run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
       - name: Test devnet
