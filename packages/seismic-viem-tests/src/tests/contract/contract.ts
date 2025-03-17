@@ -1,15 +1,15 @@
 import { expect } from 'bun:test'
+import {
+  createShieldedPublicClient,
+  createShieldedWalletClient,
+  getShieldedContract,
+  stringifyBigInt,
+} from 'seismic-viem'
 import { Account, Chain } from 'viem'
 import { http } from 'viem'
 
 import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
 import { bytecode } from '@sviem-tests/tests/contract/bytecode.ts'
-import {
-  createShieldedPublicClient,
-  createShieldedWalletClient,
-} from '@sviem/client.ts'
-import { getShieldedContract } from '@sviem/contract/contract.ts'
-import { stringifyBigInt } from '@sviem/utils.ts'
 
 type ContractTestArgs = {
   chain: Chain

@@ -7,7 +7,7 @@ export type {
 
 export { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
 export { testSeismicTx } from '@sviem-tests/tests/contract/contract.ts'
-export { testAesKeygen as testAes } from '@sviem-tests/tests/aesKeygen.ts'
+export { testAesKeygen } from '@sviem-tests/tests/aesKeygen.ts'
 export { testWsConnection } from '@sviem-tests/tests/ws.ts'
 export {
   testSeismicCallTypedData,

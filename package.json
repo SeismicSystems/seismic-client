@@ -25,7 +25,9 @@
     "viem:test:anvil": "bun run --cwd tests/seismic-viem test:anvil",
     "viem:test:devnet": "bun run --cwd tests/seismic-viem test:devnet",
     "react:build": "bun run --cwd packages/seismic-react build",
-    "react:publish": "npm publish -w packages/seismic-react"
+    "react:publish": "npm publish -w packages/seismic-react",
+    "tests:build": "bun run --cwd packages/seismic-viem-tests build",
+    "tests:publish": "npm publish -w packages/seismic-viem-tests"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
