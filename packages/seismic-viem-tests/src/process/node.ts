@@ -7,7 +7,7 @@ import { ServerProcess } from '@sviem-tests/process/manage.ts'
 
 export type NodeProcessOptions = {
   port?: number
-  wsPort?: number
+  ws?: boolean
   silent?: boolean
   waitMs?: number
   verbosity?: number

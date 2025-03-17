@@ -19,7 +19,7 @@ const runRethLocally = async (
 ): Promise<NodeProcess> => {
   const {
     port = 8545,
-    wsPort,
+    ws = false,
     silent = true,
     dev = true,
     waitMs = 10_000,
@@ -34,7 +34,7 @@ const runRethLocally = async (
     : []
   const quietArg = silent ? ['--quiet'] : []
   const httpArgs = port ? ['--http', '--http.port', port.toString()] : []
-  const wsArgs = wsPort ? ['--ws', '--ws.port', wsPort.toString()] : []
+  const wsArgs = ws ? ['--ws', '--ws.port', port.toString()] : []
   const verbosityArg = parseVerbosity(verbosity)
   const enclaveMockServerArg = enclaveMockServer
     ? ['--enclave.mock-server']

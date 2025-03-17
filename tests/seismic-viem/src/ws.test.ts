@@ -5,7 +5,7 @@ import { testWsConnection } from '@sviem-tests/tests/ws.ts'
 
 const chain = envChain()
 const port = 8549
-const { exitProcess } = await setupNode(chain, { port })
+const { exitProcess } = await setupNode(chain, { port, ws: true })
 
 describe('ws', () => {
   it('should connect to the ws', () =>
