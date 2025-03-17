@@ -13,17 +13,22 @@ import { stringifyBigInt } from '@sviem/utils.ts'
 
 type ContractTestArgs = {
   chain: Chain
+  url: string
   account: Account
 }
 
-export const testSeismicTx = async ({ chain, account }: ContractTestArgs) => {
+export const testSeismicTx = async ({
+  chain,
+  url,
+  account,
+}: ContractTestArgs) => {
   const publicClient = createShieldedPublicClient({
     chain,
-    transport: http(),
+    transport: http(url),
   })
   const walletClient = await createShieldedWalletClient({
     chain,
-    transport: http(),
+    transport: http(url),
     account,
   })
   const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
