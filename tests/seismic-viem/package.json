@@ -1,5 +1,5 @@
 {
-  "name": "seismic-viem-tests",
+  "name": "seismic-viem-test-runner",
   "private": true,
   "type": "module",
   "scripts": {
