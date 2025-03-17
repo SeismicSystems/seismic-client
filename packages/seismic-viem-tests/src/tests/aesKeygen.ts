@@ -1,12 +1,11 @@
 import { expect } from 'bun:test'
-import type { Hex } from 'viem'
-import { bytesToHex } from 'viem/utils'
-
 import {
   deriveAesKey,
   sharedKeyFromPoint,
   sharedSecretPoint,
-} from '@sviem/crypto/aes.ts'
+} from 'seismic-viem'
+import type { Hex } from 'viem'
+import { bytesToHex } from 'viem/utils'
 
 export const testAesKeygen = () => {
   const pk =

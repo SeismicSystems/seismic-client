@@ -1,12 +1,13 @@
+import { sanvil, seismicDevnet } from 'seismic-viem'
 import type { Chain } from 'viem'
 
 import { setupAnvilNode } from '@sviem-tests/process/chains/anvil.ts'
 import { setupRethNode } from '@sviem-tests/process/chains/reth.ts'
 import { ServerProcess } from '@sviem-tests/process/manage.ts'
-import { sanvil, seismicDevnet } from '@sviem/chain.ts'
 
 export type NodeProcessOptions = {
   port?: number
+  ws?: boolean
   silent?: boolean
   waitMs?: number
   verbosity?: number

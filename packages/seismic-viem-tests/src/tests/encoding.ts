@@ -1,13 +1,13 @@
 import { expect } from 'bun:test'
+import { serializeSeismicTransaction } from 'seismic-viem'
+import type { SeismicTxExtras } from 'seismic-viem'
+import { createShieldedWalletClient } from 'seismic-viem'
+import { compressPublicKey } from 'seismic-viem'
 import { http } from 'viem'
 import type { Account, Chain, Hex, TransactionSerializableLegacy } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { prepareTransactionRequest } from 'viem/actions'
 import { anvil } from 'viem/chains'
-
-import { SeismicTxExtras, serializeSeismicTransaction } from '@sviem/chain.ts'
-import { createShieldedWalletClient } from '@sviem/client.ts'
-import { compressPublicKey } from '@sviem/crypto/secp.ts'
 
 type EncodingParams = {
   chain: Chain
