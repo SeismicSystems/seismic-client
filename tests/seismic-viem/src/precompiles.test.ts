@@ -19,7 +19,7 @@ beforeAll(async () => {
   loadDotenv()
   chain = envChain()
   const node = await setupNode(chain, {
-    port: 8548,
+    port: 8548, // contract.test.ts uses 8545
     silent: true,
   })
   url = node.url
