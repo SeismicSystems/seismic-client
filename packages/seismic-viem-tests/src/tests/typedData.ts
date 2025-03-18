@@ -1,7 +1,10 @@
 import { expect } from 'bun:test'
-import { createShieldedWalletClient } from 'seismic-viem'
-import { AesGcmCrypto } from 'seismic-viem'
-import { signSeismicTxTypedData } from 'seismic-viem'
+import {
+  AesGcmCrypto,
+  createShieldedWalletClient,
+  randomEncryptionNonce,
+  signSeismicTxTypedData,
+} from 'seismic-viem'
 import { http } from 'viem'
 import type { Account, Chain, TransactionSerializableLegacy } from 'viem'
 import type { Hex } from 'viem'
@@ -35,7 +38,7 @@ export const testSeismicCallTypedData = async ({
 
   const plaintext = '0x68656c6c6f20776f726c64'
   const aes = new AesGcmCrypto(client.getEncryption())
-  const encryptionNonce = '0x123'
+  const encryptionNonce = randomEncryptionNonce
   const encrypted = await aes.encrypt(plaintext, encryptionNonce)
 
   const baseTx: TransactionSerializableLegacy = {
@@ -82,7 +85,7 @@ export const testSeismicTxTypedData = async ({
   const nonce = await client.getTransactionCount({
     address: account.address,
   })
-  const encryptionNonce = '0x123'
+  const encryptionNonce = randomEncryptionNonce()
   const baseTx: TransactionSerializableLegacy = {
     to: recipientAddress,
     chainId: chain.id,
