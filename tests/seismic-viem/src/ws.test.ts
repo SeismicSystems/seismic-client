@@ -1,16 +1,36 @@
-import { describe, it } from 'bun:test'
-import { webSocket } from 'viem'
+import { afterAll, beforeAll, describe, test } from 'bun:test'
+import { Chain } from 'viem'
 
-import { seismicDevnet } from '@sviem/chain.ts'
-import { createShieldedPublicClient } from '@sviem/client.ts'
+import { buildNode, envChain, setupNode } from '@sviem-tests/index.ts'
+import { testWsConnection } from '@sviem-tests/tests/ws.ts'
+import { loadDotenv } from '@test/env.ts'
+
+let chain: Chain
+let port: number
+let exitProcess: () => Promise<void>
+
+beforeAll(async () => {
+  loadDotenv()
+  chain = envChain()
+  port = 8549
+  await buildNode(chain)
+  const node = await setupNode(chain, { port, ws: true })
+  exitProcess = node.exitProcess
+})
 
 describe('ws', () => {
-  it('should connect to the ws', async () => {
-    const client = await createShieldedPublicClient({
-      chain: seismicDevnet,
-      transport: webSocket('wss://node-1.seismicdev.net/ws'),
-    })
-    const pk = await client.getTeePublicKey()
-    console.log(pk)
-  })
+  test(
+    'should connect to the ws',
+    async () => {
+      await testWsConnection({
+        chain,
+        wsUrl: `ws://localhost:${port}`,
+      })
+    },
+    { timeout: 20_000 }
+  )
+})
+
+afterAll(async () => {
+  await exitProcess()
 })

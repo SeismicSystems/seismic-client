@@ -12,8 +12,11 @@ export {
   seismicDevnet,
   localSeismicDevnet,
   createSeismicDevnet,
+  serializeSeismicTransaction,
   seismicChainFormatters,
 } from '@sviem/chain.ts'
+
+export { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 
 export { getShieldedContract } from '@sviem/contract/contract.ts'
 export { signedReadContract } from '@sviem/contract/read.ts'
@@ -57,6 +60,14 @@ export {
 } from '@sviem/explorer.ts'
 
 export { stringifyBigInt } from '@sviem/utils.ts'
+export { compressPublicKey } from '@sviem/crypto/secp.ts'
+export {
+  AesGcmCrypto,
+  generateAesKey,
+  deriveAesKey,
+  sharedKeyFromPoint,
+  sharedSecretPoint,
+} from '@sviem/crypto/aes.ts'
 
 export { rng, rngPrecompile } from '@sviem/precompiles/rng.ts'
 export { hdfk, hdfkPrecompile } from '@sviem/precompiles/hkdf.ts'

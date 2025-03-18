@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs'
 
-import { killProcess, runProcess } from '@test/process/manage.ts'
+import { killProcess, runProcess } from '@sviem-tests/process/manage.ts'
 import {
   NodeProcess,
   NodeProcessOptions,
   SpawnedNode,
   parseVerbosity,
-} from '@test/process/node.ts'
+} from '@sviem-tests/process/node.ts'
 
 type RethProcessOptions = NodeProcessOptions & {
   dev?: boolean
@@ -14,14 +14,30 @@ type RethProcessOptions = NodeProcessOptions & {
   enclaveMockServer?: boolean
 }
 
+export const buildReth = async (srethDir: string) => {
+  if (!srethDir || !existsSync(srethDir)) {
+    return
+  }
+  const buildProcess = await runProcess('cargo', {
+    args: ['build', '--bin', 'seismic-reth'],
+    cwd: srethDir,
+    stdio: 'ignore',
+    waitMs: 0,
+  })
+  await buildProcess.on('exit', () => {
+    console.log('seismic-reth built')
+  })
+}
+
 const runRethLocally = async (
   options: RethProcessOptions = {}
 ): Promise<NodeProcess> => {
   const {
     port = 8545,
+    ws = false,
     silent = true,
     dev = true,
-    waitMs = 10_000,
+    waitMs = 5_000,
     verbosity,
     devBlockMaxTx = 1,
     enclaveMockServer = true,
@@ -33,6 +49,7 @@ const runRethLocally = async (
     : []
   const quietArg = silent ? ['--quiet'] : []
   const httpArgs = port ? ['--http', '--http.port', port.toString()] : []
+  const wsArgs = ws ? ['--ws', '--ws.port', port.toString()] : []
   const verbosityArg = parseVerbosity(verbosity)
   const enclaveMockServerArg = enclaveMockServer
     ? ['--enclave.mock-server']
@@ -55,6 +72,7 @@ const runRethLocally = async (
     throw new Error(`Could not find directory at ${srethDir}`)
   }
 
+  await buildReth(srethDir)
   const srethProcess = await runProcess('cargo', {
     args: [
       'run',
@@ -65,6 +83,7 @@ const runRethLocally = async (
       ...devArg,
       ...devBlockMaxTxArg,
       ...httpArgs,
+      ...wsArgs,
       ...enclaveMockServerArg,
       ...dataDirArg,
       ...staticFilesArg,
@@ -84,11 +103,11 @@ const runRethLocally = async (
 
 export const setupRethNode = async ({
   port = 8545,
+  ...rest
 }: NodeProcessOptions = {}): Promise<SpawnedNode> => {
   const rethProcess = await runRethLocally({
     port,
-    silent: false,
-    verbosity: 0,
+    ...rest,
   })
   return {
     url: rethProcess.url,

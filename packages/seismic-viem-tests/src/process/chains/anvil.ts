@@ -1,14 +1,31 @@
 import type { ChildProcess } from 'node:child_process'
+import { existsSync } from 'node:fs'
 
-import { killProcess, runProcess } from '@test/process/manage.ts'
+import { killProcess, runProcess } from '@sviem-tests/process/manage.ts'
 import {
   NodeProcess,
   NodeProcessOptions,
   SpawnedNode,
   parseVerbosity,
-} from '@test/process/node.ts'
+} from '@sviem-tests/process/node.ts'
 
 const DEFAULT_PORT = 8545
+
+export const buildAnvil = async (sfoundryDir: string) => {
+  if (!sfoundryDir || !existsSync(sfoundryDir)) {
+    return
+  }
+
+  const buildProcess = await runProcess('cargo', {
+    args: ['build', '--bin', 'sanvil'],
+    cwd: sfoundryDir,
+    stdio: 'ignore',
+    waitMs: 0,
+  })
+  await buildProcess.on('exit', () => {
+    console.log('sanvil built')
+  })
+}
 
 const spawnAnvil = async (
   options: NodeProcessOptions = {}
@@ -32,9 +49,11 @@ const spawnAnvil = async (
     return runProcess('sanvil', {
       args,
       waitMs,
+      stdio: 'ignore',
     })
   }
 
+  await buildAnvil(sfoundryDir)
   return runProcess('cargo', {
     args: ['run', '--bin', 'sanvil', '--', ...args],
     cwd: sfoundryDir,
@@ -61,10 +80,9 @@ const runSanvil = async (
 
 export const setupAnvilNode = async ({
   port = 8545,
-  silent = false,
-  verbosity = 0,
+  ...rest
 }: NodeProcessOptions = {}): Promise<SpawnedNode> => {
-  const anvilProcess = await runSanvil({ port, silent, verbosity })
+  const anvilProcess = await runSanvil({ port, ...rest })
   const nodeUrl = anvilProcess.url
 
   const exitProcess = async () => {

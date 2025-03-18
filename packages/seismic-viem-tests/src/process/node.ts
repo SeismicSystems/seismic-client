@@ -1,12 +1,16 @@
+import { sanvil, seismicDevnet } from 'seismic-viem'
 import type { Chain } from 'viem'
 
-import { sanvil, seismicDevnet } from '@sviem/chain'
-import { setupAnvilNode } from '@test/process/chains/anvil'
-import { setupRethNode } from '@test/process/chains/reth'
-import { ServerProcess } from '@test/process/manage'
+import {
+  buildAnvil,
+  setupAnvilNode,
+} from '@sviem-tests/process/chains/anvil.ts'
+import { buildReth, setupRethNode } from '@sviem-tests/process/chains/reth.ts'
+import { ServerProcess } from '@sviem-tests/process/manage.ts'
 
 export type NodeProcessOptions = {
   port?: number
+  ws?: boolean
   silent?: boolean
   waitMs?: number
   verbosity?: number
@@ -56,6 +60,23 @@ export const setupNode = async (
       return setupAnvilNode({ port, ...rest })
     case seismicDevnet.id:
       return setupRethNode({ port, ...rest })
+    default:
+      throw new Error(`Unable to map Chain ${chain.id} to Backend`)
+  }
+}
+
+export const buildNode = async (chain: Chain) => {
+  switch (chain.id) {
+    case sanvil.id:
+      const sfoundryDir = process.env.SFOUNDRY_ROOT
+      if (sfoundryDir) {
+        return buildAnvil(sfoundryDir)
+      }
+    case seismicDevnet.id:
+      const srethDir = process.env.SRETH_ROOT
+      if (srethDir) {
+        return buildReth(srethDir)
+      }
     default:
       throw new Error(`Unable to map Chain ${chain.id} to Backend`)
   }

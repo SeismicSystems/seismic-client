@@ -10,9 +10,8 @@ import { createPublicClient, http, parseGwei } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { Chain } from 'viem/chains'
 
-import { contractABI } from '@test/contract/abi'
-import { bytecode } from '@test/contract/bytecode'
-import { getDeployedAddress } from '@test/utils'
+import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
+import { bytecode } from '@sviem-tests/tests/contract/bytecode.ts'
 
 const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
 
@@ -143,12 +142,11 @@ const testSeismicTx = async (
     gas: 210000n,
     gasPrice: parseGwei('20'),
   })
-  await publicClient.waitForTransactionReceipt({ hash: deployTx })
+  const deployReceipt = await publicClient.waitForTransactionReceipt({
+    hash: deployTx,
+  })
+  const deployedContractAddress = deployReceipt.contractAddress!
 
-  const deployedContractAddress = await getDeployedAddress(
-    publicClient,
-    fundedWalletClient.account.address
-  )
   console.info(`Deployed contract address: ${deployedContractAddress}`)
 
   const fundedSeismicContract = getShieldedContract({

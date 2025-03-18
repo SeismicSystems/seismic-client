@@ -8,12 +8,9 @@ const config: Config = defineConfig({
   title: 'Seismic Client',
   description: 'Build apps on the Seismic network',
   theme: {
-    variables: {
-      content: {
-        horizontalPadding: '200px',
-        verticalPadding: '20px',
-        width: 'min(100%, 2000px)',
-      },
+    accentColor: {
+      light: '#ff9318',
+      dark: '#ffc517',
     },
   },
   rootDir: '.',
@@ -32,11 +29,10 @@ const config: Config = defineConfig({
       link: 'https://x.com/SeismicSys',
     },
   ],
-  twoslash: {
-    compilerOptions: {
-      traceResolution: true,
-    },
-  },
+  topNav: [
+    { text: 'Viem', link: '/viem/intro' },
+    { text: 'React', link: '/react/intro' },
+  ],
 })
 
 export default config
