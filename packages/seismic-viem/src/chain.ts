@@ -76,7 +76,6 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   transaction: TransactionSerializableSeismic,
   signature?: Signature
 ): Hex => {
-  console.log('transaction', transaction)
   const {
     chainId,
     nonce,
@@ -112,31 +111,12 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     ),
   ]
 
-  console.log('rlpArray', rlpArray)
-
-  console.log('RLP Array elements:')
-  console.log('0 (chainId):', rlpArray[0])
-  console.log('1 (nonce):', rlpArray[1])
-  console.log('2 (gasPrice):', rlpArray[2])
-  console.log('3 (gas):', rlpArray[3])
-  console.log('4 (to):', rlpArray[4])
-  console.log('5 (value):', rlpArray[5])
-  console.log('6 (encryptionPubkey):', rlpArray[6])
-  console.log('7 (encryptionNonce):', rlpArray[7])
-  console.log('8 (messageVersion):', rlpArray[8])
-  console.log('9 (data):', rlpArray[9])
-  if (rlpArray.length > 10) {
-    console.log('10+ (signature):', rlpArray.slice(10))
-  }
-
   const rlpEncoded = toRlp(rlpArray)
-  console.log('rlpEncoded', rlpEncoded)
 
   const encodedTx = concatHex([
     toHex(74), // seismic tx type '0x4a'
     rlpEncoded,
   ])
-  console.log('encodedTx', encodedTx)
 
   return encodedTx
 }
@@ -218,8 +198,6 @@ export const seismicChainFormatters: ChainFormatters = {
         ...(seismicElements !== undefined && seismicElements),
         ...(chainId !== undefined && { chainId }),
       }
-
-      console.log(ret)
 
       return ret
     },
