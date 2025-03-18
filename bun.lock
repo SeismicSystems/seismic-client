@@ -30,7 +30,7 @@
         "@privy-io/react-auth": "^2.6.2",
         "@privy-io/wagmi": "^1.0.3",
         "@rainbow-me/rainbowkit": "^2.0.0",
-        "@tanstack/react-query": "^5.67.3",
+        "@tanstack/react-query": "^5.69.0",
         "@walletconnect/ethereum-provider": "^2.19.0",
         "react": "^19",
         "react-dom": "^19",
@@ -96,12 +96,12 @@
     },
     "packages/seismic-viem-tests": {
       "name": "seismic-viem-tests",
-      "version": "0.0.1-experimental.3",
+      "version": "0.0.4",
       "devDependencies": {
         "@types/bun": "^1.2.5",
         "bun": "^1.2.5",
         "dotenv": "^16.4.7",
-        "seismic-viem": "workspace:*",
+        "seismic-viem": "^1.0.27",
         "terminate": "^2.8.0",
         "viem": "2.x",
       },
@@ -110,6 +110,7 @@
       "name": "seismic-viem-test-runner",
       "devDependencies": {
         "dotenv": "^16.4.7",
+        "seismic-viem-tests": "workspace:*",
         "terminate": "^2.8.0",
       },
     },
@@ -673,9 +674,9 @@
 
     "@tailwindcss/vite": ["@tailwindcss/vite@4.0.7", "", { "dependencies": { "@tailwindcss/node": "4.0.7", "@tailwindcss/oxide": "4.0.7", "lightningcss": "^1.29.1", "tailwindcss": "4.0.7" }, "peerDependencies": { "vite": "^5.2.0 || ^6" } }, "sha512-GYx5sxArfIMtdZCsxfya3S/efMmf4RvfqdiLUozkhmSFBNUFnYVodatpoO/en4/BsOIGvq/RB6HwcTLn9prFnQ=="],
 
-    "@tanstack/query-core": ["@tanstack/query-core@5.67.3", "", {}, "sha512-pq76ObpjcaspAW4OmCbpXLF6BCZP2Zr/J5ztnyizXhSlNe7fIUp0QKZsd0JMkw9aDa+vxDX/OY7N+hjNY/dCGg=="],
+    "@tanstack/query-core": ["@tanstack/query-core@5.69.0", "", {}, "sha512-Kn410jq6vs1P8Nm+ZsRj9H+U3C0kjuEkYLxbiCyn3MDEiYor1j2DGVULqAz62SLZtUZ/e9Xt6xMXiJ3NJ65WyQ=="],
 
-    "@tanstack/react-query": ["@tanstack/react-query@5.67.3", "", { "dependencies": { "@tanstack/query-core": "5.67.3" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-u/n2HsQeH1vpZIOzB/w2lqKlXUDUKo6BxTdGXSMvNzIq5MHYFckRMVuFABp+QB7RN8LFXWV6X1/oSkuDq+MPIA=="],
+    "@tanstack/react-query": ["@tanstack/react-query@5.69.0", "", { "dependencies": { "@tanstack/query-core": "5.69.0" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-Ift3IUNQqTcaFa1AiIQ7WCb/PPy8aexZdq9pZWLXhfLcLxH0+PZqJ2xFImxCpdDZrFRZhLJrh76geevS5xjRhA=="],
 
     "@tanstack/react-virtual": ["@tanstack/react-virtual@3.13.4", "", { "dependencies": { "@tanstack/virtual-core": "3.13.4" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-jPWC3BXvVLHsMX67NEHpJaZ+/FySoNxFfBEiF4GBc1+/nVwdRm+UcSCYnKP3pXQr0eEsDpXi/PQZhNfJNopH0g=="],
 
