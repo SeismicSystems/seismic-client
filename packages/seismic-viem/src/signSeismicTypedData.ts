@@ -27,15 +27,15 @@ const seismicTxTypedData = <
   tx: TransactionSerializableSeismic,
   signedCall: boolean = false
 ): SignTypedDataParameters<typedData, primaryType, account> => {
-  if (!tx.chainId) {
+  if (tx.chainId === undefined) {
     throw new Error('Seismic transactions require chainId argument')
   }
 
-  if (!tx.encryptionPubkey) {
+  if (tx.encryptionPubkey === undefined) {
     throw new Error('Seismic transactions require encryptionPubkey argument')
   }
 
-  if (!tx.encryptionNonce) {
+  if (tx.encryptionNonce === undefined) {
     throw new Error('Seismic transactions require encryptionNonce argument')
   }
 
@@ -69,10 +69,10 @@ const seismicTxTypedData = <
         { name: 'to', type: 'address' },
         { name: 'value', type: 'uint256' },
         // compressed secp256k1 public key (33 bytes)
-        { name: 'encryptionPubkey', type: 'bytes' },
-        { name: 'encryptionNonce', type: 'uint64' },
-        { name: 'messageVersion', type: 'uint8' },
         { name: 'input', type: 'bytes' },
+        { name: 'encryptionPubkey', type: 'bytes' },
+        { name: 'encryptionNonce', type: 'uint128' },
+        { name: 'messageVersion', type: 'uint8' },
       ],
     },
     primaryType: 'TxSeismic',

@@ -223,6 +223,7 @@ export async function sendShieldedTransaction<
         client,
         request
       )) as TransactionSerializableSeismic
+
       if (account?.type === 'json-rpc') {
         const { typedData, signature } = await signSeismicTxTypedData(
           client,

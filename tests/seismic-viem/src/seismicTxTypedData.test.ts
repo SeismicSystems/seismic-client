@@ -12,10 +12,12 @@ import { envChain, setupNode } from '@test/process/node.ts'
 
 // Running on a different port because contract.test.ts uses 8545
 const chain = envChain()
-const { url, exitProcess } = await setupNode(chain, {
-  port: 8547,
-  silent: true,
-})
+// const { url, exitProcess } = await setupNode(chain, {
+//   port: 8547,
+//   silent: true,
+// })
+const url = 'http://localhost:8545'
+const exitProcess = () => {}
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
@@ -40,9 +42,10 @@ const testSeismicCallTypedData = async () => {
     address: testAccount.address,
   })
 
-  const toShaHash = '0x68656c6c6f20776f726c64'
+  const plaintext = '0x68656c6c6f20776f726c64'
   const aes = new AesGcmCrypto(client.getEncryption())
-  const encrypted = await aes.encrypt(toShaHash, nonce)
+  const encryptionNonce = 0n
+  const encrypted = await aes.encrypt(plaintext, encryptionNonce)
 
   const baseTx: TransactionSerializableLegacy = {
     nonce,
@@ -53,8 +56,13 @@ const testSeismicCallTypedData = async () => {
     gas: 30_000_000n,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
-  const encryptionNonce = 0n
-  const tx = { ...preparedTx, encryptionPubkey: ENC_PK, encryptionNonce }
+  const tx = {
+    ...preparedTx,
+    encryptionPubkey: ENC_PK,
+    encryptionNonce,
+  }
+
+  console.log('test tx', tx)
 
   // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
@@ -93,7 +101,11 @@ const testSeismicTxTypedData = async () => {
     nonce,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
-  const tx = { ...preparedTx, encryptionPubkey: ENC_PK }
+  const tx = {
+    ...preparedTx,
+    encryptionPubkey: ENC_PK,
+    encryptionNonce: 0n,
+  }
 
   // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
