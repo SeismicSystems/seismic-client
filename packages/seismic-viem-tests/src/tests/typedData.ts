@@ -60,7 +60,6 @@ export const testSeismicCallTypedData = async ({
   })
 
   const decrypted = await aes.decrypt(ciphertext, encryptionNonce)
-  console.log('decrypted', decrypted)
   expect(decrypted).toBe(plaintext)
 }
 
