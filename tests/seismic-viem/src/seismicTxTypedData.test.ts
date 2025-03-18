@@ -1,4 +1,5 @@
-import { afterAll, describe, test } from 'bun:test'
+import { afterAll, beforeAll, describe, test } from 'bun:test'
+import { Chain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 import { envChain, setupNode } from '@sviem-tests/process/node.ts'
@@ -6,13 +7,6 @@ import {
   testSeismicCallTypedData,
   testSeismicTxTypedData,
 } from '@sviem-tests/tests/typedData.ts'
-
-// Running on a different port because contract.test.ts uses 8545
-const chain = envChain()
-const { url, exitProcess } = await setupNode(chain, {
-  port: 8547,
-  silent: true,
-})
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
@@ -22,6 +16,21 @@ const ENC_PK =
 const TEST_ACCOUNT_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 const testAccount = privateKeyToAccount(TEST_ACCOUNT_PRIVATE_KEY)
+
+let chain: Chain
+let url: string
+let exitProcess: () => Promise<void>
+
+beforeAll(async () => {
+  // Running on a different port because contract.test.ts uses 8545
+  chain = envChain()
+  const node = await setupNode(chain, {
+    port: 8547,
+    silent: true,
+  })
+  url = node.url
+  exitProcess = node.exitProcess
+})
 
 describe('Seismic Transaction Encoding', async () => {
   test(

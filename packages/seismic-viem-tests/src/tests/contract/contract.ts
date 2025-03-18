@@ -17,6 +17,27 @@ type ContractTestArgs = {
   account: Account
 }
 
+/* Test Contract:
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
+
+contract SeismicCounter {
+    suint256 number;
+
+    function setNumber(suint256 newNumber) public {
+        number = newNumber;
+    }
+
+    function increment() public {
+        number++;
+    }
+
+    function isOdd() public view returns (bool) {
+        return number % 2 == 1;
+    }
+}
+*/
+
 export const testSeismicTx = async ({
   chain,
   url,

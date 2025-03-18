@@ -1,4 +1,4 @@
-export { envChain, setupNode } from '@sviem-tests/process/node.ts'
+export { envChain, setupNode, buildNode } from '@sviem-tests/process/node.ts'
 export type {
   NodeProcess,
   NodeProcessOptions,

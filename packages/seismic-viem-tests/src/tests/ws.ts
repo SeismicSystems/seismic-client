@@ -12,6 +12,7 @@ export const testWsConnection = async ({
     chain,
     transport: webSocket(wsUrl),
   })
-  const pk = await client.getTeePublicKey()
-  console.log(pk)
+  await client.getTeePublicKey()
+  const rpcClient = await client.transport.getRpcClient()
+  rpcClient.close()
 }

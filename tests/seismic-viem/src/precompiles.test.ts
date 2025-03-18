@@ -1,4 +1,5 @@
-import { afterAll, describe, test } from 'bun:test'
+import { afterAll, beforeAll, describe, test } from 'bun:test'
+import type { Chain } from 'viem'
 
 import { envChain, setupNode } from '@sviem-tests/process/node.ts'
 import { testRng } from '@sviem-tests/tests/precompiles.ts'
@@ -8,13 +9,21 @@ import { testSecp256k1 } from '@sviem-tests/tests/precompiles.ts'
 import { testHkdfString } from '@sviem-tests/tests/precompiles.ts'
 import { testEcdh } from '@sviem-tests/tests/precompiles.ts'
 import { testRngWithPers } from '@sviem-tests/tests/precompiles.ts'
+import { loadDotenv } from '@test/env.ts'
 
-const chain = envChain()
+let chain: Chain
+let url: string
+let exitProcess: () => Promise<void>
 
-const { url, exitProcess } = await setupNode(chain, {
-  // Running on a different port because contract.test.ts uses 8545
-  port: 8548,
-  silent: true,
+beforeAll(async () => {
+  loadDotenv()
+  chain = envChain()
+  const node = await setupNode(chain, {
+    port: 8548,
+    silent: true,
+  })
+  url = node.url
+  exitProcess = node.exitProcess
 })
 
 describe('Seismic Precompiles', async () => {
