@@ -22,6 +22,7 @@ export const buildReth = async (srethDir: string) => {
     args: ['build', '--bin', 'seismic-reth'],
     cwd: srethDir,
     stdio: 'ignore',
+    waitMs: 0,
   })
   await buildProcess.on('exit', () => {
     console.log('seismic-reth built')
@@ -36,7 +37,7 @@ const runRethLocally = async (
     ws = false,
     silent = true,
     dev = true,
-    waitMs = 10_000,
+    waitMs = 5_000,
     verbosity,
     devBlockMaxTx = 1,
     enclaveMockServer = true,
@@ -70,8 +71,8 @@ const runRethLocally = async (
   if (!existsSync(srethDir)) {
     throw new Error(`Could not find directory at ${srethDir}`)
   }
-  await buildReth(srethDir)
 
+  await buildReth(srethDir)
   const srethProcess = await runProcess('cargo', {
     args: [
       'run',

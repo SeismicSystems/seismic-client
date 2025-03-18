@@ -20,6 +20,7 @@ export const buildAnvil = async (sfoundryDir: string) => {
     args: ['build', '--bin', 'sanvil'],
     cwd: sfoundryDir,
     stdio: 'ignore',
+    waitMs: 0,
   })
   await buildProcess.on('exit', () => {
     console.log('sanvil built')
