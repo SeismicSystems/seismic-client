@@ -3,12 +3,14 @@ import { Chain } from 'viem'
 
 import { buildNode, envChain, setupNode } from '@sviem-tests/index.ts'
 import { testWsConnection } from '@sviem-tests/tests/ws.ts'
+import { loadDotenv } from '@test/env.ts'
 
 let chain: Chain
 let port: number
 let exitProcess: () => Promise<void>
 
 beforeAll(async () => {
+  loadDotenv()
   chain = envChain()
   port = 8549
   await buildNode(chain)
