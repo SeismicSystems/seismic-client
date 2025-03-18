@@ -14,6 +14,20 @@ type RethProcessOptions = NodeProcessOptions & {
   enclaveMockServer?: boolean
 }
 
+export const buildReth = async (srethDir: string) => {
+  if (!srethDir || !existsSync(srethDir)) {
+    return
+  }
+  const buildProcess = await runProcess('cargo', {
+    args: ['build', '--bin', 'seismic-reth'],
+    cwd: srethDir,
+    stdio: 'ignore',
+  })
+  await buildProcess.on('exit', () => {
+    console.log('seismic-reth built')
+  })
+}
+
 const runRethLocally = async (
   options: RethProcessOptions = {}
 ): Promise<NodeProcess> => {
@@ -56,15 +70,7 @@ const runRethLocally = async (
   if (!existsSync(srethDir)) {
     throw new Error(`Could not find directory at ${srethDir}`)
   }
-
-  const buildProcess = await runProcess('cargo', {
-    args: ['build', '--bin', 'seismic-reth'],
-    cwd: srethDir,
-    stdio: 'ignore',
-  })
-  await buildProcess.on('exit', () => {
-    console.log('seismic-reth built')
-  })
+  await buildReth(srethDir)
 
   const srethProcess = await runProcess('cargo', {
     args: [
