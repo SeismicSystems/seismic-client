@@ -38,7 +38,7 @@ export const testSeismicCallTypedData = async ({
 
   const plaintext = '0x68656c6c6f20776f726c64'
   const aes = new AesGcmCrypto(client.getEncryption())
-  const encryptionNonce = randomEncryptionNonce
+  const encryptionNonce = randomEncryptionNonce()
   const encrypted = await aes.encrypt(plaintext, encryptionNonce)
 
   const baseTx: TransactionSerializableLegacy = {
