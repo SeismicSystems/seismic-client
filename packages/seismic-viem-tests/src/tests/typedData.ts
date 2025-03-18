@@ -7,8 +7,6 @@ import type { Account, Chain, TransactionSerializableLegacy } from 'viem'
 import type { Hex } from 'viem'
 import { parseEther } from 'viem/utils'
 
-import { randomEncryptionNonce } from '../../../seismic-viem/src/crypto/nonce.ts'
-
 type TestSeismicCallTypeDataArgs = {
   chain: Chain
   account: Account
@@ -37,7 +35,7 @@ export const testSeismicCallTypedData = async ({
 
   const plaintext = '0x68656c6c6f20776f726c64'
   const aes = new AesGcmCrypto(client.getEncryption())
-  const encryptionNonce = randomEncryptionNonce()
+  const encryptionNonce = '0x123'
   const encrypted = await aes.encrypt(plaintext, encryptionNonce)
 
   const baseTx: TransactionSerializableLegacy = {
@@ -84,7 +82,7 @@ export const testSeismicTxTypedData = async ({
   const nonce = await client.getTransactionCount({
     address: account.address,
   })
-  const encryptionNonce = randomEncryptionNonce()
+  const encryptionNonce = '0x123'
   const baseTx: TransactionSerializableLegacy = {
     to: recipientAddress,
     chainId: chain.id,
