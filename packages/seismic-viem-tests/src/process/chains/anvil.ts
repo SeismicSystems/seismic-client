@@ -32,6 +32,7 @@ const spawnAnvil = async (
     return runProcess('sanvil', {
       args,
       waitMs,
+      stdio: 'ignore',
     })
   }
 

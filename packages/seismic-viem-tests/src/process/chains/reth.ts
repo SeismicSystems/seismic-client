@@ -60,6 +60,7 @@ const runRethLocally = async (
   const buildProcess = await runProcess('cargo', {
     args: ['build', '--bin', 'seismic-reth'],
     cwd: srethDir,
+    stdio: 'ignore',
   })
   await buildProcess.on('exit', () => {
     console.log('seismic-reth built')

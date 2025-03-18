@@ -1,4 +1,4 @@
-import type { ChildProcess } from 'node:child_process'
+import type { ChildProcess, StdioOptions } from 'node:child_process'
 import { spawn } from 'node:child_process'
 import terminate from 'terminate/promise'
 
@@ -8,6 +8,7 @@ type RunProcessOptions = {
   args?: readonly string[]
   waitMs?: number
   cwd?: string
+  stdio?: StdioOptions
 }
 
 /**
@@ -17,10 +18,10 @@ export const runProcess = async (
   command: string,
   options: RunProcessOptions = {}
 ): Promise<ChildProcess> => {
-  const { args = [], waitMs = 100, cwd } = options
+  const { args = [], waitMs = 100, cwd, stdio = 'inherit' } = options
   const process = spawn(command, args, {
     cwd,
-    stdio: 'inherit',
+    stdio,
   })
 
   await new Promise((resolve) => {
