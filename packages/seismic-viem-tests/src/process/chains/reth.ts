@@ -57,6 +57,14 @@ const runRethLocally = async (
     throw new Error(`Could not find directory at ${srethDir}`)
   }
 
+  const buildProcess = await runProcess('cargo', {
+    args: ['build', '--bin', 'seismic-reth'],
+    cwd: srethDir,
+  })
+  await buildProcess.on('exit', () => {
+    console.log('seismic-reth built')
+  })
+
   const srethProcess = await runProcess('cargo', {
     args: [
       'run',

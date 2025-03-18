@@ -35,6 +35,13 @@ const spawnAnvil = async (
     })
   }
 
+  const buildProcess = await runProcess('cargo', {
+    args: ['build', '--bin', 'sanvil'],
+    cwd: sfoundryDir,
+  })
+  await buildProcess.on('exit', () => {
+    console.log('sanvil built')
+  })
   return runProcess('cargo', {
     args: ['run', '--bin', 'sanvil', '--', ...args],
     cwd: sfoundryDir,
