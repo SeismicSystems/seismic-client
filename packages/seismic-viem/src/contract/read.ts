@@ -171,6 +171,7 @@ export async function signedReadContract<
   }
   const { data: encryptedData } = await signedCall(client, request)
   const data = await aesCipher.decrypt(encryptedData, encryptionNonce)
+  console.log('decrypted data:', data)
   return decodeFunctionResult({
     abi,
     args,
