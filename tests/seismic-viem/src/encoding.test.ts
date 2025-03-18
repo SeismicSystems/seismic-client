@@ -50,3 +50,7 @@ describe('Seismic Transaction Encoding', async () => {
 afterAll(async () => {
   await exitProcess()
 })
+
+// 0xf89c
+// 827a69
+// 02843b9aca00830186a094d3e8763675e4c425df46cc3b5c0f6cbdac39604687038d7ea4c68000a1028e76821eb4d77fd30223ca971c49738eb5b5b71eabe93f96b348fdce788ae5a08cbe038ada26fea4ebcb4a610780b840fc3c2cf4943c327f19af0efaf3b07201f608dd5c8e3954399a919b72588d3872b6819ac3d13d3656cbb38833a39ffd1e73963196a1ddfa9e4a5d595fdbebb875

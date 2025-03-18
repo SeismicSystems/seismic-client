@@ -13,7 +13,7 @@ import { Chain } from 'viem/chains'
 import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
 import { bytecode } from '@sviem-tests/tests/contract/bytecode.ts'
 
-const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
+const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.runtime.replace(/^0x/, '')}`
 
 const TX_CNT_PER_SPIKE = 10
 const CALL_CNT_PER_SPIKE = 10
