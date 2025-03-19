@@ -50,3 +50,12 @@ export const killProcess = async (process: ChildProcess) => {
     )
   }
 }
+
+export const waitForProcessExit = (process: ChildProcess) => {
+  // Create a promise that resolves when the exit event fires
+  return new Promise<void>((resolve) => {
+    process.on('exit', () => {
+      resolve()
+    })
+  })
+}

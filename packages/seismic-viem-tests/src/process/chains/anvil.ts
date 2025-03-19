@@ -1,7 +1,11 @@
 import type { ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
 
-import { killProcess, runProcess } from '@sviem-tests/process/manage.ts'
+import {
+  killProcess,
+  runProcess,
+  waitForProcessExit,
+} from '@sviem-tests/process/manage.ts'
 import {
   NodeProcess,
   NodeProcessOptions,
@@ -22,9 +26,7 @@ export const buildAnvil = async (sfoundryDir: string) => {
     stdio: 'ignore',
     waitMs: 0,
   })
-  await buildProcess.on('exit', () => {
-    console.log('sanvil built')
-  })
+  await waitForProcessExit(buildProcess)
 }
 
 const spawnAnvil = async (

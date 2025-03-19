@@ -1,6 +1,6 @@
 {
   "name": "seismic-viem-tests",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "module": "./dist/_esm/index.js",
   "types": "./dist/_types/index.d.ts",
@@ -20,7 +20,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "seismic-viem": "^1.0.27",
+    "seismic-viem": "^1.0.28",
     "viem": "2.x",
     "terminate": "^2.8.0",
     "dotenv": "^16.4.7",

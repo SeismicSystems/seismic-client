@@ -215,9 +215,12 @@ export async function sendShieldedTransaction<
         nonce,
         to,
         value,
-        type: 'legacy', // prepareTransactionRequest will fill the required fields using legacy spec
+        // prepareTransactionRequest will fill the required fields using legacy spec
+        type: 'legacy',
         ...rest,
       } as any
+
+      console.info('request', request)
 
       const preparedTx = (await prepareTransactionRequest(
         client,

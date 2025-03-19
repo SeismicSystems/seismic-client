@@ -46,10 +46,12 @@ beforeAll(async () => {
   chain = envChain()
   port = 8545
   await buildNode(chain)
+  console.log('buildNode finished')
   const node = await setupNode(chain, { port, ws: true })
   exitProcess = node.exitProcess
   url = node.url
   wsUrl = `ws://localhost:${port}`
+  console.log('before all finished')
 })
 
 describe('Seismic Contract', async () => {
