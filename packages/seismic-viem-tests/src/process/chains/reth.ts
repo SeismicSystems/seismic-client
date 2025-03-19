@@ -1,6 +1,10 @@
 import { existsSync } from 'node:fs'
 
-import { killProcess, runProcess } from '@sviem-tests/process/manage.ts'
+import {
+  killProcess,
+  runProcess,
+  waitForProcessExit,
+} from '@sviem-tests/process/manage.ts'
 import {
   NodeProcess,
   NodeProcessOptions,
@@ -24,9 +28,7 @@ export const buildReth = async (srethDir: string) => {
     stdio: 'ignore',
     waitMs: 0,
   })
-  await buildProcess.on('exit', () => {
-    console.log('seismic-reth built')
-  })
+  await waitForProcessExit(buildProcess)
 }
 
 const runRethLocally = async (

@@ -25,6 +25,8 @@ import type {
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 
+export const SEISMIC_TX_TYPE = 74 // '0x4a'
+
 /**
  * The additional fields added to a Seismic transaction
  * @interface SeismicTxExtras
@@ -113,10 +115,7 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
 
   const rlpEncoded = toRlp(rlpArray)
 
-  const encodedTx = concatHex([
-    toHex(74), // seismic tx type '0x4a'
-    rlpEncoded,
-  ])
+  const encodedTx = concatHex([toHex(SEISMIC_TX_TYPE), rlpEncoded])
 
   return encodedTx
 }
@@ -147,15 +146,6 @@ export const seismicRpcSchema: RpcSchema = [
   },
 ]
 
-export const allTransactionTypes = {
-  seismic: '0x4a',
-  legacy: '0x0',
-  eip2930: '0x1',
-  eip1559: '0x2',
-  eip4844: '0x3',
-  eip7702: '0x4',
-} as const
-
 /**
  * Chain formatters for Seismic transactions, providing formatting utilities for transaction requests.
  * @property {SeismicTransactionRequest} transactionRequest - Formatter configuration for transaction requests
@@ -183,12 +173,22 @@ export const seismicChainFormatters: ChainFormatters = {
       let type
       let seismicElements
       if (request.encryptionPubkey) {
+        if (!request.encryptionNonce) {
+          throw new Error(
+            'Encryption nonce is required for seismic transactions'
+          )
+        }
+        if (request.messageVersion && request.messageVersion !== 0) {
+          throw new Error(
+            'Message version must be 0 for seismic transaction requests'
+          )
+        }
         seismicElements = {
           encryptionPubkey: request.encryptionPubkey,
           encryptionNonce: request.encryptionNonce,
           messageVersion: '0x0',
         }
-        type = '0x4a'
+        type = SEISMIC_TX_TYPE
       }
 
       let ret = {
