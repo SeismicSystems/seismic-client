@@ -22,3 +22,4 @@ export {
   testRngWithPers,
   testSecp256k1,
 } from '@sviem-tests/tests/precompiles.ts'
+export { loadDotenv } from '@sviem-tests/util.ts'
