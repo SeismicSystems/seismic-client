@@ -1,6 +1,6 @@
 {
   "name": "seismic-viem-tests",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "module": "./dist/_esm/index.js",
   "types": "./dist/_types/index.d.ts",
@@ -19,9 +19,11 @@
     "dist/_types/**/*.d.ts",
     "README.md"
   ],
-  "devDependencies": {
+  "peerDependencies": {
     "seismic-viem": "^1.0.28",
-    "viem": "2.x",
+    "viem": "2.x"
+  },
+  "devDependencies": {
     "terminate": "^2.8.0",
     "dotenv": "^16.4.7",
     "bun": "^1.2.5",
@@ -31,7 +33,7 @@
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit --project tsconfig.types.json",
     "build": "bun build:esm && bun build:types",
-    "build:esm": "BUN_ENV=production bun build src/index.ts --outdir dist/_esm --target bun --format esm",
+    "build:esm": "BUN_ENV=production bun build src/index.ts --outdir dist/_esm --target bun --format esm --external viem --external seismic-viem",
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "rimraf ./dist/tsconfig.types.tsbuildinfo"
   }
