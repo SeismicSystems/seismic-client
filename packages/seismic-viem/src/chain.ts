@@ -178,6 +178,11 @@ export const seismicChainFormatters: ChainFormatters = {
             'Encryption nonce is required for seismic transactions'
           )
         }
+        if (request.messageVersion && request.messageVersion !== 0) {
+          throw new Error(
+            'Message version must be 0 for seismic transaction requests'
+          )
+        }
         seismicElements = {
           encryptionPubkey: request.encryptionPubkey,
           encryptionNonce: request.encryptionNonce,
