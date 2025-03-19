@@ -220,8 +220,6 @@ export async function sendShieldedTransaction<
         ...rest,
       } as any
 
-      console.info('request', request)
-
       const preparedTx = (await prepareTransactionRequest(
         client,
         request
