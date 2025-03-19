@@ -1,6 +1,6 @@
 {
   "name": "seismic-react",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "React components for Seismic.",
   "type": "module",
   "main": "d./ist/_cjs/index.js",
@@ -43,9 +43,6 @@
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
     "test": "bun test"
   },
-  "dependencies": {
-    "seismic-viem": "1.0.28"
-  },
   "peerDependencies": {
     "@rainbow-me/rainbowkit": "^2.0.0",
     "react": "^18",
@@ -53,7 +50,7 @@
     "typescript": ">=5.0.4",
     "viem": "2.x",
     "wagmi": "^2.0.0",
-    "seismic-viem": "*"
+    "seismic-viem": "^1.0.29"
   },
   "peerDependenciesMeta": {
     "typescript": {
