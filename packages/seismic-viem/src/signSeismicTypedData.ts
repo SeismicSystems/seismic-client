@@ -58,7 +58,7 @@ const seismicTxTypedData = <
         { name: 'name', type: 'string' },
         { name: 'version', type: 'string' },
         { name: 'chainId', type: 'uint256' },
-        { name: 'verifyingContract', type: 'address' },
+        // no verifying contract since this happens in RPC
       ],
       TxSeismic: [
         { name: 'chainId', type: 'uint64' },
@@ -80,8 +80,6 @@ const seismicTxTypedData = <
       name: 'Seismic Transaction',
       version: MESSAGE_VERSION,
       chainId: tx.chainId,
-      // no verifying contract since this happens in RPC
-      verifyingContract: '0x0000000000000000000000000000000000000000',
     },
     message,
   }
