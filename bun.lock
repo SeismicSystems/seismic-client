@@ -59,7 +59,7 @@
     },
     "packages/seismic-react": {
       "name": "seismic-react",
-      "version": "1.0.28",
+      "version": "1.0.31",
       "dependencies": {
         "seismic-viem": "1.0.27",
       },
@@ -86,7 +86,7 @@
     },
     "packages/seismic-viem": {
       "name": "seismic-viem",
-      "version": "1.0.28",
+      "version": "1.0.31",
       "dependencies": {
         "@noble/ciphers": "^1.2.0",
         "@noble/curves": "^1.8.0",
@@ -96,13 +96,15 @@
     },
     "packages/seismic-viem-tests": {
       "name": "seismic-viem-tests",
-      "version": "0.0.4",
+      "version": "0.0.7",
       "devDependencies": {
         "@types/bun": "^1.2.5",
         "bun": "^1.2.5",
         "dotenv": "^16.4.7",
-        "seismic-viem": "^1.0.27",
         "terminate": "^2.8.0",
+      },
+      "peerDependencies": {
+        "seismic-viem": "^1.0.29",
         "viem": "2.x",
       },
     },
@@ -110,8 +112,10 @@
       "name": "seismic-viem-test-runner",
       "devDependencies": {
         "dotenv": "^16.4.7",
+        "seismic-viem": "workspace:*",
         "seismic-viem-tests": "workspace:*",
         "terminate": "^2.8.0",
+        "viem": "2.x",
       },
     },
   },
