@@ -93,6 +93,20 @@ type TransparentWriteContractReturnType<
               : never
           >
         }
+        dwrite: {
+          [functionName in _writeFunctionNames]: GetWriteFunction<
+            _narrowable,
+            _walletClient['chain'],
+            _walletClient['account'],
+            TAbi,
+            functionName extends ContractFunctionName<
+              TAbi,
+              'nonpayable' | 'payable'
+            >
+              ? functionName
+              : never
+          >
+        }
       }
   : unknown
 
