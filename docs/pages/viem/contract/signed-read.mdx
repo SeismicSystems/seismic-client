@@ -1,0 +1,113 @@
+---
+description: Executes a signed read operation on a smart contract, allowing authenticated contract reads with msg.sender verification on Seismic's blockchain.
+---
+
+# Signed Read Contract
+
+Executes a signed read operation on a smart contract
+
+## What is a signed read?
+
+In Ethereum, anyone can read from a contract by impersonating any address, by specifying the `from` parameter in an `eth_call`.
+
+On Seismic, this is not the case. If you perform a standard `eth_call` and set the `from` address, Seismic will ignore this input.
+
+To read from a specific address, instead use a Signed Read, which sends a signed message to the `eth_call` endpoint. When the signature is verified, it will execute the underlying call, also providing the from address
+
+The purpose of signed reads is to allow contract developers to check against `msg.sender` inside non-transactional contract calls knowing that these calls cannot be spoofed. Therefore the developer can conditionally reveal data inside a Solidity view function based on `msg.sender`.
+
+## Import
+
+```ts
+import { signedReadContract } from 'seismic-viem'
+```
+
+## Usage
+
+Executes a signed read operation on a smart contract.
+
+A signed read is an operation unique to Seismic's blockchain. In Ethereum, users can make an eth_call and specify any `from` address. However, Seismic restricts this feature: any eth_call made to Seismic will have the from address overridden to zero. This is done so contract developers can check against `msg.sender` inside non-transactions knowing that these calls will not be spoofed.
+
+To make a read that specifies a from address on Seismic, use signed reads. Essentially a signed read sends a signed, raw transaction to the eth_call endpoint. The msg.sender for the call is set to the transaction's signer.
+
+```ts
+const result = await signedReadContract(client, {
+  abi: myContractAbi,
+  functionName: 'balanceOf',
+  address: '0x5678...',
+  args: [],
+})
+console.log('Shielded balance:', result)
+```
+
+## Return Value
+
+`Promise<unknown>` - A promise that resolves to the response from the contract.
+
+## Parameters
+
+### client
+
+- **Type:** `ShieldedWalletClient`
+
+The client used to execute the signed read operation. Must be a `ShieldedPublicClient` or `ShieldedWalletClient`.
+
+```ts
+// [!code focus:2]
+const result = await signedReadContract(client, {
+  abi: myContractAbi,
+  functionName: 'balanceOf',
+  address: '0x5678...',
+})
+```
+
+### parameters
+
+- **Type:** `SignedReadContractParameters`
+
+The parameters for the read operation.
+
+```ts
+const result = await signedReadContract(client, {
+  abi: myContractAbi, // [!code focus]
+  functionName: 'balanceOf', // [!code focus]
+  address: '0x5678...', // [!code focus]
+  args: [], // [!code focus]
+  // Additional options for customizing the call request
+})
+```
+
+#### abi
+
+- **Type:** `Abi`
+
+The contract's ABI.
+
+#### functionName
+
+- **Type:** `string`
+
+The name of the function to call.
+
+#### args
+
+- **Type:** `array`
+
+The arguments for the function.
+
+#### address
+
+- **Type:** `Address`
+
+The contract's address on the blockchain.
+
+## Throws
+
+If the account is not specified for the operation.
+
+## Remarks
+
+- If no `account` is specified in the parameters, the function defaults to using a standard read operation (`readContract`).
+- Encodes the ABI parameters and function selector for shielded calls.
+- Uses `signedCall` to securely sign and send the request.
+- The `data` returned by the contract call is decoded based on the provided ABI.

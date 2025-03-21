@@ -44,19 +44,19 @@ import {
   SeismicTxExtras,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
-} from '@sviem/chain'
+} from '@sviem/chain.ts'
 import type {
   AccountNotFoundErrorType,
   AccountTypeNotSupportedErrorType,
-} from '@sviem/error/account'
+} from '@sviem/error/account.ts'
 import {
   AccountNotFoundError,
   AccountTypeNotSupportedError,
-} from '@sviem/error/account'
-import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData'
-import type { GetAccountParameter } from '@sviem/viem-internal/account'
-import type { ErrorType } from '@sviem/viem-internal/error'
-import type { AssertRequestParameters } from '@sviem/viem-internal/request'
+} from '@sviem/error/account.ts'
+import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
+import type { GetAccountParameter } from '@sviem/viem-internal/account.ts'
+import type { ErrorType } from '@sviem/viem-internal/error.ts'
+import type { AssertRequestParameters } from '@sviem/viem-internal/request.ts'
 
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
@@ -165,7 +165,6 @@ export async function sendShieldedTransaction<
     maxPriorityFeePerGas,
     nonce,
     value,
-    encryptionPubkey,
     ...rest
   } = parameters
 
@@ -216,20 +215,20 @@ export async function sendShieldedTransaction<
         nonce,
         to,
         value,
-        type: 'legacy', // prepareTransactionRequest will fill the required fields using legacy spec
-        encryptionPubkey,
+        // prepareTransactionRequest will fill the required fields using legacy spec
+        type: 'legacy',
         ...rest,
       } as any
 
-      const preparedTx = await prepareTransactionRequest(client, request)
-      const txRequest = {
-        encryptionPubkey,
-        ...preparedTx,
-      } as TransactionSerializableSeismic
+      const preparedTx = (await prepareTransactionRequest(
+        client,
+        request
+      )) as TransactionSerializableSeismic
+
       if (account?.type === 'json-rpc') {
         const { typedData, signature } = await signSeismicTxTypedData(
           client,
-          txRequest
+          preparedTx
         )
         const action = getAction(
           client,
@@ -242,7 +241,7 @@ export async function sendShieldedTransaction<
         })
       } else {
         const serializedTransaction = await account!.signTransaction!(
-          txRequest,
+          preparedTx,
           { serializer: serializeSeismicTransaction }
         )
         return await sendRawTransaction(client, { serializedTransaction })

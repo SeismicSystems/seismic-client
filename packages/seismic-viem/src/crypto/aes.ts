@@ -6,8 +6,6 @@ import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
 export class AesGcmCrypto {
-  private readonly ALGORITHM = 'aes-256-gcm'
-  private readonly TAG_LENGTH = 16 // Authentication tag length in bytes
   private readonly NONCE_LENGTH = 12 // 96 bits is the recommended nonce length for GCM
   private readonly U64_SIZE = 8 // Size of u64 in bytes
 
@@ -27,13 +25,17 @@ export class AesGcmCrypto {
 
     // Create a buffer for the full nonce (12 bytes)
     const nonceBuffer = new Uint8Array(this.NONCE_LENGTH)
-    // Write the u64 value in big-endian format to the first 8 bytes
-    for (let i = this.U64_SIZE - 1; i >= 0; i--) {
+    // Write the u64 value in big-endian format to the last 8 bytes
+    for (
+      let i = this.NONCE_LENGTH - 1;
+      i >= this.NONCE_LENGTH - this.U64_SIZE;
+      i--
+    ) {
       nonceBuffer[i] = Number(value & 0xffn)
       value = value >> 8n
     }
 
-    // Last 4 bytes remain as zeros
+    // First 4 bytes remain as zeros
     return nonceBuffer
   }
 

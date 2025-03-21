@@ -1,45 +1,58 @@
 {
   "name": "seismic-react",
-  "version": "1.0.23",
+  "version": "1.0.32",
   "description": "React components for Seismic.",
   "type": "module",
-  "main": "dist/_cjs/index.js",
-  "module": "dist/_esm/index.js",
-  "types": "dist/_types/index.d.ts",
+  "main": "./dist/_cjs/index.js",
+  "module": "./dist/_esm/index.js",
+  "types": "./dist/_types/index.d.ts",
+  "typings": "./dist/_types/index.d.ts",
   "exports": {
     ".": {
       "require": "./dist/_cjs/index.js",
       "import": "./dist/_esm/index.js",
       "types": "./dist/_types/index.d.ts"
+    },
+    "./rainbowkit": {
+      "require": "./dist/_cjs/rainbowkit/index.js",
+      "import": "./dist/_esm/rainbowkit/index.js",
+      "types": "./dist/_types/rainbowkit/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "rainbowkit": [
+        "./_types/rainbowkit/index.d.ts"
+      ]
     }
   },
   "files": [
     "dist/_cjs/*.js",
     "dist/_esm/*.js",
     "dist/_types/**/*.d.ts",
+    "dist/_cjs/rainbowkit/*.js",
+    "dist/_esm/rainbowkit/*.js",
     "README.md"
   ],
   "scripts": {
     "clean": "bun run rimraf dist",
     "typecheck": "tsc --noEmit --project tsconfig.types.json",
     "build": "bun build:cjs && bun build:esm && bun build:types",
-    "build:cjs": "BUN_ENV=production bun build src/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
-    "build:esm": "BUN_ENV=production bun build src/index.ts --outdir dist/_esm --target browser --format esm --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
+    "build:cjs": "BUN_ENV=production bun build src/index.ts src/rainbowkit/index.ts --outdir dist/_cjs --target browser --format cjs --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
+    "build:esm": "BUN_ENV=production bun build src/index.ts src/rainbowkit/index.ts --outdir dist/_esm --target browser --format esm --external react --external wagmi --external @rainbow-me/rainbowkit --external viem --external seismic-viem",
     "build:types": "tsc --project tsconfig.types.json && tsc-alias --project tsconfig.types.json",
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
-    "test": "bun test",
-    "docs:gen": "bun run typedoc src/index.ts --out ../../docs/pages/seismic-react && bash ../../docs/replace_sources.sh ../../docs/pages/seismic-react",
-    "docs:check": "bun run typedoc src/index.ts --json ./typedoc.out.json && rm ./typedoc.out.json"
+    "test": "bun test"
   },
-  "dependencies": {},
   "peerDependencies": {
     "@rainbow-me/rainbowkit": "^2.0.0",
-    "react": ">=18",
-    "react-dom": ">=18",
+    "react": "^18",
+    "react-dom": "^18",
     "typescript": ">=5.0.4",
     "viem": "2.x",
     "wagmi": "^2.0.0",
-    "seismic-viem": "1.0.23"
+    "seismic-viem": ">=1.0.32"
   },
   "peerDependenciesMeta": {
     "typescript": {

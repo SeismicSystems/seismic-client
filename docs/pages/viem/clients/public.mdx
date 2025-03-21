@@ -1,0 +1,58 @@
+---
+description: Creates a public client for the Seismic blockchain
+---
+
+# Shielded Public Client
+
+Creates a public client for the Seismic blockchain
+
+## Import
+
+```ts
+import { createShieldedPublicClient } from 'seismic-viem'
+```
+
+## Usage
+
+Creates a public client for the Seismic network with additional privacy-preserving features.
+
+```ts
+import { createShieldedPublicClient, seismicDevnet } from 'seismic-viem'
+import { http } from 'viem'
+
+const client = await createShieldedPublicClient({
+  transport: http(),
+  chain: seismicDevnet,
+})
+
+const teePublicKey = await client.getTeePublicKey()
+```
+
+## Return Value
+
+A ShieldedPublicClient instance that extends viem's PublicClient with additional methods for privacy-preserving operations.
+
+## Parameters
+
+### parameters
+
+The same parameters passed into viem's [createPublicClient](https://viem.sh/docs/clients/public.html).
+
+```ts
+const client = await createShieldedPublicClient({
+  transport: http(), // [!code focus]
+  chain: seismicDevnet, // [!code focus]
+})
+```
+
+#### transport
+
+- **Type:** `Transport`
+
+The transport layer to use (e.g., an HTTP transport).
+
+#### chain
+
+- **Type:** `Chain | undefined`
+
+The chain configuration to target (e.g., `seismicDevnet`).

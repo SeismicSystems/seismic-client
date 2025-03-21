@@ -2,9 +2,17 @@
   "extends": "./tsconfig.base.json",
   "references": [
     { "path": "./packages/seismic-viem/tsconfig.json" },
+    { "path": "./packages/seismic-react/tsconfig.json" },
+    { "path": "./packages/seismic-bot/tsconfig.json" },
     { "path": "./packages/seismic-spammer/tsconfig.json" },
-    { "path": "./tests/seismic-viem/tsconfig.json" }
+    { "path": "./tests/seismic-viem/tsconfig.json" },
+    { "path": "./docs/tsconfig.json" }
   ],
-  "include": ["vocs.config.ts", "docs"],
-  "exclude": ["node_modules", "dist", "packages/**/dist"]
+  "exclude": ["node_modules", "dist", "packages/**/dist"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@docs/*": ["./docs/*"]
+    }
+  }
 }

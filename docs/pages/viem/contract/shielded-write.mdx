@@ -1,0 +1,141 @@
+---
+description: Executes a shielded write function on a contract, where the calldata is encrypted, with the same API as viem's writeContract.
+---
+
+# Shielded Write Contract
+
+Executes a shielded write function on a contract, where the calldata is encrypted, with the same API as viem's writeContract.
+
+## What is a shielded write?
+
+A shielded write is a function unique to Seismic's blockchain. It allows you to write to a contract with encrypted calldata.
+
+A [ShieldedWalletClient](/viem/clients/wallet) will perform this encryption automatically. Under the hood, what happens:
+
+#### When you instantiate the client, it will:
+
+1. request a public key from Seismic's TEE
+2. generate an ephemeral private key
+3. create a shared secret & AES key from those two keys
+
+#### When you build a shielded transaction:
+
+1. The client will encrypt calldata with the AES key
+2. It then includes the public key of the ephemerally generated key into the transaction payload
+3. The user will be prompted to sign the transaction
+4. The client sends the signed transaction to a Seismic node
+5. Seismic's blockchain will decrypt the calldata inside the TEE and execute the transaction
+
+## Import
+
+```ts
+import { shieldedWriteContract } from 'seismic-viem'
+```
+
+## Usage
+
+Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's [writeContract](https://viem.sh/docs/contract/writeContract).
+
+```ts
+import {
+  createShieldedWalletClient,
+  seismicDevnet,
+  shieldedWriteContract,
+} from 'seismic-viem'
+import { custom, parseAbi } from 'viem'
+
+const client = createShieldedWalletClient({
+  chain: seismicDevnet,
+  transport: custom(window.ethereum),
+})
+
+const hash = await shieldedWriteContract(client, {
+  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
+  functionName: 'mint',
+  args: [69420],
+})
+```
+
+## Return Value
+
+`Promise<'0x${string}'>` - A promise that resolves to a transaction hash.
+
+## Parameters
+
+### client
+
+- **Type:** `ShieldedWalletClient`
+
+The shielded wallet client to use for the transaction.
+
+```ts
+const hash = await shieldedWriteContract(client, {
+  // [!code focus]
+  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
+  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
+  functionName: 'mint',
+  args: [69420],
+})
+```
+
+### parameters
+
+- **Type:** `WriteContractParameters`
+
+The configuration object for the write operation.
+
+```ts
+const hash = await shieldedWriteContract(client, {
+  address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2', // [!code focus]
+  abi: parseAbi(['function mint(uint32 tokenId) nonpayable']), // [!code focus]
+  functionName: 'mint', // [!code focus]
+  args: [69420], // [!code focus]
+  // Optional parameters below
+  gas: 100000n,
+  gasPrice: 10000000000n,
+  value: 0n,
+})
+```
+
+#### address
+
+- **Type:** `Address`
+
+The address of the contract.
+
+#### abi
+
+- **Type:** `Abi`
+
+The contract's ABI.
+
+#### functionName
+
+- **Type:** `string`
+
+The name of the contract function to call.
+
+#### args
+
+- **Type:** `array`
+
+The arguments to pass to the contract function.
+
+#### gas (optional)
+
+- **Type:** `bigint`
+
+Gas limit for the transaction.
+
+#### gasPrice (optional)
+
+- **Type:** `bigint`
+
+Gas price for the transaction.
+
+#### value (optional)
+
+- **Type:** `bigint`
+
+Value (native token amount) to send with the transaction.

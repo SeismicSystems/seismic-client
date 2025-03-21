@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*", "../seismic-viem/src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "paths": {
+      "@sviem-tests/*": ["./src/*"]
+    },
+    "composite": true,
+    "baseUrl": ".",
+    "rootDir": "../..",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  }
+}

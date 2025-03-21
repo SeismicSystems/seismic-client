@@ -7,7 +7,7 @@ Seismic's typescript client. This repository contains:
 
 ## Docs
 
-View the docs [here](https://seismic-docs.netlify.app)
+View the docs [here](https://client.seismic.systems)
 
 ## Install
 

@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/**",
-    "tests/**"
+    "tests/**",
+    "docs"
   ],
   "type": "module",
   "scripts": {
@@ -15,24 +16,19 @@
     "lint:eslint:check": "eslint ./packages && eslint ./tests",
     "lint:prettier": "prettier ./packages --write; prettier ./tests --write",
     "lint:prettier:check": "prettier ./packages -c && prettier ./tests -c",
-    "docs:dev": "vocs dev",
-    "docs:build": "vocs build",
-    "docs:preview": "vocs preview",
-    "docs:gen": "bun run viem:docs:gen; bun run react:docs:gen;",
+    "docs:dev": "bun run --cwd docs dev",
+    "docs:build": "bun run --cwd docs build",
+    "docs:preview": "bun run --cwd docs preview",
+    "docs:twoslash": "bun run --cwd docs twoslash",
+    "all:build": "bun run viem:build; bun run react:build; bun run tests:build",
     "viem:build": "bun run --cwd packages/seismic-viem build",
     "viem:publish": "npm publish -w packages/seismic-viem",
     "viem:test:anvil": "bun run --cwd tests/seismic-viem test:anvil",
     "viem:test:devnet": "bun run --cwd tests/seismic-viem test:devnet",
-    "viem:docs:build": "bun run --cwd packages/seismic-viem vocs build",
-    "viem:docs:preview": "bun run --cwd packages/seismic-viem vocs preview",
-    "viem:docs:gen": "bun run --cwd packages/seismic-viem docs:gen",
-    "viem:docs:check": "bun run --cwd packages/seismic-viem docs:check",
     "react:build": "bun run --cwd packages/seismic-react build",
     "react:publish": "npm publish -w packages/seismic-react",
-    "react:docs:build": "bun run --cwd packages/seismic-react vocs build",
-    "react:docs:preview": "bun run --cwd packages/seismic-react vocs preview",
-    "react:docs:gen": "bun run --cwd packages/seismic-react docs:gen",
-    "react:docs:check": "bun run --cwd packages/seismic-react docs:check"
+    "tests:build": "bun run --cwd packages/seismic-viem-tests build",
+    "tests:publish": "npm publish -w packages/seismic-viem-tests"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
@@ -52,10 +48,7 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
-    "tsc-alias": "^1.8.10",
-    "typedoc": "^0.27.6",
-    "typedoc-plugin-markdown": "^4.4.1",
-    "vocs": "^1.0.0-alpha.62"
+    "tsc-alias": "^1.8.10"
   },
   "dependencies": {}
 }

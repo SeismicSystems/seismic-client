@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "paths": {
+      "@sviem-tests/*": ["./src/*"]
+    },
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist/_types",
+    "tsBuildInfoFile": "./dist/_types/.tsbuildinfo",
+    "rootDir": "./src",
+    "baseUrl": "."
+  }
+}

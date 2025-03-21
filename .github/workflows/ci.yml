@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.1.42
+          bun-version: 1.2.5
       - name: Install dependencies
         run: bun install
       - name: Check lint
@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.1.42
+          bun-version: 1.2.5
       - name: Install dependencies
         run: bun install
       - name: Check typing
@@ -54,6 +54,8 @@ jobs:
         run: touch .env
       - name: Install dependencies
         run: bun install
+      - name: build seismic-viem
+        run: bun viem:build
       - name: Test anvil
         run: bun viem:test:anvil
 
@@ -63,13 +65,14 @@ jobs:
     concurrency:
       group: global-self-hosted-runner
     env:
-      SFOUNDRY_ROOT: /home/azureuser/seismic/seismic-foundry
       SRETH_ROOT: /home/azureuser/seismic/seismic-reth
       RETH_DATA_DIR: /home/azureuser/.seismic-reth/data
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
+      - name: Clear reth files
+        run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
       - name: Build reth
         run: |
           cd "$SRETH_ROOT"
@@ -82,8 +85,8 @@ jobs:
         run: touch .env
       - name: Install dependencies
         run: bun install
-      - name: Clear reth files
-        run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
+      - name: build seismic-viem
+        run: bun viem:build
       - name: Test devnet
         run: bun viem:test:devnet
       - name: Remove reth files

@@ -1,0 +1,187 @@
+---
+description: A React hook for performing privacy-focused contract write operations with enhanced security and type safety.
+---
+
+# Shielded Write Contract Hook
+
+## Import
+
+```ts
+import { useShieldedWriteContract } from 'seismic-react'
+```
+
+## Overview
+
+`useShieldedWriteContract` is a React hook that provides a privacy-enhanced alternative to standard contract write operations. It's similar to Wagmi's `useWriteContract` but utilizes Seismic's shielded write contract mechanism.
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useShieldedWriteContract } from 'seismic-react'
+
+import { myTokenAbi } from './abis'
+
+function TokenTransferComponent() {
+  const { writeContract, isLoading, hash, error } = useShieldedWriteContract({
+    address: '0x1234567890123456789012345678901234567890',
+    abi: myTokenAbi,
+    functionName: 'transfer',
+    args: ['0xRecipientAddress', BigInt(100)],
+  })
+
+  const handleTransfer = async () => {
+    try {
+      await writeContract()
+    } catch (err) {
+      console.error('Transfer failed', err)
+    }
+  }
+
+  return (
+    <div>
+      {isLoading && <p>Processing transfer...</p>}
+      {hash && <p>Transaction Hash: {hash}</p>}
+      {error && <p>Error: {error.message}</p>}
+      <button onClick={handleTransfer} disabled={isLoading}>
+        Transfer Tokens
+      </button>
+    </div>
+  )
+}
+```
+
+### Advanced TypeScript Usage
+
+```tsx
+import { useShieldedWriteContract } from 'seismic-react'
+import { myNFTAbi } from './abis'
+
+function NFTMintComponent() {
+  const {
+    writeContract,
+    isLoading,
+    hash
+  } = useShieldedWriteContract<
+    typeof myNFTAbi,
+    'mintNFT',
+    [string, number]
+  >({
+    address: '0x1234567890123456789012345678901234567890',
+    abi: myNFTAbi,
+    functionName: 'mintNFT',
+    args: ['0xRecipientAddress', 42],
+    gas: 300_000n,
+    gasPrice: 10n ** 9n // 1 Gwei
+  })
+
+  return (/* ... */);
+}
+```
+
+## Parameters
+
+### config
+
+- **Type:** `UseShieldedWriteContractConfig<TAbi, TFunctionName, TArgs>`
+
+#### address
+
+- **Type:** `Hex`
+- **Required:** Yes
+- The blockchain address of the contract
+
+#### abi
+
+- **Type:** `Abi`
+- **Required:** Yes
+- The contract's Application Binary Interface
+
+#### functionName
+
+- **Type:** `string`
+- **Required:** Yes
+- The name of the contract function to call
+
+#### args
+
+- **Type:** `unknown[]`
+- **Required:** Yes
+- Arguments to pass to the contract function
+
+#### gas
+
+- **Type:** `bigint`
+- **Optional:** Yes
+- Custom gas limit for the transaction
+
+#### gasPrice
+
+- **Type:** `bigint`
+- **Optional:** Yes
+- Custom gas price for the transaction
+
+## Return Value
+
+An object with the following properties:
+
+### writeContract()
+
+- **Type:** `() => Promise<undefined | 0x${string}>`
+- A function to execute the contract write operation
+- Returns the transaction hash or undefined
+
+### isLoading
+
+- **Type:** `boolean`
+- Indicates if the write operation is in progress
+
+### hash
+
+- **Type:** `null | 0x${string}`
+- The transaction hash from the last successful write
+- `null` if no transaction has been sent
+
+### error
+
+- **Type:** `null | Error`
+- Contains any error from the most recent write operation
+
+## Remarks
+
+### Key Features
+
+- Privacy-focused contract interactions
+- Type-safe contract writes
+- Comprehensive transaction state management
+- Seamless error handling
+
+### Performance Considerations
+
+- Minimal overhead for contract writes
+- Efficient state management
+- Supports complex contract interactions
+
+## Error Handling
+
+Potential errors include:
+
+- Invalid contract parameters
+- Network connectivity issues
+- Insufficient funds
+- Transaction reverts
+
+## Compatibility
+
+- Works with modern React applications
+- Compatible with Seismic's shielded wallet ecosystem
+- Supports TypeScript
+- Integrates with various blockchain networks
+
+## Best Practices
+
+- Always handle potential errors
+- Check `isLoading` state before multiple writes
+- Validate arguments before calling `writeContract`
+- Provide user feedback during transactions

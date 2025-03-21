@@ -21,11 +21,12 @@ import { parseAccount } from 'viem/accounts'
 import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
-import { ShieldedWalletClient } from '@sviem/client'
-import { remapSeismicAbiInputs } from '@sviem/contract/abi'
-import { AesGcmCrypto } from '@sviem/crypto/aes'
-import type { SignedCallParameters } from '@sviem/signedCall'
-import { signedCall } from '@sviem/signedCall'
+import { ShieldedWalletClient } from '@sviem/client.ts'
+import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
+import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
+import type { SignedCallParameters } from '@sviem/signedCall.ts'
+import { signedCall } from '@sviem/signedCall.ts'
 
 export type SignedReadContractParameters<
   TAbi extends Abi | readonly unknown[],
@@ -153,7 +154,12 @@ export async function signedReadContract<
 
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
-  const encryptedCalldata = await aesCipher.encrypt(plaintextCalldata, nonce)
+
+  const encryptionNonce = randomEncryptionNonce()
+  const encryptedCalldata = await aesCipher.encrypt(
+    plaintextCalldata,
+    encryptionNonce
+  )
 
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
@@ -161,9 +167,10 @@ export async function signedReadContract<
     to: address!,
     data: encryptedCalldata,
     encryptionPubkey: client.getEncryptionPublicKey(),
+    encryptionNonce,
   }
   const { data: encryptedData } = await signedCall(client, request)
-  const data = await aesCipher.decrypt(encryptedData, nonce)
+  const data = await aesCipher.decrypt(encryptedData, encryptionNonce)
   return decodeFunctionResult({
     abi,
     args,

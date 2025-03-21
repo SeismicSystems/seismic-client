@@ -12,11 +12,12 @@ import type {
 import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
 import { formatAbiItem } from 'viem/utils'
 
-import type { ShieldedWalletClient } from '@sviem/client'
-import { remapSeismicAbiInputs } from '@sviem/contract/abi'
-import { AesGcmCrypto } from '@sviem/crypto/aes'
-import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.js'
-import { sendShieldedTransaction } from '@sviem/sendTransaction.js'
+import type { ShieldedWalletClient } from '@sviem/client.ts'
+import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
+import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
+import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.ts'
+import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
 
 /**
  * Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's {@link https://viem.sh/docs/contract/writeContract writeContract}
@@ -97,7 +98,9 @@ export async function shieldedWriteContract<
 
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
-  const data = await aesCipher.encrypt(plaintextCalldata, nonce)
+
+  const encryptionNonce = randomEncryptionNonce()
+  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
 
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
@@ -107,6 +110,7 @@ export async function shieldedWriteContract<
     nonce: nonce!,
     value,
     encryptionPubkey: client.getEncryptionPublicKey(),
+    encryptionNonce,
   }
   return sendShieldedTransaction(client, request)
 }

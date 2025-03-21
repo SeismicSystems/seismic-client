@@ -19,14 +19,17 @@ import {
 } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
-import { EncryptionActions, encryptionActions } from '@sviem/actions/encryption'
-import type { ShieldedPublicActions } from '@sviem/actions/public'
-import { shieldedPublicActions } from '@sviem/actions/public'
-import type { ShieldedWalletActions } from '@sviem/actions/wallet'
-import { shieldedWalletActions } from '@sviem/actions/wallet'
-import { seismicRpcSchema } from '@sviem/chain'
-import { generateAesKey } from '@sviem/crypto/aes'
-import { compressPublicKey } from '@sviem/crypto/secp'
+import {
+  EncryptionActions,
+  encryptionActions,
+} from '@sviem/actions/encryption.ts'
+import type { ShieldedPublicActions } from '@sviem/actions/public.ts'
+import { shieldedPublicActions } from '@sviem/actions/public.ts'
+import type { ShieldedWalletActions } from '@sviem/actions/wallet.ts'
+import { shieldedWalletActions } from '@sviem/actions/wallet.ts'
+import { seismicRpcSchema } from '@sviem/chain.ts'
+import { generateAesKey } from '@sviem/crypto/aes.ts'
+import { compressPublicKey } from '@sviem/crypto/secp.ts'
 
 /**
  * This is the same as viem's public client, with a few notable differences:

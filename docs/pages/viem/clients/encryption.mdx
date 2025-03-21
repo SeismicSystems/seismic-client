@@ -1,0 +1,87 @@
+---
+description: Generates or uses a provided encryption key to create an AES key for encrypting transaction calldata.
+---
+
+# Encryption
+
+Generates or uses a provided encryption key to create an AES key for encrypting transaction calldata.
+
+## Import
+
+```ts
+import { getEncryption } from 'seismic-viem'
+```
+
+## Usage
+
+Returns an AES key and its input keys for encrypting transaction calldata on the Seismic network.
+
+```ts
+import { getEncryption } from 'seismic-viem'
+
+// Using network public key with auto-generated client key
+const { aesKey, encryptionPrivateKey, encryptionPublicKey } = getEncryption(networkPublicKey)
+
+// Using network public key with provided client key
+const { aesKey, encryptionPrivateKey, encryptionPublicKey } = getEncryption(
+  networkPublicKey,
+  '0xabcdef1234567890...'
+)
+```
+
+## Return Value
+
+`object` - An object containing the encryption keys:
+
+```ts
+{
+  aesKey: '0x...', // The AES key used to encrypt calldata
+  encryptionPrivateKey: '0x...', // The client's secp256k1 private key
+  encryptionPublicKey: '0x...' // The client's secp256k1 public key
+}
+```
+
+## Parameters
+
+### networkPk
+
+- **Type:** `string`
+
+The network's encryption public key (secp256k1).
+
+```ts
+const encryption = getEncryption(networkPublicKey) // [!code focus]
+```
+
+### clientSk (optional)
+
+- **Type:** `` `0x${string}` ``
+
+Optionally, the user's encryption private key. If not provided, this function will generate one.
+
+```ts
+const encryption = getEncryption(
+  networkPublicKey,
+  '0xabcdef1234567890...' // [!code focus]
+)
+```
+
+## Return Properties
+
+### aesKey
+
+- **Type:** `` `0x${string}` ``
+
+The AES key used to encrypt calldata in privacy-preserving transactions.
+
+### encryptionPrivateKey
+
+- **Type:** `` `0x${string}` ``
+
+The client's secp256k1 private key. This will be either the provided `clientSk` or a newly generated key if none was provided.
+
+### encryptionPublicKey
+
+- **Type:** `` `0x${string}` ``
+
+The corresponding secp256k1 public key derived from the encryption private key.

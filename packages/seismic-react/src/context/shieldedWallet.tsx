@@ -15,6 +15,7 @@ interface WalletClientContextType {
   walletClient: ShieldedWalletClient | null
   address: Hex | null
   error: string | null
+  loaded: boolean
 }
 
 // Create the context
@@ -109,6 +110,7 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
   )
   const [address, setAddress] = useState<Hex | null>(null)
   const [callingOnAddressChange, setCallingOnAddressChange] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     if (!publicClient) {
@@ -182,6 +184,7 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
     }).then((wc: ShieldedWalletClient) => {
       setWalletClient(wc)
       setAddress(wc.account.address)
+      setLoaded(true)
     })
   }, [publicClient, isFetched, data])
 
@@ -212,6 +215,7 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
     walletClient,
     address,
     error,
+    loaded,
   }
 
   return (

@@ -1,0 +1,156 @@
+---
+description: A React hook for accessing shielded wallet clients with enhanced privacy and security features.
+---
+
+# Shielded Wallet Hook
+
+## Import
+
+```ts
+import { useShieldedWallet } from 'seismic-react'
+```
+
+## Overview
+
+`useShieldedWallet` is a React hook that provides access to shielded wallet clients, enabling secure and privacy-focused blockchain interactions within a React application.
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useShieldedWallet } from 'seismic-react'
+
+function WalletInteractionComponent() {
+  const { publicClient, walletClient, account, chain } = useShieldedWallet()
+
+  const handleSendTransaction = async () => {
+    if (walletClient && account) {
+      try {
+        const hash = await walletClient.sendTransaction({
+          account,
+          to: '0xRecipientAddress',
+          value: BigInt(1000000000000000000), // 1 ETH
+        })
+        console.log('Transaction hash:', hash)
+      } catch (error) {
+        console.error('Transaction failed', error)
+      }
+    }
+  }
+
+  return (
+    <div>
+      <p>Current Chain: {chain?.name}</p>
+      <p>Connected Account: {account?.address}</p>
+      <button onClick={handleSendTransaction}>Send Transaction</button>
+    </div>
+  )
+}
+```
+
+### Advanced Usage
+
+```tsx
+import { useShieldedWallet } from 'seismic-react'
+import { parseEther } from 'viem'
+
+function AdvancedWalletComponent() {
+  const {
+    publicClient,
+    walletClient,
+    account
+  } = useShieldedWallet()
+
+  const performContractInteraction = async () => {
+    if (walletClient && account) {
+      const { request } = await publicClient.simulateContract({
+        account,
+        address: '0xContractAddress',
+        abi: myContractAbi,
+        functionName: 'mintTokens',
+        args: [account.address, parseEther('10')]
+      })
+
+      const hash = await walletClient.writeContract(request)
+      console.log('Contract interaction hash:', hash)
+    }
+  }
+
+  return (/* ... */);
+}
+```
+
+## Return Value
+
+### WalletClientContextType
+
+An object with the following properties:
+
+#### publicClient
+
+- **Type:** `PublicClient`
+- A client for reading from the blockchain
+- Provides methods for blockchain queries and simulations
+
+#### walletClient
+
+- **Type:** `WalletClient`
+- A client for sending transactions and interacting with the wallet
+- Enables writing to the blockchain and signing messages
+
+#### account
+
+- **Type:** `Account | undefined`
+- The currently connected wallet account
+- `undefined` if no account is connected
+
+#### chain
+
+- **Type:** `Chain | undefined`
+- The currently connected blockchain network
+- `undefined` if no network is connected
+
+## Remarks
+
+### Key Features
+
+- Seamless access to wallet and public clients
+- Enhanced privacy through shielded wallet technology
+- Easy blockchain interaction within React components
+- Supports multiple blockchain networks
+
+### Usage Constraints
+
+- Must be used within a `ShieldedWalletProvider`
+- Requires an active wallet connection
+- Dependent on underlying wallet infrastructure
+
+## Error Handling
+
+Potential scenarios to handle:
+
+- No wallet connected
+- Network disconnection
+- Transaction failures
+- Insufficient funds
+
+## Compatibility
+
+- Works with modern React applications
+- Compatible with Wagmi and RainbowKit
+- Supports major blockchain networks
+- Integrates with Seismic's privacy-focused ecosystem
+
+## Best Practices
+
+- Always check for `walletClient` and `account` before interactions
+- Handle potential connection and transaction errors
+- Use type guards and optional chaining
+- Provide fallback UI for disconnected states
+
+## Performance Considerations
+
+- Minimal overhead for wallet client access
+- Lazy initialization of clients
+- Efficient context management

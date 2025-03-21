@@ -1,0 +1,41 @@
+---
+description: Actions for the shielded wallet client
+---
+
+# Shielded Wallet Actions
+
+In addition to all standard viem WalletClient methods, the ShieldedWalletClient provides several privacy-preserving features:
+
+## signedReadContract
+
+```ts
+const result = await walletClient.signedReadContract({
+  address: '0x1234...',
+  abi: contractAbi,
+  functionName: 'balanceOf',
+  args: ['0xabcd...'],
+})
+```
+
+Performs a signed read operation from a contract.
+
+## shieldedWriteContract
+
+```ts
+const hash = await walletClient.shieldedWriteContract({
+  address: '0x1234...',
+  abi: contractAbi,
+  functionName: 'transfer',
+  args: ['0xabcd...', 100n],
+})
+```
+
+Executes a contract write with encrypted calldata.
+
+## getEncryption
+
+```ts
+const { aesKey, ecdhPubKey } = walletClient.getEncryption()
+```
+
+Retrieves the encryption keys currently in use by the client.

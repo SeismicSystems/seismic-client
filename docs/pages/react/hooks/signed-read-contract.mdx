@@ -1,0 +1,185 @@
+---
+description: A React hook for performing privacy-enhanced, cryptographically signed contract read operations.
+---
+
+# Signed Read Contract Hook
+
+## Import
+
+```ts
+import { useSignedReadContract } from 'seismic-react'
+```
+
+## Overview
+
+`useSignedReadContract` is a React hook that provides a privacy-focused alternative to standard contract read operations. Unlike traditional read methods, this hook enables cryptographically signed read interactions, adding an extra layer of security and verification.
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useSignedReadContract } from 'seismic-react'
+
+import { myTokenAbi } from './abis'
+
+function TokenBalanceComponent() {
+  const { signedRead, isLoading, error, hash } = useSignedReadContract({
+    address: '0x1234567890123456789012345678901234567890',
+    abi: myTokenAbi,
+    functionName: 'balanceOf',
+    args: ['0xUserAddress'],
+  })
+
+  const fetchBalance = async () => {
+    try {
+      const balance = await signedRead()
+      console.log('Signed Balance:', balance)
+    } catch (err) {
+      console.error('Balance fetch failed', err)
+    }
+  }
+
+  return (
+    <div>
+      {isLoading && <p>Fetching balance...</p>}
+      {error && <p>Error: {error.message}</p>}
+      {hash && <p>Read Transaction Hash: {hash}</p>}
+      <button onClick={fetchBalance} disabled={isLoading}>
+        Get Balance
+      </button>
+    </div>
+  )
+}
+```
+
+### Advanced TypeScript Usage
+
+```tsx
+import { useSignedReadContract } from 'seismic-react'
+import { myNFTAbi } from './abis'
+
+function NFTOwnerComponent() {
+  const {
+    signedRead,
+    isLoading
+  } = useSignedReadContract<
+    typeof myNFTAbi,
+    'ownerOf',
+    [bigint]
+  >({
+    address: '0x1234567890123456789012345678901234567890',
+    abi: myNFTAbi,
+    functionName: 'ownerOf',
+    args: [42n] // NFT token ID
+  })
+
+  return (/* ... */);
+}
+```
+
+## Parameters
+
+### config
+
+- **Type:** `UseSignedReadContractConfig<TAbi, TFunctionName, TArgs>`
+
+#### address
+
+- **Type:** `Hex`
+- **Required:** Yes
+- The blockchain address of the contract
+
+#### abi
+
+- **Type:** `Abi`
+- **Required:** Yes
+- The contract's Application Binary Interface
+
+#### functionName
+
+- **Type:** `string`
+- **Required:** Yes
+- The name of the contract function to call
+
+#### args
+
+- **Type:** `unknown[]`
+- **Required:** Yes
+- Arguments to pass to the contract function
+
+## Return Value
+
+An object with the following properties:
+
+### signedRead()
+
+- **Type:** `() => Promise<unknown>`
+- A function to execute the cryptographically signed contract read
+- Returns the result of the contract function call
+
+### read()
+
+- **Type:** `() => Promise<unknown>`
+- An alias for `signedRead()`
+- Provides alternative method name for convenience
+
+### isLoading
+
+- **Type:** `boolean`
+- Indicates if the read operation is in progress
+
+### hash
+
+- **Type:** `null | 0x${string}`
+- The transaction hash associated with the signed read
+- `null` if no transaction has been sent
+
+### error
+
+- **Type:** `null | Error`
+- Contains any error from the most recent read operation
+
+## Remarks
+
+### Key Features
+
+- Cryptographically signed read operations
+- Enhanced privacy and verification
+- Type-safe contract interactions
+- Comprehensive operation state management
+
+### Security Benefits
+
+- Provides proof of read authorization
+- Prevents unauthorized or spoofed read attempts
+- Adds an additional layer of blockchain interaction security
+
+### Performance Considerations
+
+- Minimal overhead for contract reads
+- Efficient state management
+- Supports complex contract interactions
+
+## Error Handling
+
+Potential errors include:
+
+- Invalid contract parameters
+- Network connectivity issues
+- Signature verification failures
+- Read operation reverts
+
+## Compatibility
+
+- Works with modern React applications
+- Compatible with Seismic's shielded wallet ecosystem
+- Supports TypeScript
+- Integrates with various blockchain networks
+
+## Best Practices
+
+- Always handle potential errors
+- Check `isLoading` state before multiple reads
+- Validate arguments before calling `signedRead`
+- Provide user feedback during read operations

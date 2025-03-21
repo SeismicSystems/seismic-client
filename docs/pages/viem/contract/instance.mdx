@@ -1,0 +1,113 @@
+---
+description: A ShieldedContract instance is a type-safe interface for performing contract-related actions with privacy features, created by the getShieldedContract function.
+---
+
+# Contract Instance
+
+A ShieldedContract instance is a type-safe interface for performing contract-related actions on the Seismic blockchain. Create an instance with the `getShieldedContract` function.
+
+## Import
+
+```ts
+import { getShieldedContract } from 'seismic-viem'
+```
+
+## Usage
+
+You can create a ShieldedContract instance with the `getShieldedContract` function by passing in an ABI, address, and a [ShieldedWalletClient](/viem/clients/wallet).
+
+```ts
+const contract = getShieldedContract({
+  address: '0x1234...',
+  abi: myContractAbi,
+  client: shieldedWalletClient,
+})
+
+// Perform a shielded write
+await contract.write.myFunction([arg1, arg2], { gas: 50000n })
+
+// Perform a signed read
+const value = await contract.read.getValue()
+console.log('Value:', value)
+```
+
+## Return Value
+
+ShieldedContract instance object with type inferred from the ABI.
+
+Depending on the client you provide, different methods will be available on the contract instance:
+
+### Available Methods
+
+- **`write`**: Write to a contract with encrypted calldata
+- **`read`**: Read from a contract using a signed read
+- **`tread`**: Transparently read from a contract using an unsigned read (from the zero address)
+- **`twrite`**: Transparently write to a contract using non-encrypted calldata
+
+### Calling Methods
+
+Contract instance methods follow this general format:
+
+```ts
+// function calls
+contract.(read|write|tread|twrite).(functionName)(args, options)
+```
+
+If the contract function doesn't accept arguments, you can set the `args` parameter to an empty array `[]`
+
+## Parameters
+
+### address
+
+- **Type:** `Address` (`0x${string}`)
+
+The contract address.
+
+```ts
+const contract = getShieldedContract({
+  address: '0x1234...', // [!code focus]
+  abi: myContractAbi,
+  client: shieldedWalletClient,
+})
+```
+
+### abi
+
+- **Type:** `Abi`
+
+The contract's ABI.
+
+```ts
+const contract = getShieldedContract({
+  address: '0x1234...',
+  abi: myContractAbi, // [!code focus]
+  client: shieldedWalletClient,
+})
+```
+
+### client
+
+- **Type:** `ShieldedWalletClient`
+
+The ShieldedWalletClient for performing contract actions with privacy features.
+
+```ts
+const contract = getShieldedContract({
+  address: '0x1234...',
+  abi: myContractAbi,
+  client: shieldedWalletClient, // [!code focus]
+})
+```
+
+## Remarks
+
+- The `read` property will always call a signed read
+- The `tread` property will toggle between public reads and signed reads, depending on whether an `account` is provided
+- The `write` property will encrypt calldata of the transaction
+- The `twrite` property will make a normal write with transparent calldata
+- The client must be a `ShieldedWalletClient`
+
+## Throws
+
+- If the wallet client is not provided for shielded write or signed read operations
+- If the wallet client does not have an account configured for signed reads

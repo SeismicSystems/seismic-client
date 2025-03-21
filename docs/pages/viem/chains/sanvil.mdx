@@ -1,0 +1,76 @@
+---
+description: Chain configuration for connecting to a locally-running Seismic Anvil instance
+---
+
+# Seismic Anvil
+
+Chain configuration for connecting to a locally-running Seismic Anvil instance
+
+## Import
+
+```ts
+import { sanvil } from 'seismic-viem'
+```
+
+## Usage
+
+`sanvil` provides a chain configuration for connecting to a locally-running Seismic Anvil instance, which serves as a development environment.
+
+```ts
+import { sanvil } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: sanvil,
+  transport: http(),
+})
+```
+
+To install Seismic Anvil, use [sfoundryup](https://seismic-2.gitbook.io/seismic-book/getting-started/publish-your-docs#sforge-sanvil-and-ssolc).
+
+## Properties
+
+The `sanvil` chain configuration contains the following properties:
+
+### id
+
+- **Type:** `number`
+- **Value:** `31337`
+
+The chain identifier.
+
+### name
+
+- **Type:** `string`
+- **Value:** `"Anvil"`
+
+Human-readable name of the chain.
+
+### nativeCurrency
+
+- **Type:** `object`
+- **Value:** `{ decimals: 18, name: "Ether", symbol: "ETH" }`
+
+The native currency configuration of the chain.
+
+### rpcUrls
+
+- **Type:** `object`
+- **Value:**
+  ```ts
+  {
+    default: {
+      http: ["http://127.0.0.1:8545"],
+      webSocket: ["ws://127.0.0.1:8546"]
+    }
+  }
+  ```
+
+Collection of RPC endpoints for connecting to the local Anvil instance.
+
+### formatters
+
+- **Type:** `ChainFormatters`
+- **Value:** `seismicChainFormatters`
+
+Custom formatters for Seismic-specific data structures.

@@ -1,0 +1,152 @@
+---
+description: A React context provider for managing shielded wallet interactions with enhanced privacy and security.
+---
+
+# Shielded Wallet Provider
+
+## Import
+
+```ts
+import { ShieldedWalletProvider } from 'seismic-react'
+```
+
+## Overview
+
+`ShieldedWalletProvider` is a React context provider that enables secure, privacy-focused wallet interactions. It integrates seamlessly with existing React and Web3 ecosystem libraries, providing an additional layer of privacy for blockchain applications.
+
+## Usage
+
+### Basic Integration
+
+```tsx
+import React from 'react'
+import { ShieldedWalletProvider, seismicDevnet } from 'seismic-react'
+import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { http } from 'viem'
+import { WagmiProvider, createConfig } from 'wagmi'
+
+const CHAINS = [seismicDevnet1, sanvil]
+const config = createConfig({
+  chains: CHAINS,
+  transports: {
+    [sanvil.id]: http(),
+    [seismicDevnet1.id]: http(),
+  },
+})
+
+export default function App(): React.FC {
+  return (
+    <WagmiProvider config={config}>
+      <ShieldedWalletProvider
+        config={config}
+        options={{ publicChain: CHAINS[0] }}
+      >
+        <h1>Hello World</h1>
+      </ShieldedWalletProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+## Parameters
+
+### props
+
+- **Type:** `ShieldedWalletProviderProps`
+
+#### config
+
+- **Type:** `Config`
+- **Required:** Yes
+
+The Wagmi configuration used to initialize the shielded wallet client
+
+```tsx
+import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { http } from 'viem'
+import { createConfig } from 'wagmi'
+
+const config = createConfig({
+  chains: [seismicDevnet1, sanvil],
+  transports: {
+    [sanvil.id]: http(),
+    [seismicDevnet1.id]: http(),
+  },
+})
+```
+
+#### options
+
+- **Type:** `object`
+- **Required:** No
+
+Additional configuration options for the shielded wallet provider.
+
+##### publicTransport
+
+- **Type:** `Transport`
+- **Optional:** Yes
+
+Define the transport method for your public client. This should be your preferred RPC provider.
+
+##### publicChain
+
+- **Type:** `Chain`
+- **Optional:** Yes
+
+Define the chain for your public client to use. This will allow `seismic-viem` to directly send signed payloads (e.g. transactions) to the RPC provider
+
+## Return Value
+
+`ReactNode` - Renders the shielded wallet context and its children
+
+## Remarks
+
+### Key Features
+
+- Seamless integration with Web3 ecosystem libraries
+- Enhanced privacy for wallet interactions
+- Supports custom transport and chain configurations
+- Works with Next.js and other React frameworks
+
+### Security Considerations
+
+- Provides an additional layer of privacy for blockchain transactions
+- Helps protect sensitive wallet information
+- Enables more secure and confidential blockchain interactions
+
+## Error Handling
+
+The provider may throw errors if:
+
+- Invalid configuration is provided
+- Network connectivity issues occur
+- Incompatible wallet or chain configurations are used
+
+## Compatibility
+
+- Works with Wagmi v2
+- Compatible with RainbowKit
+- Supports major Web3 React frameworks
+- Tested with Next.js applications
+
+## Example: Using shielded wallet after setting up the provider context
+
+```tsx
+import { useShieldedWallet } from 'seismic-react'
+
+function MyComponent() {
+  const { loaded, walletClient } = useShieldedWallet()
+
+  const handleTransaction = async () => {
+    if (!loaded || !walletClient) return
+    const result = await walletClient.sendTransaction(...)
+  }
+
+  return (
+    <div>
+      {/* Wallet interaction UI */}
+    </div>
+  )
+}
+```

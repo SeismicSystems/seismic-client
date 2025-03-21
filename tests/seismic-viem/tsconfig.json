@@ -1,11 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*", "../../packages/seismic-viem/src/**/*"],
+  "include": [
+    "src/**/*",
+    "../../packages/seismic-viem/src/**/*",
+    "../../packages/seismic-viem-tests/src/**/*"
+  ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "paths": {
       "@sviem/*": ["../../packages/seismic-viem/src/*"],
-      "@test/*": ["./src/*"]
+      "@test/*": ["./src/*"],
+      "@sviem-tests/*": ["../../packages/seismic-viem-tests/src/*"]
     },
     "composite": true,
     "baseUrl": ".",

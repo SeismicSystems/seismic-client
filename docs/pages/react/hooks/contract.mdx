@@ -1,0 +1,189 @@
+---
+description: A React hook for creating and managing a shielded contract instance with type-safe and privacy-focused capabilities.
+---
+
+# Contract Instance Hook
+
+## Import
+
+```ts
+import { useShieldedContract } from 'seismic-react'
+```
+
+## Overview
+
+`useShieldedContract` is a React hook that provides a type-safe, privacy-focused way to interact with blockchain contracts. It creates a shielded contract instance with enhanced privacy features.
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useShieldedContract } from 'seismic-react'
+
+import { wagmiTokenAbi } from './abis'
+
+function MyComponent() {
+  const { contract, address, error } = useShieldedContract({
+    abi: wagmiTokenAbi,
+    address: '0x1234567890123456789012345678901234567890',
+  })
+
+  if (error) {
+    return <div>Error initializing contract: {error.message}</div>
+  }
+
+  const handleTransfer = async () => {
+    if (contract) {
+      try {
+        const result = await contract.write.transfer([
+          '0xRecipientAddress',
+          BigInt(100),
+        ])
+        console.log('Transfer result:', result)
+      } catch (err) {
+        console.error('Transfer failed', err)
+      }
+    }
+  }
+
+  return (
+    <div>
+      <p>Contract Address: {address}</p>
+      <button onClick={handleTransfer}>Transfer Tokens</button>
+    </div>
+  )
+}
+```
+
+### Advanced Usage with TypeScript
+
+```tsx
+import { useShieldedContract } from 'seismic-react'
+import { customTokenAbi } from './abis'
+
+function AdvancedComponent() {
+  const {
+    contract,
+    address,
+    error
+  } = useShieldedContract<
+    '0x1234567890123456789012345678901234567890',
+    typeof customTokenAbi
+  >({
+    abi: customTokenAbi,
+    address: '0x1234567890123456789012345678901234567890'
+  })
+
+  // Type-safe contract interactions
+  const fetchBalance = async () => {
+    if (contract) {
+      const balance = await contract.read.balanceOf([
+        '0xUserAddress'
+      ])
+      console.log('Balance:', balance)
+    }
+  }
+
+  return (/* ... */);
+}
+```
+
+## Parameters
+
+### config
+
+- **Type:** `UseShieldedContractConfig<TAddress, TAbi>`
+
+#### abi
+
+- **Type:** `Abi`
+- **Required:** Yes
+- The contract's Application Binary Interface
+- Defines the contract's methods and events
+
+#### address
+
+- **Type:** `Address`
+- **Required:** Yes
+- The blockchain address of the contract
+
+## Return Value
+
+An object with the following properties:
+
+### address
+
+- **Type:** `TAddress`
+- The contract's blockchain address
+
+### contract
+
+- **Type:** `null | ShieldedContract`
+- The shielded contract instance
+- `null` if contract initialization fails
+
+### error
+
+- **Type:** `null | Error`
+- Contains any error that occurred during contract initialization
+- `null` if no errors occurred
+
+## Remarks
+
+### Key Features
+
+- Type-safe contract interactions
+- Privacy-focused contract management
+- Seamless error handling
+- Works with various contract ABIs
+
+### Performance Considerations
+
+- Lazy initialization of contract
+- Minimal overhead for contract interactions
+- Supports complex contract interfaces
+
+## Error Handling
+
+Potential errors include:
+
+- Invalid contract address
+- Incompatible ABI
+- Network connectivity issues
+- Initialization failures
+
+## Compatibility
+
+- Works with modern React applications
+- Compatible with TypeScript
+- Supports various blockchain networks
+- Integrates with Seismic's shielded wallet ecosystem
+
+## Best Practices
+
+- Always check for `error` before using the contract
+- Verify `contract` is not `null` before calling methods
+- Use type parameters for maximum type safety
+- Handle potential errors in async operations
+
+### Example: Error Handling
+
+```tsx
+function SafeContractComponent() {
+  const { contract, error } = useShieldedContract({
+    abi: myContractAbi,
+    address: contractAddress,
+  })
+
+  if (error) {
+    return <ErrorDisplay message={error.message} />
+  }
+
+  if (!contract) {
+    return <LoadingSpinner />
+  }
+
+  return <ContractInteractionUI contract={contract} />
+}
+```

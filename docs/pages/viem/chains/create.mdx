@@ -1,0 +1,79 @@
+---
+description: Creates a Seismic development network chain configuration for connecting to development nodes.
+---
+
+# Create a Seismic devnet chain configuration
+
+## Import
+
+```ts
+import { createSeismicDevnet } from 'seismic-viem'
+```
+
+## Usage
+
+Creates a Seismic development network chain configuration that can be used with clients.
+
+```ts
+import { createSeismicDevnet } from 'seismic-viem'
+
+// Create using node number
+const devnet1 = createSeismicDevnet({ node: 1 })
+
+// Create using custom host
+const devnetCustom = createSeismicDevnet({
+  nodeHost: 'custom.node.example.com',
+})
+```
+
+## Return Value
+
+`Chain` - A chain configuration object that can be used with viem clients, containing:
+
+- Chain ID: 5124
+- Network name: 'Seismic'
+- Native ETH currency configuration
+- RPC URLs (HTTP and WebSocket endpoints)
+- Block explorer configuration (if applicable)
+- Seismic-specific transaction formatters
+
+## Parameters
+
+### params
+
+The parameters for creating a Seismic devnet.
+
+```ts
+// Using node number
+const devnet = createSeismicDevnet({
+  node: 1, // [!code focus]
+  explorerUrl: 'https://custom-explorer.example.com' // optional [!code focus]
+})
+
+// Using custom host
+const devnet = createSeismicDevnet({
+  nodeHost: 'custom.node.example.com' // [!code focus]
+})
+```
+
+#### node (optional)
+
+- **Type:** `number`
+
+The node number for the devnet. If provided without `nodeHost`, the hostname will be generated as `node-{node}.seismicdev.net`.
+
+#### nodeHost (optional)
+
+- **Type:** `string`
+
+The direct hostname for the node. Required if `node` is not provided.
+
+#### explorerUrl (optional)
+
+- **Type:** `string`
+
+Custom block explorer URL. If not provided and `node` exists, defaults to `https://explorer-{node}.seismicdev.net`.
+
+## Throws
+
+Throws if neither node number nor nodeHost is provided.
