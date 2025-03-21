@@ -198,7 +198,11 @@ export async function shieldedWriteContractDebug<
 
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
-  const shieldedData = await aesCipher.encrypt(plaintextCalldata, nonce)
+  const encryptionNonce = randomEncryptionNonce()
+  const shieldedData = await aesCipher.encrypt(
+    plaintextCalldata,
+    encryptionNonce
+  )
 
   const baseTx = {
     to: address,
@@ -217,6 +221,7 @@ export async function shieldedWriteContractDebug<
       ...baseTx,
       data: shieldedData,
       encryptionPubkey: client.getEncryptionPublicKey(),
+      encryptionNonce,
     },
   }
 }
