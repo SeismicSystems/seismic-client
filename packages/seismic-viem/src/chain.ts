@@ -292,6 +292,14 @@ export const seismicDevnet1 = createSeismicDevnet({ node: 1 })
 export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
 
 /**
+ * The seismic devnet running at node-3.seismicdev.net
+ * Its associated explorer is at explorer-3.seismicdev.net
+ *
+ * This is a single-node network running seismic's fork of reth on --dev mode
+ */
+export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
+
+/**
  * An alias for {@link seismicDevnet1}
  */
 export const seismicDevnet = seismicDevnet1

@@ -9,6 +9,7 @@ export {
   sanvil,
   seismicDevnet1,
   seismicDevnet2,
+  seismicDevnet3,
   seismicDevnet,
   localSeismicDevnet,
   createSeismicDevnet,
