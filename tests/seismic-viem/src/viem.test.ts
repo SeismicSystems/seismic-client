@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, test } from 'bun:test'
-import { sanvil } from 'seismic-viem'
 import { Chain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -196,10 +195,7 @@ describe('Transaction Trace', async () => {
   test(
     'Seismic Tx removes input from trace',
     async () => {
-      if (chain.id !== sanvil.id) {
-        // TODO: do this in foundry too
-        await testSeismicTxTrace({ chain, url, account })
-      }
+      await testSeismicTxTrace({ chain, url, account })
     },
     {
       timeout: TIMEOUT_MS,
