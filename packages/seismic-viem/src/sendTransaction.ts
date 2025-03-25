@@ -167,7 +167,6 @@ export async function sendShieldedTransaction<
     value,
     ...rest
   } = parameters
-
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
       // TODO: link this
@@ -175,6 +174,7 @@ export async function sendShieldedTransaction<
     })
   const account = account_ ? parseAccount(account_) : null
 
+  console.log('parameters', parameters)
   try {
     assertRequest(parameters as AssertRequestParameters)
 

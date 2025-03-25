@@ -1,6 +1,6 @@
 {
   "name": "seismic-viem-tests",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "module": "./dist/_esm/index.js",
   "types": "./dist/_types/index.d.ts",

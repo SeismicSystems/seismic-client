@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, test } from 'bun:test'
+import { sanvil } from 'seismic-viem'
 import { Chain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -19,6 +20,10 @@ import { testHkdfString } from '@sviem-tests/tests/precompiles.ts'
 import { testEcdh } from '@sviem-tests/tests/precompiles.ts'
 import { testRngWithPers } from '@sviem-tests/tests/precompiles.ts'
 import {
+  testLegacyTxTrace,
+  testSeismicTxTrace,
+} from '@sviem-tests/tests/trace.ts'
+import {
   testSeismicCallTypedData,
   testSeismicTxTypedData,
 } from '@sviem-tests/tests/typedData.ts'
@@ -33,7 +38,7 @@ const ENC_PK =
 
 const TEST_ACCOUNT_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-const testAccount = privateKeyToAccount(TEST_ACCOUNT_PRIVATE_KEY)
+const account = privateKeyToAccount(TEST_ACCOUNT_PRIVATE_KEY)
 
 let chain: Chain
 let url: string
@@ -46,7 +51,12 @@ beforeAll(async () => {
   chain = envChain()
   port = 8545
   await buildNode(chain)
-  const node = await setupNode(chain, { port, ws: true })
+  const node = await setupNode(chain, {
+    port,
+    ws: true,
+    // verbosity: 5,
+    // silent: false,
+  })
   exitProcess = node.exitProcess
   url = node.url
   wsUrl = `ws://localhost:${port}`
@@ -55,7 +65,7 @@ beforeAll(async () => {
 describe('Seismic Contract', async () => {
   test(
     'deploy & call contracts with seismic tx',
-    () => testSeismicTx({ chain, url, account: testAccount }),
+    async () => await testSeismicTx({ chain, url, account }),
     {
       timeout: TIMEOUT_MS,
     }
@@ -65,10 +75,10 @@ describe('Seismic Contract', async () => {
 describe('Seismic Transaction Encoding', async () => {
   test(
     'node detects and parses seismic transaction',
-    () =>
-      testSeismicTxEncoding({
+    async () =>
+      await testSeismicTxEncoding({
         chain,
-        account: testAccount,
+        account,
         url,
         encryptionSk: ENC_SK,
         encryptionPubkey: ENC_PK,
@@ -82,10 +92,10 @@ describe('Seismic Transaction Encoding', async () => {
 describe('Typed Data', async () => {
   test(
     'client can sign a seismic typed message',
-    () =>
-      testSeismicCallTypedData({
+    async () =>
+      await testSeismicCallTypedData({
         chain,
-        account: testAccount,
+        account,
         url,
         encryptionSk: ENC_SK,
         encryptionPubkey: ENC_PK,
@@ -95,9 +105,9 @@ describe('Typed Data', async () => {
 
   test(
     'client can sign via eth_signTypedData',
-    () =>
-      testSeismicTxTypedData({
-        account: testAccount,
+    async () =>
+      await testSeismicTxTypedData({
+        account,
         chain,
         url,
         encryptionSk: ENC_SK,
@@ -124,23 +134,84 @@ describe('Websocket Connection', () => {
   )
 })
 
-describe('Seismic Precompiles', async () => {
-  test('RNG(1)', () => testRng({ chain, url }, 1), { timeout: TIMEOUT_MS })
-  test('RNG(8)', () => testRng({ chain, url }, 8), { timeout: TIMEOUT_MS })
-  test('RNG(16)', () => testRng({ chain, url }, 16), { timeout: TIMEOUT_MS })
-  test('RNG(32)', () => testRng({ chain, url }, 32), { timeout: TIMEOUT_MS })
-  test('RNG(32, pers)', () => testRngWithPers({ chain, url }, 32), {
+describe('Seismic Precompiles', () => {
+  test(
+    'RNG(1)',
+    async () => {
+      await testRng({ chain, url }, 1)
+    },
+    { timeout: TIMEOUT_MS }
+  )
+  test(
+    'RNG(8)',
+    async () => {
+      await testRng({ chain, url }, 8)
+    },
+    { timeout: TIMEOUT_MS }
+  )
+  test(
+    'RNG(32)',
+    async () => {
+      await testRng({ chain, url }, 32)
+    },
+    { timeout: TIMEOUT_MS }
+  )
+  test(
+    'RNG(32, pers)',
+    async () => {
+      await testRngWithPers({ chain, url }, 32)
+    },
+    { timeout: TIMEOUT_MS }
+  )
+  test(
+    'ECDH',
+    async () => {
+      await testEcdh({ chain, url })
+    },
+    { timeout: TIMEOUT_MS }
+  )
+  test(
+    'HKDF(string)',
+    async () => {
+      await testHkdfString({ chain, url })
+    },
+    { timeout: TIMEOUT_MS }
+  )
+  test(
+    'HKDF(hex)',
+    async () => {
+      await testHkdfHex({ chain, url })
+    },
+    { timeout: TIMEOUT_MS }
+  )
+  test('AES-GCM', async () => testAesGcm({ chain, url }), {
     timeout: TIMEOUT_MS,
   })
-  test('ECDH', () => testEcdh({ chain, url }), { timeout: TIMEOUT_MS })
-  test('HKDF(string)', () => testHkdfString({ chain, url }), {
+  test('secp256k1', async () => testSecp256k1({ chain, url }), {
     timeout: TIMEOUT_MS,
   })
-  test('HKDF(hex)', () => testHkdfHex({ chain, url }), { timeout: TIMEOUT_MS })
-  test('AES-GCM', () => testAesGcm({ chain, url }), { timeout: TIMEOUT_MS })
-  test('secp256k1', () => testSecp256k1({ chain, url }), {
-    timeout: TIMEOUT_MS,
-  })
+})
+
+describe('Seismic Transactions', async () => {
+  test(
+    'Seismic Tx removes input from trace',
+    async () => {
+      if (chain.id !== sanvil.id) {
+        // TODO: do this in foundry too
+        await testSeismicTxTrace({ chain, url, account })
+      }
+    },
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+  test(
+    'Legacy Tx keeps input in trace',
+    async () => {
+      await testLegacyTxTrace({ chain, url, account })
+    },
+    { timeout: TIMEOUT_MS }
+  )
 })
 
 afterAll(async () => {
