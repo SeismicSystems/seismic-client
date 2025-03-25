@@ -192,7 +192,7 @@ describe('Seismic Precompiles', () => {
   })
 })
 
-describe('Seismic Transactions', async () => {
+describe('Transaction Trace', async () => {
   test(
     'Seismic Tx removes input from trace',
     async () => {
