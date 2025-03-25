@@ -22,4 +22,9 @@ export {
   testRngWithPers,
   testSecp256k1,
 } from '@sviem-tests/tests/precompiles.ts'
+export {
+  testLegacyTxTrace,
+  testSeismicTxTrace,
+} from '@sviem-tests/tests/trace.ts'
+
 export { loadDotenv } from '@sviem-tests/util.ts'
