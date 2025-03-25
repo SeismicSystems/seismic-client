@@ -133,6 +133,7 @@ export type ShieldedWriteContractDebugResult<
 > = {
   plaintextTx: PlaintextTransactionParameters<TChain, TAccount>
   shieldedTx: SendSeismicTransactionParameters<TChain, TAccount>
+  txHash: `0x${string}` | null
 }
 
 /**
@@ -204,6 +205,17 @@ export async function shieldedWriteContractDebug<
     encryptionNonce
   )
 
+  const request: SendSeismicTransactionParameters<TChain, TAccount> = {
+    to: address,
+    data: shieldedData,
+    gas: gas!,
+    gasPrice: gasPrice!,
+    nonce: nonce!,
+    value,
+    encryptionPubkey: client.getEncryptionPublicKey(),
+    encryptionNonce,
+  }
+
   const baseTx = {
     to: address,
     gas: gas!,
@@ -211,6 +223,10 @@ export async function shieldedWriteContractDebug<
     nonce: nonce!,
     value,
   }
+
+  const code = await client.getCode({ address })
+  const txHash =
+    code !== undefined ? await sendShieldedTransaction(client, request) : null
 
   return {
     plaintextTx: {
@@ -223,5 +239,6 @@ export async function shieldedWriteContractDebug<
       encryptionPubkey: client.getEncryptionPublicKey(),
       encryptionNonce,
     },
+    txHash,
   }
 }
