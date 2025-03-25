@@ -96,7 +96,7 @@
     },
     "packages/seismic-viem-tests": {
       "name": "seismic-viem-tests",
-      "version": "0.0.7",
+      "version": "0.0.9",
       "devDependencies": {
         "@types/bun": "^1.2.5",
         "bun": "^1.2.5",

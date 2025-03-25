@@ -25,7 +25,7 @@ export const buildReth = async (srethDir: string) => {
   const buildProcess = await runProcess('cargo', {
     args: ['build', '--bin', 'seismic-reth'],
     cwd: srethDir,
-    stdio: 'ignore',
+    stdio: 'inherit',
     waitMs: 0,
   })
   await waitForProcessExit(buildProcess)

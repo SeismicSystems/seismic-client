@@ -167,7 +167,6 @@ export async function sendShieldedTransaction<
     value,
     ...rest
   } = parameters
-
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
       // TODO: link this
