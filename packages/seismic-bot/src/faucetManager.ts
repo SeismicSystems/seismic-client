@@ -161,7 +161,7 @@ export class FaucetManager {
     if (!synced) {
       this.slack.urgent({
         message: `Confirmed nonce: ${nonces.confirmed}, pending: ${nonces.pending}`,
-        title: 'Faucet nonce still out of sync',
+        title: `Faucet nonce still out of sync on ${this.chainName()}`,
       })
     } else {
       this.slack.status({
