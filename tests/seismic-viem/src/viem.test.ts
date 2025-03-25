@@ -50,12 +50,7 @@ beforeAll(async () => {
   chain = envChain()
   port = 8545
   await buildNode(chain)
-  const node = await setupNode(chain, {
-    port,
-    ws: true,
-    // verbosity: 5,
-    // silent: false,
-  })
+  const node = await setupNode(chain, { port, ws: true })
   exitProcess = node.exitProcess
   url = node.url
   wsUrl = `ws://localhost:${port}`
