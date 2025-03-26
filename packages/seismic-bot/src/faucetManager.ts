@@ -170,8 +170,8 @@ export class FaucetManager {
       .catch(async (e: Error) => {
         await this.slack.urgent({
           title: `Error bumping nonce for ${this.getFaucetAddress()} on ${this.node} `,
-          message:
-            '```typescript\n' + JSON.stringify(e, stringifyBigInt, 2) + '\n```',
+          message: '```' + JSON.stringify(e, stringifyBigInt, 2) + '\n```',
+          markdown: true,
         })
       })
       .then((hash: Hash) =>
