@@ -5,7 +5,7 @@ import {
   createShieldedWalletClient,
   randomEncryptionNonce,
 } from 'seismic-viem'
-import { Account, Chain } from 'viem'
+import { Account, Chain, Hash } from 'viem'
 import { http } from 'viem'
 
 type ContractTestArgs = {
@@ -18,7 +18,7 @@ export const testSeismicTxTrace = async ({
   chain,
   url,
   account,
-}: ContractTestArgs) => {
+}: ContractTestArgs): Promise<Hash> => {
   const publicClient = createShieldedPublicClient({
     chain,
     transport: http(url),
@@ -55,13 +55,22 @@ export const testSeismicTxTrace = async ({
   await publicClient.waitForTransactionReceipt({ hash })
   const tx = await publicClient.getTransaction({ hash })
   expect(tx.input).toBe('0x')
+
+  const trace = await publicClient.request({
+    // @ts-expect-error: this is allowed
+    method: 'debug_traceTransaction',
+    // @ts-expect-error: this is allowed
+    params: [hash, { tracer: 'callTracer' }],
+  })
+  console.log(trace)
+  return hash
 }
 
 export const testLegacyTxTrace = async ({
   chain,
   url,
   account,
-}: ContractTestArgs) => {
+}: ContractTestArgs): Promise<Hash> => {
   const publicClient = createShieldedPublicClient({
     chain,
     transport: http(url),
@@ -91,4 +100,5 @@ export const testLegacyTxTrace = async ({
   await publicClient.waitForTransactionReceipt({ hash })
   const tx = await publicClient.getTransaction({ hash })
   expect(tx.input).toBe(data)
+  return hash
 }

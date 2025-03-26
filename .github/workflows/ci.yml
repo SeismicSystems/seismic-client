@@ -78,7 +78,7 @@ jobs:
           cd "$SRETH_ROOT"
           git checkout seismic
           git pull
-          cargo build --bin seismic-reth
+          cargo build --bin seismic-reth --http.api all
           cd "$GITHUB_WORKSPACE"
       - name: Create .env
         # So bun doesn't log a warning about no .env file
