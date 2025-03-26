@@ -126,8 +126,11 @@ export class FaucetManager {
       address: this.faucetAccount.address,
       blockTag: 'pending',
     })
+    // sleep for the length of the block time
+    await Bun.sleep(2_000)
     const confirmed = await this.publicClient.getTransactionCount({
       address: this.faucetAccount.address,
+      blockTag: 'latest',
     })
     return { confirmed, pending }
   }
@@ -181,16 +184,8 @@ export class FaucetManager {
     pending: number
   }> {
     const nonces = await this.getNonces()
-    if (nonces.confirmed >= nonces.pending) {
-      return { synced: true, ...nonces }
-    }
-    // sleep for 5 seconds to see if they unclog naturally
-    await Bun.sleep(5_000)
-    const nonces2 = await this.getNonces()
-    if (nonces2.confirmed >= nonces2.pending) {
-      return { synced: true, ...nonces2 }
-    }
-    return { synced: false, ...nonces2 }
+    const synced = nonces.confirmed >= nonces.pending
+    return { synced, ...nonces }
   }
 
   /**
