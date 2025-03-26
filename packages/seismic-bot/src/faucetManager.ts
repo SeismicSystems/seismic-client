@@ -41,7 +41,8 @@ export class FaucetManager {
     chain: Chain,
     faucetPrivateKey: Hex,
     faucetReservePrivateKey: Hex,
-    slack: SlackNotifier
+    slack: SlackNotifier,
+    silent?: boolean
   ) {
     this.node = node
     this.chain = chain
@@ -198,7 +199,7 @@ export class FaucetManager {
    *  2. Retrieves nonce values.
    *  3. Sends a test transaction if confirmed and pending nonces differ.
    */
-  public async checkChain(): Promise<void> {
+  public async runCheck(): Promise<void> {
     await this.fundFaucetIfNeeded()
     const { synced, ...nonces } = await this.checkNonces()
     if (!synced) {
