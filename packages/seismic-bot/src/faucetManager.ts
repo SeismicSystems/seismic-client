@@ -114,19 +114,21 @@ export class FaucetManager {
   /**
    * Retrieves and returns the confirmed and pending nonce for the faucet address.
    * @param client - The public client for the chain.
+   *
+   * Note: We request pending nonce first intentionally,
+   *       because it gives slightly more time for any pending txs
+   *       to be included in the next block.
+   *       When we check if we're up to date, we allow the confimed nonce
+   *       to be ahead of the pending nonce (but not behind)
    */
   private async getNonces() {
-    const confirmedNoncePromise = this.publicClient.getTransactionCount({
-      address: this.faucetAccount.address,
-    })
-    const pendingNoncePromise = this.publicClient.getTransactionCount({
+    const pending = await this.publicClient.getTransactionCount({
       address: this.faucetAccount.address,
       blockTag: 'pending',
     })
-    const [confirmed, pending] = await Promise.all([
-      confirmedNoncePromise,
-      pendingNoncePromise,
-    ])
+    const confirmed = await this.publicClient.getTransactionCount({
+      address: this.faucetAccount.address,
+    })
     return { confirmed, pending }
   }
 
@@ -179,13 +181,13 @@ export class FaucetManager {
     pending: number
   }> {
     const nonces = await this.getNonces()
-    if (nonces.confirmed === nonces.pending) {
+    if (nonces.confirmed >= nonces.pending) {
       return { synced: true, ...nonces }
     }
     // sleep for 5 seconds to see if they unclog naturally
     await Bun.sleep(5_000)
     const nonces2 = await this.getNonces()
-    if (nonces2.confirmed === nonces2.pending) {
+    if (nonces2.confirmed >= nonces2.pending) {
       return { synced: true, ...nonces2 }
     }
     return { synced: false, ...nonces2 }
