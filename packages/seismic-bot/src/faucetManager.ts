@@ -41,8 +41,7 @@ export class FaucetManager {
     chain: Chain,
     faucetPrivateKey: Hex,
     faucetReservePrivateKey: Hex,
-    slack: SlackNotifier,
-    silent?: boolean
+    slack: SlackNotifier
   ) {
     this.node = node
     this.chain = chain
