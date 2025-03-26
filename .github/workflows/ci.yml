@@ -43,6 +43,7 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v3
       - name: Build anvil
+        # cargo sweep will remove files in target/ that are older than 1 day
         run: |
           cd "$SFOUNDRY_ROOT"
           git checkout seismic
@@ -75,6 +76,7 @@ jobs:
       - name: Clear reth files
         run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
       - name: Build reth
+        # cargo sweep will remove files in target/ that are older than 1 day
         run: |
           cd "$SRETH_ROOT"
           git checkout seismic
