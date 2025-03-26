@@ -1,6 +1,7 @@
 import type {
   Address,
   Chain,
+  Hash,
   Hex,
   LocalAccount,
   PublicClient,
@@ -14,6 +15,7 @@ import {
   type ShieldedWalletClient,
   createShieldedWalletClient,
 } from '@sviem/client'
+import { stringifyBigInt } from '@sviem/utils.ts'
 
 const formatUnitsRounded = (
   value: bigint,
@@ -160,12 +162,22 @@ export class FaucetManager {
       value: 1n,
       nonce: confirmedNonce,
     }
-    const hash = await faucetWallet.sendTransaction({
-      ...baseTx,
-      chain: this.chain,
-    })
-    const _receipt = await this.publicClient.waitForTransactionReceipt({ hash })
-    Bun.sleep(5_000)
+    await faucetWallet
+      .sendTransaction({
+        ...baseTx,
+        chain: this.chain,
+      })
+      .catch(async (e: Error) => {
+        await this.slack.urgent({
+          title: `Error bumping nonce for ${this.getFaucetAddress()} on ${this.node} `,
+          message:
+            '```typescript\n' + JSON.stringify(e, stringifyBigInt, 2) + '\n```',
+        })
+      })
+      .then((hash: Hash) =>
+        this.publicClient.waitForTransactionReceipt({ hash })
+      )
+    await Bun.sleep(5_000)
     const { synced, ...nonces } = await this.checkNonces()
     if (!synced) {
       this.slack.urgent({
