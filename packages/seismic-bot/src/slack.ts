@@ -14,6 +14,7 @@ type SlackMessage = {
   // Can be any hex color e.g. '#439FE0'
   color?: 'good' | 'warning' | 'danger' | string
   threadTs?: string
+  markdown?: boolean
 } & Partial<ChatPostMessageArguments>
 
 class SlackNotifier {
@@ -34,14 +35,25 @@ class SlackNotifier {
     title,
     color,
     threadTs,
+    markdown = false,
   }: SlackMessage): Promise<ChatPostMessageResponse | { ts?: string }> {
     if (this.silent) {
       return { ts: undefined }
     }
+
     const defaultAttachment: MessageAttachment = {
       color,
       title,
-      text: message,
+    }
+    if (markdown) {
+      defaultAttachment.blocks = [
+        {
+          type: 'section',
+          text: { type: 'mrkdwn', text: message },
+        },
+      ]
+    } else {
+      defaultAttachment.text = message
     }
 
     const postParams: ChatPostMessageArguments = {
@@ -61,6 +73,7 @@ class SlackNotifier {
     title,
     color = 'danger',
     threadTs,
+    markdown,
   }: Omit<SlackMessage, 'channel'>) {
     return this.send({
       channel: '#log-urgent',
@@ -68,6 +81,7 @@ class SlackNotifier {
       message,
       title,
       threadTs,
+      markdown,
     })
   }
 
@@ -76,6 +90,7 @@ class SlackNotifier {
     title,
     color = LIGHT_GRAY,
     threadTs,
+    markdown,
   }: Omit<SlackMessage, 'channel'>) {
     return this.send({
       channel: '#log-status',
