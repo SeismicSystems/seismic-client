@@ -1,4 +1,5 @@
 import type {
+  Address,
   Chain,
   Hex,
   LocalAccount,
@@ -28,6 +29,7 @@ const formatUnitsRounded = (
 }
 
 export class FaucetManager {
+  private node: string
   private chain: Chain
   private faucetAccount: LocalAccount
   private faucetReserveAccount: LocalAccount
@@ -35,11 +37,13 @@ export class FaucetManager {
   private slack: SlackNotifier
 
   constructor(
+    node: string,
     chain: Chain,
     faucetPrivateKey: Hex,
     faucetReservePrivateKey: Hex,
     slack: SlackNotifier
   ) {
+    this.node = node
     this.chain = chain
     this.faucetAccount = privateKeyToAccount(faucetPrivateKey)
     this.faucetReserveAccount = privateKeyToAccount(faucetReservePrivateKey)
@@ -47,8 +51,8 @@ export class FaucetManager {
     this.slack = slack
   }
 
-  private chainName(): string {
-    return this.chain.rpcUrls.default.http[0]
+  private getFaucetAddress(): Address {
+    return this.faucetAccount.address
   }
 
   /**
@@ -92,7 +96,7 @@ export class FaucetManager {
         `devnet=${this.chain.rpcUrls.default.http[0]}, Faucet balance is too low, sending 100 eth`
       )
       const response = await this.slack.status({
-        message: `Faucet balance on ${this.chainName()} is ${formatUnitsRounded(originalBalance)}. Topping up...`,
+        message: `Faucet balance on ${this.node} for ${this.getFaucetAddress()} is ${formatUnitsRounded(originalBalance)}. Topping up...`,
       })
       const reserveWallet = await this.getReserveWallet()
       const tx = await reserveWallet.sendTransaction({
@@ -105,7 +109,7 @@ export class FaucetManager {
       })
       const newBalance = await this.faucetBalance()
       this.slack.status({
-        message: `Faucet balance on ${this.chainName()} is now ${formatUnitsRounded(newBalance)}`,
+        message: `Faucet balance on ${this.node} for ${this.getFaucetAddress()} is now ${formatUnitsRounded(newBalance)}`,
         threadTs: response.ts,
       })
     }
@@ -138,7 +142,7 @@ export class FaucetManager {
   private async unclogNonce(confirmedNonce: number, pendingNonce: number) {
     const response = await this.slack.status({
       message: `confirmed nonce: ${confirmedNonce}, pending: ${pendingNonce}`,
-      title: `Faucet nonce on ${this.chainName()} is out of sync`,
+      title: `Faucet nonce on ${this.node} is out of sync for ${this.getFaucetAddress()}`,
       color: 'warning',
     })
     const faucetWallet = await this.getFaucetWallet()
@@ -161,11 +165,11 @@ export class FaucetManager {
     if (!synced) {
       this.slack.urgent({
         message: `Confirmed nonce: ${nonces.confirmed}, pending: ${nonces.pending}`,
-        title: `Faucet nonce still out of sync on ${this.chainName()}`,
+        title: `Faucet nonce still out of sync on ${this.node} for ${this.getFaucetAddress()}`,
       })
     } else {
       this.slack.status({
-        message: `Faucet nonce is now synced on ${this.chainName()}`,
+        message: `Faucet nonce is now synced on ${this.node} for ${this.getFaucetAddress()}`,
         title: 'Faucet nonce is now synced',
         color: 'good',
         threadTs: response.ts,
