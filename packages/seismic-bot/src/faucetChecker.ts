@@ -10,17 +10,17 @@ export const checkAllFaucets = async (faucets: Faucets) => {
   console.log(
     `Checking all faucets across ${Object.keys(faucets).length} chains`
   )
-  const slack = new SlackNotifier(process.env.SLACK_TOKEN!)
   for (const [node, { chain, privateKeys }] of Object.entries(faucets)) {
-    for (const faucetPrivateKey of privateKeys) {
+    for (const { pk, silent } of privateKeys) {
+      const slack = new SlackNotifier(process.env.SLACK_TOKEN!, silent)
       const manager = new FaucetManager(
         node,
         chain,
-        faucetPrivateKey,
+        pk,
         faucetReservePrivateKey,
         slack
       )
-      await manager.checkChain()
+      await manager.runCheck()
     }
   }
 }

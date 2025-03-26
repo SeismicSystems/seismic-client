@@ -18,9 +18,11 @@ type SlackMessage = {
 
 class SlackNotifier {
   private web: WebClient
+  private silent: boolean
 
-  constructor(token: string) {
+  constructor(token: string, silent?: boolean) {
     this.web = new WebClient(token)
+    this.silent = silent ?? false
   }
 
   /**
@@ -32,7 +34,10 @@ class SlackNotifier {
     title,
     color,
     threadTs,
-  }: SlackMessage): Promise<ChatPostMessageResponse> {
+  }: SlackMessage): Promise<ChatPostMessageResponse | { ts?: string }> {
+    if (this.silent) {
+      return { ts: undefined }
+    }
     const defaultAttachment: MessageAttachment = {
       color,
       title,
