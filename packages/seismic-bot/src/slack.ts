@@ -44,7 +44,9 @@ class SlackNotifier {
     const defaultAttachment: MessageAttachment = {
       color,
       title,
+      fallback: `${title}\n${message}`, // Move fallback here inside each attachment
     }
+
     if (markdown) {
       defaultAttachment.blocks = [
         {
@@ -58,9 +60,8 @@ class SlackNotifier {
 
     const postParams: ChatPostMessageArguments = {
       channel,
+      text: title || 'Notification', // Add required text field
       attachments: [defaultAttachment],
-      // @ts-expect-error: legacy slack api
-      fallback: `${title}\n${message}`,
       thread_ts: threadTs,
     }
 
