@@ -17,6 +17,9 @@ import {
 } from '@sviem/client'
 import { stringifyBigInt } from '@sviem/utils.ts'
 
+const MIN_ETH_REFILL = 500
+const REFILL_AMOUNT_ETH = 500
+
 const formatUnitsRounded = (
   value: bigint,
   decimals: number = 18,
@@ -93,7 +96,7 @@ export class FaucetManager {
    */
   private async fundFaucetIfNeeded() {
     const originalBalance = await this.faucetBalance()
-    if (originalBalance < parseEther('100', 'wei')) {
+    if (originalBalance < parseEther(MIN_ETH_REFILL.toString(), 'wei')) {
       console.log(
         `devnet=${this.chain.rpcUrls.default.http[0]}, Faucet balance is too low, sending 100 eth`
       )
@@ -103,7 +106,7 @@ export class FaucetManager {
       const reserveWallet = await this.getReserveWallet()
       const tx = await reserveWallet.sendTransaction({
         to: this.faucetAccount.address,
-        value: parseEther('100', 'wei'),
+        value: parseEther(REFILL_AMOUNT_ETH.toString(), 'wei'),
         chain: this.chain,
       })
       const _receipt = await this.publicClient.waitForTransactionReceipt({
