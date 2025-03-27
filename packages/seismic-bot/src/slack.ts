@@ -44,7 +44,7 @@ class SlackNotifier {
       color,
       title,
       text: message,
-      fallback: `${title}\n${message}`, // Move fallback here inside each attachment
+      fallback: `${title}\n${message}`,
     }
 
     const postParams: ChatPostMessageArguments = {
