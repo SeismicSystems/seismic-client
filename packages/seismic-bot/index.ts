@@ -21,8 +21,8 @@ const faucets: Faucets = {
     chain: seismicDevnet2,
     privateKeys: [
       { pk: FAUCET_PK_1 },
-      { pk: FAUCET_PK_2, silent: true },
-      { pk: FAUCET_PK_3 },
+      { pk: FAUCET_PK_2 },
+      { pk: FAUCET_PK_3, silent: true },
     ],
   },
   'node-3': { chain: seismicDevnet3, privateKeys: [{ pk: FAUCET_PK_1 }] },
