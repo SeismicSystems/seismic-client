@@ -2,7 +2,6 @@ import { Chain } from 'viem'
 import { Hex } from 'viem'
 
 import { checkAllFaucets } from '@sbot/faucetChecker'
-import SlackNotifier from '@sbot/slack.ts'
 import { seismicDevnet1, seismicDevnet2, seismicDevnet3 } from '@sviem/chain'
 
 const FAUCET_PK_1 = process.env.FAUCET_1_PRIVATE_KEY! as Hex
@@ -15,12 +14,6 @@ export type FaucetConfig = {
   privateKeys: Key[]
 }
 export type Faucets = Record<string, FaucetConfig>
-
-const slack = new SlackNotifier(process.env.SLACK_TOKEN!)
-slack.urgent({
-  title: `Error bumping nonce for test on test`,
-  message: '```' + 'codeblock' + '\n```',
-})
 
 const faucets: Faucets = {
   'node-1': { chain: seismicDevnet1, privateKeys: [{ pk: FAUCET_PK_1 }] },
