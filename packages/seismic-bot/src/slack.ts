@@ -35,7 +35,6 @@ class SlackNotifier {
     title,
     color,
     threadTs,
-    markdown = false,
   }: SlackMessage): Promise<ChatPostMessageResponse | { ts?: string }> {
     if (this.silent) {
       return { ts: undefined }
@@ -44,23 +43,12 @@ class SlackNotifier {
     const defaultAttachment: MessageAttachment = {
       color,
       title,
+      text: message,
       fallback: `${title}\n${message}`, // Move fallback here inside each attachment
-    }
-
-    if (markdown) {
-      defaultAttachment.blocks = [
-        {
-          type: 'section',
-          text: { type: 'mrkdwn', text: message },
-        },
-      ]
-    } else {
-      defaultAttachment.text = message
     }
 
     const postParams: ChatPostMessageArguments = {
       channel,
-      text: title || 'Notification', // Add required text field
       attachments: [defaultAttachment],
       thread_ts: threadTs,
     }
@@ -74,7 +62,6 @@ class SlackNotifier {
     title,
     color = 'danger',
     threadTs,
-    markdown,
   }: Omit<SlackMessage, 'channel'>) {
     return this.send({
       channel: '#log-urgent',
@@ -82,7 +69,6 @@ class SlackNotifier {
       message,
       title,
       threadTs,
-      markdown,
     })
   }
 
@@ -91,7 +77,6 @@ class SlackNotifier {
     title,
     color = LIGHT_GRAY,
     threadTs,
-    markdown,
   }: Omit<SlackMessage, 'channel'>) {
     return this.send({
       channel: '#log-status',

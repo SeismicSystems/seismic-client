@@ -20,7 +20,6 @@ const slack = new SlackNotifier(process.env.SLACK_TOKEN!)
 slack.urgent({
   title: `Error bumping nonce for test on test`,
   message: '```' + 'codeblock' + '\n```',
-  // markdown: true,
 })
 
 const faucets: Faucets = {
