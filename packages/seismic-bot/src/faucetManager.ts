@@ -98,7 +98,7 @@ export class FaucetManager {
     const originalBalance = await this.faucetBalance()
     if (originalBalance < parseEther(MIN_ETH_REFILL.toString(), 'wei')) {
       console.log(
-        `devnet=${this.chain.rpcUrls.default.http[0]}, Faucet balance is too low, sending 100 eth`
+        `${this.node}/${this.getFaucetAddress()} faucet balance is too low, sending 100 eth`
       )
       const response = await this.slack.status({
         message: `Faucet balance on ${this.node} for ${this.getFaucetAddress()} is ${formatUnitsRounded(originalBalance)}. Topping up...`,
