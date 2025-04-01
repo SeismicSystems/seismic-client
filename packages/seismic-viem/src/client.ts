@@ -40,7 +40,7 @@ export type ShieldedPublicClient<
   transport extends Transport = Transport,
   chain extends Chain | undefined = Chain | undefined,
   accountOrAddress extends Account | undefined = undefined,
-  rpcSchema extends RpcSchema = RpcSchema,
+  rpcSchema extends RpcSchema | undefined = undefined,
 > = Prettify<
   Client<
     transport,
@@ -49,7 +49,7 @@ export type ShieldedPublicClient<
     rpcSchema extends RpcSchema
       ? [...PublicRpcSchema, ...rpcSchema]
       : PublicRpcSchema,
-    PublicActions<transport, chain> & ShieldedPublicActions<rpcSchema>
+    PublicActions<transport, chain> & ShieldedPublicActions
   >
 >
 
@@ -72,16 +72,16 @@ export type ShieldedWalletClient<
   transport extends Transport = Transport,
   chain extends Chain | undefined = Chain | undefined,
   account extends Account = Account,
-  rpcSchema extends RpcSchema = RpcSchema,
+  TRpcSchema extends RpcSchema | undefined = undefined,
 > = Client<
   transport,
   chain,
   account,
-  rpcSchema,
+  RpcSchema,
   PublicActions<transport, chain, account> &
     WalletActions<chain, account> &
     EncryptionActions &
-    ShieldedPublicActions<rpcSchema> &
+    ShieldedPublicActions<TRpcSchema> &
     ShieldedWalletActions<chain, account>
 >
 
@@ -159,7 +159,7 @@ export const getEncryption = (
 export const createShieldedPublicClient = <
   transport extends Transport,
   chain extends Chain | undefined = undefined,
-  rpcSchema extends RpcSchema = RpcSchema,
+  rpcSchema extends RpcSchema | undefined = undefined,
 >(
   parameters: PublicClientConfig<transport, chain>
 ): ShieldedPublicClient<transport, chain, undefined, rpcSchema> => {
@@ -176,7 +176,6 @@ export const getSeismicClients = async <
   TTransport extends Transport,
   TChain extends Chain | undefined,
   TAccount extends Account,
-  TRpcSchema extends RpcSchema = RpcSchema,
 >({
   chain,
   transport,
@@ -186,14 +185,9 @@ export const getSeismicClients = async <
 }: GetSeismicClientsParameters<TTransport, TChain, TAccount>): Promise<
   SeismicClients<TTransport, TChain, TAccount>
 > => {
-  const pubClient: ShieldedPublicClient<
-    TTransport,
-    TChain,
-    undefined,
-    TRpcSchema
-  > =
+  const pubClient: ShieldedPublicClient<TTransport, TChain, undefined> =
     publicClient ??
-    (await createShieldedPublicClient<TTransport, TChain, TRpcSchema>({
+    (await createShieldedPublicClient<TTransport, TChain, undefined>({
       chain,
       transport,
     }))

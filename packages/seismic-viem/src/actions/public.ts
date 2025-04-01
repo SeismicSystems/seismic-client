@@ -1,13 +1,14 @@
-import {
-  type Account,
-  type Chain,
-  type EIP1193RequestFn,
-  type GetStorageAtParameters,
-  type GetStorageAtReturnType,
-  type Hex,
-  type RpcSchema,
-  type Signature,
-  type Transport,
+import type {
+  Account,
+  Chain,
+  EIP1193RequestFn,
+  EIP1474Methods,
+  GetStorageAtParameters,
+  GetStorageAtReturnType,
+  Hex,
+  RpcSchema,
+  Signature,
+  Transport,
 } from 'viem'
 
 import type { ShieldedPublicClient } from '@sviem/client.ts'
@@ -37,6 +38,7 @@ import {
   Secp256K1SigParams,
   secp256k1SigPrecompile,
 } from '@sviem/precompiles/secp256k1.ts'
+import { RpcRequest } from '@sviem/viem-internal/rpc.ts'
 
 /**
  * Defines the additional actions available on a shielded public client.
@@ -124,12 +126,18 @@ import {
  *     - `message` {string} - The message to sign.
  *   @returns {Promise<Signature>} A promise that resolves to the signature object.
  */
-export type ShieldedPublicActions<TRpcSchema extends RpcSchema> = {
+export type ShieldedPublicActions<
+  rpcSchema extends RpcSchema | undefined = undefined,
+> = {
   getTeePublicKey: () => Promise<Hex | string>
   getStorageAt: (
     args: GetStorageAtParameters
   ) => Promise<GetStorageAtReturnType>
-  publicRequest: EIP1193RequestFn<TRpcSchema>
+  publicRequest: (
+    args: RpcRequest
+  ) => EIP1193RequestFn<
+    rpcSchema extends undefined ? EIP1474Methods : rpcSchema
+  >
   explorerUrl: (options: GetExplorerUrlOptions) => string | undefined
   addressExplorerUrl: (options: GetAddressExplorerOptions) => string | undefined
   blockExplorerUrl: (options: GetBlockExplorerOptions) => string | undefined
@@ -175,10 +183,10 @@ export const shieldedPublicActions = <
   TTransport extends Transport,
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends Account | undefined = Account | undefined,
-  TRpcSchema extends RpcSchema = RpcSchema,
+  TRpcSchema extends RpcSchema | undefined = undefined,
 >(
   client: ShieldedPublicClient<TTransport, TChain, TAccount, TRpcSchema>
-): ShieldedPublicActions<TRpcSchema> => ({
+): ShieldedPublicActions => ({
   getTeePublicKey: async () => {
     // @ts-ignore
     const key: Hex | string = await client.request({
@@ -189,7 +197,8 @@ export const shieldedPublicActions = <
   getStorageAt: async (_args) => {
     throw new Error('Cannot call getStorageAt with a shielded public client')
   },
-  publicRequest: (args, options) => client.request(args, options),
+  // @ts-expect-error: TODO: fix this typing
+  publicRequest: async (_args) => client.request<TRpcSchema>(_args),
   explorerUrl: (options) => getExplorerUrl(client.chain, options),
   addressExplorerUrl: (options) =>
     addressExplorerUrl({ chain: client.chain, ...options }),
