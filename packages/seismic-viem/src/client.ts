@@ -89,9 +89,10 @@ type SeismicClients<
   TTransport extends Transport,
   TChain extends Chain | undefined,
   TAccount extends Account,
+  TRpcSchema extends RpcSchema | undefined = undefined,
 > = {
-  public: ShieldedPublicClient<TTransport, TChain, undefined>
-  wallet: ShieldedWalletClient<TTransport, TChain, TAccount>
+  public: ShieldedPublicClient<TTransport, TChain, undefined, TRpcSchema>
+  wallet: ShieldedWalletClient<TTransport, TChain, TAccount, TRpcSchema>
 }
 
 /**
@@ -104,9 +105,10 @@ export type GetSeismicClientsParameters<
   TTransport extends Transport,
   TChain extends Chain | undefined,
   TAccount extends Account,
+  TRpcSchema extends RpcSchema | undefined = undefined,
 > = PublicClientConfig<TTransport, TChain> & {
   account: TAccount
-  publicClient?: ShieldedPublicClient<TTransport, TChain, undefined>
+  publicClient?: ShieldedPublicClient<TTransport, TChain, undefined, TRpcSchema>
   encryptionSk?: Hex | undefined
 }
 
@@ -176,18 +178,27 @@ export const getSeismicClients = async <
   TTransport extends Transport,
   TChain extends Chain | undefined,
   TAccount extends Account,
+  TRpcSchema extends RpcSchema | undefined = undefined,
 >({
   chain,
   transport,
   account,
   encryptionSk,
   publicClient,
-}: GetSeismicClientsParameters<TTransport, TChain, TAccount>): Promise<
-  SeismicClients<TTransport, TChain, TAccount>
-> => {
-  const pubClient: ShieldedPublicClient<TTransport, TChain, undefined> =
+}: GetSeismicClientsParameters<
+  TTransport,
+  TChain,
+  TAccount,
+  TRpcSchema
+>): Promise<SeismicClients<TTransport, TChain, TAccount, TRpcSchema>> => {
+  const pubClient: ShieldedPublicClient<
+    TTransport,
+    TChain,
+    undefined,
+    TRpcSchema
+  > =
     publicClient ??
-    (await createShieldedPublicClient<TTransport, TChain, undefined>({
+    (await createShieldedPublicClient<TTransport, TChain, TRpcSchema>({
       chain,
       transport,
     }))
