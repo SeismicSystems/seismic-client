@@ -7,13 +7,12 @@
     "declarationMap": true,
     "outDir": "./dist/_types",
     "tsBuildInfoFile": "./dist/_types/.tsbuildinfo",
-    "baseUrl": ".",
-    "rootDir": "../..",
+    "rootDir": "./src",
+    "baseUrl": "./src",
     "paths": {
       "@sviem/*": ["../seismic-viem/src/*"],
-      "@sreact/*": ["./src/*"]
+      "@sreact/*": ["./*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "../seismic-viem/src/**/*.ts"],
-  "references": [{ "path": "../seismic-viem/tsconfig.types.json" }]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
