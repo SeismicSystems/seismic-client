@@ -102,11 +102,13 @@ export async function shieldedWriteContract<
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
     data,
+    // include type=legacy simply to avoid type errors
+    // this arg isn't used in sendShieldedTransaction
     type: 'legacy',
     nonce,
+    value,
     gas,
     gasPrice,
-    value,
     encryptionPubkey: client.getEncryptionPublicKey(),
     encryptionNonce,
   }
@@ -204,9 +206,11 @@ export async function shieldedWriteContractDebug<
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
     data: shieldedData,
+    // include type=legacy simply to avoid type errors
+    // this arg isn't used in sendShieldedTransaction
     type: 'legacy',
-    value,
     nonce,
+    value,
     gas,
     gasPrice,
     encryptionPubkey: client.getEncryptionPublicKey(),
