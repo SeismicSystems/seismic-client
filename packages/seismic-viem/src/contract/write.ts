@@ -84,14 +84,8 @@ export async function shieldedWriteContract<
     gas,
     gasPrice,
     value,
+    nonce,
   } = parameters as WriteContractParameters
-  let { nonce } = parameters as WriteContractParameters
-
-  if (nonce === undefined) {
-    nonce = await client.getTransactionCount({
-      address: client.account?.address,
-    })
-  }
 
   const seismicAbi = getAbiItem({ abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
@@ -108,9 +102,10 @@ export async function shieldedWriteContract<
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
     data,
-    gas: gas!,
-    gasPrice: gasPrice!,
-    nonce: nonce!,
+    type: 'legacy',
+    nonce,
+    gas,
+    gasPrice,
     value,
     encryptionPubkey: client.getEncryptionPublicKey(),
     encryptionNonce,
@@ -121,9 +116,9 @@ export async function shieldedWriteContract<
 type PlaintextTransactionParameters = {
   to: Address
   data: Hex
-  gas: bigint
-  gasPrice: bigint
-  nonce: number
+  nonce?: number
+  gas?: bigint
+  gasPrice?: bigint
   value?: bigint
 }
 
@@ -182,6 +177,7 @@ export async function shieldedWriteContractDebug<
     gas,
     gasPrice,
     value,
+    nonce,
   } = parameters as WriteContractParameters
 
   if (parameters.checkContractDeployed) {
@@ -189,14 +185,6 @@ export async function shieldedWriteContractDebug<
     if (code === undefined) {
       throw new Error('Contract not found')
     }
-  }
-
-  let { nonce } = parameters as WriteContractParameters
-
-  if (nonce === undefined) {
-    nonce = await client.getTransactionCount({
-      address: client.account?.address,
-    })
   }
 
   const seismicAbi = getAbiItem({ abi, name: functionName }) as AbiFunction
@@ -216,29 +204,26 @@ export async function shieldedWriteContractDebug<
   const request: SendSeismicTransactionParameters<TChain, TAccount> = {
     to: address,
     data: shieldedData,
-    gas: gas!,
-    gasPrice: gasPrice!,
-    nonce: nonce!,
+    type: 'legacy',
     value,
+    nonce,
+    gas,
+    gasPrice,
     encryptionPubkey: client.getEncryptionPublicKey(),
     encryptionNonce,
-  }
-
-  const baseTx = {
-    to: address,
-    gas: gas!,
-    gasPrice: gasPrice!,
-    nonce: nonce!,
-    value,
   }
 
   const txHash = await sendShieldedTransaction(client, request)
   return {
     plaintextTx: {
-      ...baseTx,
+      to: address,
       data: plaintextCalldata,
+      nonce,
+      gas,
+      gasPrice,
+      value,
     },
-    shieldedTx: request,
+    shieldedTx: { ...request, type: '0x74' },
     txHash,
   }
 }
