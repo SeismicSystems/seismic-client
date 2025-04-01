@@ -45,6 +45,9 @@
     "postbuild": "bun run rimraf ./dist/tsconfig.types.tsbuildinfo",
     "test": "bun test"
   },
+  "dependencies": {
+    "seismic-viem": "workspace:*"
+  },
   "peerDependencies": {
     "@rainbow-me/rainbowkit": "^2.0.0",
     "react": "^18",

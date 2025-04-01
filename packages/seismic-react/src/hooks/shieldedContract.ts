@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import type { ShieldedContract } from 'seismic-viem'
+import type { ShieldedContract, ShieldedWalletClient } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
-import type { Abi, Address, CustomTransport } from 'viem'
+import type { Abi, Account, Address, Chain, CustomTransport } from 'viem'
 
 import { useShieldedWallet } from '@sreact/context/shieldedWallet.tsx'
 
@@ -39,16 +39,16 @@ export function useShieldedContract<
   TAddress,
   TAbi
 > {
+  const { walletClient } = useShieldedWallet()
   type ShieldedContractType = ShieldedContract<
     CustomTransport,
     TAddress,
     TAbi,
-    typeof walletClient.chain,
-    typeof walletClient.account,
-    typeof walletClient
+    Chain | undefined,
+    Account,
+    ShieldedWalletClient<CustomTransport, Chain | undefined, Account>
   >
 
-  const { walletClient } = useShieldedWallet()
   const [contract, setContract] = useState<ShieldedContractType | null>(null)
 
   const [error, setError] = useState<Error | null>(null)
