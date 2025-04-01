@@ -12,9 +12,15 @@ import type {
   WriteContractParameters,
   WriteContractReturnType,
 } from 'viem'
-import { encodeAbiParameters, getAbiItem, toFunctionSelector } from 'viem'
+import {
+  encodeAbiParameters,
+  getAbiItem,
+  numberToHex,
+  toFunctionSelector,
+} from 'viem'
 import { formatAbiItem } from 'viem/utils'
 
+import { SEISMIC_TX_TYPE } from '@sviem/chain.ts'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
@@ -233,7 +239,7 @@ export async function shieldedWriteContractDebug<
       gasPrice: request.gasPrice,
       value: request.value,
     },
-    shieldedTx: { ...request, type: '0x74' },
+    shieldedTx: { ...request, type: numberToHex(SEISMIC_TX_TYPE) },
     txHash,
   }
 }
