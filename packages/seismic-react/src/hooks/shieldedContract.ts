@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ShieldedContract } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
-import type { Abi, Address } from 'viem'
+import type { Abi, Address, CustomTransport } from 'viem'
 
 import { useShieldedWallet } from '@sreact/context/shieldedWallet.tsx'
 
@@ -9,6 +9,16 @@ export type UseShieldedContractConfig<
   TAddress extends Address,
   TAbi extends Abi | readonly unknown[],
 > = { abi: TAbi; address: TAddress }
+
+export type UseShieldedContractResult<
+  TAddress extends Address,
+  TAbi extends Abi | readonly unknown[],
+> = {
+  contract: ShieldedContract<CustomTransport, TAddress, TAbi> | null
+  abi: TAbi
+  address: TAddress
+  error: Error | null
+}
 
 /**
  * A React hook that exposes `contract`, which is returned by a call to {@link getShieldedContract}.
@@ -22,9 +32,24 @@ export type UseShieldedContractConfig<
 export function useShieldedContract<
   TAddress extends Address,
   const TAbi extends Abi | readonly unknown[],
->({ abi, address }: UseShieldedContractConfig<TAddress, TAbi>) {
+>({
+  abi,
+  address,
+}: UseShieldedContractConfig<TAddress, TAbi>): UseShieldedContractResult<
+  TAddress,
+  TAbi
+> {
+  type ShieldedContractType = ShieldedContract<
+    CustomTransport,
+    TAddress,
+    TAbi,
+    typeof walletClient.chain,
+    typeof walletClient.account,
+    typeof walletClient
+  >
+
   const { walletClient } = useShieldedWallet()
-  const [contract, setContract] = useState<ShieldedContract | null>(null)
+  const [contract, setContract] = useState<ShieldedContractType | null>(null)
 
   const [error, setError] = useState<Error | null>(null)
 
@@ -35,11 +60,12 @@ export function useShieldedContract<
     }
     setError(null)
     const contract = getShieldedContract({ abi, address, client: walletClient })
-    setContract(contract as any as ShieldedContract)
+    setContract(contract)
   }, [walletClient, abi, address])
 
   return {
     contract,
+    abi,
     address,
     error,
   }
