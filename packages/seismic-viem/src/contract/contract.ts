@@ -40,12 +40,12 @@ type TransparentReadContractReturnType<
       : ExtractAbiFunctionNames<TAbi, 'pure' | 'view'>
     : string,
   _narrowable extends boolean = IsNarrowable<TAbi, Abi>,
-  _walletClient extends Client | unknown = TClient extends {
-    wallet: Client
+  _publicClient extends Client | unknown = TClient extends {
+    public: Client
   }
-    ? TClient['wallet']
+    ? TClient['public']
     : TClient,
-> = _walletClient extends Client
+> = _publicClient extends Client
   ? IsNever<_readFunctionNames> extends true
     ? unknown
     : {
@@ -130,7 +130,7 @@ export type ShieldedContract<
   >,
 > = GetContractReturnType<TAbi, TClient, TAddress> &
   TransparentReadContractReturnType<TAbi, TClient> &
-  TransparentWriteContractReturnType<TAbi, TClient, TAddress>
+  TransparentWriteContractReturnType<TAbi, TClient>
 
 /**
  * This function extends viem's base {@link https://viem.sh/docs/contract/getContract.html getContract} functionality by adding:
