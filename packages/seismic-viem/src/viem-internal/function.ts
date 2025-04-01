@@ -63,6 +63,7 @@ export type GetWriteFunction<
   account extends Account | undefined,
   abi extends Abi | readonly unknown[],
   functionName extends ContractFunctionName<abi, 'nonpayable' | 'payable'>,
+  returnType = WriteContractReturnType,
   args extends ContractFunctionArgs<
     abi,
     'nonpayable' | 'payable',
@@ -102,7 +103,7 @@ export type GetWriteFunction<
               ? [options: options]
               : [options?: options],
           ]
-    ) => Promise<WriteContractReturnType>
+    ) => Promise<returnType>
   : <
       chainOverride extends Chain | undefined,
       options extends Prettify<
@@ -123,4 +124,4 @@ export type GetWriteFunction<
         : [options?: options],
     >(
       ...parameters: Rest | [args: readonly unknown[], ...parameters: Rest]
-    ) => Promise<WriteContractReturnType>
+    ) => Promise<returnType>

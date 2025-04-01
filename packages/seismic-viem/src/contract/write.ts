@@ -2,9 +2,12 @@ import type {
   Abi,
   AbiFunction,
   Account,
+  Address,
   Chain,
   ContractFunctionArgs,
   ContractFunctionName,
+  Hash,
+  Hex,
   Transport,
   WriteContractParameters,
   WriteContractReturnType,
@@ -115,12 +118,9 @@ export async function shieldedWriteContract<
   return sendShieldedTransaction(client, request)
 }
 
-type PlaintextTransactionParameters<
-  TChain extends Chain | undefined,
-  TAccount extends Account,
-> = {
-  to: `0x${string}`
-  data: `0x${string}`
+type PlaintextTransactionParameters = {
+  to: Address
+  data: Hex
   gas: bigint
   gasPrice: bigint
   nonce: number
@@ -128,12 +128,12 @@ type PlaintextTransactionParameters<
 }
 
 export type ShieldedWriteContractDebugResult<
-  TChain extends Chain | undefined,
-  TAccount extends Account,
+  TChain extends Chain | undefined = Chain | undefined,
+  TAccount extends Account | undefined = Account | undefined,
 > = {
-  plaintextTx: PlaintextTransactionParameters<TChain, TAccount>
+  plaintextTx: PlaintextTransactionParameters
   shieldedTx: SendSeismicTransactionParameters<TChain, TAccount>
-  txHash: `0x${string}` | null
+  txHash: Hash
 }
 
 /**
@@ -172,7 +172,7 @@ export async function shieldedWriteContractDebug<
     TChain,
     TAccount,
     chainOverride
-  >
+  > & { checkContractDeployed?: boolean }
 ): Promise<ShieldedWriteContractDebugResult<TChain, TAccount>> {
   const {
     abi,
@@ -183,6 +183,14 @@ export async function shieldedWriteContractDebug<
     gasPrice,
     value,
   } = parameters as WriteContractParameters
+
+  if (parameters.checkContractDeployed) {
+    const code = await client.getCode({ address })
+    if (code === undefined) {
+      throw new Error('Contract not found')
+    }
+  }
+
   let { nonce } = parameters as WriteContractParameters
 
   if (nonce === undefined) {
@@ -224,21 +232,13 @@ export async function shieldedWriteContractDebug<
     value,
   }
 
-  const code = await client.getCode({ address })
-  const txHash =
-    code !== undefined ? await sendShieldedTransaction(client, request) : null
-
+  const txHash = await sendShieldedTransaction(client, request)
   return {
     plaintextTx: {
       ...baseTx,
       data: plaintextCalldata,
     },
-    shieldedTx: {
-      ...baseTx,
-      data: shieldedData,
-      encryptionPubkey: client.getEncryptionPublicKey(),
-      encryptionNonce,
-    },
+    shieldedTx: request,
     txHash,
   }
 }
