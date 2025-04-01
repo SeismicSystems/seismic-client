@@ -22,6 +22,84 @@ import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.ts'
 import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
 
+const getPlaintextCalldata = <
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+  const TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
+  chainOverride extends Chain | undefined = undefined,
+>(
+  parameters: WriteContractParameters<
+    TAbi,
+    TFunctionName,
+    TArgs,
+    TChain,
+    TAccount,
+    chainOverride
+  >
+): Hex => {
+  const { abi, functionName, args = [] } = parameters as WriteContractParameters
+  const seismicAbi = getAbiItem({ abi, name: functionName }) as AbiFunction
+  const selector = toFunctionSelector(formatAbiItem(seismicAbi))
+  const ethAbi = remapSeismicAbiInputs(seismicAbi)
+  const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
+  const plaintextCalldata = `${selector}${encodedParams}` as Hex
+  return plaintextCalldata
+}
+
+async function getShieldedWriteContractRequest<
+  TTransport extends Transport,
+  TChain extends Chain | undefined,
+  TAccount extends Account,
+  const TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
+  chainOverride extends Chain | undefined = undefined,
+>(
+  client: ShieldedWalletClient<TTransport, TChain, TAccount>,
+  parameters: WriteContractParameters<
+    TAbi,
+    TFunctionName,
+    TArgs,
+    TChain,
+    TAccount,
+    chainOverride
+  >
+): Promise<SendSeismicTransactionParameters<TChain, TAccount>> {
+  const { address, gas, gasPrice, value, nonce } = parameters
+
+  const plaintextCalldata = getPlaintextCalldata(parameters)
+  const aesKey = client.getEncryption()
+  const aesCipher = new AesGcmCrypto(aesKey)
+
+  const encryptionNonce = randomEncryptionNonce()
+  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
+
+  return {
+    to: address,
+    data,
+    // include type=legacy simply to avoid type errors
+    // this arg isn't used in sendShieldedTransaction
+    type: 'legacy',
+    nonce,
+    value,
+    gas,
+    gasPrice,
+    encryptionPubkey: client.getEncryptionPublicKey(),
+    encryptionNonce,
+    plaintextCalldata,
+  }
+}
+
 /**
  * Executes a shielded write function on a contract, where the calldata is encrypted. The API for this is the same as viem's {@link https://viem.sh/docs/contract/writeContract writeContract}
  *
@@ -76,47 +154,12 @@ export async function shieldedWriteContract<
     chainOverride
   >
 ): Promise<WriteContractReturnType> {
-  const {
-    abi,
-    functionName,
-    args = [],
-    address,
-    gas,
-    gasPrice,
-    value,
-    nonce,
-  } = parameters as WriteContractParameters
-
-  const seismicAbi = getAbiItem({ abi, name: functionName }) as AbiFunction
-  const selector = toFunctionSelector(formatAbiItem(seismicAbi))
-  const ethAbi = remapSeismicAbiInputs(seismicAbi)
-  const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
-  const plaintextCalldata = `${selector}${encodedParams}` as `0x${string}`
-
-  const aesKey = client.getEncryption()
-  const aesCipher = new AesGcmCrypto(aesKey)
-
-  const encryptionNonce = randomEncryptionNonce()
-  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
-
-  const request: SendSeismicTransactionParameters<TChain, TAccount> = {
-    to: address,
-    data,
-    // include type=legacy simply to avoid type errors
-    // this arg isn't used in sendShieldedTransaction
-    type: 'legacy',
-    nonce,
-    value,
-    gas,
-    gasPrice,
-    encryptionPubkey: client.getEncryptionPublicKey(),
-    encryptionNonce,
-  }
+  const request = await getShieldedWriteContractRequest(client, parameters)
   return sendShieldedTransaction(client, request)
 }
 
 type PlaintextTransactionParameters = {
-  to: Address
+  to: Address | null
   data: Hex
   nonce?: number
   gas?: bigint
@@ -169,63 +212,26 @@ export async function shieldedWriteContractDebug<
     TChain,
     TAccount,
     chainOverride
-  > & { checkContractDeployed?: boolean }
+  >,
+  checkContractDeployed?: boolean
 ): Promise<ShieldedWriteContractDebugResult<TChain, TAccount>> {
-  const {
-    abi,
-    functionName,
-    args = [],
-    address,
-    gas,
-    gasPrice,
-    value,
-    nonce,
-  } = parameters as WriteContractParameters
-
-  if (parameters.checkContractDeployed) {
-    const code = await client.getCode({ address })
+  if (checkContractDeployed) {
+    const code = await client.getCode({ address: parameters.address })
     if (code === undefined) {
       throw new Error('Contract not found')
     }
   }
-
-  const seismicAbi = getAbiItem({ abi, name: functionName }) as AbiFunction
-  const selector = toFunctionSelector(formatAbiItem(seismicAbi))
-  const ethAbi = remapSeismicAbiInputs(seismicAbi)
-  const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
-  const plaintextCalldata = `${selector}${encodedParams}` as `0x${string}`
-
-  const aesKey = client.getEncryption()
-  const aesCipher = new AesGcmCrypto(aesKey)
-  const encryptionNonce = randomEncryptionNonce()
-  const shieldedData = await aesCipher.encrypt(
-    plaintextCalldata,
-    encryptionNonce
-  )
-
-  const request: SendSeismicTransactionParameters<TChain, TAccount> = {
-    to: address,
-    data: shieldedData,
-    // include type=legacy simply to avoid type errors
-    // this arg isn't used in sendShieldedTransaction
-    type: 'legacy',
-    nonce,
-    value,
-    gas,
-    gasPrice,
-    encryptionPubkey: client.getEncryptionPublicKey(),
-    encryptionNonce,
-  }
-
+  const plaintextCalldata = getPlaintextCalldata(parameters)
+  const request = await getShieldedWriteContractRequest(client, parameters)
   const txHash = await sendShieldedTransaction(client, request)
   return {
     plaintextTx: {
-      to: address,
+      to: request.to || null,
       data: plaintextCalldata,
-      nonce,
-      gas,
-      gasPrice,
-      value,
+      nonce: request.nonce,
+      gas: request.gas,
+      gasPrice: request.gasPrice,
+      value: request.value,
     },
     shieldedTx: { ...request, type: '0x74' },
     txHash,
