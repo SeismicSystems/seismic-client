@@ -77,7 +77,7 @@ export type ShieldedWalletClient<
   transport,
   chain,
   account,
-  RpcSchema,
+  TRpcSchema,
   PublicActions<transport, chain, account> &
     WalletActions<chain, account> &
     EncryptionActions &
