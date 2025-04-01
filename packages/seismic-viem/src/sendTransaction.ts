@@ -12,7 +12,6 @@ import type {
   GetTransactionRequestKzgParameter,
   Hash,
   PrepareTransactionRequestErrorType,
-  Prettify,
   SendRawTransactionErrorType,
   Transport,
   UnionOmit,
@@ -59,8 +58,6 @@ import type { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 import type { AssertRequestParameters } from '@sviem/viem-internal/request.ts'
 
-type Expand<T> = Prettify<T extends infer O ? { [K in keyof O]: O[K] } : never>
-
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
   chainOverride extends Chain | undefined = Chain | undefined,
@@ -99,10 +96,6 @@ export type SendSeismicTransactionErrorType =
       | RequestErrorType
     >
   | ErrorType
-
-type DebugType<TChain extends Chain, TAccount extends Account> = Expand<
-  SendSeismicTransactionParameters<TChain, TAccount>
->
 
 /**
  * Sends a shielded transaction on the Seismic network.
