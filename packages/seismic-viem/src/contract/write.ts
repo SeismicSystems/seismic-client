@@ -171,6 +171,7 @@ type PlaintextTransactionParameters = {
   gas?: bigint
   gasPrice?: bigint
   value?: bigint
+  type: Hex
 }
 
 export type ShieldedWriteContractDebugResult<
@@ -234,6 +235,7 @@ export async function shieldedWriteContractDebug<
     plaintextTx: {
       to: request.to || null,
       data: plaintextCalldata,
+      type: numberToHex(SEISMIC_TX_TYPE),
       nonce: request.nonce,
       gas: request.gas,
       gasPrice: request.gasPrice,
