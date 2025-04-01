@@ -72,6 +72,7 @@ export type ShieldedWalletClient<
   transport extends Transport = Transport,
   chain extends Chain | undefined = Chain | undefined,
   account extends Account = Account,
+  TRpcSchema extends RpcSchema | undefined = undefined,
 > = Client<
   transport,
   chain,
@@ -80,7 +81,7 @@ export type ShieldedWalletClient<
   PublicActions<transport, chain, account> &
     WalletActions<chain, account> &
     EncryptionActions &
-    ShieldedPublicActions &
+    ShieldedPublicActions<TRpcSchema> &
     ShieldedWalletActions<chain, account>
 >
 
@@ -186,7 +187,7 @@ export const getSeismicClients = async <
 > => {
   const pubClient: ShieldedPublicClient<TTransport, TChain, undefined> =
     publicClient ??
-    (await createShieldedPublicClient<TTransport, TChain, undefined>({
+    (await createShieldedPublicClient<TTransport, TChain>({
       chain,
       transport,
     }))

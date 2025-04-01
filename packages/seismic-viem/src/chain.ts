@@ -120,31 +120,32 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   return encodedTx
 }
 
-export const seismicRpcSchema: RpcSchema = [
-  {
-    Method: 'eth_estimateGas',
-    Parameters: ['SeismicTransactionRequest'] as
-      | [SeismicTransactionRequest]
-      | [SeismicTransactionRequest, BlockNumber]
-      | [SeismicTransactionRequest, BlockNumber, RpcStateOverride],
-    ReturnType: 'Quantity',
-  },
-  {
-    Method: 'eth_call',
-    Parameters: ['SeismicTransactionRequest'] as
-      | [ExactPartial<SeismicTransactionRequest>]
-      | [
-          ExactPartial<SeismicTransactionRequest>,
-          BlockNumber | BlockTag | BlockIdentifier,
-        ]
-      | [
-          ExactPartial<SeismicTransactionRequest>,
-          BlockNumber | BlockTag | BlockIdentifier,
-          RpcStateOverride,
-        ],
-    ReturnType: 'Hex',
-  },
-]
+export const estimateGasRpcSchema = {
+  Method: 'eth_estimateGas',
+  Parameters: ['SeismicTransactionRequest'] as
+    | [SeismicTransactionRequest]
+    | [SeismicTransactionRequest, BlockNumber]
+    | [SeismicTransactionRequest, BlockNumber, RpcStateOverride],
+  ReturnType: 'Quantity',
+}
+
+export const callRpcSchema = {
+  Method: 'eth_call',
+  Parameters: ['SeismicTransactionRequest'] as
+    | [ExactPartial<SeismicTransactionRequest>]
+    | [
+        ExactPartial<SeismicTransactionRequest>,
+        BlockNumber | BlockTag | BlockIdentifier,
+      ]
+    | [
+        ExactPartial<SeismicTransactionRequest>,
+        BlockNumber | BlockTag | BlockIdentifier,
+        RpcStateOverride,
+      ],
+  ReturnType: 'Hex',
+}
+
+export const seismicRpcSchema: RpcSchema = [estimateGasRpcSchema, callRpcSchema]
 
 /**
  * Chain formatters for Seismic transactions, providing formatting utilities for transaction requests.
