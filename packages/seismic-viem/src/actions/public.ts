@@ -138,11 +138,11 @@ export type ShieldedPublicActions<
   ) => EIP1193RequestFn<
     rpcSchema extends undefined ? EIP1474Methods : rpcSchema
   >
-  explorerUrl: (options: GetExplorerUrlOptions) => string | undefined
-  addressExplorerUrl: (options: GetAddressExplorerOptions) => string | undefined
-  blockExplorerUrl: (options: GetBlockExplorerOptions) => string | undefined
-  txExplorerUrl: (options: GetTxExplorerOptions) => string | undefined
-  tokenExplorerUrl: (options: GetTokenExplorerOptions) => string | undefined
+  explorerUrl: (options: GetExplorerUrlOptions) => string | null
+  addressExplorerUrl: (options: GetAddressExplorerOptions) => string | null
+  blockExplorerUrl: (options: GetBlockExplorerOptions) => string | null
+  txExplorerUrl: (options: GetTxExplorerOptions) => string | null
+  tokenExplorerUrl: (options: GetTokenExplorerOptions) => string | null
   rng: (args: RngParams) => Promise<bigint>
   ecdh: (args: EcdhParams) => Promise<Hex>
   aesGcmEncryption: (args: AesGcmEncryptionParams) => Promise<Hex>

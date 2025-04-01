@@ -70,7 +70,7 @@ export const checkFaucet = async ({
       }
       // only return after the tx is confirmed, to prevent double-requesting
       await publicClient.waitForTransactionReceipt({ hash })
-      return { sent: true, hash, txUrl }
+      return { sent: true, hash, txUrl: txUrl ?? undefined }
     } else {
       throw new Error(`Invalid hash from faucet claim: ${hash}`)
     }
