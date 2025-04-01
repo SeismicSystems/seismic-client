@@ -82,13 +82,13 @@ export type GetBlockExplorerUrlParams = {
 export const getExplorerUrl = (
   chain?: Chain,
   options?: GetExplorerUrlOptions
-): string | undefined => {
+): string | null => {
   if (!chain) {
-    return undefined
+    return null
   }
   const explorerUrl = chain.blockExplorers?.default.url
   if (!explorerUrl) {
-    return undefined
+    return null
   }
   if (!options) {
     return explorerUrl
@@ -104,7 +104,7 @@ export const addressExplorerUrl = ({
   chain,
   address,
   tab,
-}: GetAddressExplorerUrlParams): string | undefined => {
+}: GetAddressExplorerUrlParams): string | null => {
   return getExplorerUrl(chain, {
     item: 'address',
     id: address,
@@ -116,7 +116,7 @@ export const blockExplorerUrl = ({
   chain,
   blockNumber,
   tab,
-}: GetBlockExplorerUrlParams): string | undefined => {
+}: GetBlockExplorerUrlParams): string | null => {
   return getExplorerUrl(chain, {
     item: 'block',
     id: blockNumber.toString(),
@@ -128,7 +128,7 @@ export const txExplorerUrl = ({
   chain,
   txHash,
   tab,
-}: GetTxExplorerUrlParams): string | undefined => {
+}: GetTxExplorerUrlParams): string | null => {
   return getExplorerUrl(chain, {
     item: 'tx',
     id: txHash,
@@ -140,7 +140,7 @@ export const tokenExplorerUrl = ({
   chain,
   address,
   tab,
-}: GetTokenExplorerUrlParams): string | undefined => {
+}: GetTokenExplorerUrlParams): string | null => {
   return getExplorerUrl(chain, {
     item: 'token',
     id: address,

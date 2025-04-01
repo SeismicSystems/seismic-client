@@ -62,9 +62,13 @@ export class AesGcmCrypto {
    * Encrypts data using either a number-based nonce or hex nonce
    */
   public async encrypt(
-    plaintext: Hex,
+    plaintext: Hex | null | undefined,
     nonce: number | bigint | Hex
   ): Promise<Hex> {
+    if (!plaintext || plaintext === '0x') {
+      return '0x'
+    }
+
     // Handle the nonce based on its type
     const nonceBuffer = new Uint8Array(
       typeof nonce === 'string'
@@ -83,11 +87,11 @@ export class AesGcmCrypto {
    * NOTE: not tested or called in any real way
    */
   public async decrypt(
-    ciphertext: Hex | undefined,
+    ciphertext: Hex | null | undefined,
     nonce: number | bigint | Hex
-  ): Promise<Hex | undefined> {
-    if (!ciphertext) {
-      return undefined
+  ): Promise<Hex> {
+    if (!ciphertext || ciphertext === '0x') {
+      return '0x'
     }
 
     // Handle the nonce based on its type

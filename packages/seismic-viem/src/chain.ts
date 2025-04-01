@@ -59,16 +59,16 @@ export type TransactionSerializableSeismic = TransactionSerializable &
   SeismicTxExtras
 
 export type TxSeismic = {
-  chainId?: number | undefined
-  nonce?: bigint | undefined
-  gasPrice?: bigint | undefined
-  gasLimit?: bigint | undefined
-  to?: Address | null | undefined
-  value?: bigint | undefined
-  input?: Hex | undefined
+  chainId?: number
+  nonce?: bigint
+  gasPrice?: bigint
+  gasLimit?: bigint
+  to?: Address | null
+  value?: bigint
+  input?: Hex
   encryptionPubkey: Hex
   encryptionNonce: Hex
-  messageVersion: number | undefined
+  messageVersion?: number
 }
 
 export type SeismicTxSerializer =

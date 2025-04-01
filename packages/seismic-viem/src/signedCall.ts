@@ -53,8 +53,7 @@ const doSignedCall = async <
     // the typedData and signature to the node
     const { typedData, signature } = await signSeismicTxTypedData(
       client,
-      seismicTx,
-      true
+      seismicTx
     )
     // @ts-ignore
     const response: Hex = await client.publicRequest({

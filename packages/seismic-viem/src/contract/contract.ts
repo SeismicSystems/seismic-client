@@ -15,12 +15,14 @@ import type {
   Transport,
   UnionOmit,
   WriteContractParameters,
+  WriteContractReturnType,
 } from 'viem'
 import { getContract } from 'viem'
 
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import { signedReadContract } from '@sviem/contract/read.ts'
 import {
+  ShieldedWriteContractDebugResult,
   shieldedWriteContract,
   shieldedWriteContractDebug,
 } from '@sviem/contract/write.ts'
@@ -90,7 +92,8 @@ type TransparentWriteContractReturnType<
               'nonpayable' | 'payable'
             >
               ? functionName
-              : never
+              : never,
+            WriteContractReturnType
           >
         }
         dwrite: {
@@ -104,7 +107,11 @@ type TransparentWriteContractReturnType<
               'nonpayable' | 'payable'
             >
               ? functionName
-              : never
+              : never,
+            ShieldedWriteContractDebugResult<
+              _walletClient['chain'],
+              _walletClient['account']
+            >
           >
         }
       }
