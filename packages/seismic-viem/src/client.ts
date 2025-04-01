@@ -40,7 +40,7 @@ export type ShieldedPublicClient<
   transport extends Transport = Transport,
   chain extends Chain | undefined = Chain | undefined,
   accountOrAddress extends Account | undefined = undefined,
-  rpcSchema extends RpcSchema | undefined = undefined,
+  rpcSchema extends RpcSchema = RpcSchema,
 > = Prettify<
   Client<
     transport,
@@ -49,7 +49,7 @@ export type ShieldedPublicClient<
     rpcSchema extends RpcSchema
       ? [...PublicRpcSchema, ...rpcSchema]
       : PublicRpcSchema,
-    PublicActions<transport, chain> & ShieldedPublicActions
+    PublicActions<transport, chain> & ShieldedPublicActions<rpcSchema>
   >
 >
 
@@ -72,15 +72,16 @@ export type ShieldedWalletClient<
   transport extends Transport = Transport,
   chain extends Chain | undefined = Chain | undefined,
   account extends Account = Account,
+  rpcSchema extends RpcSchema = RpcSchema,
 > = Client<
   transport,
   chain,
   account,
-  RpcSchema,
+  rpcSchema,
   PublicActions<transport, chain, account> &
     WalletActions<chain, account> &
     EncryptionActions &
-    ShieldedPublicActions &
+    ShieldedPublicActions<rpcSchema> &
     ShieldedWalletActions<chain, account>
 >
 
@@ -158,7 +159,7 @@ export const getEncryption = (
 export const createShieldedPublicClient = <
   transport extends Transport,
   chain extends Chain | undefined = undefined,
-  rpcSchema extends RpcSchema | undefined = undefined,
+  rpcSchema extends RpcSchema = RpcSchema,
 >(
   parameters: PublicClientConfig<transport, chain>
 ): ShieldedPublicClient<transport, chain, undefined, rpcSchema> => {
@@ -175,6 +176,7 @@ export const getSeismicClients = async <
   TTransport extends Transport,
   TChain extends Chain | undefined,
   TAccount extends Account,
+  TRpcSchema extends RpcSchema = RpcSchema,
 >({
   chain,
   transport,
@@ -184,9 +186,14 @@ export const getSeismicClients = async <
 }: GetSeismicClientsParameters<TTransport, TChain, TAccount>): Promise<
   SeismicClients<TTransport, TChain, TAccount>
 > => {
-  const pubClient: ShieldedPublicClient<TTransport, TChain, undefined> =
+  const pubClient: ShieldedPublicClient<
+    TTransport,
+    TChain,
+    undefined,
+    TRpcSchema
+  > =
     publicClient ??
-    (await createShieldedPublicClient<TTransport, TChain, undefined>({
+    (await createShieldedPublicClient<TTransport, TChain, TRpcSchema>({
       chain,
       transport,
     }))

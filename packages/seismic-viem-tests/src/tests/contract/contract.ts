@@ -73,6 +73,8 @@ export const testSeismicTx = async ({
     client: walletClient,
   })
 
+  let r = publicClient.request
+
   const isOdd0 = await walletClient.readContract({
     address: deployedContractAddress,
     abi: contractABI,

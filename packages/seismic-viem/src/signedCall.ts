@@ -5,6 +5,7 @@ import type {
   CallReturnType,
   Chain,
   Hex,
+  RpcSchema,
   TransactionRequest,
   Transport,
 } from 'viem'
@@ -41,7 +42,7 @@ const doSignedCall = async <
   TChain extends Chain | undefined,
   TAccount extends Account,
 >(
-  client: ShieldedWalletClient<TTransport, TChain, TAccount>,
+  client: ShieldedWalletClient<TTransport, TChain, TAccount, RpcSchema>,
   seismicTx: TransactionSerializableSeismic,
   { block }: { block: Hex | BlockTag }
 ) => {
