@@ -54,7 +54,7 @@ export const testSeismicTxTrace = async ({
 
   await publicClient.waitForTransactionReceipt({ hash })
   const tx = await publicClient.getTransaction({ hash })
-  expect(tx.input).toBe('0x')
+  expect(tx.input).toBe(data)
 }
 
 export const testLegacyTxTrace = async ({
