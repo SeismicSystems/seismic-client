@@ -46,7 +46,7 @@ jobs:
         # cargo sweep will remove files in target/ that are older than 1 day
         run: |
           cd "$SFOUNDRY_ROOT"
-          git checkout dc6f6d8
+          git checkout peter/rpc
           git pull
           cargo build --bin sanvil
           cargo sweep --time 1
@@ -79,7 +79,7 @@ jobs:
         # cargo sweep will remove files in target/ that are older than 1 day
         run: |
           cd "$SRETH_ROOT"
-          git checkout 4731325
+          git checkout peter/rpc
           git pull
           cargo build --bin seismic-reth
           cargo sweep --time 1
