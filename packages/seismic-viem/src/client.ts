@@ -242,7 +242,6 @@ export const getSeismicClients = async <
  *   chain: seismicDevnet,
  *   transport: http(),
  *   account: privateKeyToAccount('0x0123...')
- *   privateKey: '0xabcdef...',
  * });
  *
  * // Perform wallet operations
