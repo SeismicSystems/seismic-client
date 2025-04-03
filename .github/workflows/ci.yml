@@ -45,6 +45,7 @@ jobs:
       - name: Build anvil
         # cargo sweep will remove files in target/ that are older than 1 day
         run: |
+          echo $GITHUB_WORKSPACE
           cd "$SFOUNDRY_ROOT"
           git fetch --all
           git checkout peter/rpc
