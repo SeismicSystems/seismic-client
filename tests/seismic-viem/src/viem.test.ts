@@ -11,13 +11,15 @@ import {
 } from '@sviem-tests/index.ts'
 import { testAesKeygen } from '@sviem-tests/tests/aesKeygen.ts'
 import { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
-import { testRng } from '@sviem-tests/tests/precompiles.ts'
-import { testHkdfHex } from '@sviem-tests/tests/precompiles.ts'
-import { testAesGcm } from '@sviem-tests/tests/precompiles.ts'
-import { testSecp256k1 } from '@sviem-tests/tests/precompiles.ts'
-import { testHkdfString } from '@sviem-tests/tests/precompiles.ts'
-import { testEcdh } from '@sviem-tests/tests/precompiles.ts'
-import { testRngWithPers } from '@sviem-tests/tests/precompiles.ts'
+import {
+  testRng,
+  testHkdfHex,
+  testAesGcm,
+  testSecp256k1,
+  testHkdfString,
+  testEcdh,
+  testRngWithPers,
+} from '@sviem-tests/tests/precompiles.ts'
 import {
   testLegacyTxTrace,
   testSeismicTxTrace,
