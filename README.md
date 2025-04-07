@@ -18,7 +18,7 @@ Install [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-up
 Using [brew](https://formulae.brew.sh/formula/nvm):
 `brew install nvm`
 
-Make sure to follow the instructions to will source `nvm` in your shell profile
+Make sure to follow the instructions to source `nvm` in your shell profile
 
 ### npm
 
