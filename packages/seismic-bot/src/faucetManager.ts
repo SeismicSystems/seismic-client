@@ -158,9 +158,6 @@ export class FaucetManager {
     const baseTx: TransactionSerializableLegacy = {
       to: this.faucetAccount.address,
       chainId: this.chain.id,
-      type: 'legacy',
-      gas: 30_000_000n,
-      gasPrice: 1_000_000n,
       value: 1n,
       nonce: confirmedNonce,
     }
