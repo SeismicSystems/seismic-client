@@ -47,8 +47,6 @@ jobs:
         run: |
           echo $GITHUB_WORKSPACE
           cd "$SFOUNDRY_ROOT"
-          git fetch --all
-          git checkout peter/rpc
           git pull
           cargo build --bin sanvil
           cargo sweep --time 1
@@ -81,8 +79,6 @@ jobs:
         # cargo sweep will remove files in target/ that are older than 1 day
         run: |
           cd "$SRETH_ROOT"
-          git fetch --all
-          git checkout peter/rpc
           git pull
           cargo build --bin seismic-reth
           cargo sweep --time 1
