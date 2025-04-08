@@ -136,10 +136,9 @@ export class FaucetManager {
       blockTag: 'pending',
     })
     // sleep for the length of the block time
-    await Bun.sleep(2_000)
+    await Bun.sleep(4_000)
     const confirmed = await this.publicClient.getTransactionCount({
       address: this.faucetAccount.address,
-      blockTag: 'latest',
     })
     return { confirmed, pending }
   }
