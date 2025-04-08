@@ -57,6 +57,21 @@ class SlackNotifier {
     return this.web.chat.postMessage(postParams)
   }
 
+  async faucet({
+    message,
+    title,
+    color,
+    threadTs,
+  }: Omit<SlackMessage, 'channel'>) {
+    return this.send({
+      channel: '#log-faucet',
+      color,
+      message,
+      title,
+      threadTs,
+    })
+  }
+
   async urgent({
     message,
     title,

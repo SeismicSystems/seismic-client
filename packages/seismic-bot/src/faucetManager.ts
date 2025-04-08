@@ -100,7 +100,7 @@ export class FaucetManager {
       console.log(
         `${this.node}/${this.getFaucetAddress()} faucet balance is too low, sending 100 eth`
       )
-      const response = await this.slack.status({
+      const response = await this.slack.faucet({
         message: `Faucet balance on ${this.node} for ${this.getFaucetAddress()} is ${formatUnitsRounded(originalBalance)}. Topping up...`,
       })
       const reserveWallet = await this.getReserveWallet()
@@ -113,7 +113,7 @@ export class FaucetManager {
         hash: tx,
       })
       const newBalance = await this.faucetBalance()
-      this.slack.status({
+      this.slack.faucet({
         message: `Faucet balance on ${this.node} for ${this.getFaucetAddress()} is now ${formatUnitsRounded(newBalance)}`,
         threadTs: response.ts,
       })
@@ -149,7 +149,7 @@ export class FaucetManager {
    * @param confirmedNonce - The confirmed nonce value.
    */
   private async unclogNonce(confirmedNonce: number, pendingNonce: number) {
-    const response = await this.slack.status({
+    const response = await this.slack.faucet({
       message: `confirmed nonce: ${confirmedNonce}, pending: ${pendingNonce}`,
       title: `Faucet nonce on ${this.node} is out of sync for ${this.getFaucetAddress()}`,
       color: 'warning',
@@ -167,9 +167,11 @@ export class FaucetManager {
         chain: this.chain,
       })
       .catch(async (e: Error) => {
-        await this.slack.urgent({
+        await this.slack.faucet({
           title: `Error bumping nonce for ${this.getFaucetAddress()} on ${this.node} `,
           message: '```' + JSON.stringify(e, stringifyBigInt, 2) + '\n```',
+          color: 'danger',
+          threadTs: response.ts,
         })
       })
       .then((hash: Hash) =>
@@ -178,12 +180,14 @@ export class FaucetManager {
     await Bun.sleep(5_000)
     const { synced, ...nonces } = await this.checkNonces()
     if (!synced) {
-      this.slack.urgent({
+      this.slack.faucet({
         message: `Confirmed nonce: ${nonces.confirmed}, pending: ${nonces.pending}`,
         title: `Faucet nonce still out of sync on ${this.node} for ${this.getFaucetAddress()}`,
+        color: 'danger',
+        threadTs: response.ts,
       })
     } else {
-      this.slack.status({
+      this.slack.faucet({
         message: `Faucet nonce is now synced on ${this.node} for ${this.getFaucetAddress()}`,
         title: 'Faucet nonce is now synced',
         color: 'good',
