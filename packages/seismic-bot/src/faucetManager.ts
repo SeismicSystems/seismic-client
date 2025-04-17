@@ -17,8 +17,8 @@ import {
 } from '@sviem/client'
 import { stringifyBigInt } from '@sviem/utils.ts'
 
-const MIN_ETH_REFILL = 500
-const REFILL_AMOUNT_ETH = 500
+const MIN_ETH_REFILL = 10_000
+const REFILL_AMOUNT_ETH = 20_000
 
 const formatUnitsRounded = (
   value: bigint,
@@ -40,13 +40,15 @@ export class FaucetManager {
   private faucetReserveAccount: LocalAccount
   private publicClient: PublicClient
   private slack: SlackNotifier
+  private extraAddresses: Address[]
 
   constructor(
     node: string,
     chain: Chain,
     faucetPrivateKey: Hex,
     faucetReservePrivateKey: Hex,
-    slack: SlackNotifier
+    slack: SlackNotifier,
+    extraAddresses: Address[] = []
   ) {
     this.node = node
     this.chain = chain
@@ -54,6 +56,7 @@ export class FaucetManager {
     this.faucetReserveAccount = privateKeyToAccount(faucetReservePrivateKey)
     this.publicClient = createPublicClient({ chain, transport: http() })
     this.slack = slack
+    this.extraAddresses = extraAddresses
   }
 
   private getFaucetAddress(): Address {
@@ -85,36 +88,36 @@ export class FaucetManager {
   /**
    * Retrieves the faucet balance and logs it.
    */
-  private async faucetBalance(): Promise<bigint> {
+  private async getBalance(address: Address): Promise<bigint> {
     return await this.publicClient.getBalance({
-      address: this.faucetAccount.address,
+      address,
     })
   }
 
   /**
    * Funds the faucet if its balance is below 100 ETH (in wei).
    */
-  private async fundFaucetIfNeeded() {
-    const originalBalance = await this.faucetBalance()
+  private async fundAddressIfNeeded(address: Address) {
+    const originalBalance = await this.getBalance(address)
     if (originalBalance < parseEther(MIN_ETH_REFILL.toString(), 'wei')) {
       console.log(
-        `${this.node}/${this.getFaucetAddress()} faucet balance is too low, sending ${REFILL_AMOUNT_ETH} eth`
+        `${this.node}/${address} balance is too low, sending ${REFILL_AMOUNT_ETH} eth`
       )
       const response = await this.slack.faucet({
-        message: `Faucet balance on ${this.node} for ${this.getFaucetAddress()} is ${formatUnitsRounded(originalBalance)}. Topping up...`,
+        message: `Faucet balance on ${this.node} for ${address} is ${formatUnitsRounded(originalBalance)}. Topping up...`,
       })
       const reserveWallet = await this.getReserveWallet()
       const tx = await reserveWallet.sendTransaction({
-        to: this.faucetAccount.address,
+        to: address,
         value: parseEther(REFILL_AMOUNT_ETH.toString(), 'wei'),
         chain: this.chain,
       })
       const _receipt = await this.publicClient.waitForTransactionReceipt({
         hash: tx,
       })
-      const newBalance = await this.faucetBalance()
+      const newBalance = await this.getBalance(address)
       this.slack.faucet({
-        message: `Faucet balance on ${this.node} for ${this.getFaucetAddress()} is now ${formatUnitsRounded(newBalance)}`,
+        message: `Faucet balance on ${this.node} for ${address} is now ${formatUnitsRounded(newBalance)}`,
         threadTs: response.ts,
       })
     }
@@ -213,7 +216,10 @@ export class FaucetManager {
    *  3. Sends a test transaction if confirmed and pending nonces differ.
    */
   public async runCheck(): Promise<void> {
-    await this.fundFaucetIfNeeded()
+    await this.fundAddressIfNeeded(this.getFaucetAddress())
+    for (const address of this.extraAddresses) {
+      await this.fundAddressIfNeeded(address)
+    }
     const { synced, ...nonces } = await this.checkNonces()
     if (!synced) {
       await this.unclogNonce(nonces.confirmed, nonces.pending)
