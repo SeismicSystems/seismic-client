@@ -26,8 +26,8 @@
   "devDependencies": {
     "terminate": "^2.8.0",
     "dotenv": "^16.4.7",
-    "bun": "^1.2.5",
-    "@types/bun": "^1.2.5"
+    "bun": "^1.2.10",
+    "@types/bun": "^1.2.10"
   },
   "scripts": {
     "clean": "rimraf dist",
