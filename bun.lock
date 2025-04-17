@@ -30,7 +30,7 @@
         "@privy-io/react-auth": "^2.6.2",
         "@privy-io/wagmi": "^1.0.3",
         "@rainbow-me/rainbowkit": "^2.0.0",
-        "@tanstack/react-query": "^5.67.3",
+        "@tanstack/react-query": "^5.74.4",
         "@walletconnect/ethereum-provider": "^2.19.0",
         "react": "^19",
         "react-dom": "^19",
@@ -60,14 +60,11 @@
     "packages/seismic-react": {
       "name": "seismic-react",
       "version": "1.0.37",
-      "dependencies": {
-        "seismic-viem": "1.0.27",
-      },
       "peerDependencies": {
         "@rainbow-me/rainbowkit": "^2.0.0",
         "react": "^18",
         "react-dom": "^18",
-        "seismic-viem": "*",
+        "seismic-viem": ">=1.0.37",
         "typescript": ">=5.0.4",
         "viem": "2.x",
         "wagmi": "^2.0.0",
@@ -678,9 +675,9 @@
 
     "@tailwindcss/vite": ["@tailwindcss/vite@4.0.7", "", { "dependencies": { "@tailwindcss/node": "4.0.7", "@tailwindcss/oxide": "4.0.7", "lightningcss": "^1.29.1", "tailwindcss": "4.0.7" }, "peerDependencies": { "vite": "^5.2.0 || ^6" } }, "sha512-GYx5sxArfIMtdZCsxfya3S/efMmf4RvfqdiLUozkhmSFBNUFnYVodatpoO/en4/BsOIGvq/RB6HwcTLn9prFnQ=="],
 
-    "@tanstack/query-core": ["@tanstack/query-core@5.68.0", "", {}, "sha512-r8rFYYo8/sY/LNaOqX84h12w7EQev4abFXDWy4UoDVUJzJ5d9Fbmb8ayTi7ScG+V0ap44SF3vNs/45mkzDGyGw=="],
+    "@tanstack/query-core": ["@tanstack/query-core@5.74.4", "", {}, "sha512-YuG0A0+3i9b2Gfo9fkmNnkUWh5+5cFhWBN0pJAHkHilTx6A0nv8kepkk4T4GRt4e5ahbtFj2eTtkiPcVU1xO4A=="],
 
-    "@tanstack/react-query": ["@tanstack/react-query@5.68.0", "", { "dependencies": { "@tanstack/query-core": "5.68.0" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-mMOdGDKlwTP/WV72QqSNf4PAMeoBp/DqBHQ222wBfb51Looi8QUqnCnb9O98ZgvNISmy6fzxRGBJdZ+9IBvX2Q=="],
+    "@tanstack/react-query": ["@tanstack/react-query@5.74.4", "", { "dependencies": { "@tanstack/query-core": "5.74.4" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-mAbxw60d4ffQ4qmRYfkO1xzRBPUEf/72Dgo3qqea0J66nIKuDTLEqQt0ku++SDFlMGMnB6uKDnEG1xD/TDse4Q=="],
 
     "@tanstack/react-virtual": ["@tanstack/react-virtual@3.13.4", "", { "dependencies": { "@tanstack/virtual-core": "3.13.4" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-jPWC3BXvVLHsMX67NEHpJaZ+/FySoNxFfBEiF4GBc1+/nVwdRm+UcSCYnKP3pXQr0eEsDpXi/PQZhNfJNopH0g=="],
 
@@ -2672,7 +2669,7 @@
 
     "rpc-websockets/uuid": ["uuid@8.3.2", "", { "bin": { "uuid": "dist/bin/uuid" } }, "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg=="],
 
-    "seismic-bot/@types/bun": ["@types/bun@1.2.8", "", { "dependencies": { "bun-types": "1.2.7" } }, "sha512-t8L1RvJVUghW5V+M/fL3Thbxcs0HwNsXsnTEBEfEVqGteiJToOlZ/fyOEaR1kZsNqnu+3XA4RI/qmnX4w6+S+w=="],
+    "seismic-bot/@types/bun": ["@types/bun@1.2.10", "", { "dependencies": { "bun-types": "1.2.10" } }, "sha512-eilv6WFM3M0c9ztJt7/g80BDusK98z/FrFwseZgT4bXCq2vPhXD4z8R3oddmAn+R/Nmz9vBn4kweJKmGTZj+lg=="],
 
     "seismic-spammer/seismic-viem": ["seismic-viem@1.0.15", "", { "dependencies": { "@noble/ciphers": "^1.2.0", "@noble/curves": "^1.8.0", "@noble/hashes": "^1.7.0", "viem": "^2.21.50" } }, "sha512-xw6lZuZ0l1SeoAFfaqpIY2Hd09WtsjqKWlqtDqWZ3ZNStOCYEFR6m8W7MQYnc1fKpSV93JJNsV9m0GOoclPYXQ=="],
 
@@ -2790,7 +2787,7 @@
 
     "p-locate/p-limit/yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
 
-    "seismic-bot/@types/bun/bun-types": ["bun-types@1.2.7", "", { "dependencies": { "@types/node": "*", "@types/ws": "*" } }, "sha512-P4hHhk7kjF99acXqKvltyuMQ2kf/rzIw3ylEDpCxDS9Xa0X0Yp/gJu/vDCucmWpiur5qJ0lwB2bWzOXa2GlHqA=="],
+    "seismic-bot/@types/bun/bun-types": ["bun-types@1.2.10", "", { "dependencies": { "@types/node": "*" } }, "sha512-b5ITZMnVdf3m1gMvJHG+gIfeJHiQPJak0f7925Hxu6ZN5VKA8AGy4GZ4lM+Xkn6jtWxg5S3ldWvfmXdvnkp3GQ=="],
 
     "send/debug/ms": ["ms@2.0.0", "", {}, "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="],
 
