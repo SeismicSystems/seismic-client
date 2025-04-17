@@ -38,7 +38,7 @@ export const useShieldedWallet = () => {
   const context = useContext(WalletClientContext)
   if (context === undefined) {
     throw new Error(
-      'useWalletClient must be used within a WalletClientProvider'
+      'useShieldedWallet must be used within a WalletClientContext'
     )
   }
   return context

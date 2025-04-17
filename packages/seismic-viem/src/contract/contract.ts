@@ -19,7 +19,10 @@ import type {
 } from 'viem'
 import { getContract } from 'viem'
 
-import type { ShieldedWalletClient } from '@sviem/client.ts'
+import type {
+  ShieldedPublicClient,
+  ShieldedWalletClient,
+} from '@sviem/client.ts'
 import { signedReadContract } from '@sviem/contract/read.ts'
 import {
   ShieldedWriteContractDebugResult,
@@ -130,11 +133,12 @@ export type ShieldedContract<
   TAccount extends Account = Account,
   TClient extends
     | ShieldedWalletClient<TTransport, TChain, TAccount>
-    | KeyedClient<TTransport, TChain, TAccount> = ShieldedWalletClient<
-    TTransport,
-    TChain,
-    TAccount
-  >,
+    | ShieldedPublicClient<TTransport, TChain, undefined>
+    | KeyedClient<
+        TTransport,
+        TChain,
+        TAccount | undefined
+      > = ShieldedWalletClient<TTransport, TChain, TAccount>,
 > = GetContractReturnType<TAbi, TClient, TAddress> &
   TransparentReadContractReturnType<TAbi, TClient> &
   TransparentWriteContractReturnType<TAbi, TClient>
@@ -185,6 +189,7 @@ export function getShieldedContract<
   const TAbi extends Abi | readonly unknown[],
   const TClient extends
     | ShieldedWalletClient<TTransport, TChain, TAccount>
+    | ShieldedPublicClient<TTransport, TChain, undefined>
     | KeyedClient<TTransport, TChain, TAccount>,
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends Account = Account,
@@ -210,6 +215,13 @@ export function getShieldedContract<
       return client.wallet as ShieldedWalletClient<TTransport, TChain, TAccount>
     return client as ShieldedWalletClient<TTransport, TChain, TAccount>
   })()
+
+  const publicClient: ShieldedPublicClient<TTransport, TChain> | undefined =
+    (() => {
+      if (!client) return undefined
+      if ('public' in client)
+        return client.public as ShieldedPublicClient<TTransport, TChain>
+    })()
 
   function shieldedWrite<
     functionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,

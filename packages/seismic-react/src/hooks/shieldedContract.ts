@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ShieldedContract, ShieldedWalletClient } from 'seismic-viem'
+import type { ShieldedContract } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
 import type { Abi, Account, Address, Chain, CustomTransport } from 'viem'
 
@@ -13,8 +13,16 @@ export type UseShieldedContractConfig<
 export type UseShieldedContractResult<
   TAddress extends Address,
   TAbi extends Abi | readonly unknown[],
+  TChain extends Chain | undefined,
 > = {
-  contract: ShieldedContract<CustomTransport, TAddress, TAbi> | null
+  contract: ShieldedContract<CustomTransport, TAddress, TAbi, TChain> | null
+  publicContract: ShieldedContract<
+    CustomTransport,
+    TAddress,
+    TAbi,
+    TChain,
+    undefined
+  > | null
   abi: TAbi
   address: TAddress
   error: Error | null
@@ -39,17 +47,18 @@ export function useShieldedContract<
   TAddress,
   TAbi
 > {
-  const { walletClient } = useShieldedWallet()
+  const { publicClient, walletClient } = useShieldedWallet()
   type ShieldedContractType = ShieldedContract<
     CustomTransport,
     TAddress,
     TAbi,
     Chain | undefined,
-    Account,
-    ShieldedWalletClient<CustomTransport, Chain | undefined, Account>
+    Account
   >
 
   const [contract, setContract] = useState<ShieldedContractType | null>(null)
+  const [publicContract, setPublicContract] =
+    useState<ShieldedContractType | null>(null)
 
   const [error, setError] = useState<Error | null>(null)
 
@@ -63,8 +72,23 @@ export function useShieldedContract<
     setContract(contract)
   }, [walletClient, abi, address])
 
+  useEffect(() => {
+    if (!publicClient) {
+      setError(new Error('Public client not initialized'))
+      return
+    }
+    setError(null)
+    const publicContract = getShieldedContract({
+      abi,
+      address,
+      client: publicClient,
+    })
+    setPublicContract(publicContract)
+  }, [publicClient, abi, address])
+
   return {
     contract,
+    publicContract,
     abi,
     address,
     error,
