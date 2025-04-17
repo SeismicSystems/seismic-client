@@ -146,6 +146,12 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
     setPublicClient(pubClient)
   }, [data, isFetched, options.publicChain, options.publicTransport])
 
+  const resetWallet = () => {
+    setWalletClient(null)
+    setAddress(null)
+    setLoaded(false)
+  }
+
   useEffect(() => {
     if (!publicClient) {
       // Don't set error here, since it would overwrite
@@ -156,20 +162,24 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
 
     if (!isFetched || !data) {
       setError('Failed to create shielded client: Connector not fetched')
+      resetWallet()
       return
     }
 
     const { account, chain, transport } = data
     if (!account) {
       setError('Failed to create shielded client: No account connected')
+      resetWallet()
       return
     }
     if (!transport) {
       setError('Failed to create shielded client: No transport connected')
+      resetWallet()
       return
     }
     if (!chain) {
       setError('Failed to create shielded client: No chain connected')
+      resetWallet()
       return
     }
 
@@ -181,11 +191,16 @@ export const ShieldedWalletProvider: React.FC<ShieldedWalletProviderProps> = ({
       // @ts-ignore
       transport: custom(transport),
       publicClient,
-    }).then((wc: ShieldedWalletClient) => {
-      setWalletClient(wc)
-      setAddress(wc.account.address)
-      setLoaded(true)
     })
+      .then((wc: ShieldedWalletClient) => {
+        setWalletClient(wc)
+        setAddress(wc.account.address)
+        setLoaded(true)
+      })
+      .catch((error) => {
+        setError(error.message)
+        resetWallet()
+      })
   }, [publicClient, isFetched, data])
 
   useEffect(() => {
