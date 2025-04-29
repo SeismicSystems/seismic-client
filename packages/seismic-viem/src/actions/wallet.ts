@@ -1,4 +1,15 @@
-import type { Account, Chain, Transport } from 'viem'
+import type {
+  Abi,
+  Account,
+  Chain,
+  ContractFunctionArgs,
+  ContractFunctionName,
+  ReadContractParameters,
+  ReadContractReturnType,
+  Transport,
+  WriteContractParameters,
+  WriteContractReturnType,
+} from 'viem'
 import { readContract, writeContract } from 'viem/actions'
 
 import { ShieldedWalletClient } from '@sviem/client.ts'
@@ -12,10 +23,6 @@ import type {
 import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
 import { signedCall } from '@sviem/signedCall.ts'
 import type { SignedCall } from '@sviem/signedCall.ts'
-import type {
-  ReadContract,
-  WriteContract,
-} from '@sviem/viem-internal/contract.ts'
 
 /**
  * Defines the actions available for a shielded wallet client.
@@ -49,10 +56,42 @@ export type ShieldedWalletActions<
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends Account | undefined = Account | undefined,
 > = {
-  writeContract: WriteContract<TChain, TAccount>
-  twriteContract: WriteContract<TChain, TAccount>
-  readContract: ReadContract
-  treadContract: ReadContract
+  writeContract: <
+    TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, 'payable' | 'nonpayable'>,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      'payable' | 'nonpayable',
+      TFunctionName
+    >,
+  >(
+    args: WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount>
+  ) => Promise<WriteContractReturnType>
+  twriteContract: <
+    TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, 'payable' | 'nonpayable'>,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      'payable' | 'nonpayable',
+      TFunctionName
+    >,
+  >(
+    args: WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount>
+  ) => Promise<WriteContractReturnType>
+  readContract: <
+    TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+    TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
+  >(
+    args: ReadContractParameters<TAbi, TFunctionName, TArgs>
+  ) => Promise<ReadContractReturnType>
+  treadContract: <
+    TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+    TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
+  >(
+    args: ReadContractParameters<TAbi, TFunctionName, TArgs>
+  ) => Promise<ReadContractReturnType>
   signedCall: SignedCall<TChain>
   sendShieldedTransaction: <
     const request extends SendSeismicTransactionRequest<TChain, TChainOverride>,

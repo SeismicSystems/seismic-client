@@ -20,7 +20,10 @@ import type {
 import { getContract } from 'viem'
 
 import type { ShieldedWalletClient } from '@sviem/client.ts'
-import { signedReadContract } from '@sviem/contract/read.ts'
+import {
+  SignedReadContractParameters,
+  signedReadContract,
+} from '@sviem/contract/read.ts'
 import {
   ShieldedWriteContractDebugResult,
   shieldedWriteContract,
@@ -314,28 +317,17 @@ export function getShieldedContract<
   )
 
   function signedRead<
-    functionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-    args extends ContractFunctionArgs<
+    TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+    TArgs extends ContractFunctionArgs<
       TAbi,
-      'payable' | 'nonpayable',
-      functionName
-    > = ContractFunctionArgs<TAbi, 'payable' | 'nonpayable', functionName>,
-  >({
-    functionName,
-    args,
-    ...options
-  }: ReadContractParameters<TAbi, functionName, args>) {
+      'pure' | 'view',
+      TFunctionName
+    > = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
+  >(params: SignedReadContractParameters<TAbi, TFunctionName, TArgs>) {
     if (walletClient === undefined) {
-      throw new Error('Must provide wallet client to read seismic contract')
+      throw new Error('Must provide wallet client to call signed read')
     }
-
-    return signedReadContract(walletClient, {
-      abi,
-      address,
-      functionName,
-      args,
-      ...(options as any),
-    })
+    return signedReadContract(walletClient, params)
   }
 
   const readAction = new Proxy(
@@ -344,9 +336,9 @@ export function getShieldedContract<
       get(_, functionName: string) {
         return (
           ...parameters: [
-            args?: readonly unknown[],
+            args?: readonly unknown[] | undefined,
             options?: UnionOmit<
-              WriteContractParameters,
+              ReadContractParameters,
               'abi' | 'address' | 'functionName' | 'args'
             >,
           ]
@@ -370,9 +362,9 @@ export function getShieldedContract<
       get(_, functionName: string) {
         return (
           ...parameters: [
-            args?: readonly unknown[],
+            args?: readonly unknown[] | undefined,
             options?: UnionOmit<
-              WriteContractParameters,
+              ReadContractParameters,
               'abi' | 'address' | 'functionName' | 'args'
             >,
           ]
@@ -380,14 +372,14 @@ export function getShieldedContract<
           if (!walletClient?.account) {
             console.error(JSON.stringify(walletClient, null, 2))
             throw new Error(
-              'Wallet must have an account with address to perform signed reads'
+              'Wallet must have an account to perform signed reads'
             )
           }
           const params = getFunctionParameters(parameters)
           const { args } = params
           const {
             options: { account, ...options },
-          } = params as { options: { account: any } }
+          } = params as { options: { account: any } & any }
           return signedRead({
             abi,
             address,
@@ -395,7 +387,7 @@ export function getShieldedContract<
             args,
             // Force account to be their account
             account: walletClient.account.address,
-            ...(options as any),
+            ...options,
           })
         }
       },

@@ -6,12 +6,8 @@ import { useShieldedWallet } from '@sreact/context/shieldedWallet.tsx'
 
 export type UseSignedReadContractConfig<
   TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 > = {
   address: `0x${string}`
   abi: TAbi
@@ -37,12 +33,8 @@ export type UseSignedReadContractConfig<
  */
 export function useSignedReadContract<
   TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 >({
   address,
   abi,

@@ -30,12 +30,8 @@ import { signedCall } from '@sviem/signedCall.ts'
 
 export type SignedReadContractParameters<
   TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 > = ReadContractParameters<TAbi, TFunctionName, TArgs> & {
   nonce?: number
 }
@@ -44,12 +40,8 @@ const fillNonce = async <
   TChain extends Chain | undefined,
   TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 >(
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
@@ -119,12 +111,8 @@ export async function signedReadContract<
   TChain extends Chain | undefined,
   TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 >(
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
