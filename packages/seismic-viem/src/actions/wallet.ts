@@ -64,8 +64,16 @@ export type ShieldedWalletActions<
       'payable' | 'nonpayable',
       TFunctionName
     >,
+    TChainOverride extends Chain | undefined = undefined,
   >(
-    args: WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount>
+    args: WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      TChain,
+      TAccount,
+      TChainOverride
+    >
   ) => Promise<WriteContractReturnType>
   twriteContract: <
     TAbi extends Abi | readonly unknown[],
@@ -75,8 +83,16 @@ export type ShieldedWalletActions<
       'payable' | 'nonpayable',
       TFunctionName
     >,
+    TChainOverride extends Chain | undefined = undefined,
   >(
-    args: WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount>
+    args: WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      TChain,
+      TAccount,
+      TChainOverride
+    >
   ) => Promise<WriteContractReturnType>
   readContract: <
     TAbi extends Abi | readonly unknown[],
@@ -158,9 +174,9 @@ export const shieldedWalletActions = <
 ): ShieldedWalletActions<TChain, TAccount> => {
   return {
     writeContract: (args) => shieldedWriteContract(client, args as any),
+    twriteContract: (args) => writeContract(client, args as any),
     readContract: (args) => signedReadContract(client, args as any),
     treadContract: (args) => readContract(client, args as any),
-    twriteContract: (args) => writeContract(client, args as any),
     signedCall: (args) => signedCall(client, args as any),
     sendShieldedTransaction: (args) =>
       sendShieldedTransaction(client, args as any),
