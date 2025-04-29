@@ -42,4 +42,3 @@ const faucets: Faucets = {
   },
 }
 checkAllFaucets(faucets)
-
