@@ -94,9 +94,9 @@ export const testSeismicTx = async ({
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
-  const { txHash: tx2, ...debug } = await seismicContract.dwrite.increment()
+  const tx2 = await seismicContract.twrite.increment()
   console.info(`[2] Incremented number in tx: ${tx2}`)
-  console.info(`dwrite: ${JSON.stringify(debug, stringifyBigInt, 2)}`)
+  // console.info(`dwrite: ${JSON.stringify(debug, stringifyBigInt, 2)}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
   console.info(
     `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
@@ -114,7 +114,7 @@ export const testSeismicTx = async ({
   )
 
   // Use non-explicit signed-read
-  const isOdd3 = await seismicContract.tread.isOdd([], {
+  const isOdd3 = await seismicContract.tread.isOdd({
     account: walletClient.account.address,
   })
   // number has been set back to 11
