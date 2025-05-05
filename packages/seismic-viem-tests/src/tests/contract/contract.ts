@@ -94,9 +94,9 @@ export const testSeismicTx = async ({
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
-  const { txHash: tx2, ...debug } = await seismicContract.dwrite.increment()
+  const tx2 = await seismicContract.twrite.increment()
   console.info(`[2] Incremented number in tx: ${tx2}`)
-  console.info(`dwrite: ${JSON.stringify(debug, stringifyBigInt, 2)}`)
+  // console.info(`dwrite: ${JSON.stringify(debug, stringifyBigInt, 2)}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
   console.info(
     `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
@@ -106,15 +106,25 @@ export const testSeismicTx = async ({
   const isOdd2 = await seismicContract.tread.isOdd()
   expect(isOdd2).toBe(false)
 
-  const tx3 = await seismicContract.write.setNumber([TEST_NUMBER])
+  const {
+    txHash: tx3,
+    plaintextTx,
+    shieldedTx,
+  } = await seismicContract.dwrite.setNumber([TEST_NUMBER])
   console.info(`[3] Set number tx: ${tx1}`)
+  console.info(
+    `[3] Plaintext tx: ${JSON.stringify(plaintextTx, stringifyBigInt, 2)}`
+  )
+  console.info(
+    `[3] Shielded tx: ${JSON.stringify(shieldedTx, stringifyBigInt, 2)}`
+  )
   const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
   console.info(
     `[3] setNumber receipt: ${JSON.stringify(receipt3, stringifyBigInt, 2)}`
   )
 
   // Use non-explicit signed-read
-  const isOdd3 = await seismicContract.tread.isOdd([], {
+  const isOdd3 = await seismicContract.tread.isOdd({
     account: walletClient.account.address,
   })
   // number has been set back to 11

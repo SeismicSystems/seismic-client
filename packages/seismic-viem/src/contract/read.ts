@@ -18,7 +18,6 @@ import {
   toFunctionSelector,
 } from 'viem'
 import { parseAccount } from 'viem/accounts'
-import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
 import { ShieldedWalletClient } from '@sviem/client.ts'
@@ -30,12 +29,8 @@ import { signedCall } from '@sviem/signedCall.ts'
 
 export type SignedReadContractParameters<
   TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 > = ReadContractParameters<TAbi, TFunctionName, TArgs> & {
   nonce?: number
 }
@@ -44,17 +39,13 @@ const fillNonce = async <
   TChain extends Chain | undefined,
   TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 >(
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
 ) => {
-  const account = parseAccount(parameters.account!)
+  let account = parseAccount(parameters.account || client.account)
   const { nonce: nonce_ } = parameters
   if (nonce_) {
     return nonce_
@@ -119,12 +110,8 @@ export async function signedReadContract<
   TChain extends Chain | undefined,
   TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'nonpayable' | 'payable',
-    TFunctionName
-  >,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 >(
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
@@ -140,8 +127,9 @@ export async function signedReadContract<
 
   // If they specify no address, then use the standard read contract,
   // since it doesn't have to be signed
+  let account = rest.account
   if (!rest.account) {
-    return readContract(client, parameters as ReadContractParameters)
+    account = client.account
   }
 
   const nonce = await fillNonce(client, parameters)
