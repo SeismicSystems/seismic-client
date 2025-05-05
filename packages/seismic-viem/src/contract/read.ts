@@ -18,7 +18,6 @@ import {
   toFunctionSelector,
 } from 'viem'
 import { parseAccount } from 'viem/accounts'
-import { readContract } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
 import { ShieldedWalletClient } from '@sviem/client.ts'
@@ -46,7 +45,7 @@ const fillNonce = async <
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
 ) => {
-  const account = parseAccount(parameters.account!)
+  let account = parseAccount(parameters.account || client.account)
   const { nonce: nonce_ } = parameters
   if (nonce_) {
     return nonce_
@@ -128,8 +127,9 @@ export async function signedReadContract<
 
   // If they specify no address, then use the standard read contract,
   // since it doesn't have to be signed
+  let account = rest.account
   if (!rest.account) {
-    return readContract(client, parameters as ReadContractParameters)
+    account = client.account
   }
 
   const nonce = await fillNonce(client, parameters)
