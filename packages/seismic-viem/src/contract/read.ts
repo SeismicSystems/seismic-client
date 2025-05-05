@@ -45,7 +45,7 @@ const fillNonce = async <
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
 ) => {
-  const account = parseAccount(parameters.account!)
+  let account = parseAccount(parameters.account || client.account)
   const { nonce: nonce_ } = parameters
   if (nonce_) {
     return nonce_
