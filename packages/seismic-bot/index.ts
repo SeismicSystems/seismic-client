@@ -29,7 +29,7 @@ const faucets: Faucets = {
   'node-2': {
     chain: seismicDevnet2,
     privateKeys: [
-      { pk: FAUCET_PK_1 },
+      { pk: FAUCET_PK_1, silent: true },
       { pk: FAUCET_PK_2 },
       { pk: FAUCET_PK_3, silent: true },
     ],
