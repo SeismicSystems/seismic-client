@@ -30,29 +30,19 @@ contract ShieldedDelegationAccountTest is Test {
         // derive the EOA for our test SK
         SKaddr = vm.addr(SK);
 
-        // // Fund the account with ETH for testing
-        // vm.deal(address(acc), 100 ether);
+        // Fund the account with ETH for testing
+        vm.deal(address(acc), 100 ether);
 
         // Fund the relayer with some ETH for gas
         vm.deal(relayer, 1 ether);
 
         // 1) Deploy the delegation account with masterKey = 1
-        // vm.prank(alice);
         acc = new ShieldedDelegationAccount();
         vm.prank(address(acc));
         acc.setAESKey(suint256(AES_KEY));
 
-        // // // 2) Grant a session for SKaddr (no expiry, 1 ETH gas cap)
-        // vm.prank(address(acc)); // pretend the contract calls itself
-        //     // acc.grantSession(
-        //     //     SKaddr,
-        //     //     /* expiry  */ 0,
-        //     //     /* limitWei*/ 1 ether
-        //     // );
-
-        // // // 3) Deploy the shielded token and mint 100 tokens into the account
+        // 3) Deploy the shielded token and mint 100 tokens into the account
         tok = new TestToken();
-        // vm.prank(alice);
         tok.mint(saddress(address(alice)), suint256(100 * 10 ** 18));
         tok.mint(saddress(address(acc)), suint256(100 * 10 ** 18));
     }
@@ -114,13 +104,6 @@ contract ShieldedDelegationAccountTest is Test {
         console.logBytes(decrypted);
         assertEq(decrypted, testData);
     }
-
-    // function test_abiEncode() public view {
-    //     bytes memory encoded = abi.encodePacked(suint256(AES_KEY));
-    //     console.log("encoded");
-    //     console.logBytes(encoded);
-    //     assertEq(false, true);
-    // }
 
     function test_execute() public {
         vm.prank(address(acc));
