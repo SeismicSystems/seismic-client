@@ -8,16 +8,16 @@ contract AESPrecompiles {
     ////////////////////////////////////////////////////////////////////////
     // Precompile Addresses
     ////////////////////////////////////////////////////////////////////////
-    
+
     /// @dev Precompile address for random number generation
     address private constant RNG_PRECOMPILE = address(0x64);
-    
+
     /// @dev Precompile address for AES encryption
     address private constant AES_ENCRYPT_PRECOMPILE = address(0x66);
-    
+
     /// @dev Precompile address for AES decryption
     address private constant AES_DECRYPT_PRECOMPILE = address(0x67);
-    
+
     ////////////////////////////////////////////////////////////////////////
     // Precompile Interaction Functions
     ////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,11 @@ contract AESPrecompiles {
     /// @param nonce The nonce to use for encryption
     /// @param plaintext The data to encrypt
     /// @return ciphertext The encrypted data
-    function _encrypt(suint256 key, uint96 nonce, bytes memory plaintext) internal view returns (bytes memory ciphertext) {
+    function _encrypt(suint256 key, uint96 nonce, bytes memory plaintext)
+        internal
+        view
+        returns (bytes memory ciphertext)
+    {
         bytes memory input = abi.encodePacked(key, nonce, plaintext);
 
         (bool success, bytes memory output) = AES_ENCRYPT_PRECOMPILE.staticcall(input);
@@ -59,7 +63,11 @@ contract AESPrecompiles {
     /// @param nonce The nonce used during encryption
     /// @param ciphertext The encrypted data
     /// @return plaintext The decrypted data
-    function _decrypt(suint256 key, uint96 nonce, bytes calldata ciphertext) internal view returns (bytes memory plaintext) {
+    function _decrypt(suint256 key, uint96 nonce, bytes calldata ciphertext)
+        internal
+        view
+        returns (bytes memory plaintext)
+    {
         require(ciphertext.length > 0, "Ciphertext cannot be empty");
 
         bytes memory input = abi.encodePacked(key, nonce, ciphertext);
