@@ -203,14 +203,15 @@ export class FaucetManager {
         value: 1n,
         nonce,
       }
-      await faucetWallet
+      const stop = await faucetWallet
         .sendTransaction({
           ...baseTx,
           chain: this.chain,
         })
-        .then((hash: Hash) =>
-          this.publicClient.waitForTransactionReceipt({ hash })
-        )
+        .then(async (hash: Hash) => {
+          await this.publicClient.waitForTransactionReceipt({ hash })
+          return false
+        })
         .catch(async (e: Error) => {
           await this.slack.faucet({
             title: `Error bumping nonce for ${this.getFaucetAddress()} on ${this.node} `,
@@ -218,7 +219,11 @@ export class FaucetManager {
             color: 'danger',
             threadTs: response.ts,
           })
+          return true
         })
+      if (stop) {
+        break
+      }
     }
     await Bun.sleep(5_000)
     const { synced, ...nonces } = await this.checkNonces()
