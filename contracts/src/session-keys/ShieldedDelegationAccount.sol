@@ -4,13 +4,14 @@ pragma solidity ^0.8.23;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../utils/MultiSend.sol";
 import "../utils/precompiles/AESPrecompiles.sol";
+import "./interfaces/IShieldedDelegationAccount.sol";
 
 /// @title ShieldedDelegationAccount
 /// @author ameya-deshmukh (https://github.com/ameya-deshmukh)
 /// @notice Experimental EIP-7702 delegation contract which supports session keys
 /// @dev WARNING: THIS CONTRACT IS AN EXPERIMENT AND HAS NOT BEEN AUDITED
 /// @custom:inspired-by https://github.com/ithacaxyz/exp-0001/blob/main/contracts/src/ExperimentDelegation.sol
-contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
+contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, AESPrecompiles {
     using ECDSA for bytes32;
 
     ////////////////////////////////////////////////////////////////////////
@@ -40,44 +41,9 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
     /// @dev Immutable domain separator for EIP-712
     bytes32 private immutable DOMAIN_SEPARATOR;
 
-    /// @notice Session information structure
-    /// @custom:property authorized - Whether the session is currently authorized
-    /// @custom:property signer - The secp256k1 address that can sign for this session
-    /// @custom:property expiry - Unix timestamp when session expires
-    /// @custom:property limitWei - Maximum ether value that can be spent
-    /// @custom:property spentWei - Cumulative ether spent by this session
-    /// @custom:property nonce - Current nonce for replay protection
-    struct Session {
-        bool authorized;
-        address signer;
-        uint256 expiry;
-        uint256 limitWei;
-        uint256 spentWei;
-        uint256 nonce;
-    }
-
     /// @notice List of active and revoked sessions
     /// @dev Index is returned at grant time
-    Session[] public sessions;
-
-    ////////////////////////////////////////////////////////////////////////
-    // Events
-    ////////////////////////////////////////////////////////////////////////
-
-    /// @notice Emitted when a new session is granted
-    /// @param idx The index of the granted session
-    /// @param signer The address authorized to sign for this session
-    /// @param expiry The timestamp when the session expires
-    /// @param limit The maximum amount of wei that can be spent
-    event SessionGranted(uint32 idx, address signer, uint256 expiry, uint256 limit);
-
-    /// @notice Emitted when a session is revoked
-    /// @param idx The index of the revoked session
-    event SessionRevoked(uint32 idx);
-
-    /// @notice Emitted for debugging purposes
-    /// @param message The log message
-    event Log(string message);
+    Session[] public override sessions;
 
     ////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -113,10 +79,15 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
 
     /// @notice Creates a new authorized session
     /// @param signer The address that will be allowed to sign for this session
-    /// @param expiry The timestamp when the session expires
-    /// @param limitWei The maximum amount of wei that can be spent
+    /// @param expiry The timestamp when the session expires (0 = unlimited)
+    /// @param limitWei The maximum amount of wei that can be spent (0 = unlimited)
     /// @return idx The index of the newly created session
-    function grantSession(address signer, uint256 expiry, uint256 limitWei) external onlySelf returns (uint32 idx) {
+    function grantSession(address signer, uint256 expiry, uint256 limitWei)
+        external
+        override
+        onlySelf
+        returns (uint32 idx)
+    {
         sessions.push(Session(true, signer, expiry, limitWei, 0, 0));
         idx = uint32(sessions.length - 1);
         emit SessionGranted(idx, signer, expiry, limitWei);
@@ -124,19 +95,19 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
 
     /// @notice Revokes an existing session
     /// @param idx The index of the session to revoke
-    function revokeSession(uint32 idx) external onlySelf {
+    function revokeSession(uint32 idx) external override onlySelf {
         sessions[idx].authorized = false;
         emit SessionRevoked(idx);
     }
 
     /// @notice Initializes the contract after deployment
-    function initialize() external payable {
+    function initialize() external payable override {
         emit Log("Hello, world!");
     }
 
     /// @notice Sets the AES encryption key
     /// @param _aesKey The new AES key to set
-    function setAESKey(suint256 _aesKey) external onlySelf {
+    function setAESKey(suint256 _aesKey) external override onlySelf {
         AES_KEY = _aesKey;
     }
 
@@ -149,7 +120,7 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
     /// @param plaintext The data to encrypt
     /// @return nonce The random nonce used for encryption
     /// @return ciphertext The encrypted data
-    function encrypt(bytes calldata plaintext) external view returns (uint96 nonce, bytes memory ciphertext) {
+    function encrypt(bytes calldata plaintext) external view override returns (uint96 nonce, bytes memory ciphertext) {
         nonce = _generateRandomNonce();
         ciphertext = _encrypt(AES_KEY, nonce, plaintext);
         return (nonce, ciphertext);
@@ -165,10 +136,14 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
     /// @param ciphertext The encrypted transaction data
     /// @param sig The session signature authorizing the execution
     /// @param idx The index of the session to use
-    function execute(uint96 nonce, bytes calldata ciphertext, bytes calldata sig, uint32 idx) external payable {
+    function execute(uint96 nonce, bytes calldata ciphertext, bytes calldata sig, uint32 idx)
+        external
+        payable
+        override
+    {
         Session storage S = sessions[idx];
         require(S.authorized, "revoked");
-        require(S.expiry > block.timestamp, "expired");
+        require(S.expiry == 0 || S.expiry > block.timestamp, "expired");
 
         /* verify session signature */
         bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
@@ -241,7 +216,7 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
     /// @notice Gets the current nonce for a session
     /// @param idx The index of the session
     /// @return The current nonce value
-    function getSessionNonce(uint32 idx) external view returns (uint256) {
+    function getSessionNonce(uint32 idx) external view override returns (uint256) {
         return sessions[idx].nonce;
     }
 
