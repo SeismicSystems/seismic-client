@@ -14,7 +14,7 @@ contract ShieldedDelegationAccountTest is Test {
     address SKaddr;
     address alice = address(0xA11CE);
     address bob = address(0xB0B);
-    uint256 MASTER_KEY = 0x2dc875f35f6fa751d30fc934bbf5027760109521adf5f66c9426002180f32bce;
+    uint256 AES_KEY = 0x2dc875f35f6fa751d30fc934bbf5027760109521adf5f66c9426002180f32bce;
     address relayer = address(0xAA);
 
     // EIP-712 Constants
@@ -40,7 +40,7 @@ contract ShieldedDelegationAccountTest is Test {
         // vm.prank(alice);
         acc = new ShieldedDelegationAccount();
         vm.prank(address(acc));
-        acc.setAESKey(suint256(MASTER_KEY));
+        acc.setAESKey(suint256(AES_KEY));
 
         // // // 2) Grant a session for SKaddr (no expiry, 1 ETH gas cap)
         // vm.prank(address(acc)); // pretend the contract calls itself
@@ -92,7 +92,7 @@ contract ShieldedDelegationAccountTest is Test {
 
         address AESDecryptAddr = address(0x67);
         // Pack key, nonce, and ciphertext
-        bytes memory input = abi.encodePacked(suint256(MASTER_KEY), nonce, ciphertext);
+        bytes memory input = abi.encodePacked(suint256(AES_KEY), nonce, ciphertext);
 
         (bool success, bytes memory output) = AESDecryptAddr.staticcall(input);
         require(success, "AES decrypt precompile call failed");
@@ -116,7 +116,7 @@ contract ShieldedDelegationAccountTest is Test {
     }
 
     // function test_abiEncode() public view {
-    //     bytes memory encoded = abi.encodePacked(suint256(MASTER_KEY));
+    //     bytes memory encoded = abi.encodePacked(suint256(AES_KEY));
     //     console.log("encoded");
     //     console.logBytes(encoded);
     //     assertEq(false, true);
