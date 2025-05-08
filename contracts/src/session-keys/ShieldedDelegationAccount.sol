@@ -43,8 +43,8 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
     /// @notice Session information structure
     /// @custom:property authorized - Whether the session is currently authorized
     /// @custom:property signer - The secp256k1 address that can sign for this session
-    /// @custom:property expiry - Unix timestamp when session expires (0 = unlimited)
-    /// @custom:property limitWei - Maximum ether value that can be spent (0 = unlimited)
+    /// @custom:property expiry - Unix timestamp when session expires
+    /// @custom:property limitWei - Maximum ether value that can be spent
     /// @custom:property spentWei - Cumulative ether spent by this session
     /// @custom:property nonce - Current nonce for replay protection
     struct Session {
@@ -113,8 +113,8 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
 
     /// @notice Creates a new authorized session
     /// @param signer The address that will be allowed to sign for this session
-    /// @param expiry The timestamp when the session expires (0 = unlimited)
-    /// @param limitWei The maximum amount of wei that can be spent (0 = unlimited)
+    /// @param expiry The timestamp when the session expires
+    /// @param limitWei The maximum amount of wei that can be spent
     /// @return idx The index of the newly created session
     function grantSession(address signer, uint256 expiry, uint256 limitWei) external onlySelf returns (uint32 idx) {
         sessions.push(Session(true, signer, expiry, limitWei, 0, 0));
@@ -168,7 +168,7 @@ contract ShieldedDelegationAccount is MultiSendCallOnly, AESPrecompiles {
     function execute(uint96 nonce, bytes calldata ciphertext, bytes calldata sig, uint32 idx) external payable {
         Session storage S = sessions[idx];
         require(S.authorized, "revoked");
-        require(S.expiry == 0 || S.expiry > block.timestamp, "expired");
+        require(S.expiry > block.timestamp, "expired");
 
         /* verify session signature */
         bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
