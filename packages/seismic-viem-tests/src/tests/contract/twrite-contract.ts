@@ -4,38 +4,12 @@ import {
   createShieldedWalletClient,
 } from 'seismic-viem'
 import { SEISMIC_TX_TYPE, getShieldedContract } from 'seismic-viem'
-import { Account, Chain, hexToNumber } from 'viem'
+import { hexToNumber } from 'viem'
 import { http } from 'viem'
 
 import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
 import { bytecode } from '@sviem-tests/tests/contract/bytecode.ts'
-
-type ContractTestArgs = {
-  chain: Chain
-  url: string
-  account: Account
-}
-
-/* Test Contract:
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
-
-contract SeismicCounter {
-    suint256 number;
-
-    function setNumber(suint256 newNumber) public {
-        number = newNumber;
-    }
-
-    function increment() public {
-        number++;
-    }
-
-    function isOdd() public view returns (bool) {
-        return number % 2 == 1;
-    }
-}
-*/
+import type { ContractTestArgs } from '@sviem-tests/tests/contract/contract.ts'
 
 export const testTwriteIsntSeismicTx = async ({
   chain,

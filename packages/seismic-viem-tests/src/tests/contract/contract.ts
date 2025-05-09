@@ -11,7 +11,7 @@ import { http } from 'viem'
 import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
 import { bytecode } from '@sviem-tests/tests/contract/bytecode.ts'
 
-type ContractTestArgs = {
+export type ContractTestArgs = {
   chain: Chain
   url: string
   account: Account
