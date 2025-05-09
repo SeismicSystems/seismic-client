@@ -82,7 +82,6 @@ export const testSeismicTxTypedData = async ({
 
   const preTxBalance = await client.getBalance({ address: recipientAddress })
 
-  console.log('fetching nonce')
   const nonce = await client.getTransactionCount({
     address: account.address,
   })
@@ -95,18 +94,18 @@ export const testSeismicTxTypedData = async ({
     value,
     nonce,
   }
-  console.log('preparing tx')
+
   const preparedTx = await client.prepareTransactionRequest(baseTx)
   const tx = { ...preparedTx, encryptionPubkey, encryptionNonce }
-  console.log('signing tx')
+
   // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
-  console.log('sending tx')
+
   const hash: Hex = await client.request({
     method: 'eth_sendRawTransaction',
     params: [{ data: typedData, signature }],
   })
-  console.log('waiting for tx')
+
   const receipt = await client.waitForTransactionReceipt({ hash })
   expect(receipt.status).toBe('success')
 
