@@ -1,11 +1,12 @@
 import { expect } from 'bun:test'
 import {
+  SEISMIC_TX_TYPE,
   createShieldedPublicClient,
   createShieldedWalletClient,
 } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
 import { stringifyBigInt } from 'seismic-viem'
-import { Account, Chain } from 'viem'
+import { Account, Chain, Hex, hexToNumber } from 'viem'
 import { http } from 'viem'
 
 import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
@@ -37,6 +38,15 @@ contract SeismicCounter {
     }
 }
 */
+
+const expectSeismicTx = (typeHex: Hex | null) => {
+  if (!typeHex) {
+    throw new Error('Transaction type not found')
+  } else {
+    const txType = hexToNumber(typeHex)
+    expect(txType).toBe(SEISMIC_TX_TYPE)
+  }
+}
 
 export const testSeismicTx = async ({
   chain,
@@ -89,18 +99,28 @@ export const testSeismicTx = async ({
     `[1] setNumber receipt: ${JSON.stringify(receipt1, stringifyBigInt, 2)}`
   )
 
+  const { typeHex: typeHex1 } = await publicClient.getTransaction({ hash: tx1 })
+  expectSeismicTx(typeHex1)
+
   // Try reading using explicit signedRead
   const isOdd1 = await seismicContract.read.isOdd()
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
-  const tx2 = await seismicContract.twrite.increment()
+  const tx2 = await walletClient.twriteContract({
+    address: deployedContractAddress,
+    abi: contractABI,
+    functionName: 'increment',
+  })
   console.info(`[2] Incremented number in tx: ${tx2}`)
   // console.info(`dwrite: ${JSON.stringify(debug, stringifyBigInt, 2)}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
   console.info(
     `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
   )
+
+  const { typeHex: typeHex2 } = await publicClient.getTransaction({ hash: tx2 })
+  expectSeismicTx(typeHex2)
 
   // Try reading using unsigned (normal) read
   const isOdd2 = await seismicContract.tread.isOdd()

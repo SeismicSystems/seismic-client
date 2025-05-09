@@ -10,7 +10,6 @@ import {
   testSeismicTx,
 } from '@sviem-tests/index.ts'
 import { testAesKeygen } from '@sviem-tests/tests/aesKeygen.ts'
-import { testTwriteIsntSeismicTx } from '@sviem-tests/tests/contract/twrite-contract.ts'
 import { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
 import { testRng } from '@sviem-tests/tests/precompiles.ts'
 import { testHkdfHex } from '@sviem-tests/tests/precompiles.ts'
@@ -23,6 +22,11 @@ import {
   testLegacyTxTrace,
   testSeismicTxTrace,
 } from '@sviem-tests/tests/trace.ts'
+import {
+  testContractTwriteIsntSeismicTx,
+  testShieldedWalletClientTwriteIsntSeismicTx,
+  testViemWriteContractIsntSeismicTx,
+} from '@sviem-tests/tests/transparentContract/twrite-contract.ts'
 import {
   testSeismicCallTypedData,
   testSeismicTxTypedData,
@@ -67,10 +71,32 @@ describe('Seismic Contract', async () => {
   )
 })
 
-describe('Test that twrite does not use seismic tx', async () => {
+describe('twrite should not use seismic tx', async () => {
   test(
-    'deploy & call contracts with seismic tx',
-    async () => await testTwriteIsntSeismicTx({ chain, url, account }),
+    'ShieldedContract.twrite should not use seismic tx',
+    async () => await testContractTwriteIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'viem writeContract should not use seismic tx',
+    async () =>
+      await testViemWriteContractIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'ShieldedWalletClient.twriteContract does not use seismic tx',
+    async () =>
+      await testShieldedWalletClientTwriteIsntSeismicTx({
+        chain,
+        url,
+        account,
+      }),
     {
       timeout: TIMEOUT_MS,
     }
