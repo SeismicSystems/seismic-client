@@ -69,7 +69,7 @@ async function getShieldedWriteContractRequest<
     'nonpayable' | 'payable',
     TFunctionName
   >,
-  chainOverride extends Chain | undefined = undefined,
+  TChainOverride extends Chain | undefined = undefined,
 >(
   client: ShieldedWalletClient<TTransport, TChain, TAccount>,
   parameters: WriteContractParameters<
@@ -78,12 +78,12 @@ async function getShieldedWriteContractRequest<
     TArgs,
     TChain,
     TAccount,
-    chainOverride
-  >
+    TChainOverride
+  >,
+  plaintextCalldata: Hex
 ): Promise<SendSeismicTransactionParameters<TChain, TAccount>> {
   const { address, gas, gasPrice, value, nonce } = parameters
 
-  const plaintextCalldata = getPlaintextCalldata(parameters)
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
 
@@ -91,18 +91,16 @@ async function getShieldedWriteContractRequest<
   const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
 
   return {
+    account: client.account,
+    chain: undefined,
     to: address,
     data,
-    // include type=legacy simply to avoid type errors
-    // this arg isn't used in sendShieldedTransaction
-    type: 'legacy',
     nonce,
     value,
     gas,
     gasPrice,
     encryptionPubkey: client.getEncryptionPublicKey(),
     encryptionNonce,
-    plaintextCalldata,
   }
 }
 
@@ -160,7 +158,12 @@ export async function shieldedWriteContract<
     chainOverride
   >
 ): Promise<WriteContractReturnType> {
-  const request = await getShieldedWriteContractRequest(client, parameters)
+  const plaintextCalldata = getPlaintextCalldata(parameters)
+  const request = await getShieldedWriteContractRequest(
+    client,
+    parameters,
+    plaintextCalldata
+  )
   return sendShieldedTransaction(client, request)
 }
 
@@ -229,7 +232,11 @@ export async function shieldedWriteContractDebug<
     }
   }
   const plaintextCalldata = getPlaintextCalldata(parameters)
-  const request = await getShieldedWriteContractRequest(client, parameters)
+  const request = await getShieldedWriteContractRequest(
+    client,
+    parameters,
+    plaintextCalldata
+  )
   const txHash = await sendShieldedTransaction(client, request)
   return {
     plaintextTx: {

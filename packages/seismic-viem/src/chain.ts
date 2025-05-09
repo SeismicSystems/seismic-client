@@ -14,16 +14,18 @@ import type {
   ChainFormatters,
   ExactPartial,
   Hex,
+  OneOf,
   RpcSchema,
   RpcStateOverride,
   SerializeTransactionFn,
   Signature,
   TransactionRequest,
+  TransactionRequestLegacy,
   TransactionSerializable,
-  TransactionSerializableGeneric,
+  TransactionSerializableLegacy,
+  UnionOmit,
 } from 'viem'
 
-import { stringifyBigInt } from '@sviem/utils.ts'
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 
 export const SEISMIC_TX_TYPE = 74 // '0x4a'
@@ -34,6 +36,13 @@ export const SEISMIC_TX_TYPE = 74 // '0x4a'
  * @property {Hex} [encryptionPubkey] - The public key used to encrypt the calldata. This uses AES encryption, where the user's keypair is combined with the network's keypair
  * @property {number} [messageVersion] - The version of the message being sent. Used for signing transactions via messages. Normal transactions use messageVersion = 0. Txs signed with EIP-712 use messageVersion = 2
  */
+
+type SeismicTxExtrasBlank = {
+  encryptionPubkey?: undefined
+  encryptionNonce?: undefined
+  messageVersion?: undefined
+}
+
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
   encryptionNonce?: Hex | undefined
@@ -47,7 +56,10 @@ export type SeismicTxExtras = {
  * @extends {TransactionRequest}
  * @extends {SeismicTxExtras}
  */
-export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
+export type SeismicTransactionRequest =
+  | (TransactionRequest & SeismicTxExtrasBlank)
+  | (UnionOmit<TransactionRequestLegacy, 'type'> &
+      SeismicTxExtras & { type: 'seismic' })
 
 /**
  * Represents a serializable Seismic transaction, extending viem's base {@link https://viem.sh/docs/utilities/parseTransaction#returns TransactionSerializable} with {@link SeismicTxExtras}
@@ -56,8 +68,10 @@ export type SeismicTransactionRequest = TransactionRequest & SeismicTxExtras
  * @extends {TransactionSerializable}
  * @extends {SeismicTxExtras}
  */
-export type TransactionSerializableSeismic = TransactionSerializable &
-  SeismicTxExtras
+export type TransactionSerializableSeismic =
+  | (TransactionSerializable & SeismicTxExtrasBlank)
+  | (UnionOmit<TransactionSerializable, 'type'> &
+      SeismicTxExtras & { type: 'seismic' })
 
 export type TxSeismic = {
   chainId?: number
@@ -72,11 +86,13 @@ export type TxSeismic = {
   messageVersion?: number
 }
 
-export type SeismicTxSerializer =
-  SerializeTransactionFn<TransactionSerializableSeismic>
+export type SeismicTxSerializer = SerializeTransactionFn<
+  TransactionSerializableSeismic,
+  'seismic'
+>
 
 export const serializeSeismicTransaction: SeismicTxSerializer = (
-  transaction: TransactionSerializableSeismic,
+  transaction: OneOf<TransactionSerializable | TransactionSerializableSeismic>,
   signature?: Signature
 ): Hex => {
   const {
@@ -109,7 +125,7 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     messageVersion ? toHex(messageVersion) : '0x',
     data ?? '0x',
     ...toYParitySignatureArray(
-      transaction as TransactionSerializableGeneric,
+      transaction as TransactionSerializableLegacy,
       signature
     ),
   ]
@@ -148,6 +164,29 @@ export const callRpcSchema = {
 
 export const seismicRpcSchema: RpcSchema = [estimateGasRpcSchema, callRpcSchema]
 
+const hasSeismicFields = (request: SeismicTransactionRequest) => {
+  return (
+    request.encryptionPubkey !== undefined &&
+    request.encryptionNonce !== undefined
+  )
+}
+
+const fmtRpcRequest = (request: SeismicTransactionRequest) => {
+  if (request.type === 'seismic') {
+    const seismicFmt = formatTransactionRequest({
+      ...request,
+      type: 'legacy',
+    })
+    return { ...seismicFmt, type: SEISMIC_TX_TYPE }
+  }
+
+  const { type, ...fmt } = formatTransactionRequest(request)
+  if (hasSeismicFields(request)) {
+    return { ...fmt, type: SEISMIC_TX_TYPE }
+  }
+  return { ...fmt, type }
+}
+
 /**
  * Chain formatters for Seismic transactions, providing formatting utilities for transaction requests.
  * @property {SeismicTransactionRequest} transactionRequest - Formatter configuration for transaction requests
@@ -166,43 +205,35 @@ export const seismicRpcSchema: RpcSchema = [estimateGasRpcSchema, callRpcSchema]
 export const seismicChainFormatters: ChainFormatters = {
   transactionRequest: {
     format: (request: SeismicTransactionRequest) => {
-      console.log(JSON.stringify(request, stringifyBigInt, 2))
-      const formattedRpcRequest = formatTransactionRequest(request)
+      // @ts-expect-error: anvil requires chainId to be set but estimateGas doesn't set it
+      let chainId = request.chainId
+      const formattedRpcRequest = fmtRpcRequest(request)
 
-      let data = formattedRpcRequest.data
-      // @ts-ignore
-      let chainId = request.chainId // anvil requires chainId to be set but estimateGas doesn't set it
-
-      let type
-      let seismicElements
-      if (request.encryptionPubkey) {
+      if (request.type === 'seismic') {
         if (!request.encryptionNonce) {
           throw new Error(
             'Encryption nonce is required for seismic transactions'
           )
         }
-        if (request.messageVersion && request.messageVersion !== 0) {
+        if (!request.encryptionPubkey) {
+          throw new Error(
+            'Encryption public key is required for seismic transactions'
+          )
+        }
+        if (request.messageVersion) {
           throw new Error(
             'Message version must be 0 for seismic transaction requests'
           )
         }
-        seismicElements = {
-          encryptionPubkey: request.encryptionPubkey,
-          encryptionNonce: request.encryptionNonce,
-          messageVersion: '0x0',
-        }
-        type = SEISMIC_TX_TYPE
       }
 
-      let ret = {
+      return {
         ...formattedRpcRequest,
-        ...(type !== undefined && { type }),
-        ...(data !== undefined && { data }),
-        ...(seismicElements !== undefined && seismicElements),
-        ...(chainId !== undefined && { chainId }),
+        chainId,
+        encryptionPubkey: request.encryptionPubkey,
+        encryptionNonce: request.encryptionNonce,
+        messageVersion: hasSeismicFields(request) ? '0x0' : undefined,
       }
-
-      return ret
     },
     type: 'transactionRequest',
   },

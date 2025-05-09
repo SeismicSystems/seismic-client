@@ -9,29 +9,8 @@ import { http } from 'viem'
 import { writeContract } from 'viem/actions'
 
 import type { ContractTestArgs } from '@sviem-tests/tests/contract/contract.ts'
-import { contractABI } from '@sviem-tests/tests/transparentContract/abi.ts'
-import { bytecode } from '@sviem-tests/tests/transparentContract/bytecode.ts'
-
-/* Test Contract:
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
-
-contract NormalCounter {
-    uint256 number;
-
-    function setNumber(uint256 newNumber) public {
-        number = newNumber;
-    }
-
-    function increment() public {
-        number++;
-    }
-
-    function isOdd() public view returns (bool) {
-        return number % 2 == 1;
-    }
-}
-*/
+import { transparentCounterABI } from '@sviem-tests/tests/transparentContract/abi.ts'
+import { transparentCounterBytecode } from '@sviem-tests/tests/transparentContract/bytecode.ts'
 
 const TEST_NUMBER = BigInt(11)
 
@@ -45,10 +24,10 @@ const twriteSetup = async ({ chain, url, account }: ContractTestArgs) => {
     transport: http(url),
     account,
   })
-  const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
+  const testContractBytecodeFormatted: `0x${string}` = `0x${transparentCounterBytecode.object.replace(/^0x/, '')}`
 
   const deployTx = await walletClient.deployContract({
-    abi: contractABI,
+    abi: transparentCounterABI,
     bytecode: testContractBytecodeFormatted,
     chain: walletClient.chain,
   })
@@ -57,7 +36,6 @@ const twriteSetup = async ({ chain, url, account }: ContractTestArgs) => {
   })
 
   const deployedContractAddress = deployReceipt.contractAddress!
-  console.info(`Deployed contract address: ${deployedContractAddress}`)
   return {
     deployedContractAddress,
     publicClient,
@@ -70,7 +48,7 @@ const expectNonSeismicTx = (typeHex: Hex | null) => {
     throw new Error('Transaction type not found')
   } else {
     const txType = hexToNumber(typeHex)
-    expect(txType).toBe(SEISMIC_TX_TYPE)
+    expect(txType).not.toBe(SEISMIC_TX_TYPE)
   }
 }
 
@@ -83,7 +61,7 @@ export const testContractTwriteIsntSeismicTx = async ({
     await twriteSetup({ chain, url, account })
 
   const seismicContract = getShieldedContract({
-    abi: contractABI,
+    abi: transparentCounterABI,
     address: deployedContractAddress,
     client: walletClient,
   })
@@ -103,7 +81,7 @@ export const testViemWriteContractIsntSeismicTx = async ({
 
   const hash = await writeContract(walletClient, {
     address: deployedContractAddress,
-    abi: contractABI,
+    abi: transparentCounterABI,
     functionName: 'setNumber',
     args: [TEST_NUMBER],
   })
@@ -121,7 +99,7 @@ export const testShieldedWalletClientTwriteIsntSeismicTx = async ({
 
   const hash = await walletClient.twriteContract({
     address: deployedContractAddress,
-    abi: contractABI,
+    abi: transparentCounterABI,
     functionName: 'setNumber',
     args: [TEST_NUMBER],
   })
