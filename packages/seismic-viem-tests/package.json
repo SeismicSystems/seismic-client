@@ -20,7 +20,7 @@
     "README.md"
   ],
   "peerDependencies": {
-    "seismic-viem": "^1.0.37",
+    "seismic-viem": "^1.0.42",
     "viem": "2.x"
   },
   "devDependencies": {
