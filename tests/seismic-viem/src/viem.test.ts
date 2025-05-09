@@ -23,6 +23,11 @@ import {
   testSeismicTxTrace,
 } from '@sviem-tests/tests/trace.ts'
 import {
+  testContractTwriteIsntSeismicTx,
+  testShieldedWalletClientTwriteIsntSeismicTx,
+  testViemWriteContractIsntSeismicTx,
+} from '@sviem-tests/tests/transparentContract/twrite-contract.ts'
+import {
   testSeismicCallTypedData,
   testSeismicTxTypedData,
 } from '@sviem-tests/tests/typedData.ts'
@@ -60,6 +65,38 @@ describe('Seismic Contract', async () => {
   test(
     'deploy & call contracts with seismic tx',
     async () => await testSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+})
+
+describe('twrite should not use seismic tx', async () => {
+  test(
+    'ShieldedContract.twrite should not use seismic tx',
+    async () => await testContractTwriteIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'viem writeContract should not use seismic tx',
+    async () =>
+      await testViemWriteContractIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'ShieldedWalletClient.twriteContract does not use seismic tx',
+    async () =>
+      await testShieldedWalletClientTwriteIsntSeismicTx({
+        chain,
+        url,
+        account,
+      }),
     {
       timeout: TIMEOUT_MS,
     }

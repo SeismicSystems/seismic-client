@@ -15,6 +15,7 @@ export {
   createSeismicDevnet,
   serializeSeismicTransaction,
   seismicChainFormatters,
+  SEISMIC_TX_TYPE,
 } from '@sviem/chain.ts'
 
 export { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'

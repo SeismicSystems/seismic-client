@@ -1,13 +1,6 @@
 import { Abi } from 'viem'
 
-export const seismicCounterAbi = [
-  {
-    type: 'function',
-    name: 'getNumber',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
-    stateMutability: 'view',
-  },
+export const transparentCounterABI = [
   {
     type: 'function',
     name: 'increment',
@@ -24,8 +17,15 @@ export const seismicCounterAbi = [
   },
   {
     type: 'function',
+    name: 'number',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'setNumber',
-    inputs: [{ name: 'newNumber', type: 'suint256', internalType: 'suint256' }],
+    inputs: [{ name: 'newNumber', type: 'uint256', internalType: 'uint256' }],
     outputs: [],
     stateMutability: 'nonpayable',
   },
