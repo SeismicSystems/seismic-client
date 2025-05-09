@@ -107,8 +107,8 @@ export const testSeismicTxTypedData = async ({
     params: [{ data: typedData, signature }],
   })
   console.log('waiting for tx')
-  await client.waitForTransactionReceipt({ hash })
-  console.log('done')
+  const receipt = await client.waitForTransactionReceipt({ hash })
+  expect(receipt.status).toBe('success')
 
   const postTxBalance = await client.getBalance({ address: recipientAddress })
   expect(postTxBalance).toBe(preTxBalance + value)
