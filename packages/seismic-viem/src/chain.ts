@@ -23,6 +23,7 @@ import type {
   TransactionSerializableGeneric,
 } from 'viem'
 
+import { stringifyBigInt } from '@sviem/utils.ts'
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 
 export const SEISMIC_TX_TYPE = 74 // '0x4a'
@@ -165,6 +166,7 @@ export const seismicRpcSchema: RpcSchema = [estimateGasRpcSchema, callRpcSchema]
 export const seismicChainFormatters: ChainFormatters = {
   transactionRequest: {
     format: (request: SeismicTransactionRequest) => {
+      console.log(JSON.stringify(request, stringifyBigInt, 2))
       const formattedRpcRequest = formatTransactionRequest(request)
 
       let data = formattedRpcRequest.data

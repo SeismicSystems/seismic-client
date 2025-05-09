@@ -10,6 +10,7 @@ import {
   testSeismicTx,
 } from '@sviem-tests/index.ts'
 import { testAesKeygen } from '@sviem-tests/tests/aesKeygen.ts'
+import { testTwriteIsntSeismicTx } from '@sviem-tests/tests/contract/twrite-contract.ts'
 import { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
 import { testRng } from '@sviem-tests/tests/precompiles.ts'
 import { testHkdfHex } from '@sviem-tests/tests/precompiles.ts'
@@ -60,6 +61,16 @@ describe('Seismic Contract', async () => {
   test(
     'deploy & call contracts with seismic tx',
     async () => await testSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+})
+
+describe('Test that twrite does not use seismic tx', async () => {
+  test(
+    'deploy & call contracts with seismic tx',
+    async () => await testTwriteIsntSeismicTx({ chain, url, account }),
     {
       timeout: TIMEOUT_MS,
     }
