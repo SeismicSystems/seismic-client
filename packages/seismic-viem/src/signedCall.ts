@@ -321,12 +321,16 @@ export async function signedCall<
     */
 
     // @ts-ignore
-    const preparedTx = await prepareTransactionRequest(client, request)
+    const { type, ...preparedTx } = await prepareTransactionRequest(client, {
+      ...request,
+      type: 'legacy',
+    })
     const encryptionPubkey = client.getEncryptionPublicKey()
     // @ts-ignore
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
       encryptionPubkey,
+      type: 'seismic',
     }
 
     const response = await doSignedCall(client, seismicTx, { block })
