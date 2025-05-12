@@ -50,6 +50,7 @@ const seismicTxTypedData = <
     encryptionNonce: tx.encryptionNonce,
     messageVersion: parseInt(MESSAGE_VERSION),
   }
+
   // @ts-ignore
   return {
     types: {

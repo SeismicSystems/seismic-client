@@ -18,7 +18,7 @@ import type {
   WriteContractReturnType,
 } from 'viem'
 import { getContract } from 'viem'
-import { writeContract } from 'viem/actions'
+import { readContract, writeContract } from 'viem/actions'
 
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import {
@@ -374,6 +374,17 @@ export function getShieldedContract<
           ]
         ) => {
           const { args, options } = getFunctionParameters(parameters)
+          // @ts-expect-error: account might be here
+          if (!options?.account) {
+            // @ts-expect-error: this is valid
+            return readContract(walletClient, {
+              abi,
+              address,
+              functionName,
+              args,
+              ...(options as any),
+            })
+          }
           return signedRead({
             abi,
             address,

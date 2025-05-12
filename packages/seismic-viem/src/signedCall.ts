@@ -8,7 +8,6 @@ import type {
   Hex,
   RpcSchema,
   SendTransactionParameters,
-  TransactionRequest,
   Transport,
   UnionOmit,
 } from 'viem'
@@ -298,7 +297,9 @@ export async function signedCall<
       nonce: nonce_,
       to: deploylessCall ? undefined : to,
       value,
-    } as TransactionRequest
+      // prepareTransactionRequest will fill the required fields using legacy spec
+      type: 'legacy',
+    } as any
 
     // TODO: decide if we ever want to add multicall support
     /*
@@ -320,13 +321,13 @@ export async function signedCall<
     }
     */
 
-    // @ts-ignore
     const preparedTx = await prepareTransactionRequest(client, request)
     const encryptionPubkey = client.getEncryptionPublicKey()
     // @ts-ignore
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
       encryptionPubkey,
+      type: 'seismic',
     }
 
     const response = await doSignedCall(client, seismicTx, { block })

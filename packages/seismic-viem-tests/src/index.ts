@@ -7,6 +7,16 @@ export type {
 
 export { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
 export { testSeismicTx } from '@sviem-tests/tests/contract/contract.ts'
+export {
+  testContractTreadIsntSeismicTx,
+  testShieldedWalletClientTreadIsntSeismicTx,
+  testViemReadContractIsntSeismicTx,
+} from '@sviem-tests/tests/transparentContract/tread-contract.ts'
+export {
+  testContractTwriteIsntSeismicTx,
+  testShieldedWalletClientTwriteIsntSeismicTx,
+  testViemWriteContractIsntSeismicTx,
+} from '@sviem-tests/tests/transparentContract/twrite-contract.ts'
 export { testAesKeygen } from '@sviem-tests/tests/aesKeygen.ts'
 export { testWsConnection } from '@sviem-tests/tests/ws.ts'
 export {
