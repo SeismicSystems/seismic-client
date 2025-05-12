@@ -12,9 +12,9 @@ import type {
 } from 'viem'
 import { readContract, writeContract } from 'viem/actions'
 import {
-  signAuthorization,
   SignAuthorizationParameters,
   SignAuthorizationReturnType,
+  signAuthorization,
 } from 'viem/experimental'
 
 import { ShieldedWalletClient } from '@sviem/client.ts'
@@ -115,7 +115,7 @@ export type ShieldedWalletActions<
   ) => Promise<ReadContractReturnType>
   signedCall: SignedCall<TChain>
   signAuthorization: (
-    parameters: SignAuthorizationParameters<TAccount>,
+    parameters: SignAuthorizationParameters<TAccount>
   ) => Promise<SignAuthorizationReturnType>
   sendShieldedTransaction: <
     const request extends SendSeismicTransactionRequest<TChain, TChainOverride>,
@@ -188,6 +188,6 @@ export const shieldedWalletActions = <
     signAuthorization: (args) => signAuthorization(client, args),
     signedCall: (args) => signedCall(client, args as any),
     sendShieldedTransaction: (args) =>
-    sendShieldedTransaction(client, args as any),
+      sendShieldedTransaction(client, args as any),
   }
 }
