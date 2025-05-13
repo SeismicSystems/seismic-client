@@ -74,8 +74,8 @@ contract ShieldedDelegationAccountTest is Test {
 
         // Deploy the test token and mint tokens to Alice and the account
         tok = new TestToken();
-        tok.mint(saddress(address(alice)), suint256(100 * 10 ** 18));
-        tok.mint(saddress(address(acc)), suint256(100 * 10 ** 18));
+        tok.mint(address(alice), suint256(100 * 10 ** 18));
+        tok.mint(address(acc), suint256(100 * 10 ** 18));
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -117,7 +117,7 @@ contract ShieldedDelegationAccountTest is Test {
     }
 
     /// @notice Creates and signs a digest for the execute function
-    /// @param sessionIndex Index of the session to use
+    /// @param sessionIndex Index of the session to uses
     /// @param cipher Encrypted data to be executed
     /// @return signature The signature bytes
     function _signExecuteDigest(uint32 sessionIndex, bytes memory cipher)
@@ -145,7 +145,7 @@ contract ShieldedDelegationAccountTest is Test {
     function _createTokenTransferCall(address recipient, uint256 amount) internal view returns (bytes memory calls) {
         // Create the transfer function call data
         bytes memory transferData =
-            abi.encodeWithSelector(SRC20.transfer.selector, saddress(recipient), suint256(amount));
+            abi.encodeWithSelector(SRC20.transfer.selector, address(recipient), suint256(amount));
 
         // Format it for MultiSend
         return abi.encodePacked(

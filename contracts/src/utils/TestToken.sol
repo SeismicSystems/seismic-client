@@ -21,14 +21,14 @@ contract TestToken is SRC20 {
     /*//////////////////////////////////////////////////////////////
                                MINT FUNCTION
     //////////////////////////////////////////////////////////////*/
-    function mint(saddress to, suint256 amount) public onlyAdmin {
+    function mint(address to, suint256 amount) public onlyAdmin {
         _mint(to, amount);
     }
 
     /*//////////////////////////////////////////////////////////////
                                BURN FUNCTION
     //////////////////////////////////////////////////////////////*/
-    function burn(saddress from, suint256 amount) public onlyAdmin {
+    function burn(address from, suint256 amount) public onlyAdmin {
         _burn(from, amount);
     }
 

@@ -17,9 +17,9 @@ interface ISRC20 {
                               ERC20 FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     function balanceOf() external view returns (uint256);
-    function approve(saddress spender, suint256 amount) external returns (bool);
-    function transfer(saddress to, suint256 amount) external returns (bool);
-    function transferFrom(saddress from, saddress to, suint256 amount) external returns (bool);
+    function approve(address spender, suint256 amount) external returns (bool);
+    function transfer(address to, suint256 amount) external returns (bool);
+    function transferFrom(address from, address to, suint256 amount) external returns (bool);
 }
 
 /*//////////////////////////////////////////////////////////////
@@ -40,8 +40,8 @@ abstract contract SRC20 is ISRC20 {
     // All storage variables that will be mutated must be confidential to
     // preserve functional privacy.
     suint256 internal totalSupply;
-    mapping(saddress => suint256) internal balance;
-    mapping(saddress => mapping(saddress => suint256)) internal allowance;
+    mapping(address => suint256) internal balance;
+    mapping(address => mapping(address => suint256)) internal allowance;
 
     /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
@@ -56,27 +56,27 @@ abstract contract SRC20 is ISRC20 {
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
     function balanceOf() external view returns (uint256) {
-        return uint256(balance[saddress(msg.sender)]);
+        return uint256(balance[msg.sender]);
     }
 
-    function approve(saddress spender, suint256 amount) public virtual returns (bool) {
-        allowance[saddress(msg.sender)][spender] = amount;
+    function approve(address spender, suint256 amount) public virtual returns (bool) {
+        allowance[msg.sender][spender] = amount;
         return true;
     }
 
-    function transfer(saddress to, suint256 amount) public virtual returns (bool) {
+    function transfer(address to, suint256 amount) public virtual returns (bool) {
         // msg.sender is public information, casting to saddress below doesn't change this
-        balance[saddress(msg.sender)] -= amount;
+        balance[msg.sender] -= amount;
         unchecked {
             balance[to] += amount;
         }
         return true;
     }
 
-    function transferFrom(saddress from, saddress to, suint256 amount) public virtual returns (bool) {
-        suint256 allowed = allowance[from][saddress(msg.sender)]; // Saves gas for limited approvals.
+    function transferFrom(address from, address to, suint256 amount) public virtual returns (bool) {
+        suint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
         if (allowed != suint256(type(uint256).max)) {
-            allowance[from][saddress(msg.sender)] = allowed - amount;
+            allowance[from][msg.sender] = allowed - amount;
         }
 
         balance[from] -= amount;
@@ -89,14 +89,14 @@ abstract contract SRC20 is ISRC20 {
     /*//////////////////////////////////////////////////////////////
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _mint(saddress to, suint256 amount) internal virtual {
+    function _mint(address to, suint256 amount) internal virtual {
         totalSupply += amount;
         unchecked {
             balance[to] += amount;
         }
     }
 
-    function _burn(saddress to, suint256 amount) internal virtual {
+    function _burn(address to, suint256 amount) internal virtual {
         totalSupply -= amount;
         balance[to] -= amount;
     }
