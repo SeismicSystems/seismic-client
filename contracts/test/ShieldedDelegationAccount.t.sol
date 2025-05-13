@@ -216,12 +216,9 @@ contract ShieldedDelegationAccountTest is Test {
 
         // Encrypt using the contract's function
         (uint96 n, bytes memory c) = acc.encrypt(testData);
-        console.logBytes(c);
-        console.log("Nonce in test_encrypt: ", n);
 
         // Decrypt and verify the data matches
         bytes memory decrypted = _decrypt(n, c);
-        console.logBytes(decrypted);
         assertEq(decrypted, testData, "Decrypted data should match original");
     }
 
@@ -231,27 +228,12 @@ contract ShieldedDelegationAccountTest is Test {
         vm.prank(address(acc));
         acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
 
-        // Log transfer selector for debugging
-        console.log("src20 transfer selector is");
-        bytes memory selectorBytes = abi.encodePacked(SRC20.transfer.selector);
-        console.logBytes(selectorBytes);
-
         // Create the token transfer call
         bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
 
-        console.log("calls is");
-        console.logBytes(calls);
-
         // Encrypt and verify decryption works properly
         (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
-        console.log("encrypted calls is");
-        console.logBytes(encryptedCalls);
-        console.log("nonce is");
-        console.log(encryptedCallsNonce);
-
         bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
-        console.log("decrypted calls is");
-        console.logBytes(decrypted);
         assertEq(decrypted, calls, "Decrypted calls should match original");
 
         // Get session nonce for signing
@@ -267,12 +249,6 @@ contract ShieldedDelegationAccountTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(SK, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        // Log relayer info
-        console.log("relayer is");
-        console.log(relayer);
-        console.log("relayer eth balance is");
-        console.log(relayer.balance);
-
         // Execute the transaction
         vm.prank(relayer);
         acc.execute(encryptedCallsNonce, encryptedCalls, signature, 0);
@@ -280,13 +256,11 @@ contract ShieldedDelegationAccountTest is Test {
         // Verify Bob received the tokens
         vm.prank(bob);
         uint256 bobBalance = tok.balanceOf();
-        console.log("bob balance is");
-        console.log(bobBalance);
         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
     }
 
     /// @notice Test that execution is rejected when session has expired
-    function test_revert_when_session_expired() public {
+    function test_revertWhenSessionExpired() public {
         // Grant a session
         vm.prank(address(acc));
         acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
@@ -315,7 +289,7 @@ contract ShieldedDelegationAccountTest is Test {
     }
 
     /// @notice Test that the session spending limit is enforced
-    function test_eth_session_limit() public {
+    function test_ethSessionLimit() public {
         // Fund the account contract with ETH
         vm.deal(address(acc), 100 ether);
 
