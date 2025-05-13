@@ -7,7 +7,6 @@ pragma solidity ^0.8.23;
 interface IShieldedDelegationAccount {
     /// @notice Session information structure
     struct Session {
-        bool authorized;
         address signer;
         uint256 expiry;
         uint256 limitWei;
@@ -38,8 +37,8 @@ interface IShieldedDelegationAccount {
     function grantSession(address signer, uint256 expiry, uint256 limitWei) external returns (uint32 idx);
 
     /// @notice Revokes an existing session
-    /// @param idx The index of the session to revoke
-    function revokeSession(uint32 idx) external;
+    /// @param signer The address of the session key signer
+    function revokeSession(address signer) external;
 
     /// @notice Sets the AES encryption key
     /// @param _aesKey The new AES key to set
@@ -70,14 +69,13 @@ interface IShieldedDelegationAccount {
 
     /// @notice Accessor for sessions array
     /// @param idx The index of the session to access
-    /// @return authorized Whether the session is authorized
     /// @return signer The address authorized to sign for this session
     /// @return expiry The timestamp when the session expires
     /// @return limitWei The maximum amount of wei that can be spent
     /// @return spentWei The amount of wei spent from the session
     /// @return nonce The nonce used for the session
-    function sessions(uint256 idx)
+    function sessions(uint32 idx)
         external
         view
-        returns (bool authorized, address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce);
+        returns (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce);
 }

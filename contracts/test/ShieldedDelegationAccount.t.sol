@@ -197,16 +197,59 @@ contract ShieldedDelegationAccountTest is Test {
         acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
 
         // Access the session data from storage
-        (bool authorized, address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce) =
-            acc.sessions(0);
+        (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce) = acc.sessions(0);
 
         // Verify all fields
-        assertEq(authorized, true, "Session should be authorized");
         assertEq(signer, SKaddr, "Session signer should match");
         assertEq(expiry, block.timestamp + 24 hours, "Expiry should match");
         assertEq(limitWei, 1 ether, "Limit should match");
         assertEq(spentWei, 0, "Spent amount should be zero initially");
         assertEq(nonce, 0, "Nonce should be zero initially");
+    }
+
+    /// @notice Test granting and revoking multiple sessions
+    function test_grantAndRevokeMultipleSessions() public {
+        address signer1 = vm.addr(0xA1);
+        address signer2 = vm.addr(0xA2);
+        address signer3 = vm.addr(0xA3);
+
+        // 1. Grant 3 sessions
+        vm.prank(address(acc));
+        acc.grantSession(signer1, block.timestamp + 1 hours, 1 ether);
+        vm.prank(address(acc));
+        acc.grantSession(signer2, block.timestamp + 2 hours, 1 ether);
+        vm.prank(address(acc));
+        acc.grantSession(signer3, block.timestamp + 3 hours, 1 ether);
+
+        // Verify signerToSessionIndex
+        assertEq(acc.getSessionIndex(signer1), 0);
+        assertEq(acc.getSessionIndex(signer2), 1);
+        assertEq(acc.getSessionIndex(signer3), 2);
+
+        // 2. Revoke signer2
+        vm.prank(address(acc));
+        acc.revokeSession(signer2);
+
+        // signer3 should have taken signer2's place
+        uint32 newIndexForSigner3 = acc.getSessionIndex(signer3);
+        assertEq(newIndexForSigner3, 1, "signer3 should now be at index 1");
+
+        // // signer2 mapping should be removed     
+        vm.expectRevert("invalid signer slot");
+        acc.getSessionIndex(signer2);
+
+        // Confirm session count shrinks
+        assertEq(acc.sessionCount(), 2, "Should have 2 active sessions");
+
+        // Revoke signer1
+        vm.prank(address(acc));
+        acc.revokeSession(signer1);
+        assertEq(acc.sessionCount(), 1, "Should have 1 active session");
+
+        // Revoke signer3
+        vm.prank(address(acc));
+        acc.revokeSession(signer3);
+        assertEq(acc.sessionCount(), 0, "Should have 0 active sessions");
     }
 
     /// @notice Test the encryption and decryption functionality
@@ -259,8 +302,11 @@ contract ShieldedDelegationAccountTest is Test {
         bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
         assertEq(decrypted, calls, "Decrypted calls should match original");
 
+        // Get session index for signing
+        uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
         // Get session nonce for signing
-        uint256 sessionNonce = acc.getSessionNonce(0);
+        uint256 sessionNonce = acc.getSessionNonce(sessionIndex);
 
         // Generate domain separator
         bytes32 DOMAIN_SEPARATOR = _getDomainSeparator();
@@ -274,7 +320,7 @@ contract ShieldedDelegationAccountTest is Test {
 
         // Execute the transaction
         vm.prank(relayer);
-        acc.execute(encryptedCallsNonce, encryptedCalls, signature, 0);
+        acc.execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
 
         // Verify Bob received the tokens
         vm.prank(bob);
@@ -297,13 +343,16 @@ contract ShieldedDelegationAccountTest is Test {
         // Encrypt the call data
         (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
 
+        // Get session index for signing
+        uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
         // Sign the execution request
-        bytes memory signature = _signExecuteDigest(0, encryptedCalls);
+        bytes memory signature = _signExecuteDigest(sessionIndex, encryptedCalls);
 
         // Execution should revert due to expired session
         vm.prank(relayer);
         vm.expectRevert("expired");
-        acc.execute(encryptedCallsNonce, encryptedCalls, signature, 0);
+        acc.execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
 
         // Verify Bob didn't receive any tokens
         vm.prank(bob);
@@ -342,11 +391,16 @@ contract ShieldedDelegationAccountTest is Test {
             bytes memory calls = _createEthTransferCall(bob, 2 ether);
 
             (uint96 nonce96, bytes memory cipher) = acc.encrypt(calls);
-            bytes memory signature = _signExecuteDigest(0, cipher);
+
+            // Get session index for signing
+            uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
+            // Sign the execution request
+            bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
 
             vm.prank(relayer);
             vm.expectRevert("spend limit exceeded");
-            acc.execute(nonce96, cipher, signature, 0);
+            acc.execute(nonce96, cipher, signature, sessionIndex);
 
             assertEq(address(bob).balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
         }
@@ -365,11 +419,16 @@ contract ShieldedDelegationAccountTest is Test {
             bytes memory calls = _createEthTransferCall(bob, 0.1 ether);
 
             (uint96 nonce96, bytes memory cipher) = acc.encrypt(calls);
-            bytes memory signature = _signExecuteDigest(0, cipher);
+
+            // Get session index for signing
+            uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
+            // Sign the execution request
+            bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
 
             vm.prank(relayer);
             vm.expectRevert("spend limit exceeded");
-            acc.execute(nonce96, cipher, signature, 0);
+            acc.execute(nonce96, cipher, signature, sessionIndex);
 
             assertEq(address(bob).balance, initialBalance + 10 ether, "No more transfers should be possible");
         }

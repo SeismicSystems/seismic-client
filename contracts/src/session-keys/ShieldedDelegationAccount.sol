@@ -19,6 +19,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     struct ShieldedStorage {
         suint256 aesKey;
         Session[] sessions;
+        mapping(address => uint32) signerToSessionIndex;
     }
 
     function _getStorage() internal pure returns (ShieldedStorage storage $) {
@@ -74,21 +75,35 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     // Session Management
     ////////////////////////////////////////////////////////////////////////
 
-    function grantSession(address signer, uint256 expiry, uint256 limitWei)
-        external
-        override
-        onlySelf
-        returns (uint32 idx)
-    {
+    function grantSession(address signer, uint256 expiry, uint256 limitWei) external onlySelf returns (uint32 idx) {
         ShieldedStorage storage $ = _getStorage();
-        $.sessions.push(Session(true, signer, expiry, limitWei, 0, 0));
-        idx = uint32($.sessions.length - 1);
+
+        Session memory newSession = Session(signer, expiry, limitWei, 0, 0);
+
+        idx = uint32($.sessions.length);
+        $.sessions.push(newSession);
+        $.signerToSessionIndex[signer] = idx;
+
         emit SessionGranted(idx, signer, expiry, limitWei);
     }
 
-    function revokeSession(uint32 idx) external override onlySelf {
-        _getStorage().sessions[idx].authorized = false;
-        emit SessionRevoked(idx);
+    function revokeSession(address signer) external override onlySelf {
+        ShieldedStorage storage $ = _getStorage();
+        uint32 idx = $.signerToSessionIndex[signer];
+        uint32 lastIdx = uint32($.sessions.length - 1);
+
+        if (idx != lastIdx) {
+            // Swap with last session
+            Session memory lastSession = $.sessions[lastIdx];
+            $.sessions[idx] = lastSession;
+            $.signerToSessionIndex[lastSession.signer] = idx;
+        }
+
+        // Remove last session
+        $.sessions.pop();
+        delete $.signerToSessionIndex[signer];
+
+        emit SessionRevoked(uint32(idx));
     }
 
     function setAESKey(suint256 _aesKey) external override onlySelf {
@@ -116,13 +131,13 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     {
         ShieldedStorage storage $ = _getStorage();
         Session storage S = $.sessions[idx];
-        require(S.authorized, "revoked");
         require(S.expiry > block.timestamp, "expired");
+        require(idx == $.signerToSessionIndex[S.signer], "session key revoked");
 
         bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
         address recoveredSigner = ECDSA.recover(dig, sig);
-        require(recoveredSigner == S.signer, "bad sig");
-
+        require(recoveredSigner == S.signer, "bad signature");
+        
         bytes memory decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
 
         uint256 totalValue = 0;
@@ -194,12 +209,19 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return _getStorage().sessions[idx];
     }
 
-    function sessions(uint256 idx)
+    function getSessionIndex(address signer) external view returns (uint32) {
+        uint32 idx = _getStorage().signerToSessionIndex[signer];
+        require(_getStorage().sessions.length > idx, "signer not found");
+        require(_getStorage().sessions[idx].signer == signer, "invalid signer slot");
+        return idx;
+    }
+
+    function sessions(uint32 idx)
         external
         view
-        returns (bool authorized, address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce)
+        returns (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce)
     {
         Session memory session = _getStorage().sessions[idx];
-        return (session.authorized, session.signer, session.expiry, session.limitWei, session.spentWei, session.nonce);
+        return (session.signer, session.expiry, session.limitWei, session.spentWei, session.nonce);
     }
 }
