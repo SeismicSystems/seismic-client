@@ -222,7 +222,30 @@ contract ShieldedDelegationAccountTest is Test {
         assertEq(decrypted, testData, "Decrypted data should match original");
     }
 
-    /// @notice Test executing a token transfer via session
+    /// @notice Test executing a token transfer as the owner bypassing session key and signature checks
+    function test_executeAsOwner() public {
+        // Grant a session
+        vm.prank(address(acc));
+        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+
+        // Create the token transfer call
+        bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
+
+        // Encrypt and verify decryption works properly
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
+        bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
+        assertEq(decrypted, calls, "Decrypted calls should match original");
+
+        // Execute the transaction as the owner
+        vm.prank(address(acc));
+        acc.executeAsOwner(encryptedCallsNonce, encryptedCalls);
+
+        // Verify Bob received the tokens
+        vm.prank(bob);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
+    }
+
     function test_execute() public {
         // Grant a session
         vm.prank(address(acc));
