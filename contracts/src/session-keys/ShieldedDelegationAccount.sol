@@ -50,7 +50,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     // Constructor
     ////////////////////////////////////////////////////////////////////////
 
-    constructor() payable {
+    constructor() {
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
@@ -137,7 +137,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
         address recoveredSigner = ECDSA.recover(dig, sig);
         require(recoveredSigner == S.signer, "bad signature");
-        
+
         bytes memory decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
 
         uint256 totalValue = 0;
