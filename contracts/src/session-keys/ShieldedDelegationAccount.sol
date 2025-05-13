@@ -91,10 +91,6 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         emit SessionRevoked(idx);
     }
 
-    function initialize() external payable override {
-        emit Log("Hello, world!");
-    }
-
     function setAESKey(suint256 _aesKey) external override onlySelf {
         _getStorage().aesKey = _aesKey;
     }
