@@ -234,8 +234,8 @@ contract ShieldedDelegationAccountTest is Test {
         uint32 newIndexForSigner3 = acc.getSessionIndex(signer3);
         assertEq(newIndexForSigner3, 1, "signer3 should now be at index 1");
 
-        // // signer2 mapping should be removed     
-        vm.expectRevert("invalid signer slot");
+        // // signer2 mapping should be removed
+        vm.expectRevert("invalid signer mapping");
         acc.getSessionIndex(signer2);
 
         // Confirm session count shrinks
@@ -250,6 +250,60 @@ contract ShieldedDelegationAccountTest is Test {
         vm.prank(address(acc));
         acc.revokeSession(signer3);
         assertEq(acc.sessionCount(), 0, "Should have 0 active sessions");
+    }
+
+    function test_revokeSessionWhenOnlyOneSessionExists() public {
+        address signer1 = vm.addr(0xA1);
+        address signer2 = vm.addr(0xA2);
+        vm.prank(address(acc));
+        acc.grantSession(signer1, block.timestamp + 24 hours, 1 ether);
+        vm.prank(address(acc));
+        acc.grantSession(signer2, block.timestamp + 24 hours, 1 ether);
+
+        // Revoke signer2
+        vm.prank(address(acc));
+        acc.revokeSession(signer2);
+
+        // Again try to revoke signer2 but this time it should revert
+        vm.prank(address(acc));
+        vm.expectRevert("invalid signer mapping");
+        acc.revokeSession(signer2);
+    }
+
+    function test_storageCollisionResistance() public {
+        // Step 1: Write a known value to _getStorage().aesKey
+        uint256 testAESKey = 0xaabbccddeeff00112233445566778899;
+        vm.prank(address(acc));
+        acc.setAESKey(suint256(testAESKey));
+
+        // Step 2: Derive the custom struct slot
+        bytes32 baseHash = keccak256("SHIELDED_DELEGATION_STORAGE");
+        uint256 customSlot = uint72(bytes9(baseHash)); // same logic as contract
+
+        // Check the aesKey slot (offset 0 inside struct)
+        bytes32 aesKeySlot = bytes32(customSlot + 0);
+        bytes32 aesKeyRaw = vm.load(address(acc), aesKeySlot);
+        assertEq(uint256(aesKeyRaw), testAESKey, "aesKey should be correctly stored");
+
+        // Step 3: Check slot 0-10 to ensure no unintentional collision (these are Solidity-managed)
+        for (uint256 i = 0; i < 10; i++) {
+            if (i == customSlot) continue; // skip the actual struct base slot
+            bytes32 otherSlotValue = vm.load(address(acc), bytes32(i));
+            assertEq(uint256(otherSlotValue), 0, string.concat("Unexpected data in slot ", vm.toString(i)));
+        }
+
+        // Step 4: Check DOMAIN_SEPARATOR is not colliding with our custom layout
+        bytes32 separatorSlot = bytes32(uint256(0)); // immutables go into bytecode, not SSTORE
+        bytes32 rawSlot0 = vm.load(address(acc), separatorSlot);
+        assertEq(uint256(rawSlot0), 0, "Slot 0 should be empty, immutables not stored here");
+
+        // Step 5: Check unused slots near the struct (±10)
+        for (uint256 i = 1; i <= 10; i++) {
+            bytes32 high = vm.load(address(acc), bytes32(customSlot + i));
+            bytes32 low = vm.load(address(acc), bytes32(customSlot - i));
+            assertEq(high, 0, "Unexpected data above struct");
+            assertEq(low, 0, "Unexpected data below struct");
+        }
     }
 
     /// @notice Test the encryption and decryption functionality
@@ -281,7 +335,7 @@ contract ShieldedDelegationAccountTest is Test {
 
         // Execute the transaction as the owner
         vm.prank(address(acc));
-        acc.executeAsOwner(encryptedCallsNonce, encryptedCalls);
+        acc.execute(encryptedCallsNonce, encryptedCalls, bytes(""), 0);
 
         // Verify Bob received the tokens
         vm.prank(bob);

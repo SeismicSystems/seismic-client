@@ -89,7 +89,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
 
     function revokeSession(address signer) external override onlySelf {
         ShieldedStorage storage $ = _getStorage();
-        uint32 idx = $.signerToSessionIndex[signer];
+        uint32 idx = getSessionIndex(signer);
         uint32 lastIdx = uint32($.sessions.length - 1);
 
         if (idx != lastIdx) {
@@ -130,32 +130,32 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         override
     {
         ShieldedStorage storage $ = _getStorage();
-        Session storage S = $.sessions[idx];
-        require(S.expiry > block.timestamp, "expired");
-        require(idx == $.signerToSessionIndex[S.signer], "session key revoked");
+        bytes memory decryptedCiphertext;
+        if (msg.sender == address(this)) {
+            decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
+            multiSend(decryptedCiphertext);
+        } else {
+            Session storage S = $.sessions[idx];
+            require(S.expiry > block.timestamp, "expired");
+            require(idx == $.signerToSessionIndex[S.signer], "session key revoked");
 
-        bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
-        address recoveredSigner = ECDSA.recover(dig, sig);
-        require(recoveredSigner == S.signer, "bad signature");
+            bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
+            address recoveredSigner = ECDSA.recover(dig, sig);
+            require(recoveredSigner == S.signer, "bad signature");
 
-        bytes memory decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
+            decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
 
-        uint256 totalValue = 0;
-        if (S.limitWei != 0) {
-            totalValue = _calculateTotalSpend(decryptedCiphertext);
-            require(S.spentWei + totalValue <= S.limitWei, "spend limit exceeded");
-            S.spentWei += totalValue;
+            uint256 totalValue = 0;
+            if (S.limitWei != 0) {
+                totalValue = _calculateTotalSpend(decryptedCiphertext);
+                require(S.spentWei + totalValue <= S.limitWei, "spend limit exceeded");
+                S.spentWei += totalValue;
+            }
+
+            S.nonce++;
+
+            multiSend(decryptedCiphertext);
         }
-
-        S.nonce++;
-
-        multiSend(decryptedCiphertext);
-    }
-
-    function executeAsOwner(uint96 nonce, bytes calldata ciphertext) external payable override onlySelf {
-        ShieldedStorage storage $ = _getStorage();
-        bytes memory decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
-        multiSend(decryptedCiphertext);
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -209,10 +209,10 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return _getStorage().sessions[idx];
     }
 
-    function getSessionIndex(address signer) external view returns (uint32) {
+    function getSessionIndex(address signer) public view returns (uint32) {
         uint32 idx = _getStorage().signerToSessionIndex[signer];
         require(_getStorage().sessions.length > idx, "signer not found");
-        require(_getStorage().sessions[idx].signer == signer, "invalid signer slot");
+        require(_getStorage().sessions[idx].signer == signer, "invalid signer mapping");
         return idx;
     }
 
