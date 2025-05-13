@@ -141,6 +141,12 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         multiSend(decryptedCiphertext);
     }
 
+    function executeAsOwner(uint96 nonce, bytes calldata ciphertext) external payable override onlySelf {
+        ShieldedStorage storage $ = _getStorage();
+        bytes memory decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
+        multiSend(decryptedCiphertext);
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // EIP-712 Hashing
     ////////////////////////////////////////////////////////////////////////

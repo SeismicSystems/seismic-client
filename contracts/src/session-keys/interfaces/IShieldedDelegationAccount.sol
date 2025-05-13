@@ -61,6 +61,11 @@ interface IShieldedDelegationAccount {
     /// @param idx The index of the session to use
     function execute(uint96 nonce, bytes calldata ciphertext, bytes calldata sig, uint32 idx) external payable;
 
+    /// @notice Executes transactions as the owner
+    /// @param nonce The nonce used for encryption/decryption
+    /// @param ciphertext The encrypted transaction data
+    function executeAsOwner(uint96 nonce, bytes calldata ciphertext) external payable;
+
     /// @notice Gets the current nonce for a session
     /// @param idx The index of the session
     /// @return The current nonce value
