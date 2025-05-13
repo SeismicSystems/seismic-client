@@ -6,12 +6,17 @@ This repository contains the Seismic Standard Library, a collection of smart con
 
 The Seismic Standard Library provides:
 
+- Basic Seismic counter contract
 - Session key management for delegated transactions
 - AES encryption/decryption utilities via precompiles
 - Secure multi-send functionality
 - ERC token implementations and extensions
 
 ## Key Components
+
+### Seismic Counter
+
+The `SeismicCounter` contract is the Seismic equivalent of the `Counter` (named `TransparentCounter` here) contract, where the counter is an `suint256`.
 
 ### Session Keys
 
@@ -23,7 +28,7 @@ The `ShieldedDelegationAccount` contract implements EIP-7702 delegation with ses
 ### Precompiles
 
 The library includes wrappers for Seismic-specific precompiles:
-- `AESPrecompiles` for encryption/decryption operations
+- `CryptoUtils` for encryption/decryption operations
 - Random number generation via precompiles
 
 ### Utilities
