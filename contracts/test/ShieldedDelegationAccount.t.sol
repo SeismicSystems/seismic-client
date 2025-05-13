@@ -1,0 +1,490 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.23;
+
+import "forge-std/Test.sol";
+import "../src/session-keys/ShieldedDelegationAccount.sol";
+import "../src/utils/TestToken.sol";
+
+/// @title ShieldedDelegationAccountTest
+/// @notice Test suite for ShieldedDelegationAccount contract
+/// @dev Uses Foundry's Test contract for assertions and utilities
+contract ShieldedDelegationAccountTest is Test {
+    ////////////////////////////////////////////////////////////////////////
+    // Test Contracts
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @dev The main contract under test
+    ShieldedDelegationAccount acc;
+
+    /// @dev Test token for transfer operations
+    TestToken tok;
+
+    ////////////////////////////////////////////////////////////////////////
+    // Test Parameters
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @dev Session key's private key for signing (fixed for deterministic tests)
+    uint256 constant SK = 0xBEEF;
+
+    /// @dev Address derived from session key
+    address SKaddr;
+
+    /// @dev Test addresses for operations
+    address constant alice = address(0xA11CE);
+    address constant bob = address(0xB0B);
+    address constant relayer = address(0xAA);
+
+    /// @dev AES key for encryption operations
+    suint256 AES_KEY = suint256(0x2dc875f35f6fa751d30fc934bbf5027760109521adf5f66c9426002180f32bce);
+
+    ////////////////////////////////////////////////////////////////////////
+    // EIP-712 Constants
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @dev EIP-712 Domain Typehash used for domain separator calculation
+    bytes32 constant EIP712_DOMAIN_TYPEHASH =
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+
+    /// @dev EIP-712 Execute Typehash used for structured data hashing
+    bytes32 constant EXECUTE_TYPEHASH = keccak256("Execute(uint256 nonce,bytes cipher)");
+
+    /// @dev Name of the contract domain for EIP-712
+    string constant DOMAIN_NAME = "ShieldedDelegationAccount";
+
+    /// @dev Version of the contract domain for EIP-712
+    string constant DOMAIN_VERSION = "1";
+
+    ////////////////////////////////////////////////////////////////////////
+    // Setup
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Setup function that runs before each test
+    /// @dev Initializes contracts and test environment
+    function setUp() public {
+        // Derive the EOA for our test session key
+        SKaddr = vm.addr(SK);
+
+        // Fund the relayer with some ETH for gas
+        vm.deal(relayer, 1 ether);
+
+        // Deploy the delegation account and set the AES key
+        acc = new ShieldedDelegationAccount();
+        vm.prank(address(acc));
+        acc.setAESKey(suint256(AES_KEY));
+
+        // Deploy the test token and mint tokens to Alice and the account
+        tok = new TestToken();
+        tok.mint(address(alice), suint256(100 * 10 ** 18));
+        tok.mint(address(acc), suint256(100 * 10 ** 18));
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Utility Functions
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Helper function to decrypt using the master key
+    /// @dev Uses the same key as the contract for testing purposes
+    /// @param nonce Random nonce that was used during encryption
+    /// @param ciphertext The ciphertext to decrypt
+    /// @return plaintext The decrypted result
+    function _decrypt(uint96 nonce, bytes memory ciphertext) internal view returns (bytes memory plaintext) {
+        require(ciphertext.length > 0, "Ciphertext cannot be empty");
+
+        address AESDecryptAddr = address(0x67);
+
+        // Pack key, nonce, and ciphertext
+        bytes memory input = abi.encodePacked(suint256(AES_KEY), nonce, ciphertext);
+
+        (bool success, bytes memory output) = AESDecryptAddr.staticcall(input);
+        require(success, "AES decrypt precompile call failed");
+
+        return output;
+    }
+
+    /// @notice Creates a domain separator matching the one used in the contract
+    /// @dev Used for EIP-712 signature generation
+    /// @return domainSeparator The computed domain separator
+    function _getDomainSeparator() internal view returns (bytes32 domainSeparator) {
+        return keccak256(
+            abi.encode(
+                EIP712_DOMAIN_TYPEHASH,
+                keccak256(bytes(DOMAIN_NAME)),
+                keccak256(bytes(DOMAIN_VERSION)),
+                block.chainid,
+                address(acc)
+            )
+        );
+    }
+
+    /// @notice Creates and signs a digest for the execute function
+    /// @param sessionIndex Index of the session to uses
+    /// @param cipher Encrypted data to be executed
+    /// @return signature The signature bytes
+    function _signExecuteDigest(uint32 sessionIndex, bytes memory cipher)
+        internal
+        view
+        returns (bytes memory signature)
+    {
+        uint256 sessionNonce = acc.getSessionNonce(sessionIndex);
+        bytes32 domainSeparator = _getDomainSeparator();
+
+        // Create EIP-712 typed data hash for signing
+        bytes32 structHash = keccak256(abi.encode(EXECUTE_TYPEHASH, sessionNonce, keccak256(cipher)));
+
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
+
+        // Sign the digest with the session key
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(SK, digest);
+        return abi.encodePacked(r, s, v);
+    }
+
+    /// @notice Creates a MultiSend-compatible call to transfer tokens
+    /// @param recipient Address to receive tokens
+    /// @param amount Amount of tokens to transfer
+    /// @return calls Encoded call data for MultiSend
+    function _createTokenTransferCall(address recipient, uint256 amount) internal view returns (bytes memory calls) {
+        // Create the transfer function call data
+        bytes memory transferData =
+            abi.encodeWithSelector(SRC20.transfer.selector, address(recipient), suint256(amount));
+
+        // Format it for MultiSend
+        return abi.encodePacked(
+            uint8(0), // operation (0 = call)
+            address(tok), // to: token contract address
+            uint256(0), // value: 0 ETH (no ETH sent with token transfer)
+            uint256(transferData.length), // data length
+            transferData // the actual calldata
+        );
+    }
+
+    /// @notice Creates a MultiSend-compatible call to transfer ETH
+    /// @param recipient Address to receive ETH
+    /// @param amount Amount of ETH to transfer
+    /// @return calls Encoded call data for MultiSend
+    function _createEthTransferCall(address recipient, uint256 amount) internal pure returns (bytes memory calls) {
+        return abi.encodePacked(
+            uint8(0), // operation (0 = call)
+            recipient, // recipient address
+            amount, // ETH amount
+            uint256(0), // data length
+            bytes("") // empty data
+        );
+    }
+
+    /// @notice Helper to execute a call via session
+    /// @param sessionIndex The session index to use
+    /// @param calls The encoded calls to execute
+    function _executeViaSession(uint32 sessionIndex, bytes memory calls) internal {
+        // Encrypt the calls
+        (uint96 nonce, bytes memory cipher) = acc.encrypt(calls);
+
+        // Sign the execution request
+        bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
+
+        // Execute via relayer
+        vm.prank(relayer);
+        acc.execute(nonce, cipher, signature, sessionIndex);
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Test Cases
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Test granting a session with expiry and limit
+    function test_grantSession() public {
+        // Grant a session that expires in 24 hours with 1 ETH limit
+        vm.prank(address(acc));
+        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+
+        // Access the session data from storage
+        (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce) = acc.sessions(0);
+
+        // Verify all fields
+        assertEq(signer, SKaddr, "Session signer should match");
+        assertEq(expiry, block.timestamp + 24 hours, "Expiry should match");
+        assertEq(limitWei, 1 ether, "Limit should match");
+        assertEq(spentWei, 0, "Spent amount should be zero initially");
+        assertEq(nonce, 0, "Nonce should be zero initially");
+    }
+
+    /// @notice Test granting and revoking multiple sessions
+    function test_grantAndRevokeMultipleSessions() public {
+        address signer1 = vm.addr(0xA1);
+        address signer2 = vm.addr(0xA2);
+        address signer3 = vm.addr(0xA3);
+
+        // 1. Grant 3 sessions
+        vm.prank(address(acc));
+        acc.grantSession(signer1, block.timestamp + 1 hours, 1 ether);
+        vm.prank(address(acc));
+        acc.grantSession(signer2, block.timestamp + 2 hours, 1 ether);
+        vm.prank(address(acc));
+        acc.grantSession(signer3, block.timestamp + 3 hours, 1 ether);
+
+        // Verify signerToSessionIndex
+        assertEq(acc.getSessionIndex(signer1), 0);
+        assertEq(acc.getSessionIndex(signer2), 1);
+        assertEq(acc.getSessionIndex(signer3), 2);
+
+        // 2. Revoke signer2
+        vm.prank(address(acc));
+        acc.revokeSession(signer2);
+
+        // signer3 should have taken signer2's place
+        uint32 newIndexForSigner3 = acc.getSessionIndex(signer3);
+        assertEq(newIndexForSigner3, 1, "signer3 should now be at index 1");
+
+        // // signer2 mapping should be removed
+        vm.expectRevert("invalid signer mapping");
+        acc.getSessionIndex(signer2);
+
+        // Confirm session count shrinks
+        assertEq(acc.sessionCount(), 2, "Should have 2 active sessions");
+
+        // Revoke signer1
+        vm.prank(address(acc));
+        acc.revokeSession(signer1);
+        assertEq(acc.sessionCount(), 1, "Should have 1 active session");
+
+        // Revoke signer3
+        vm.prank(address(acc));
+        acc.revokeSession(signer3);
+        assertEq(acc.sessionCount(), 0, "Should have 0 active sessions");
+    }
+
+    function test_revokeSessionWhenOnlyOneSessionExists() public {
+        address signer1 = vm.addr(0xA1);
+        address signer2 = vm.addr(0xA2);
+        vm.prank(address(acc));
+        acc.grantSession(signer1, block.timestamp + 24 hours, 1 ether);
+        vm.prank(address(acc));
+        acc.grantSession(signer2, block.timestamp + 24 hours, 1 ether);
+
+        // Revoke signer2
+        vm.prank(address(acc));
+        acc.revokeSession(signer2);
+
+        // Again try to revoke signer2 but this time it should revert
+        vm.prank(address(acc));
+        vm.expectRevert("invalid signer mapping");
+        acc.revokeSession(signer2);
+    }
+
+    function test_storageCollisionResistance() public {
+        // Step 1: Write a known value to _getStorage().aesKey
+        uint256 testAESKey = 0xaabbccddeeff00112233445566778899;
+        vm.prank(address(acc));
+        acc.setAESKey(suint256(testAESKey));
+
+        // Step 2: Derive the custom struct slot
+        bytes32 baseHash = keccak256("SHIELDED_DELEGATION_STORAGE");
+        uint256 customSlot = uint72(bytes9(baseHash)); // same logic as contract
+
+        // Check the aesKey slot (offset 0 inside struct)
+        bytes32 aesKeySlot = bytes32(customSlot + 0);
+        bytes32 aesKeyRaw = vm.load(address(acc), aesKeySlot);
+        assertEq(uint256(aesKeyRaw), testAESKey, "aesKey should be correctly stored");
+
+        // Step 3: Check slot 0-10 to ensure no unintentional collision (these are Solidity-managed)
+        for (uint256 i = 0; i < 10; i++) {
+            if (i == customSlot) continue; // skip the actual struct base slot
+            bytes32 otherSlotValue = vm.load(address(acc), bytes32(i));
+            assertEq(uint256(otherSlotValue), 0, string.concat("Unexpected data in slot ", vm.toString(i)));
+        }
+
+        // Step 4: Check DOMAIN_SEPARATOR is not colliding with our custom layout
+        bytes32 separatorSlot = bytes32(uint256(0)); // immutables go into bytecode, not SSTORE
+        bytes32 rawSlot0 = vm.load(address(acc), separatorSlot);
+        assertEq(uint256(rawSlot0), 0, "Slot 0 should be empty, immutables not stored here");
+
+        // Step 5: Check unused slots near the struct (±10)
+        for (uint256 i = 1; i <= 10; i++) {
+            bytes32 high = vm.load(address(acc), bytes32(customSlot + i));
+            bytes32 low = vm.load(address(acc), bytes32(customSlot - i));
+            assertEq(high, 0, "Unexpected data above struct");
+            assertEq(low, 0, "Unexpected data below struct");
+        }
+    }
+
+    /// @notice Test the encryption and decryption functionality
+    function test_encrypt() public view {
+        // Test data to encrypt
+        bytes memory testData = bytes("ABCD");
+
+        // Encrypt using the contract's function
+        (uint96 n, bytes memory c) = acc.encrypt(testData);
+
+        // Decrypt and verify the data matches
+        bytes memory decrypted = _decrypt(n, c);
+        assertEq(decrypted, testData, "Decrypted data should match original");
+    }
+
+    /// @notice Test executing a token transfer as the owner bypassing session key and signature checks
+    function test_executeAsOwner() public {
+        // Grant a session
+        vm.prank(address(acc));
+        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+
+        // Create the token transfer call
+        bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
+
+        // Encrypt and verify decryption works properly
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
+        bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
+        assertEq(decrypted, calls, "Decrypted calls should match original");
+
+        // Execute the transaction as the owner
+        vm.prank(address(acc));
+        acc.execute(encryptedCallsNonce, encryptedCalls, bytes(""), 0);
+
+        // Verify Bob received the tokens
+        vm.prank(bob);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
+    }
+
+    function test_execute() public {
+        // Grant a session
+        vm.prank(address(acc));
+        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+
+        // Create the token transfer call
+        bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
+
+        // Encrypt and verify decryption works properly
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
+        bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
+        assertEq(decrypted, calls, "Decrypted calls should match original");
+
+        // Get session index for signing
+        uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
+        // Get session nonce for signing
+        uint256 sessionNonce = acc.getSessionNonce(sessionIndex);
+
+        // Generate domain separator
+        bytes32 DOMAIN_SEPARATOR = _getDomainSeparator();
+
+        // Create and sign digest
+        bytes32 structHash = keccak256(abi.encode(EXECUTE_TYPEHASH, sessionNonce, keccak256(encryptedCalls)));
+
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(SK, digest);
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        // Execute the transaction
+        vm.prank(relayer);
+        acc.execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
+
+        // Verify Bob received the tokens
+        vm.prank(bob);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
+    }
+
+    /// @notice Test that execution is rejected when session has expired
+    function test_revertWhenSessionExpired() public {
+        // Grant a session
+        vm.prank(address(acc));
+        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+
+        // Advance time past expiration
+        vm.warp(block.timestamp + 24 hours + 1 hours);
+
+        // Create token transfer call
+        bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
+
+        // Encrypt the call data
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
+
+        // Get session index for signing
+        uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
+        // Sign the execution request
+        bytes memory signature = _signExecuteDigest(sessionIndex, encryptedCalls);
+
+        // Execution should revert due to expired session
+        vm.prank(relayer);
+        vm.expectRevert("expired");
+        acc.execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
+
+        // Verify Bob didn't receive any tokens
+        vm.prank(bob);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 0, "Bob should not have received any tokens");
+    }
+
+    /// @notice Test that the session spending limit is enforced
+    function test_ethSessionLimit() public {
+        // Fund the account contract with ETH
+        vm.deal(address(acc), 100 ether);
+
+        // Grant session with 10 ETH limit
+        vm.prank(address(acc));
+        acc.grantSession(SKaddr, block.timestamp + 24 hours, 10 ether);
+
+        // Record Bob's initial balance
+        uint256 initialBalance = address(bob).balance;
+
+        // Test 1: First transfer of 6 ETH (should succeed)
+        {
+            bytes memory calls = _createEthTransferCall(bob, 6 ether);
+            _executeViaSession(0, calls);
+            assertEq(address(bob).balance, initialBalance + 6 ether, "First transfer should succeed");
+        }
+
+        // Test 2: Second transfer of 3 ETH (should succeed)
+        {
+            bytes memory calls = _createEthTransferCall(bob, 3 ether);
+            _executeViaSession(0, calls);
+            assertEq(address(bob).balance, initialBalance + 9 ether, "Second transfer should succeed");
+        }
+
+        // Test 3: Third transfer of 2 ETH (should fail - would exceed limit)
+        {
+            bytes memory calls = _createEthTransferCall(bob, 2 ether);
+
+            (uint96 nonce96, bytes memory cipher) = acc.encrypt(calls);
+
+            // Get session index for signing
+            uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
+            // Sign the execution request
+            bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
+
+            vm.prank(relayer);
+            vm.expectRevert("spend limit exceeded");
+            acc.execute(nonce96, cipher, signature, sessionIndex);
+
+            assertEq(address(bob).balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
+        }
+
+        // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
+        {
+            bytes memory calls = _createEthTransferCall(bob, 1 ether);
+            _executeViaSession(0, calls);
+            assertEq(
+                address(bob).balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit"
+            );
+        }
+
+        // Test 5: Final tiny transfer (should fail - exceeds limit)
+        {
+            bytes memory calls = _createEthTransferCall(bob, 0.1 ether);
+
+            (uint96 nonce96, bytes memory cipher) = acc.encrypt(calls);
+
+            // Get session index for signing
+            uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+
+            // Sign the execution request
+            bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
+
+            vm.prank(relayer);
+            vm.expectRevert("spend limit exceeded");
+            acc.execute(nonce96, cipher, signature, sessionIndex);
+
+            assertEq(address(bob).balance, initialBalance + 10 ether, "No more transfers should be possible");
+        }
+    }
+}

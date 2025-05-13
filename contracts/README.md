@@ -1,66 +1,34 @@
-## Foundry
+# Seismic Standard Library
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This repository contains the Seismic Standard Library, a collection of smart contracts and utilities designed for building secure and efficient applications on the Seismic blockchain.
 
-Foundry consists of:
+## Overview
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The Seismic Standard Library provides:
 
-## Documentation
+- Session key management for delegated transactions
+- AES encryption/decryption utilities via precompiles
+- Secure multi-send functionality
+- ERC token implementations and extensions
 
-https://book.getfoundry.sh/
+## Key Components
 
-## Usage
+### Session Keys
 
-### Build
+The `ShieldedDelegationAccount` contract implements EIP-7702 delegation with session keys, allowing:
+- Time-limited authorization for delegates
+- Spending limits for delegated transactions
+- Encrypted transaction payloads for privacy
 
-```shell
-$ forge build
-```
+### Precompiles
 
-### Test
+The library includes wrappers for Seismic-specific precompiles:
+- `AESPrecompiles` for encryption/decryption operations
+- Random number generation via precompiles
 
-```shell
-$ forge test
-```
+### Utilities
 
-### Format
+- `MultiSend` for batched transaction execution
+- ECDSA signature verification utilities
 
-```shell
-$ forge fmt
-```
 
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```

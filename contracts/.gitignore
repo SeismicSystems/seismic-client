@@ -10,5 +10,12 @@ out/
 # Docs
 docs/
 
-# Dotenv file
-.env
+# User-specific files
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Dependency directories
+node_modules/

@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+pragma solidity ^0.8.13;
+
+import "./SRC20.sol";
+
+/*//////////////////////////////////////////////////////////////
+//                         TestToken Contract
+//////////////////////////////////////////////////////////////*/
+
+contract TestToken is SRC20 {
+    /*────────────────── storage ──────────────────*/
+    address admin;
+    /*//////////////////////////////////////////////////////////////
+                               CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
+    constructor() SRC20("TestToken", "TEST", 18) {
+        admin = msg.sender;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                               MINT FUNCTION
+    //////////////////////////////////////////////////////////////*/
+    function mint(address to, suint256 amount) public onlyAdmin {
+        _mint(to, amount);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                               BURN FUNCTION
+    //////////////////////////////////////////////////////////////*/
+    function burn(address from, suint256 amount) public onlyAdmin {
+        _burn(from, amount);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                               ONLY ADMIN MODIFIER
+    //////////////////////////////////////////////////////////////*/
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can call this function");
+        _;
+    }
+}
