@@ -6,13 +6,14 @@ import type {
   Chain,
   Client,
   DeriveChain,
+  ExactPartial,
   FormattedTransactionRequest,
   GetChainIdErrorType,
   GetChainParameter,
-  GetTransactionRequestKzgParameter,
   Hash,
   PrepareTransactionRequestErrorType,
   SendRawTransactionErrorType,
+  SendTransactionParameters,
   Transport,
   UnionOmit,
 } from 'viem'
@@ -54,16 +55,14 @@ import {
   AccountTypeNotSupportedError,
 } from '@sviem/error/account.ts'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
-import type { GetAccountParameter } from '@sviem/viem-internal/account.ts'
+import { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
-import type { AssertRequestParameters } from '@sviem/viem-internal/request.ts'
 
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
   chainOverride extends Chain | undefined = Chain | undefined,
   _derivedChain extends Chain | undefined = DeriveChain<chain, chainOverride>,
-> = UnionOmit<FormattedTransactionRequest<_derivedChain>, 'from'> &
-  GetTransactionRequestKzgParameter &
+> = UnionOmit<FormattedTransactionRequest<_derivedChain>, 'from' | 'type'> &
   SeismicTxExtras
 
 export type SendSeismicTransactionParameters<
@@ -76,8 +75,11 @@ export type SendSeismicTransactionParameters<
   > = SendSeismicTransactionRequest<chain, chainOverride>,
 > = request &
   GetAccountParameter<account, Account | Address, true, true> &
-  GetChainParameter<chain, chainOverride> &
-  GetTransactionRequestKzgParameter<request>
+  GetChainParameter<chain, chainOverride>
+
+export type AssertSeismicRequestParameters = ExactPartial<
+  SendSeismicTransactionParameters<Chain>
+>
 
 export type SendSeismicTransactionReturnType = Hash
 
@@ -175,7 +177,14 @@ export async function sendShieldedTransaction<
   const account = account_ ? parseAccount(account_) : null
 
   try {
-    assertRequest(parameters as AssertRequestParameters)
+    const assertRequestParams = {
+      account,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      to: parameters.to,
+    } as ExactPartial<SendTransactionParameters>
+    assertRequest(assertRequestParams)
 
     const to = await (async () => {
       if (parameters.to) return parameters.to
@@ -199,7 +208,7 @@ export async function sendShieldedTransaction<
       const chainFormat = client.chain?.formatters?.transactionRequest?.format
 
       const request = {
-        ...extract(rest, { format: chainFormat }),
+        ...extract({ ...rest, type: 'seismic' }, { format: chainFormat }),
         accessList,
         authorizationList,
         blobs,
@@ -219,10 +228,12 @@ export async function sendShieldedTransaction<
         ...rest,
       } as any
 
-      const preparedTx = (await prepareTransactionRequest(
-        client,
-        request
-      )) as TransactionSerializableSeismic
+      const { type: _legacy, ...viemPreparedTx } =
+        await prepareTransactionRequest(client, request)
+      const preparedTx = {
+        ...viemPreparedTx,
+        type: 'seismic',
+      } as TransactionSerializableSeismic
 
       if (account?.type === 'json-rpc') {
         const { typedData, signature } = await signSeismicTxTypedData(
@@ -264,6 +275,8 @@ export async function sendShieldedTransaction<
       ...parameters,
       account,
       chain: chain || undefined,
+      // not correct, but not used
+      type: 'legacy',
     })
   }
 }

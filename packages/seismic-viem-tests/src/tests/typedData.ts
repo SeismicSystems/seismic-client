@@ -94,6 +94,7 @@ export const testSeismicTxTypedData = async ({
     value,
     nonce,
   }
+
   const preparedTx = await client.prepareTransactionRequest(baseTx)
   const tx = { ...preparedTx, encryptionPubkey, encryptionNonce }
 
@@ -104,7 +105,9 @@ export const testSeismicTxTypedData = async ({
     method: 'eth_sendRawTransaction',
     params: [{ data: typedData, signature }],
   })
-  await client.waitForTransactionReceipt({ hash })
+
+  const receipt = await client.waitForTransactionReceipt({ hash })
+  expect(receipt.status).toBe('success')
 
   const postTxBalance = await client.getBalance({ address: recipientAddress })
   expect(postTxBalance).toBe(preTxBalance + value)

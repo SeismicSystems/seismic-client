@@ -1,6 +1,6 @@
 {
   "name": "seismic-viem",
-  "version": "1.0.40",
+  "version": "1.0.42",
   "description": "Typescript interface for Seismic",
   "type": "module",
   "main": "./dist/_cjs/index.js",
@@ -42,7 +42,7 @@
   "homepage": "https://seismic.systems",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SeismicSystems/seismic-client"
+    "url": "git+https://github.com/SeismicSystems/seismic-client.git"
   },
   "keywords": [
     "seismic",
