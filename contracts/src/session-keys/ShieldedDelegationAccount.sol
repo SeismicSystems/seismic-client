@@ -22,7 +22,6 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     function _getStorage() internal pure returns (ShieldedStorage storage $) {
-        // PORTO-style 9-byte truncated keccak256 slot
         uint256 s = uint72(bytes9(keccak256("SHIELDED_DELEGATION_STORAGE")));
         assembly ("memory-safe") {
             $.slot := s
