@@ -3,14 +3,14 @@ pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../utils/MultiSend.sol";
-import "../utils/precompiles/AESPrecompiles.sol";
+import "../utils/precompiles/CryptoUtils.sol";
 import "./interfaces/IShieldedDelegationAccount.sol";
 
 /// @title ShieldedDelegationAccount
 /// @author ameya-deshmukh
 /// @notice Experimental EIP-7702 delegation contract which supports session keys
 /// @dev WARNING: THIS CONTRACT IS AN EXPERIMENT AND HAS NOT BEEN AUDITED
-contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, AESPrecompiles {
+contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, CryptoUtils {
     using ECDSA for bytes32;
 
     ////////////////////////////////////////////////////////////////////////

@@ -41,9 +41,6 @@ interface IShieldedDelegationAccount {
     /// @param idx The index of the session to revoke
     function revokeSession(uint32 idx) external;
 
-    /// @notice Initializes the contract after deployment
-    function initialize() external payable;
-
     /// @notice Sets the AES encryption key
     /// @param _aesKey The new AES key to set
     function setAESKey(suint256 _aesKey) external;

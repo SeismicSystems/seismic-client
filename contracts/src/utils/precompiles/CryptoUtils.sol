@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-/// @title AESPrecompiles
-/// @notice Utility contract for interacting with AES encryption precompiles
+/// @title CryptoUtils
+/// @notice Utility contract for interacting with crypto precompiles
 /// @dev Provides helpers for random nonce generation, encryption, and decryption
-contract AESPrecompiles {
+contract CryptoUtils {
     ////////////////////////////////////////////////////////////////////////
     // Precompile Addresses
     ////////////////////////////////////////////////////////////////////////
