@@ -85,6 +85,9 @@ export const testSeismicTx = async ({
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
+  const isOdd1_tread = await seismicContract.tread.isOdd()
+  expect(isOdd1_tread).toBe(true)
+
   const tx2 = await walletClient.writeContract({
     address: deployedContractAddress,
     abi: seismicCounterAbi,
