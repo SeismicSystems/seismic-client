@@ -4,10 +4,12 @@ import type {
   CallParameters,
   CallReturnType,
   Chain,
+  ExactPartial,
   Hex,
   RpcSchema,
-  TransactionRequest,
+  SendTransactionParameters,
   Transport,
+  UnionOmit,
 } from 'viem'
 import {
   BaseError,
@@ -35,7 +37,6 @@ import {
   toDeploylessCallViaFactoryData,
 } from '@sviem/viem-internal/call.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
-import type { AssertRequestParameters } from '@sviem/viem-internal/request.ts'
 
 const doSignedCall = async <
   TTransport extends Transport,
@@ -111,8 +112,11 @@ const doSignedCall = async <
  * console.log('Call result:', result);
  * ```
  */
-export type SignedCallParameters<chain extends Chain | undefined> =
-  CallParameters<chain> & SeismicTxExtras
+export type SignedCallParameters<chain extends Chain | undefined> = UnionOmit<
+  CallParameters<chain>,
+  'type'
+> &
+  SeismicTxExtras
 
 /**
  * @ignore
@@ -248,7 +252,14 @@ export async function signedCall<
   })()
 
   try {
-    assertRequest(args as AssertRequestParameters)
+    const assertRequestParams = {
+      account,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      to: args.to,
+    } as ExactPartial<SendTransactionParameters>
+    assertRequest(assertRequestParams)
 
     const blockNumberHex = blockNumber ? numberToHex(blockNumber) : undefined
     const block = blockNumberHex || blockTag
@@ -273,7 +284,7 @@ export async function signedCall<
 
     const request = {
       // Pick out extra data that might exist on the chain's transaction request type.
-      ...extract(rest, { format: chainFormat }),
+      ...extract({ ...rest, type: 'seismic' }, { format: chainFormat }),
       from: fromAddress,
       accessList,
       blobs,
@@ -286,8 +297,9 @@ export async function signedCall<
       nonce: nonce_,
       to: deploylessCall ? undefined : to,
       value,
+      // prepareTransactionRequest will fill the required fields using legacy spec
       type: 'legacy',
-    } as TransactionRequest
+    } as any
 
     // TODO: decide if we ever want to add multicall support
     /*
@@ -309,13 +321,13 @@ export async function signedCall<
     }
     */
 
-    // @ts-ignore
     const preparedTx = await prepareTransactionRequest(client, request)
     const encryptionPubkey = client.getEncryptionPublicKey()
     // @ts-ignore
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
       encryptionPubkey,
+      type: 'seismic',
     }
 
     const response = await doSignedCall(client, seismicTx, { block })
@@ -337,9 +349,16 @@ export async function signedCall<
       throw new CounterfactualDeploymentFailedError({ factory })
 
     throw getCallError(err as ErrorType, {
-      ...args,
       account,
       chain: client.chain,
+      data,
+      gas: gas !== undefined ? BigInt(gas) : undefined,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      nonce: nonce_,
+      to,
+      value,
+      stateOverride,
     })
   }
 }

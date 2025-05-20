@@ -5,6 +5,7 @@ import type {
   Hex,
   LocalAccount,
   PublicClient,
+  TransactionSerializable,
   TransactionSerializableLegacy,
 } from 'viem'
 import { createPublicClient, formatUnits, http, parseEther } from 'viem'
@@ -31,6 +32,41 @@ const formatUnitsRounded = (
     return formatted
   }
   return `${integer}.${fraction.slice(0, places)}`
+}
+
+type NonceString = string
+type PoolResponse = {
+  pending: Record<NonceString, TransactionSerializable>
+  queued: Record<NonceString, TransactionSerializable>
+}
+
+const pickNonces = (
+  txs: Record<NonceString, TransactionSerializable>
+): number[] =>
+  Object.entries(txs)
+    .map(([nonce, tx]) => parseInt(nonce))
+    .sort((a, b) => a - b)
+
+const getMissingNonces = async (
+  publicClient: PublicClient,
+  address: Address
+): Promise<number[]> => {
+  const confirmedNonce = await publicClient.getTransactionCount({
+    address,
+    blockTag: 'latest',
+  })
+  const pool: PoolResponse = await publicClient.request({
+    // @ts-expect-error: this is okay
+    method: 'txpool_contentFrom',
+    params: [address],
+  })
+  const queuedNonces = pickNonces(pool.queued)
+  const minQueuedNonce = Math.min(...queuedNonces)
+  const missingNonces: number[] = []
+  for (let i = confirmedNonce; i < minQueuedNonce; i++) {
+    missingNonces.push(i)
+  }
+  return missingNonces
 }
 
 export class FaucetManager {
@@ -112,9 +148,7 @@ export class FaucetManager {
         value: parseEther(REFILL_AMOUNT_ETH.toString(), 'wei'),
         chain: this.chain,
       })
-      const _receipt = await this.publicClient.waitForTransactionReceipt({
-        hash: tx,
-      })
+      await this.publicClient.waitForTransactionReceipt({ hash: tx })
       const newBalance = await this.getBalance(address)
       this.slack.faucet({
         message: `Faucet balance on ${this.node} for ${address} is now ${formatUnitsRounded(newBalance)}`,
@@ -157,29 +191,40 @@ export class FaucetManager {
       title: `Faucet nonce on ${this.node} is out of sync for ${this.getFaucetAddress()}`,
       color: 'warning',
     })
+    const missingNonces = await getMissingNonces(
+      this.publicClient,
+      this.getFaucetAddress()
+    )
     const faucetWallet = await this.getFaucetWallet()
-    const baseTx: TransactionSerializableLegacy = {
-      to: this.faucetAccount.address,
-      chainId: this.chain.id,
-      value: 1n,
-      nonce: confirmedNonce,
-    }
-    await faucetWallet
-      .sendTransaction({
-        ...baseTx,
-        chain: this.chain,
-      })
-      .catch(async (e: Error) => {
-        await this.slack.faucet({
-          title: `Error bumping nonce for ${this.getFaucetAddress()} on ${this.node} `,
-          message: '```' + JSON.stringify(e, stringifyBigInt, 2) + '\n```',
-          color: 'danger',
-          threadTs: response.ts,
+    for (const nonce of missingNonces) {
+      const baseTx: TransactionSerializableLegacy = {
+        to: this.faucetAccount.address,
+        chainId: this.chain.id,
+        value: 1n,
+        nonce,
+      }
+      const stop = await faucetWallet
+        .sendTransaction({
+          ...baseTx,
+          chain: this.chain,
         })
-      })
-      .then((hash: Hash) =>
-        this.publicClient.waitForTransactionReceipt({ hash })
-      )
+        .then(async (hash: Hash) => {
+          await this.publicClient.waitForTransactionReceipt({ hash })
+          return false
+        })
+        .catch(async (e: Error) => {
+          await this.slack.faucet({
+            title: `Error bumping nonce for ${this.getFaucetAddress()} on ${this.node} `,
+            message: '```' + JSON.stringify(e, stringifyBigInt, 2) + '\n```',
+            color: 'danger',
+            threadTs: response.ts,
+          })
+          return true
+        })
+      if (stop) {
+        break
+      }
+    }
     await Bun.sleep(5_000)
     const { synced, ...nonces } = await this.checkNonces()
     if (!synced) {

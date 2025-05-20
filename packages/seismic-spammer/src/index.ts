@@ -10,10 +10,10 @@ import { createPublicClient, http, parseGwei } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { Chain } from 'viem/chains'
 
-import { contractABI } from '@sviem-tests/tests/contract/abi.ts'
-import { bytecode } from '@sviem-tests/tests/contract/bytecode.ts'
+import { seismicCounterAbi } from '@sviem-tests/tests/contract/abi.ts'
+import { seismicCounterBytecode } from '@sviem-tests/tests/contract/bytecode.ts'
 
-const testContractBytecodeFormatted: `0x${string}` = `0x${bytecode.object.replace(/^0x/, '')}`
+const testContractBytecodeFormatted: `0x${string}` = `0x${seismicCounterBytecode.object.replace(/^0x/, '')}`
 
 const TX_CNT_PER_SPIKE = 10
 const CALL_CNT_PER_SPIKE = 10
@@ -137,7 +137,7 @@ const testSeismicTx = async (
   // =========== wallet creation completion ===========
 
   const deployTx = await fundedWalletClient.deployContract({
-    abi: contractABI,
+    abi: seismicCounterAbi,
     bytecode: testContractBytecodeFormatted,
     gas: 210000n,
     gasPrice: parseGwei('20'),
@@ -150,13 +150,13 @@ const testSeismicTx = async (
   console.info(`Deployed contract address: ${deployedContractAddress}`)
 
   const fundedSeismicContract = getShieldedContract({
-    abi: contractABI,
+    abi: seismicCounterAbi,
     address: deployedContractAddress,
     client: fundedWalletClient,
   })
 
   const poorSeismicContract = getShieldedContract({
-    abi: contractABI,
+    abi: seismicCounterAbi,
     address: deployedContractAddress,
     client: poorWalletClient,
   })

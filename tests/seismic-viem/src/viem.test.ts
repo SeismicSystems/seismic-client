@@ -23,10 +23,21 @@ import {
   testSeismicTxTrace,
 } from '@sviem-tests/tests/trace.ts'
 import {
+  testContractTreadIsntSeismicTx,
+  testShieldedWalletClientTreadIsntSeismicTx,
+  testViemReadContractIsntSeismicTx,
+} from '@sviem-tests/tests/transparentContract/tread-contract.ts'
+import {
+  testContractTwriteIsntSeismicTx,
+  testShieldedWalletClientTwriteIsntSeismicTx,
+  testViemWriteContractIsntSeismicTx,
+} from '@sviem-tests/tests/transparentContract/twrite-contract.ts'
+import {
   testSeismicCallTypedData,
   testSeismicTxTypedData,
 } from '@sviem-tests/tests/typedData.ts'
 import { testWsConnection } from '@sviem-tests/tests/ws.ts'
+import { sanvil } from '@sviem/chain.ts'
 
 const TIMEOUT_MS = 20_000
 
@@ -50,7 +61,10 @@ beforeAll(async () => {
   chain = envChain()
   port = 8545
   await buildNode(chain)
-  const node = await setupNode(chain, { port, ws: true })
+  const node = await setupNode(chain, {
+    port,
+    ws: true,
+  })
   exitProcess = node.exitProcess
   url = node.url
   wsUrl = `ws://localhost:${port}`
@@ -60,6 +74,89 @@ describe('Seismic Contract', async () => {
   test(
     'deploy & call contracts with seismic tx',
     async () => await testSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'deploy & call contracts with seismic tx via JSON RPC',
+    async () => {
+      if (chain.id !== sanvil.id) {
+        // only run this against anvil
+        return
+      }
+      const jsonRpcAccount = {
+        type: 'json-rpc',
+        address: account.address,
+      }
+      // @ts-ignore
+      await testSeismicTx({ chain, url, account: jsonRpcAccount })
+    },
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+})
+
+describe('twrite should not use seismic tx', async () => {
+  test(
+    'ShieldedContract.twrite should not use seismic tx',
+    async () => await testContractTwriteIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'viem writeContract should not use seismic tx',
+    async () =>
+      await testViemWriteContractIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'ShieldedWalletClient.twriteContract does not use seismic tx',
+    async () =>
+      await testShieldedWalletClientTwriteIsntSeismicTx({
+        chain,
+        url,
+        account,
+      }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+})
+
+describe('tread should not use seismic tx', async () => {
+  test(
+    'ShieldedContract.tread should not use seismic tx',
+    async () => await testContractTreadIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'viem readContract should not use seismic tx',
+    async () =>
+      await testViemReadContractIsntSeismicTx({ chain, url, account }),
+    {
+      timeout: TIMEOUT_MS,
+    }
+  )
+
+  test(
+    'ShieldedWalletClient.treadContract does not use seismic tx',
+    async () =>
+      await testShieldedWalletClientTreadIsntSeismicTx({
+        chain,
+        url,
+        account,
+      }),
     {
       timeout: TIMEOUT_MS,
     }
