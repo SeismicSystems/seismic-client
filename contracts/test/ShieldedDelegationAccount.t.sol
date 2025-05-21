@@ -25,8 +25,6 @@ contract ShieldedDelegationAccountTest is Test {
 
     /// @dev Session key's private key for signing (fixed for deterministic tests)
     uint256 constant SK = 0xBEEF;
-    uint256 AES_KEY_SET;
-    uint256 AES_KEY_GET;
 
     /// @dev Address derived from session key
     address SKaddr;
@@ -35,9 +33,6 @@ contract ShieldedDelegationAccountTest is Test {
     address constant alice = address(0xA11CE);
     address constant bob = address(0xB0B);
     address constant relayer = address(0xAA);
-
-    /// @dev AES key for encryption operations
-    suint256 AES_KEY = suint256(0x2dc875f35f6fa751d30fc934bbf5027760109521adf5f66c9426002180f32bce);
 
     ////////////////////////////////////////////////////////////////////////
     // EIP-712 Constants
@@ -72,12 +67,7 @@ contract ShieldedDelegationAccountTest is Test {
         // Deploy the delegation account and set the AES key
         acc = new ShieldedDelegationAccount();
         vm.prank(address(acc));
-        AES_KEY_SET = acc.setAESKey();
-        console.log("AES_KEY_SET", AES_KEY_SET);
-        vm.prank(address(acc));
-        AES_KEY_GET = acc.getAESKey();
-        console.log("AES_KEY_GET", AES_KEY_GET);
-
+        acc.setAESKey();
         // Deploy the test token and mint tokens to Alice and the account
         tok = new TestToken();
         tok.mint(address(alice), suint256(100 * 10 ** 18));
@@ -87,25 +77,6 @@ contract ShieldedDelegationAccountTest is Test {
     ////////////////////////////////////////////////////////////////////////
     // Utility Functions
     ////////////////////////////////////////////////////////////////////////
-
-    /// @notice Helper function to decrypt using the master key
-    /// @dev Uses the same key as the contract for testing purposes
-    /// @param nonce Random nonce that was used during encryption
-    /// @param ciphertext The ciphertext to decrypt
-    /// @return plaintext The decrypted result
-    function _decrypt(uint96 nonce, bytes memory ciphertext) internal view returns (bytes memory plaintext) {
-        require(ciphertext.length > 0, "Ciphertext cannot be empty");
-
-        address AESDecryptAddr = address(0x67);
-
-        // Pack key, nonce, and ciphertext
-        bytes memory input = abi.encodePacked(suint256(AES_KEY), nonce, ciphertext);
-
-        (bool success, bytes memory output) = AESDecryptAddr.staticcall(input);
-        require(success, "AES decrypt precompile call failed");
-
-        return output;
-    }
 
     /// @notice Creates a domain separator matching the one used in the contract
     /// @dev Used for EIP-712 signature generation
@@ -310,19 +281,6 @@ contract ShieldedDelegationAccountTest is Test {
     //         assertEq(high, 0, "Unexpected data above struct");
     //         assertEq(low, 0, "Unexpected data below struct");
     //     }
-    // }
-
-    /// @notice Test the encryption and decryption functionality
-    // function test_encrypt() public view {
-    //     // Test data to encrypt
-    //     bytes memory testData = bytes("ABCD");
-
-    //     // Encrypt using the contract's function
-    //     (uint96 n, bytes memory c) = acc.encrypt(testData);
-
-    //     // Decrypt and verify the data matches
-    //     bytes memory decrypted = _decrypt(n, c);
-    //     assertEq(decrypted, testData, "Decrypted data should match original");
     // }
 
     /// @notice Test executing a token transfer as the owner bypassing session key and signature checks

@@ -41,7 +41,7 @@ interface IShieldedDelegationAccount {
     function revokeSession(address signer) external;
 
     /// @notice Sets the AES encryption key using the RNG precompile
-    function setAESKey() external returns (uint256);
+    function setAESKey() external;
 
     /// @notice Gas-free helper to encrypt plaintext
     /// @param plaintext The data to encrypt
