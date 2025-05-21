@@ -106,8 +106,14 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         emit SessionRevoked(uint32(idx));
     }
 
-    function setAESKey(suint256 _aesKey) external override onlySelf {
-        _getStorage().aesKey = _aesKey;
+    function setAESKey() external override onlySelf returns (uint256) {
+        suint256 key = _generateRandomAESKey();
+        _getStorage().aesKey = key;
+        return uint256(key);
+    }
+
+    function getAESKey() external view onlySelf returns (uint256) {
+        return uint256(_getStorage().aesKey);
     }
 
     ////////////////////////////////////////////////////////////////////////

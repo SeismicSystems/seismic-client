@@ -37,6 +37,22 @@ contract CryptoUtils {
         return uint96(uint256(randomBytes));
     }
 
+    function _generateRandomAESKey() internal view returns (suint256) {
+    bytes memory personalization = abi.encodePacked("aes-key", block.timestamp); // or "session-aes" or similar
+    bytes memory input = abi.encodePacked(uint32(32), personalization);
+
+    (bool success, bytes memory output) = RNG_PRECOMPILE.staticcall(input);
+    require(success, "RNG Precompile call failed");
+    require(output.length == 32, "Invalid RNG output length");
+
+    bytes32 randomBytes;
+    assembly {
+        randomBytes := mload(add(output, 32))
+    }
+
+    return suint256(randomBytes);
+}
+
     /// @notice Encrypts the given plaintext with AES key and nonce
     /// @dev Uses AES encryption precompile at address 0x66
     /// @param key The AES key to use for encryption
