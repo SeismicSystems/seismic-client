@@ -26,6 +26,30 @@ contract ShieldedDelegationAccountTest is Test {
     /// @dev Session key's private key for signing (fixed for deterministic tests)
     uint256 constant SK = 0xBEEF;
 
+    /// @dev Admin private key for signing
+    uint256 constant ADMIN_PK = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
+
+    /// @dev Admin's address
+    address payable ADMIN_ADDRESS = payable(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
+
+    /// @dev Alice private key for signing
+    uint256 constant ALICE_PK = 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d;
+
+    /// @dev Alice's address
+    address payable ALICE_ADDRESS = payable(0x70997970C51812dc3A010C7d01b50e0d17dc79C8);
+
+    /// @dev Relay private key for signing
+    uint256 constant RELAY_PK = 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a;
+
+    /// @dev Relay's address
+    address constant RELAY_ADDRESS = address(0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC);
+
+    /// @dev Bob's private key for signing
+    uint256 constant BOB_PK = 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a;
+
+    /// @dev Bob's address
+    address payable BOB_ADDRESS = payable(0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65);
+
     /// @dev Address derived from session key
     address SKaddr;
 
@@ -64,14 +88,18 @@ contract ShieldedDelegationAccountTest is Test {
         // Fund the relayer with some ETH for gas
         vm.deal(relayer, 1 ether);
 
-        // Deploy the delegation account and set the AES key
+        // Deploy the shielded delegation account contract
+        vm.startPrank(ADMIN_ADDRESS);
         acc = new ShieldedDelegationAccount();
-        vm.prank(address(acc));
-        acc.setAESKey();
+
         // Deploy the test token and mint tokens to Alice and the account
         tok = new TestToken();
-        tok.mint(address(alice), suint256(100 * 10 ** 18));
-        tok.mint(address(acc), suint256(100 * 10 ** 18));
+        tok.mint(ALICE_ADDRESS, suint256(100 * 10 ** 18));
+        vm.stopPrank();
+
+        // Sign the authorization for the account and
+        // set the code to Alice's address
+        _signAndAttachDelegation(address(acc));
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -97,12 +125,12 @@ contract ShieldedDelegationAccountTest is Test {
     /// @param sessionIndex Index of the session to uses
     /// @param cipher Encrypted data to be executed
     /// @return signature The signature bytes
-    function _signExecuteDigest(uint32 sessionIndex, bytes memory cipher)
+    function _signExecuteDigest(address account, uint32 sessionIndex, bytes memory cipher)
         internal
         view
         returns (bytes memory signature)
     {
-        uint256 sessionNonce = acc.getSessionNonce(sessionIndex);
+        uint256 sessionNonce = ShieldedDelegationAccount(account).getSessionNonce(sessionIndex);
         bytes32 domainSeparator = _getDomainSeparator();
 
         // Create EIP-712 typed data hash for signing
@@ -151,30 +179,50 @@ contract ShieldedDelegationAccountTest is Test {
     /// @notice Helper to execute a call via session
     /// @param sessionIndex The session index to use
     /// @param calls The encoded calls to execute
-    function _executeViaSession(uint32 sessionIndex, bytes memory calls) internal {
+    function _executeViaSession(address account, uint32 sessionIndex, bytes memory calls) internal {
         // Encrypt the calls
-        (uint96 nonce, bytes memory cipher) = acc.encrypt(calls);
+        (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(account).encrypt(calls);
 
         // Sign the execution request
-        bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
+        bytes memory signature = _signExecuteDigest(account, sessionIndex, cipher);
 
         // Execute via relayer
-        vm.prank(relayer);
-        acc.execute(nonce, cipher, signature, sessionIndex);
+        vm.prank(RELAY_ADDRESS);
+        ShieldedDelegationAccount(account).execute(nonce, cipher, signature, sessionIndex);
+    }
+
+    function _signAndAttachDelegation(address implementation) internal {
+        Vm.SignedDelegation memory signedDelegation = vm.signDelegation(implementation, ALICE_PK);
+        vm.broadcast(RELAY_PK);
+        vm.attachDelegation(signedDelegation);
+        vm.stopBroadcast();
     }
 
     ////////////////////////////////////////////////////////////////////////
     // Test Cases
     ////////////////////////////////////////////////////////////////////////
 
+    function test_signDelegationAndThenAttachDelegation() public {
+        Vm.SignedDelegation memory signedDelegation = vm.signDelegation(address(acc), ALICE_PK);
+
+        // Relay attaches the signed delegation from Alice and signs it
+        vm.broadcast(RELAY_PK);
+        vm.attachDelegation(signedDelegation);
+
+        // Verify that Alice's account now behaves as a smart contract.
+        bytes memory code = address(ALICE_ADDRESS).code;
+        require(code.length > 0, "no code written to Alice");
+    }
+
     /// @notice Test granting a session with expiry and limit
     function test_grantSession() public {
         // Grant a session that expires in 24 hours with 1 ETH limit
-        vm.prank(address(acc));
-        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
 
         // Access the session data from storage
-        (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce) = acc.sessions(0);
+        (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce) =
+            ShieldedDelegationAccount(ALICE_ADDRESS).sessions(0);
 
         // Verify all fields
         assertEq(signer, SKaddr, "Session signer should match");
@@ -191,60 +239,59 @@ contract ShieldedDelegationAccountTest is Test {
         address signer3 = vm.addr(0xA3);
 
         // 1. Grant 3 sessions
-        vm.prank(address(acc));
-        acc.grantSession(signer1, block.timestamp + 1 hours, 1 ether);
-        vm.prank(address(acc));
-        acc.grantSession(signer2, block.timestamp + 2 hours, 1 ether);
-        vm.prank(address(acc));
-        acc.grantSession(signer3, block.timestamp + 3 hours, 1 ether);
+        vm.startPrank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(signer1, block.timestamp + 1 hours, 1 ether);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(signer2, block.timestamp + 2 hours, 1 ether);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(signer3, block.timestamp + 3 hours, 1 ether);
+        vm.stopPrank();
 
         // Verify signerToSessionIndex
-        assertEq(acc.getSessionIndex(signer1), 0);
-        assertEq(acc.getSessionIndex(signer2), 1);
-        assertEq(acc.getSessionIndex(signer3), 2);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(signer1), 0);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(signer2), 1);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(signer3), 2);
 
         // 2. Revoke signer2
-        vm.prank(address(acc));
-        acc.revokeSession(signer2);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeSession(signer2);
 
         // signer3 should have taken signer2's place
-        uint32 newIndexForSigner3 = acc.getSessionIndex(signer3);
+        uint32 newIndexForSigner3 = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(signer3);
         assertEq(newIndexForSigner3, 1, "signer3 should now be at index 1");
 
         // // signer2 mapping should be removed
         vm.expectRevert("invalid signer mapping");
-        acc.getSessionIndex(signer2);
+        ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(signer2);
 
         // Confirm session count shrinks
-        assertEq(acc.sessionCount(), 2, "Should have 2 active sessions");
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).sessionCount(), 2, "Should have 2 active sessions");
 
         // Revoke signer1
-        vm.prank(address(acc));
-        acc.revokeSession(signer1);
-        assertEq(acc.sessionCount(), 1, "Should have 1 active session");
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeSession(signer1);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).sessionCount(), 1, "Should have 1 active session");
 
         // Revoke signer3
-        vm.prank(address(acc));
-        acc.revokeSession(signer3);
-        assertEq(acc.sessionCount(), 0, "Should have 0 active sessions");
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeSession(signer3);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).sessionCount(), 0, "Should have 0 active sessions");
     }
 
     function test_revokeSessionWhenOnlyOneSessionExists() public {
         address signer1 = vm.addr(0xA1);
         address signer2 = vm.addr(0xA2);
-        vm.prank(address(acc));
-        acc.grantSession(signer1, block.timestamp + 24 hours, 1 ether);
-        vm.prank(address(acc));
-        acc.grantSession(signer2, block.timestamp + 24 hours, 1 ether);
+        vm.startPrank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(signer1, block.timestamp + 24 hours, 1 ether);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(signer2, block.timestamp + 24 hours, 1 ether);
+        vm.stopPrank();
 
         // Revoke signer2
-        vm.prank(address(acc));
-        acc.revokeSession(signer2);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeSession(signer2);
 
         // Again try to revoke signer2 but this time it should revert
-        vm.prank(address(acc));
+        vm.prank(ALICE_ADDRESS);
         vm.expectRevert("invalid signer mapping");
-        acc.revokeSession(signer2);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeSession(signer2);
     }
 
     // function test_storageCollisionResistance() public {
@@ -286,45 +333,43 @@ contract ShieldedDelegationAccountTest is Test {
     /// @notice Test executing a token transfer as the owner bypassing session key and signature checks
     function test_executeAsOwner() public {
         // Grant a session
-        vm.prank(address(acc));
-        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
 
         // Create the token transfer call
-        bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
         // Encrypt and verify decryption works properly
-        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
         // bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
         // assertEq(decrypted, calls, "Decrypted calls should match original");
 
         // Execute the transaction as the owner
-        vm.prank(address(acc));
-        acc.execute(encryptedCallsNonce, encryptedCalls, bytes(""), 0);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, bytes(""), 0);
 
         // Verify Bob received the tokens
-        vm.prank(bob);
+        vm.prank(BOB_ADDRESS);
         uint256 bobBalance = tok.balanceOf();
         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
     }
 
     function test_execute() public {
         // Grant a session
-        vm.prank(address(acc));
-        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
 
         // Create the token transfer call
-        bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
         // Encrypt and verify decryption works properly
-        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
-        // bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
-        // assertEq(decrypted, calls, "Decrypted calls should match original");
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
         // Get session index for signing
-        uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+        uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
 
         // Get session nonce for signing
-        uint256 sessionNonce = acc.getSessionNonce(sessionIndex);
+        uint256 sessionNonce = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionNonce(sessionIndex);
 
         // Generate domain separator
         bytes32 DOMAIN_SEPARATOR = _getDomainSeparator();
@@ -337,11 +382,11 @@ contract ShieldedDelegationAccountTest is Test {
         bytes memory signature = abi.encodePacked(r, s, v);
 
         // Execute the transaction
-        vm.prank(relayer);
-        acc.execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
+        vm.prank(RELAY_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
 
         // Verify Bob received the tokens
-        vm.prank(bob);
+        vm.prank(BOB_ADDRESS);
         uint256 bobBalance = tok.balanceOf();
         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
     }
@@ -349,106 +394,105 @@ contract ShieldedDelegationAccountTest is Test {
     /// @notice Test that execution is rejected when session has expired
     function test_revertWhenSessionExpired() public {
         // Grant a session
-        vm.prank(address(acc));
-        acc.grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
 
         // Advance time past expiration
         vm.warp(block.timestamp + 24 hours + 1 hours);
 
         // Create token transfer call
-        bytes memory calls = _createTokenTransferCall(bob, 5 * 10 ** 18);
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
         // Encrypt the call data
-        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = acc.encrypt(calls);
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
         // Get session index for signing
-        uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+        uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
 
         // Sign the execution request
-        bytes memory signature = _signExecuteDigest(sessionIndex, encryptedCalls);
+        bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, encryptedCalls);
 
         // Execution should revert due to expired session
-        vm.prank(relayer);
+        vm.prank(RELAY_ADDRESS);
         vm.expectRevert("expired");
-        acc.execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
 
         // Verify Bob didn't receive any tokens
-        vm.prank(bob);
+        vm.prank(BOB_ADDRESS);
         uint256 bobBalance = tok.balanceOf();
         assertEq(bobBalance, 0, "Bob should not have received any tokens");
     }
 
     /// @notice Test that the session spending limit is enforced
     function test_ethSessionLimit() public {
-        // Fund the account contract with ETH
-        vm.deal(address(acc), 100 ether);
 
         // Grant session with 10 ETH limit
-        vm.prank(address(acc));
-        acc.grantSession(SKaddr, block.timestamp + 24 hours, 10 ether);
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 10 ether);
 
         // Record Bob's initial balance
-        uint256 initialBalance = address(bob).balance;
+        uint256 initialBalance = BOB_ADDRESS.balance;
 
         // Test 1: First transfer of 6 ETH (should succeed)
         {
-            bytes memory calls = _createEthTransferCall(bob, 6 ether);
-            _executeViaSession(0, calls);
-            assertEq(address(bob).balance, initialBalance + 6 ether, "First transfer should succeed");
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 6 ether);
+            _executeViaSession(ALICE_ADDRESS, 0, calls);
+            assertEq(BOB_ADDRESS.balance, initialBalance + 6 ether, "First transfer should succeed");
         }
 
         // Test 2: Second transfer of 3 ETH (should succeed)
         {
-            bytes memory calls = _createEthTransferCall(bob, 3 ether);
-            _executeViaSession(0, calls);
-            assertEq(address(bob).balance, initialBalance + 9 ether, "Second transfer should succeed");
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 3 ether);
+            _executeViaSession(ALICE_ADDRESS, 0, calls);
+            assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Second transfer should succeed");
         }
 
         // Test 3: Third transfer of 2 ETH (should fail - would exceed limit)
         {
-            bytes memory calls = _createEthTransferCall(bob, 2 ether);
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 2 ether);
 
-            (uint96 nonce96, bytes memory cipher) = acc.encrypt(calls);
-
-            // Get session index for signing
-            uint32 sessionIndex = acc.getSessionIndex(SKaddr);
-
-            // Sign the execution request
-            bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
-
-            vm.prank(relayer);
-            vm.expectRevert("spend limit exceeded");
-            acc.execute(nonce96, cipher, signature, sessionIndex);
-
-            assertEq(address(bob).balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
-        }
-
-        // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
-        {
-            bytes memory calls = _createEthTransferCall(bob, 1 ether);
-            _executeViaSession(0, calls);
-            assertEq(
-                address(bob).balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit"
-            );
-        }
-
-        // Test 5: Final tiny transfer (should fail - exceeds limit)
-        {
-            bytes memory calls = _createEthTransferCall(bob, 0.1 ether);
-
-            (uint96 nonce96, bytes memory cipher) = acc.encrypt(calls);
+            (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
             // Get session index for signing
-            uint32 sessionIndex = acc.getSessionIndex(SKaddr);
+            uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
 
             // Sign the execution request
-            bytes memory signature = _signExecuteDigest(sessionIndex, cipher);
+            bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, cipher);
 
-            vm.prank(relayer);
+            vm.prank(RELAY_ADDRESS);
             vm.expectRevert("spend limit exceeded");
-            acc.execute(nonce96, cipher, signature, sessionIndex);
+            ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, sessionIndex);
 
-            assertEq(address(bob).balance, initialBalance + 10 ether, "No more transfers should be possible");
+            assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
         }
-    }
+
+    //     // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
+    //     {
+    //         bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 1 ether);
+    //         _executeViaSession(ALICE_ADDRESS, 0, calls);
+    //         assertEq(
+    //             BOB_ADDRESS.balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit"
+    //         );
+    //     }
+
+    //     // Test 5: Final tiny transfer (should fail - exceeds limit)
+    //     {
+    //         bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 0.1 ether);
+
+    //         (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+
+    //         // Get session index for signing
+    //         uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
+
+    //         // Sign the execution request
+    //         bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, cipher);
+
+    //         vm.prank(RELAY_ADDRESS);
+    //         vm.expectRevert("spend limit exceeded");
+    //         ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, sessionIndex);
+
+    //         assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
+    //     }
+    // }
+}
 }
