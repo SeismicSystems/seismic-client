@@ -2,6 +2,8 @@
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {P256} from "solady/utils/P256.sol";
+import {WebAuthn} from "solady/utils/WebAuthn.sol";
 import "../utils/MultiSend.sol";
 import "../utils/precompiles/CryptoUtils.sol";
 import "./interfaces/IShieldedDelegationAccount.sol";
@@ -12,6 +14,14 @@ import "./interfaces/IShieldedDelegationAccount.sol";
 /// @dev WARNING: THIS CONTRACT IS AN EXPERIMENT AND HAS NOT BEEN AUDITED
 contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, CryptoUtils {
     using ECDSA for bytes32;
+
+
+    /// @notice The type of key
+    enum KeyType {
+        P256,
+        WebAuthnP256,
+        Secp256k1
+    }
 
     ////////////////////////////////////////////////////////////////////////
     // Storage
