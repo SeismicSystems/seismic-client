@@ -206,6 +206,18 @@ contract ShieldedDelegationAccountTest is Test {
     // Test Cases
     ////////////////////////////////////////////////////////////////////////
 
+    /// @notice Test that setAESKey reverts if AES key is already initialized
+    function test_setAESKey_ifAlreadyInitialized() public {
+        vm.prank(ALICE_ADDRESS);
+        // Initialize the AES key
+        ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
+
+        // Try to initialize the AES key again
+        vm.prank(ALICE_ADDRESS);
+        vm.expectRevert("AES key already initialized");
+        ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
+    }
+
     /// @notice Test granting a session with expiry and limit
     function test_grantSession() public {
         // Grant a session that expires in 24 hours with 1 ETH limit

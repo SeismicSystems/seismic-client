@@ -18,6 +18,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     ////////////////////////////////////////////////////////////////////////
     struct ShieldedStorage {
         suint256 aesKey;
+        bool aesKeyInitialized;
         Session[] sessions;
         mapping(address => uint32) signerToSessionIndex;
     }
@@ -71,6 +72,11 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         _;
     }
 
+    modifier onlyUninitialized() {
+        require(!_getStorage().aesKeyInitialized, "AES key already initialized");
+        _;
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // Session Management
     ////////////////////////////////////////////////////////////////////////
@@ -106,8 +112,10 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         emit SessionRevoked(uint32(idx));
     }
 
-    function setAESKey() external override onlySelf {
-        _getStorage().aesKey = _generateRandomAESKey();
+    function setAESKey() external override onlySelf onlyUninitialized {
+        ShieldedStorage storage $ = _getStorage();
+        $.aesKey = _generateRandomAESKey();
+        $.aesKeyInitialized = true;
     }
 
     ////////////////////////////////////////////////////////////////////////
