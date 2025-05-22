@@ -42,7 +42,7 @@ contract ShieldedDelegationAccountTest is Test {
     uint256 constant RELAY_PK = 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a;
 
     /// @dev Relay's address
-    address constant RELAY_ADDRESS = address(0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC);
+    address payable RELAY_ADDRESS = payable(0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC);
 
     /// @dev Bob's private key for signing
     uint256 constant BOB_PK = 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a;
@@ -100,6 +100,10 @@ contract ShieldedDelegationAccountTest is Test {
         // Sign the authorization for the account and
         // set the code to Alice's address
         _signAndAttachDelegation(address(acc));
+
+        // Verify that Alice's account now behaves as a smart contract.
+        bytes memory code = address(ALICE_ADDRESS).code;
+        require(code.length > 0, "no code written to Alice");
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -201,18 +205,6 @@ contract ShieldedDelegationAccountTest is Test {
     ////////////////////////////////////////////////////////////////////////
     // Test Cases
     ////////////////////////////////////////////////////////////////////////
-
-    function test_signDelegationAndThenAttachDelegation() public {
-        Vm.SignedDelegation memory signedDelegation = vm.signDelegation(address(acc), ALICE_PK);
-
-        // Relay attaches the signed delegation from Alice and signs it
-        vm.broadcast(RELAY_PK);
-        vm.attachDelegation(signedDelegation);
-
-        // Verify that Alice's account now behaves as a smart contract.
-        bytes memory code = address(ALICE_ADDRESS).code;
-        require(code.length > 0, "no code written to Alice");
-    }
 
     /// @notice Test granting a session with expiry and limit
     function test_grantSession() public {
@@ -340,7 +332,8 @@ contract ShieldedDelegationAccountTest is Test {
         bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
         // Encrypt and verify decryption works properly
-        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
+            ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
         // bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
         // assertEq(decrypted, calls, "Decrypted calls should match original");
 
@@ -363,7 +356,8 @@ contract ShieldedDelegationAccountTest is Test {
         bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
         // Encrypt and verify decryption works properly
-        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
+            ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
         // Get session index for signing
         uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
@@ -404,7 +398,8 @@ contract ShieldedDelegationAccountTest is Test {
         bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
         // Encrypt the call data
-        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
+            ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
         // Get session index for signing
         uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
@@ -425,10 +420,14 @@ contract ShieldedDelegationAccountTest is Test {
 
     /// @notice Test that the session spending limit is enforced
     function test_ethSessionLimit() public {
+        // Fund Alice with 100 ETH
+        vm.deal(ALICE_ADDRESS, 100 ether);
 
         // Grant session with 10 ETH limit
         vm.prank(ALICE_ADDRESS);
         ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 10 ether);
+
+        uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
 
         // Record Bob's initial balance
         uint256 initialBalance = BOB_ADDRESS.balance;
@@ -453,9 +452,6 @@ contract ShieldedDelegationAccountTest is Test {
 
             (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
-            // Get session index for signing
-            uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
-
             // Sign the execution request
             bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, cipher);
 
@@ -466,33 +462,27 @@ contract ShieldedDelegationAccountTest is Test {
             assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
         }
 
-    //     // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
-    //     {
-    //         bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 1 ether);
-    //         _executeViaSession(ALICE_ADDRESS, 0, calls);
-    //         assertEq(
-    //             BOB_ADDRESS.balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit"
-    //         );
-    //     }
+        // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
+        {
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 1 ether);
+            _executeViaSession(ALICE_ADDRESS, 0, calls);
+            assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit");
+        }
 
-    //     // Test 5: Final tiny transfer (should fail - exceeds limit)
-    //     {
-    //         bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 0.1 ether);
+        // Test 5: Final tiny transfer (should fail - exceeds limit)
+        {
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 0.1 ether);
 
-    //         (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+            (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
-    //         // Get session index for signing
-    //         uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
+            // Sign the execution request
+            bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, cipher);
 
-    //         // Sign the execution request
-    //         bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, cipher);
+            vm.prank(RELAY_ADDRESS);
+            vm.expectRevert("spend limit exceeded");
+            ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, sessionIndex);
 
-    //         vm.prank(RELAY_ADDRESS);
-    //         vm.expectRevert("spend limit exceeded");
-    //         ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, sessionIndex);
-
-    //         assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
-    //     }
-    // }
-}
+            assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
+        }
+    }
 }
