@@ -2,6 +2,7 @@
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "solady/utils/SignatureCheckerLib.sol";
 import "../utils/MultiSend.sol";
 import "../utils/precompiles/CryptoUtils.sol";
 import "./interfaces/IShieldedDelegationAccount.sol";
@@ -258,10 +259,11 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return _getStorage().sessions[idx];
     }
 
-    function getSessionIndex(KeyType keyType, bytes calldata publicKey) public view returns (uint32) {
-        uint32 idx = _getStorage().keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
-        require(_getStorage().sessions.length > idx, "key not found");
-        require(_getStorage().sessions[idx].keyType == keyType && _getStorage().sessions[idx-1].publicKey == publicKey, "invalid key mapping");
+    function getSessionIndex(KeyType keyType, bytes memory publicKey) public view returns (uint32) {
+        ShieldedStorage storage $ = _getStorage();
+        uint32 idx = $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
+        require($.sessions.length > idx, "key not found");
+        require($.sessions[idx].keyType == keyType && keccak256($.sessions[idx].publicKey) == keccak256(publicKey), "invalid key mapping");
         return idx;
     }
 
