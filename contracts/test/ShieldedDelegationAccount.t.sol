@@ -4,6 +4,7 @@ pragma solidity ^0.8.23;
 import "forge-std/Test.sol";
 import "../src/session-keys/ShieldedDelegationAccount.sol";
 import "../src/utils/TestToken.sol";
+import {Base64} from "solady/utils/Base64.sol";
 
 /// @title ShieldedDelegationAccountTest
 /// @notice Test suite for ShieldedDelegationAccount contract
@@ -123,6 +124,20 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         );
     }
 
+    /// @notice Creates a MultiSend-compatible call to transfer ETH
+    /// @param recipient Address to receive ETH
+    /// @param amount Amount of ETH to transfer
+    /// @return calls Encoded call data for MultiSend
+    function _createEthTransferCall(address recipient, uint256 amount) internal pure returns (bytes memory calls) {
+        return abi.encodePacked(
+            uint8(0), // operation (0 = call)
+            recipient, // recipient address
+            amount, // ETH amount
+            uint256(0), // data length
+            bytes("") // empty data
+        );
+    }
+
     /// @notice Creates a MultiSend-compatible call to transfer tokens
     /// @param recipient Address to receive tokens
     /// @param amount Amount of tokens to transfer
@@ -172,6 +187,23 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         }
     }
 
+    /// @notice Helper to execute a call via key
+    /// @param account The account to execute the call on
+    /// @param keyIndex The key index to use
+    /// @param calls The encoded calls to execute
+    /// @param privateKey The private key to sign with
+    function _executeViaKey(address account, uint32 keyIndex, bytes memory calls, uint256 privateKey) internal {
+        // Encrypt the calls
+        (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(account).encrypt(calls);
+
+        // Sign the execution request
+        bytes memory signature = _signExecuteDigestWithKey(account, keyIndex, cipher, privateKey);
+
+        // Execute via relayer
+        vm.prank(RELAY_ADDRESS);
+        ShieldedDelegationAccount(account).execute(nonce, cipher, signature, keyIndex);
+    }
+
     /// @notice Creates a secp256r1 signature
     /// @param privateKey The private key to sign with
     /// @param keyHash The key hash to sign with
@@ -188,10 +220,54 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         return abi.encodePacked(abi.encode(r, s), keyHash, uint8(prehash ? 1 : 0));
     }
 
+    function _webauthnSig(uint256 privateKey, bytes32 keyHash, bool prehash, bytes32 digest)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        // Construct mock WebAuthn-style clientDataJSON with known layout
+        string memory challengeEncoded = Base64.encode(abi.encodePacked(digest), true, true);
+        string memory clientDataJSON =
+            string(abi.encodePacked('{"type":"webauthn.get","challenge":"', challengeEncoded, '"}'));
+
+        // Dummy authenticatorData (must be non-empty and at least 33 bytes for UP flag)
+        bytes memory authenticatorData = new bytes(33);
+        authenticatorData[32] = 0x01; // Set UP (user present) flag
+
+        uint256 challengeIndex = 28; // fixed index for '"challenge":"'
+        uint256 typeIndex = 8; // fixed index for '"type":"...'
+
+        // Create digest of authenticatorData || SHA256(clientDataJSON)
+        bytes32 clientHash = sha256(bytes(clientDataJSON));
+        bytes32 messageHash = sha256(abi.encodePacked(authenticatorData, clientHash));
+
+        // Sign message hash with P256
+        (bytes32 r, bytes32 s) = vm.signP256(privateKey, messageHash);
+        s = P256.normalized(s);
+
+        WebAuthn.WebAuthnAuth memory auth = WebAuthn.WebAuthnAuth({
+            authenticatorData: authenticatorData,
+            clientDataJSON: clientDataJSON,
+            challengeIndex: challengeIndex,
+            typeIndex: typeIndex,
+            r: r,
+            s: s
+        });
+
+        return abi.encode(auth, keyHash, uint8(prehash ? 1 : 0));
+    }
+
     function _randomSecp256r1Key() internal returns (bytes memory publicKey, uint256 privateKey) {
         privateKey = _generateRandomNumber() & type(uint192).max;
         (uint256 x, uint256 y) = vm.publicKeyP256(privateKey);
         publicKey = abi.encode(x, y);
+        return (publicKey, privateKey);
+    }
+
+    function _randomSecp256k1Key() internal returns (bytes memory publicKey, uint256 privateKey) {
+        privateKey = _generateRandomNumber() & type(uint192).max;
+        address addr = vm.addr(privateKey);
+        publicKey = abi.encode(addr);
         return (publicKey, privateKey);
     }
 
@@ -211,24 +287,6 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         return uint256(randomBytes);
     }
 
-
-    /// @notice Helper to execute a call via key
-    /// @param account The account to execute the call on
-    /// @param keyIndex The key index to use
-    /// @param calls The encoded calls to execute
-    /// @param privateKey The private key to sign with
-    function _executeViaKey(address account, uint32 keyIndex, bytes memory calls, uint256 privateKey) internal {
-        // Encrypt the calls
-        (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(account).encrypt(calls);
-
-        // Sign the execution request
-        bytes memory signature = _signExecuteDigestWithKey(account, keyIndex, cipher, privateKey);
-
-        // Execute via relayer
-        vm.prank(RELAY_ADDRESS);
-        ShieldedDelegationAccount(account).execute(nonce, cipher, signature, keyIndex);
-    }
-
     function _signAndAttachDelegation(address implementation) internal {
         Vm.SignedDelegation memory signedDelegation = vm.signDelegation(implementation, ALICE_PK);
         vm.broadcast(RELAY_PK);
@@ -236,9 +294,9 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         vm.stopBroadcast();
     }
 
-//     ////////////////////////////////////////////////////////////////////////
-//     // Test Cases
-//     ////////////////////////////////////////////////////////////////////////
+    //     ////////////////////////////////////////////////////////////////////////
+    //     // Test Cases
+    //     ////////////////////////////////////////////////////////////////////////
 
     /// @notice Test that setAESKey reverts if AES key is already initialized
     function test_setAESKey_ifAlreadyInitialized() public {
@@ -252,18 +310,24 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
     }
 
-    /// @notice Test authorizing a P256 key
-    function test_authorizeP256Key() public {
-        // Grant a session that expires in 24 hours with 1 ETH limit
-        (bytes memory publicKey, ) = _randomSecp256r1Key();
-        vm.prank(ALICE_ADDRESS);
-        uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey, uint40(block.timestamp + 24 hours), 1 ether);
-        console.log("keyIndex", keyIndex);
+    function test_authorizeAllKeyTypes() public {
+        _test_authorizeKey(KeyType.P256);
+        _test_authorizeKey(KeyType.WebAuthnP256);
+        _test_authorizeKey(KeyType.Secp256k1);
+    }
 
-        // Access the session data from storage
+    function _test_authorizeKey(KeyType keyType) internal {
+        (bytes memory publicKey,) = keyType == KeyType.Secp256k1 ? _randomSecp256k1Key() : _randomSecp256r1Key();
+
+        vm.prank(ALICE_ADDRESS);
+        uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey, uint40(block.timestamp + 24 hours), 1 ether
+        );
+        console.log("Authorized key type %s at index %s", uint8(keyType), keyIndex);
+
         Key memory key = ShieldedDelegationAccount(ALICE_ADDRESS).keys(keyIndex);
 
-        // Verify all fields
+        assertEq(uint8(key.keyType), uint8(keyType), "Key type mismatch");
         assertEq(key.publicKey, publicKey, "Session signer should match");
         assertEq(key.expiry, block.timestamp + 24 hours, "Expiry should match");
         assertEq(key.spendLimit, 1 ether, "Limit should match");
@@ -271,71 +335,105 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         assertEq(key.nonce, 0, "Nonce should be zero initially");
     }
 
-    /// @notice Test granting and revoking multiple sessions
-    function test_grantAndRevokeMultipleSessions() public {
+    function test_grantAndRevokeMultipleSessions_AllKeyTypes() public {
+        _test_grantAndRevokeMultipleSessions(KeyType.P256);
+        _test_grantAndRevokeMultipleSessions(KeyType.WebAuthnP256);
+        _test_grantAndRevokeMultipleSessions(KeyType.Secp256k1);
+    }
+
+    function _test_grantAndRevokeMultipleSessions(KeyType keyType) internal {
         bytes memory publicKey1;
         bytes memory publicKey2;
         bytes memory publicKey3;
-        (publicKey1, ) = _randomSecp256r1Key();
-        (publicKey2, ) = _randomSecp256r1Key();
-        (publicKey3, ) = _randomSecp256r1Key();
 
-        // 1. Grant 3 sessions
+        if (keyType == KeyType.Secp256k1) {
+            (publicKey1,) = _randomSecp256k1Key();
+            (publicKey2,) = _randomSecp256k1Key();
+            (publicKey3,) = _randomSecp256k1Key();
+        } else {
+            (publicKey1,) = _randomSecp256r1Key();
+            (publicKey2,) = _randomSecp256r1Key();
+            (publicKey3,) = _randomSecp256r1Key();
+        }
+
+        // Grant 3 sessions
         vm.startPrank(ALICE_ADDRESS);
-        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey1, uint40(block.timestamp + 1 hours), 1 ether);
-        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey2, uint40(block.timestamp + 2 hours), 1 ether);
-        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey3, uint40(block.timestamp + 3 hours), 1 ether);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey1, uint40(block.timestamp + 1 hours), 1 ether
+        );
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey2, uint40(block.timestamp + 2 hours), 1 ether
+        );
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey3, uint40(block.timestamp + 3 hours), 1 ether
+        );
         vm.stopPrank();
 
-        // Verify keyToKeyIndex
-        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey1), 1);
-        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey2), 2);
-        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey3), 3);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(keyType, publicKey1), 1);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(keyType, publicKey2), 2);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(keyType, publicKey3), 3);
 
-        // 2. Revoke signer2
+        // Revoke key2
         vm.prank(ALICE_ADDRESS);
-        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(KeyType.P256, publicKey2);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(keyType, publicKey2);
 
-        // key3 should have taken key2's place
-        uint32 newIndexForKey3 = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey3);
+        // key3 should now be at index 2
+        uint32 newIndexForKey3 = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(keyType, publicKey3);
         assertEq(newIndexForKey3, 2, "key3 should now be at index 2");
 
-        // // // key2 mapping should be removed
+        // key2 should be gone
         vm.expectRevert("key not found");
-        ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey2);
+        ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(keyType, publicKey2);
 
-        // Confirm session count shrinks
-        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).keyCount(), 2, "Should have 2 active sessions");
+        // Should have 2 keys
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).keyCount(), 2);
 
         // Revoke key1
         vm.prank(ALICE_ADDRESS);
-        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(KeyType.P256, publicKey1);
-        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).keyCount(), 1, "Should have 1 active session");
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(keyType, publicKey1);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).keyCount(), 1);
 
         // Revoke key3
         vm.prank(ALICE_ADDRESS);
-        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(KeyType.P256, publicKey3);
-        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).keyCount(), 0, "Should have 0 active sessions");
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(keyType, publicKey3);
+        assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).keyCount(), 0);
     }
 
-    function test_revokeSessionWhenOnlyOneSessionExists() public {
+    function test_revokeSessionWhenOnlyOneSessionExists_AllKeyTypes() public {
+        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.P256);
+        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.WebAuthnP256);
+        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.Secp256k1);
+    }
+
+    function _test_revokeSessionWhenOnlyOneSessionExists(KeyType keyType) internal {
         bytes memory publicKey1;
         bytes memory publicKey2;
-        (publicKey1, ) = _randomSecp256r1Key();
-        (publicKey2, ) = _randomSecp256r1Key();
+
+        if (keyType == KeyType.Secp256k1) {
+            (publicKey1,) = _randomSecp256k1Key();
+            (publicKey2,) = _randomSecp256k1Key();
+        } else {
+            (publicKey1,) = _randomSecp256r1Key();
+            (publicKey2,) = _randomSecp256r1Key();
+        }
+
         vm.startPrank(ALICE_ADDRESS);
-        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey1, uint40(block.timestamp + 24 hours), 1 ether);
-        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey2, uint40(block.timestamp + 24 hours), 1 ether);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey1, uint40(block.timestamp + 24 hours), 1 ether
+        );
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey2, uint40(block.timestamp + 24 hours), 1 ether
+        );
         vm.stopPrank();
 
         // Revoke key2
         vm.prank(ALICE_ADDRESS);
-        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(KeyType.P256, publicKey2);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(keyType, publicKey2);
 
-        // Again try to revoke key2 but this time it should revert
+        // Revoke again: should revert
         vm.prank(ALICE_ADDRESS);
         vm.expectRevert("key not found");
-        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(KeyType.P256, publicKey2);
+        ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(keyType, publicKey2);
     }
 
     // function test_storageCollisionResistance() public {
@@ -374,36 +472,111 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     //     }
     // }
 
-//     /// @notice Test executing a token transfer as the owner bypassing session key and signature checks
-//     function test_executeAsOwner() public {
-//         // Grant a session
-//         vm.prank(ALICE_ADDRESS);
-//         ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+    function _resetBobBalance() internal {
+        vm.prank(BOB_ADDRESS);
+        uint256 bobBalance = tok.balanceOf();
+        assertGt(bobBalance, 0, "Bob should have some balance");
+        vm.prank(BOB_ADDRESS);
+        tok.transfer(ALICE_ADDRESS, suint256(bobBalance));
+    }
 
-//         // Create the token transfer call
-//         bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
+    function test_executeAsOwner_AllKeyTypes() public {
+        _test_executeAsOwner(KeyType.P256);
+        _resetBobBalance();
+        _test_executeAsOwner(KeyType.WebAuthnP256);
+        _resetBobBalance();
+        _test_executeAsOwner(KeyType.Secp256k1);
+        _resetBobBalance();
+    }
 
-//         // Encrypt and verify decryption works properly
-//         (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
-//             ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
-//         // bytes memory decrypted = _decrypt(encryptedCallsNonce, encryptedCalls);
-//         // assertEq(decrypted, calls, "Decrypted calls should match original");
+    function _test_executeAsOwner(KeyType keyType) internal {
+        bytes memory publicKey;
+        if (keyType == KeyType.Secp256k1) {
+            (publicKey,) = _randomSecp256k1Key();
+        } else {
+            (publicKey,) = _randomSecp256r1Key();
+        }
 
-//         // Execute the transaction as the owner
-//         vm.prank(ALICE_ADDRESS);
-//         ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, bytes(""), 0);
+        // Grant session key
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey, uint40(block.timestamp + 24 hours), 1 ether
+        );
 
-//         // Verify Bob received the tokens
-//         vm.prank(BOB_ADDRESS);
-//         uint256 bobBalance = tok.balanceOf();
-//         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
-//     }
+        // Prepare token transfer call
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
+
+        // Encrypt calls
+        (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+
+        // Call as owner — signature and key index are ignored
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce, cipher, bytes(""), 1);
+
+        // Verify transfer
+        vm.prank(BOB_ADDRESS);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
+    }
+
+    function test_execute_AllKeyTypes() public {
+        _test_execute(KeyType.P256);
+        _resetBobBalance();
+
+        _test_execute(KeyType.WebAuthnP256);
+        _resetBobBalance();
+
+        _test_execute(KeyType.Secp256k1);
+    }
+
+    function _test_execute(KeyType keyType) internal {
+        (bytes memory publicKey, uint256 privateKey) =
+            keyType == KeyType.Secp256k1 ? _randomSecp256k1Key() : _randomSecp256r1Key();
+
+        // Grant a session
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey, uint40(block.timestamp + 24 hours), 1 ether
+        );
+
+        // Create token transfer call
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
+        (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+
+        // Get key metadata
+        uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(keyType, publicKey);
+        uint256 keyNonce = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyNonce(keyIndex);
+        bytes32 domainSeparator = _getDomainSeparator();
+        bytes32 structHash = keccak256(abi.encode(EXECUTE_TYPEHASH, keyNonce, keccak256(cipher)));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
+
+        // Generate signature
+        bytes memory signature;
+        if (keyType == KeyType.Secp256k1) {
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
+            signature = abi.encodePacked(r, s, v);
+        } else if (keyType == KeyType.P256) {
+            signature = _secp256r1Sig(privateKey, digest, false, digest);
+        } else {
+            signature = _webauthnSig(privateKey, digest, false, digest);
+        }
+        // Execute as relayer
+        vm.prank(RELAY_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce, cipher, signature, keyIndex);
+
+        // Verify tokens transferred
+        vm.prank(BOB_ADDRESS);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
+    }
 
     function test_execute() public {
         (bytes memory publicKey, uint256 privateKey) = _randomSecp256r1Key();
         // Grant a session
         vm.prank(ALICE_ADDRESS);
-        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey, uint40(block.timestamp + 24 hours), 1 ether);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            KeyType.P256, publicKey, uint40(block.timestamp + 24 hours), 1 ether
+        );
 
         // Create the token transfer call
         bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
@@ -437,104 +610,110 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
     }
 
-//     /// @notice Test that execution is rejected when session has expired
-//     function test_revertWhenSessionExpired() public {
-//         // Grant a session
-//         vm.prank(ALICE_ADDRESS);
-//         ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+    /// @notice Test that execution is rejected when session has expired
+    function test_revertWhenSessionExpired() public {
+        (bytes memory publicKey, uint256 privateKey) = _randomSecp256r1Key();
+        // Authorize a key
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            KeyType.P256, publicKey, uint40(block.timestamp + 24 hours), 1 ether
+        );
 
-//         // Advance time past expiration
-//         vm.warp(block.timestamp + 24 hours + 1 hours);
+        // Advance time past expiration
+        vm.warp(block.timestamp + 24 hours + 1 hours);
 
-//         // Create token transfer call
-//         bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
+        // Create token transfer call
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
-//         // Encrypt the call data
-//         (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
-//             ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+        // Encrypt the call data
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
+            ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
-//         // Get session index for signing
-//         uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
+        // Get key index for signing
+        uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey);
 
-//         // Sign the execution request
-//         bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, encryptedCalls);
+        // Sign the execution request
+        bytes memory signature = _signExecuteDigestWithKey(ALICE_ADDRESS, keyIndex, encryptedCalls, privateKey);
 
-//         // Execution should revert due to expired session
-//         vm.prank(RELAY_ADDRESS);
-//         vm.expectRevert("expired");
-//         ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
+        // Execution should revert due to expired session
+        vm.prank(RELAY_ADDRESS);
+        vm.expectRevert("key expired");
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, signature, keyIndex);
 
-//         // Verify Bob didn't receive any tokens
-//         vm.prank(BOB_ADDRESS);
-//         uint256 bobBalance = tok.balanceOf();
-//         assertEq(bobBalance, 0, "Bob should not have received any tokens");
-//     }
+        // Verify Bob didn't receive any tokens
+        vm.prank(BOB_ADDRESS);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 0, "Bob should not have received any tokens");
+    }
 
-//     /// @notice Test that the session spending limit is enforced
-//     function test_ethSessionLimit() public {
-//         // Fund Alice with 100 ETH
-//         vm.deal(ALICE_ADDRESS, 100 ether);
+    /// @notice Test that the session spending limit is enforced
+    function test_ethSessionLimit() public {
+        (bytes memory publicKey, uint256 privateKey) = _randomSecp256r1Key();
+        // Fund Alice with 100 ETH
+        vm.deal(ALICE_ADDRESS, 100 ether);
 
-//         // Grant session with 10 ETH limit
-//         vm.prank(ALICE_ADDRESS);
-//         ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 10 ether);
+        // Grant session with 10 ETH limit
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            KeyType.P256, publicKey, uint40(block.timestamp + 24 hours), 10 ether
+        );
 
-//         uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
+        uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey);
 
-//         // Record Bob's initial balance
-//         uint256 initialBalance = BOB_ADDRESS.balance;
+        // Record Bob's initial balance
+        uint256 initialBalance = BOB_ADDRESS.balance;
 
-//         // Test 1: First transfer of 6 ETH (should succeed)
-//         {
-//             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 6 ether);
-//             _executeViaSession(ALICE_ADDRESS, 0, calls);
-//             assertEq(BOB_ADDRESS.balance, initialBalance + 6 ether, "First transfer should succeed");
-//         }
+        // Test 1: First transfer of 6 ETH (should succeed)
+        {
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 6 ether);
+            _executeViaKey(ALICE_ADDRESS, keyIndex, calls, privateKey);
+            assertEq(BOB_ADDRESS.balance, initialBalance + 6 ether, "First transfer should succeed");
+        }
 
-//         // Test 2: Second transfer of 3 ETH (should succeed)
-//         {
-//             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 3 ether);
-//             _executeViaSession(ALICE_ADDRESS, 0, calls);
-//             assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Second transfer should succeed");
-//         }
+        // Test 2: Second transfer of 3 ETH (should succeed)
+        {
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 3 ether);
+            _executeViaKey(ALICE_ADDRESS, keyIndex, calls, privateKey);
+            assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Second transfer should succeed");
+        }
 
-//         // Test 3: Third transfer of 2 ETH (should fail - would exceed limit)
-//         {
-//             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 2 ether);
+        // Test 3: Third transfer of 2 ETH (should fail - would exceed limit)
+        {
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 2 ether);
 
-//             (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+            (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
-//             // Sign the execution request
-//             bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, cipher);
+            // Sign the execution request
+            bytes memory signature = _signExecuteDigestWithKey(ALICE_ADDRESS, keyIndex, cipher, privateKey);
 
-//             vm.prank(RELAY_ADDRESS);
-//             vm.expectRevert("spend limit exceeded");
-//             ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, sessionIndex);
+            vm.prank(RELAY_ADDRESS);
+            vm.expectRevert("spend limit exceeded");
+            ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, keyIndex);
 
-//             assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
-//         }
+            assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
+        }
 
-//         // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
-//         {
-//             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 1 ether);
-//             _executeViaSession(ALICE_ADDRESS, 0, calls);
-//             assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit");
-//         }
+        // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
+        {
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 1 ether);
+            _executeViaKey(ALICE_ADDRESS, keyIndex, calls, privateKey);
+            assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit");
+        }
 
-//         // Test 5: Final tiny transfer (should fail - exceeds limit)
-//         {
-//             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 0.1 ether);
+        // Test 5: Final tiny transfer (should fail - exceeds limit)
+        {
+            bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 0.1 ether);
 
-//             (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+            (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
-//             // Sign the execution request
-//             bytes memory signature = _signExecuteDigest(ALICE_ADDRESS, sessionIndex, cipher);
+            // Sign the execution request
+            bytes memory signature = _signExecuteDigestWithKey(ALICE_ADDRESS, keyIndex, cipher, privateKey);
 
-//             vm.prank(RELAY_ADDRESS);
-//             vm.expectRevert("spend limit exceeded");
-//             ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, sessionIndex);
+            vm.prank(RELAY_ADDRESS);
+            vm.expectRevert("spend limit exceeded");
+            ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, keyIndex);
 
-//             assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
-//         }
-//     }
+            assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
+        }
+    }
 }

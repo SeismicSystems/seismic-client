@@ -8,7 +8,6 @@ import {WebAuthn} from "solady/utils/WebAuthn.sol";
 /// @notice Interface for ShieldedDelegationAccount functionality
 /// @dev Defines the core session management and execution functions
 interface IShieldedDelegationAccount {
-
     /// @notice The type of key
     enum KeyType {
         P256,
@@ -16,7 +15,7 @@ interface IShieldedDelegationAccount {
         Secp256k1
     }
 
-     /// @dev A key that can be used to authorize call.
+    /// @dev A key that can be used to authorize call.
     struct Key {
         /// @dev Unix timestamp at which the key expires (0 = never).
         uint40 expiry;
@@ -53,7 +52,9 @@ interface IShieldedDelegationAccount {
     /// @param expiry The timestamp when the session expires (0 = unlimited)
     /// @param limitWei The maximum amount of wei that can be spent (0 = unlimited)
     /// @return idx The index of the newly created session
-    function authorizeKey(KeyType keyType, bytes calldata publicKey, uint40 expiry, uint256 limitWei) external returns (uint32 idx);
+    function authorizeKey(KeyType keyType, bytes calldata publicKey, uint40 expiry, uint256 limitWei)
+        external
+        returns (uint32 idx);
 
     /// @notice Revokes an existing session
     /// @param keyType The type of key
@@ -90,8 +91,5 @@ interface IShieldedDelegationAccount {
     /// @notice Accessor for keys array
     /// @param idx The index of the key to access
     /// @return key The key
-    function keys(uint32 idx)
-        external
-        view
-        returns (Key memory key);
+    function keys(uint32 idx) external view returns (Key memory key);
 }

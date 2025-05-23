@@ -78,11 +78,15 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         _;
     }
 
-
     ////////////////////////////////////////////////////////////////////////
     // Key Management
     ////////////////////////////////////////////////////////////////////////
-    function authorizeKey(KeyType keyType, bytes calldata publicKey, uint40 expiry, uint256 limitWei) external override onlySelf returns (uint32 idx) {
+    function authorizeKey(KeyType keyType, bytes calldata publicKey, uint40 expiry, uint256 limitWei)
+        external
+        override
+        onlySelf
+        returns (uint32 idx)
+    {
         ShieldedStorage storage $ = _getStorage();
 
         Key memory newKey = Key({
@@ -98,33 +102,32 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         idx = uint32($.keys.length);
         $.keys.push(newKey);
         bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
-        $.keyToSessionIndex[keyHash] = idx+1;
+        $.keyToSessionIndex[keyHash] = idx + 1;
 
         emit KeyAuthorized(keyHash, newKey);
-        return idx+1;
+        return idx + 1;
     }
 
     function revokeKey(KeyType keyType, bytes calldata publicKey) external override onlySelf {
-    ShieldedStorage storage $ = _getStorage();
-    bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
-    uint32 idx = $.keyToSessionIndex[keyHash];
+        ShieldedStorage storage $ = _getStorage();
+        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+        uint32 idx = $.keyToSessionIndex[keyHash];
 
-    require(idx != 0, "key not found");
+        require(idx != 0, "key not found");
 
-    uint32 lastIdx = uint32($.keys.length);
+        uint32 lastIdx = uint32($.keys.length);
 
-    if (idx != lastIdx) {
-        Key memory lastKey = $.keys[lastIdx - 1];
-        $.keys[idx - 1] = lastKey;
-        $.keyToSessionIndex[_generateKeyIdentifier(lastKey.keyType, lastKey.publicKey)] = idx;
+        if (idx != lastIdx) {
+            Key memory lastKey = $.keys[lastIdx - 1];
+            $.keys[idx - 1] = lastKey;
+            $.keyToSessionIndex[_generateKeyIdentifier(lastKey.keyType, lastKey.publicKey)] = idx;
+        }
+
+        $.keys.pop();
+        delete $.keyToSessionIndex[keyHash];
+
+        emit KeyRevoked(keyHash);
     }
-
-    $.keys.pop();
-    delete $.keyToSessionIndex[keyHash];
-
-    emit KeyRevoked(keyHash);
-   }
-
 
     function setAESKey() external override onlySelf onlyUninitialized {
         ShieldedStorage storage $ = _getStorage();
@@ -157,33 +160,31 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             multiSend(decryptedCiphertext);
         } else {
-            Key storage S = $.keys[idx-1];
-            require(S.expiry > block.timestamp, "expired");
-            require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "session key revoked");
+            Key storage S = $.keys[idx - 1];
+            require(S.expiry > block.timestamp, "key expired");
+            require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "key revoked");
 
             bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
             bool isValid;
             if (S.keyType == KeyType.P256) {
-            // The try decode functions returns `(0,0)` if the bytes is too short,
-            // which will make the signature check fail.
-            (bytes32 r, bytes32 s) = P256.tryDecodePointCalldata(sig);
-            (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
-            isValid = P256.verifySignature(dig, r, s, x, y);
-        } else if (S.keyType == KeyType.WebAuthnP256) {
-            (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
-            isValid = WebAuthn.verify(
-                abi.encode(dig), // Challenge.
-                false, // Require user verification optional.
-                // This is simply `abi.decode(signature, (WebAuthn.WebAuthnAuth))`.
-                WebAuthn.tryDecodeAuth(sig), // Auth.
-                x,
-                y
-            );
-        } else if (S.keyType == KeyType.Secp256k1) {
-            isValid = SignatureCheckerLib.isValidSignatureNowCalldata(
-                abi.decode(S.publicKey, (address)), dig, sig
-            );
-        }
+                // The try decode functions returns `(0,0)` if the bytes is too short,
+                // which will make the signature check fail.
+                (bytes32 r, bytes32 s) = P256.tryDecodePointCalldata(sig);
+                (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
+                isValid = P256.verifySignature(dig, r, s, x, y);
+            } else if (S.keyType == KeyType.WebAuthnP256) {
+                (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
+                isValid = WebAuthn.verify(
+                    abi.encode(dig), // Challenge.
+                    false, // Require user verification optional.
+                    // This is simply `abi.decode(signature, (WebAuthn.WebAuthnAuth))`.
+                    WebAuthn.tryDecodeAuth(sig), // Auth.
+                    x,
+                    y
+                );
+            } else if (S.keyType == KeyType.Secp256k1) {
+                isValid = SignatureCheckerLib.isValidSignatureNowCalldata(abi.decode(S.publicKey, (address)), dig, sig);
+            }
             require(isValid, "invalid signature");
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             uint256 totalValue = 0;
@@ -242,7 +243,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     function getKeyNonce(uint32 idx) external view override returns (uint256) {
-        return _getStorage().keys[idx-1].nonce;
+        return _getStorage().keys[idx - 1].nonce;
     }
 
     // Optional public accessors
@@ -251,28 +252,23 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     function getKey(uint32 idx) external view returns (Key memory) {
-        return _getStorage().keys[idx-1];
+        return _getStorage().keys[idx - 1];
     }
 
     function getKeyIndex(KeyType keyType, bytes memory publicKey) public view returns (uint32) {
-    ShieldedStorage storage $ = _getStorage();
-    bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
-    uint32 idx = $.keyToSessionIndex[keyHash];
-    require(idx != 0, "key not found");
-    require(
-        $.keys[idx - 1].keyType == keyType &&
-        keccak256($.keys[idx - 1].publicKey) == keccak256(publicKey),
-        "invalid key mapping"
-    );
-    return idx;
- }
+        ShieldedStorage storage $ = _getStorage();
+        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+        uint32 idx = $.keyToSessionIndex[keyHash];
+        require(idx != 0, "key not found");
+        require(
+            $.keys[idx - 1].keyType == keyType && keccak256($.keys[idx - 1].publicKey) == keccak256(publicKey),
+            "invalid key mapping"
+        );
+        return idx;
+    }
 
-    function keys(uint32 idx)
-        external
-        view
-        returns (Key memory key)
-    {
-        key = _getStorage().keys[idx-1];
+    function keys(uint32 idx) external view returns (Key memory key) {
+        key = _getStorage().keys[idx - 1];
         return key;
     }
 }
