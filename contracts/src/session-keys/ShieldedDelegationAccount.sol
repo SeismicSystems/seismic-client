@@ -101,28 +101,30 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         $.keyToSessionIndex[keyHash] = idx+1;
 
         emit KeyAuthorized(keyHash, newKey);
-        return idx;
+        return idx+1;
     }
 
     function revokeKey(KeyType keyType, bytes calldata publicKey) external override onlySelf {
-        ShieldedStorage storage $ = _getStorage();
-        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
-        uint32 idx = $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
-        uint32 lastIdx = uint32($.keys.length);
+    ShieldedStorage storage $ = _getStorage();
+    bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+    uint32 idx = $.keyToSessionIndex[keyHash];
 
-        if (idx != lastIdx) {
-            // Swap with last session
-            Key memory lastKey = $.keys[lastIdx-1];
-            $.keys[idx-1] = lastKey;
-            $.keyToSessionIndex[_generateKeyIdentifier(lastKey.keyType, lastKey.publicKey)] = idx;
-        }
+    require(idx != 0, "key not found");
 
-        // Remove last session
-        $.keys.pop();
-        delete $.keyToSessionIndex[keyHash];
+    uint32 lastIdx = uint32($.keys.length);
 
-        emit KeyRevoked(keyHash);
+    if (idx != lastIdx) {
+        Key memory lastKey = $.keys[lastIdx - 1];
+        $.keys[idx - 1] = lastKey;
+        $.keyToSessionIndex[_generateKeyIdentifier(lastKey.keyType, lastKey.publicKey)] = idx;
     }
+
+    $.keys.pop();
+    delete $.keyToSessionIndex[keyHash];
+
+    emit KeyRevoked(keyHash);
+   }
+
 
     function setAESKey() external override onlySelf onlyUninitialized {
         ShieldedStorage storage $ = _getStorage();
@@ -253,12 +255,17 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     function getKeyIndex(KeyType keyType, bytes memory publicKey) public view returns (uint32) {
-        ShieldedStorage storage $ = _getStorage();
-        uint32 idx = $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
-        require($.keys.length >= idx, "key not found");
-        require($.keys[idx-1].keyType == keyType && keccak256($.keys[idx-1].publicKey) == keccak256(publicKey), "invalid key mapping");
-        return idx;
-    }
+    ShieldedStorage storage $ = _getStorage();
+    bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+    uint32 idx = $.keyToSessionIndex[keyHash];
+    require(idx != 0, "key not found");
+    require(
+        $.keys[idx - 1].keyType == keyType &&
+        keccak256($.keys[idx - 1].publicKey) == keccak256(publicKey),
+        "invalid key mapping"
+    );
+    return idx;
+ }
 
     function keys(uint32 idx)
         external
