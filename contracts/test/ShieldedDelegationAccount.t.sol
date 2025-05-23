@@ -123,6 +123,25 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         );
     }
 
+    /// @notice Creates a MultiSend-compatible call to transfer tokens
+    /// @param recipient Address to receive tokens
+    /// @param amount Amount of tokens to transfer
+    /// @return calls Encoded call data for MultiSend
+    function _createTokenTransferCall(address recipient, uint256 amount) internal view returns (bytes memory calls) {
+        // Create the transfer function call data
+        bytes memory transferData =
+            abi.encodeWithSelector(SRC20.transfer.selector, saddress(recipient), suint256(amount));
+
+        // Format it for MultiSend
+        return abi.encodePacked(
+            uint8(0), // operation (0 = call)
+            address(tok), // to: token contract address
+            uint256(0), // value: 0 ETH (no ETH sent with token transfer)
+            uint256(transferData.length), // data length
+            transferData // the actual calldata
+        );
+    }
+
     /// @notice Creates and signs a digest for the execute function
     /// @param keyIndex Index of the key to use
     /// @param cipher Encrypted data to be executed
@@ -380,43 +399,43 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
 //         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
 //     }
 
-//     function test_execute() public {
-//         // Grant a session
-//         vm.prank(ALICE_ADDRESS);
-//         ShieldedDelegationAccount(ALICE_ADDRESS).grantSession(SKaddr, block.timestamp + 24 hours, 1 ether);
+    function test_execute() public {
+        (bytes memory publicKey, uint256 privateKey) = _randomSecp256r1Key();
+        // Grant a session
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(KeyType.P256, publicKey, uint40(block.timestamp + 24 hours), 1 ether);
 
-//         // Create the token transfer call
-//         bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
+        // Create the token transfer call
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
 
-//         // Encrypt and verify decryption works properly
-//         (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
-//             ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+        // Encrypt and verify decryption works properly
+        (uint96 encryptedCallsNonce, bytes memory encryptedCalls) =
+            ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
 
-//         // Get session index for signing
-//         uint32 sessionIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionIndex(SKaddr);
+        // Get key index for signing
+        uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.P256, publicKey);
 
-//         // Get session nonce for signing
-//         uint256 sessionNonce = ShieldedDelegationAccount(ALICE_ADDRESS).getSessionNonce(sessionIndex);
+        // Get key nonce for signing
+        uint256 keyNonce = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyNonce(keyIndex);
 
-//         // Generate domain separator
-//         bytes32 DOMAIN_SEPARATOR = _getDomainSeparator();
+        // Generate domain separator
+        bytes32 DOMAIN_SEPARATOR = _getDomainSeparator();
 
-//         // Create and sign digest
-//         bytes32 structHash = keccak256(abi.encode(EXECUTE_TYPEHASH, sessionNonce, keccak256(encryptedCalls)));
+        // Create and sign digest
+        bytes32 structHash = keccak256(abi.encode(EXECUTE_TYPEHASH, keyNonce, keccak256(encryptedCalls)));
 
-//         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
-//         (uint8 v, bytes32 r, bytes32 s) = vm.sign(SK, digest);
-//         bytes memory signature = abi.encodePacked(r, s, v);
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        bytes memory signature = _secp256r1Sig(privateKey, digest, false, digest);
 
-//         // Execute the transaction
-//         vm.prank(RELAY_ADDRESS);
-//         ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, signature, sessionIndex);
+        // Execute the transaction
+        vm.prank(RELAY_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(encryptedCallsNonce, encryptedCalls, signature, keyIndex);
 
-//         // Verify Bob received the tokens
-//         vm.prank(BOB_ADDRESS);
-//         uint256 bobBalance = tok.balanceOf();
-//         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
-//     }
+        // Verify Bob received the tokens
+        vm.prank(BOB_ADDRESS);
+        uint256 bobBalance = tok.balanceOf();
+        assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
+    }
 
 //     /// @notice Test that execution is rejected when session has expired
 //     function test_revertWhenSessionExpired() public {

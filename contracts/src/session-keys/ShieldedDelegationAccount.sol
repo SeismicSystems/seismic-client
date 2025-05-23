@@ -157,7 +157,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             multiSend(decryptedCiphertext);
         } else {
-            Key storage S = $.keys[idx];
+            Key storage S = $.keys[idx-1];
             require(S.expiry > block.timestamp, "expired");
             require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "session key revoked");
 
@@ -184,8 +184,8 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
                 abi.decode(S.publicKey, (address)), dig, sig
             );
         }
-            decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             require(isValid, "invalid signature");
+            decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             uint256 totalValue = 0;
             if (S.spendLimit != 0) {
                 totalValue = _calculateTotalSpend(decryptedCiphertext);
