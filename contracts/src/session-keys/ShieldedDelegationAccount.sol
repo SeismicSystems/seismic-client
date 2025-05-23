@@ -20,8 +20,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     struct ShieldedStorage {
         suint256 aesKey;
         bool aesKeyInitialized;
-        Session[] sessions;
-        mapping(bytes32 => Key) keys;
+        Key[] keys;
         mapping(bytes32 => uint32) keyToSessionIndex; // add 1 to the index to distinguish from 0 unset
     }
 
@@ -79,56 +78,50 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         _;
     }
 
+
     ////////////////////////////////////////////////////////////////////////
     // Key Management
     ////////////////////////////////////////////////////////////////////////
-
-    function authorizeKey(bytes calldata publicKey, KeyType keyType, bool isSuperAdmin, uint40 expiry) external onlySelf {
+    function authorizeKey(KeyType keyType, bytes calldata publicKey, uint40 expiry, uint256 limitWei) external override onlySelf returns (uint32 idx) {
         ShieldedStorage storage $ = _getStorage();
+
         Key memory newKey = Key({
-            expiry: expiry,
             keyType: keyType,
-            isAuthorized: true,
-            isSuperAdmin: isSuperAdmin,
-            publicKey: publicKey
+            publicKey: publicKey,
+            expiry: expiry,
+            spendLimit: limitWei,
+            spentWei: 0,
+            nonce: 0,
+            isAuthorized: true
         });
 
-        $.keys[_generateKeyIdentifier(keyType, publicKey)] = newKey;
-    }
+        idx = uint32($.keys.length);
+        $.keys.push(newKey);
+        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+        $.keyToSessionIndex[keyHash] = idx+1;
 
-    ////////////////////////////////////////////////////////////////////////
-    // Session Management
-    ////////////////////////////////////////////////////////////////////////
-    function grantSession(KeyType keyType, bytes calldata publicKey, uint256 expiry, uint256 limitWei) external override onlySelf returns (uint32 idx) {
-        ShieldedStorage storage $ = _getStorage();
-
-        Session memory newSession = Session(keyType, publicKey, expiry, limitWei, 0, 0);
-
-        idx = uint32($.sessions.length);
-        $.sessions.push(newSession);
-        $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)] = idx+1;
-
-        emit SessionGranted(idx, keyType, publicKey, expiry, limitWei);
+        emit KeyAuthorized(keyHash, newKey);
         return idx;
     }
 
-    function revokeSession(KeyType keyType, bytes calldata publicKey) external override onlySelf {
+    function revokeKey(KeyType keyType, bytes calldata publicKey) external override onlySelf {
         ShieldedStorage storage $ = _getStorage();
+        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
         uint32 idx = $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
-        uint32 lastIdx = uint32($.sessions.length);
+        uint32 lastIdx = uint32($.keys.length);
 
         if (idx != lastIdx) {
             // Swap with last session
-            Session memory lastSession = $.sessions[lastIdx-1];
-            $.sessions[idx-1] = lastSession;
-            $.keyToSessionIndex[_generateKeyIdentifier(lastSession.keyType, lastSession.publicKey)] = idx;
+            Key memory lastKey = $.keys[lastIdx-1];
+            $.keys[idx-1] = lastKey;
+            $.keyToSessionIndex[_generateKeyIdentifier(lastKey.keyType, lastKey.publicKey)] = idx;
         }
 
         // Remove last session
-        $.sessions.pop();
-        delete $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
+        $.keys.pop();
+        delete $.keyToSessionIndex[keyHash];
 
-        emit SessionRevoked(uint32(idx));
+        emit KeyRevoked(keyHash);
     }
 
     function setAESKey() external override onlySelf onlyUninitialized {
@@ -162,7 +155,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             multiSend(decryptedCiphertext);
         } else {
-            Session storage S = $.sessions[idx];
+            Key storage S = $.keys[idx];
             require(S.expiry > block.timestamp, "expired");
             require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "session key revoked");
 
@@ -192,9 +185,9 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             require(isValid, "invalid signature");
             uint256 totalValue = 0;
-            if (S.limitWei != 0) {
+            if (S.spendLimit != 0) {
                 totalValue = _calculateTotalSpend(decryptedCiphertext);
-                require(S.spentWei + totalValue <= S.limitWei, "spend limit exceeded");
+                require(S.spentWei + totalValue <= S.spendLimit, "spend limit exceeded");
                 S.spentWei += totalValue;
             }
 
@@ -246,33 +239,33 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return totalSpend;
     }
 
-    function getSessionNonce(uint32 idx) external view override returns (uint256) {
-        return _getStorage().sessions[idx].nonce;
+    function getKeyNonce(uint32 idx) external view override returns (uint256) {
+        return _getStorage().keys[idx-1].nonce;
     }
 
     // Optional public accessors
-    function sessionCount() external view returns (uint256) {
-        return _getStorage().sessions.length;
+    function keyCount() external view returns (uint256) {
+        return _getStorage().keys.length;
     }
 
-    function getSession(uint32 idx) external view returns (Session memory) {
-        return _getStorage().sessions[idx];
+    function getKey(uint32 idx) external view returns (Key memory) {
+        return _getStorage().keys[idx-1];
     }
 
-    function getSessionIndex(KeyType keyType, bytes memory publicKey) public view returns (uint32) {
+    function getKeyIndex(KeyType keyType, bytes memory publicKey) public view returns (uint32) {
         ShieldedStorage storage $ = _getStorage();
         uint32 idx = $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
-        require($.sessions.length > idx, "key not found");
-        require($.sessions[idx].keyType == keyType && keccak256($.sessions[idx].publicKey) == keccak256(publicKey), "invalid key mapping");
+        require($.keys.length >= idx, "key not found");
+        require($.keys[idx-1].keyType == keyType && keccak256($.keys[idx-1].publicKey) == keccak256(publicKey), "invalid key mapping");
         return idx;
     }
 
-    function sessions(uint32 idx)
+    function keys(uint32 idx)
         external
         view
-        returns (KeyType keyType, bytes memory publicKey, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce)
+        returns (Key memory key)
     {
-        Session memory session = _getStorage().sessions[idx];
-        return (session.keyType, session.publicKey, session.expiry, session.limitWei, session.spentWei, session.nonce);
+        key = _getStorage().keys[idx-1];
+        return key;
     }
 }
