@@ -2,8 +2,6 @@
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {P256} from "solady/utils/P256.sol";
-import {WebAuthn} from "solady/utils/WebAuthn.sol";
 import "../utils/MultiSend.sol";
 import "../utils/precompiles/CryptoUtils.sol";
 import "./interfaces/IShieldedDelegationAccount.sol";
@@ -15,14 +13,6 @@ import "./interfaces/IShieldedDelegationAccount.sol";
 contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, CryptoUtils {
     using ECDSA for bytes32;
 
-
-    /// @notice The type of key
-    enum KeyType {
-        P256,
-        WebAuthnP256,
-        Secp256k1
-    }
-
     ////////////////////////////////////////////////////////////////////////
     // Storage
     ////////////////////////////////////////////////////////////////////////
@@ -30,7 +20,8 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         suint256 aesKey;
         bool aesKeyInitialized;
         Session[] sessions;
-        mapping(address => uint32) signerToSessionIndex;
+        mapping(bytes32 => Key) keys;
+        mapping(bytes32 => uint32) keyToSessionIndex; // add 1 to the index to distinguish from 0 unset
     }
 
     function _getStorage() internal pure returns (ShieldedStorage storage $) {
@@ -88,36 +79,53 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     ////////////////////////////////////////////////////////////////////////
-    // Session Management
+    // Key Management
     ////////////////////////////////////////////////////////////////////////
 
-    function grantSession(address signer, uint256 expiry, uint256 limitWei) external onlySelf returns (uint32 idx) {
+    function authorizeKey(bytes calldata publicKey, KeyType keyType, bool isSuperAdmin, uint40 expiry) external onlySelf {
+        ShieldedStorage storage $ = _getStorage();
+        Key memory newKey = Key({
+            expiry: expiry,
+            keyType: keyType,
+            isAuthorized: true,
+            isSuperAdmin: isSuperAdmin,
+            publicKey: publicKey
+        });
+
+        $.keys[_generateKeyIdentifier(keyType, publicKey)] = newKey;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Session Management
+    ////////////////////////////////////////////////////////////////////////
+    function grantSession(KeyType keyType, bytes calldata publicKey, uint256 expiry, uint256 limitWei) external override onlySelf returns (uint32 idx) {
         ShieldedStorage storage $ = _getStorage();
 
-        Session memory newSession = Session(signer, expiry, limitWei, 0, 0);
+        Session memory newSession = Session(keyType, publicKey, expiry, limitWei, 0, 0);
 
         idx = uint32($.sessions.length);
         $.sessions.push(newSession);
-        $.signerToSessionIndex[signer] = idx;
+        $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)] = idx+1;
 
-        emit SessionGranted(idx, signer, expiry, limitWei);
+        emit SessionGranted(idx, keyType, publicKey, expiry, limitWei);
+        return idx;
     }
 
-    function revokeSession(address signer) external override onlySelf {
+    function revokeSession(KeyType keyType, bytes calldata publicKey) external override onlySelf {
         ShieldedStorage storage $ = _getStorage();
-        uint32 idx = getSessionIndex(signer);
-        uint32 lastIdx = uint32($.sessions.length - 1);
+        uint32 idx = $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
+        uint32 lastIdx = uint32($.sessions.length);
 
         if (idx != lastIdx) {
             // Swap with last session
-            Session memory lastSession = $.sessions[lastIdx];
-            $.sessions[idx] = lastSession;
-            $.signerToSessionIndex[lastSession.signer] = idx;
+            Session memory lastSession = $.sessions[lastIdx-1];
+            $.sessions[idx-1] = lastSession;
+            $.keyToSessionIndex[_generateKeyIdentifier(lastSession.keyType, lastSession.publicKey)] = idx;
         }
 
         // Remove last session
         $.sessions.pop();
-        delete $.signerToSessionIndex[signer];
+        delete $.keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
 
         emit SessionRevoked(uint32(idx));
     }
@@ -155,14 +163,33 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         } else {
             Session storage S = $.sessions[idx];
             require(S.expiry > block.timestamp, "expired");
-            require(idx == $.signerToSessionIndex[S.signer], "session key revoked");
+            require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "session key revoked");
 
             bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
-            address recoveredSigner = ECDSA.recover(dig, sig);
-            require(recoveredSigner == S.signer, "bad signature");
-
+            bool isValid;
+            if (S.keyType == KeyType.P256) {
+            // The try decode functions returns `(0,0)` if the bytes is too short,
+            // which will make the signature check fail.
+            (bytes32 r, bytes32 s) = P256.tryDecodePointCalldata(sig);
+            (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
+            isValid = P256.verifySignature(dig, r, s, x, y);
+        } else if (S.keyType == KeyType.WebAuthnP256) {
+            (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
+            isValid = WebAuthn.verify(
+                abi.encode(dig), // Challenge.
+                false, // Require user verification optional.
+                // This is simply `abi.decode(signature, (WebAuthn.WebAuthnAuth))`.
+                WebAuthn.tryDecodeAuth(sig), // Auth.
+                x,
+                y
+            );
+        } else if (S.keyType == KeyType.Secp256k1) {
+            isValid = SignatureCheckerLib.isValidSignatureNowCalldata(
+                abi.decode(S.publicKey, (address)), dig, sig
+            );
+        }
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
-
+            require(isValid, "invalid signature");
             uint256 totalValue = 0;
             if (S.limitWei != 0) {
                 totalValue = _calculateTotalSpend(decryptedCiphertext);
@@ -188,6 +215,10 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     ////////////////////////////////////////////////////////////////////////
     // Helpers
     ////////////////////////////////////////////////////////////////////////
+
+    function _generateKeyIdentifier(KeyType keyType, bytes memory publicKey) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(uint8(keyType), keccak256(publicKey)));
+    }
 
     function _calculateTotalSpend(bytes memory data) internal pure returns (uint256 totalSpend) {
         uint256 i = 0;
@@ -227,19 +258,19 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return _getStorage().sessions[idx];
     }
 
-    function getSessionIndex(address signer) public view returns (uint32) {
-        uint32 idx = _getStorage().signerToSessionIndex[signer];
-        require(_getStorage().sessions.length > idx, "signer not found");
-        require(_getStorage().sessions[idx].signer == signer, "invalid signer mapping");
+    function getSessionIndex(KeyType keyType, bytes calldata publicKey) public view returns (uint32) {
+        uint32 idx = _getStorage().keyToSessionIndex[_generateKeyIdentifier(keyType, publicKey)];
+        require(_getStorage().sessions.length > idx, "key not found");
+        require(_getStorage().sessions[idx].keyType == keyType && _getStorage().sessions[idx-1].publicKey == publicKey, "invalid key mapping");
         return idx;
     }
 
     function sessions(uint32 idx)
         external
         view
-        returns (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce)
+        returns (KeyType keyType, bytes memory publicKey, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce)
     {
         Session memory session = _getStorage().sessions[idx];
-        return (session.signer, session.expiry, session.limitWei, session.spentWei, session.nonce);
+        return (session.keyType, session.publicKey, session.expiry, session.limitWei, session.spentWei, session.nonce);
     }
 }
