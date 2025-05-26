@@ -240,31 +240,45 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
 
     function _webauthnSig(uint256 privateKey, bytes32 keyHash, bool prehash, bytes32 digest)
         internal
+        pure
         returns (bytes memory)
     {
-        // The contract passes abi.encode(dig) as challenge, not just dig
+        // STEP 1: The contract passes abi.encode(digest) as the challenge
         bytes memory challenge = abi.encode(digest);
 
-        (bytes32 r, bytes32 s) = vm.signP256(privateKey, digest);
-        s = P256.normalized(s);
+        // STEP 2: Create the authenticatorData (using the same format as the trace)
+        bytes memory authenticatorData = hex"49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763050000010a";
 
-        WebAuthn.WebAuthnAuth memory auth;
-        auth.authenticatorData =
-            hex"49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763050000010a";
-        auth.clientDataJSON = string(
+        // STEP 3: Create the clientDataJSON with the encoded challenge
+        string memory clientDataJSON = string(
             abi.encodePacked(
                 '{"type":"webauthn.get","challenge":"',
                 Base64.encode(challenge, true, true),
                 '","origin":"http://localhost:3005","crossOrigin":false}'
             )
         );
-        auth.challengeIndex = 23;
-        auth.typeIndex = 1;
-        auth.r = r;
-        auth.s = s;
 
-        bytes memory encoded = abi.encode(auth);
-        return encoded;
+        // STEP 4: Calculate the message hash according to WebAuthn spec
+        // messageHash = sha256(authenticatorData || sha256(clientDataJSON))
+        bytes32 clientDataHash = sha256(bytes(clientDataJSON));
+        bytes32 messageHash = sha256(abi.encodePacked(authenticatorData, clientDataHash));
+
+        // STEP 5: Sign the messageHash (NOT the digest!)
+        (bytes32 r, bytes32 s) = vm.signP256(privateKey, messageHash);
+        s = P256.normalized(s);
+
+        // STEP 6: Create the WebAuthnAuth struct
+        WebAuthn.WebAuthnAuth memory auth = WebAuthn.WebAuthnAuth({
+            authenticatorData: authenticatorData,
+            clientDataJSON: clientDataJSON,
+            challengeIndex: 23, // Position where challenge value starts in the JSON
+            typeIndex: 1, // Position where type value starts in the JSON
+            r: r,
+            s: s
+        });
+
+        // STEP 7: Return the encoded auth struct
+        return abi.encode(auth);
     }
 
     function _randomSecp256r1Key() internal returns (bytes memory publicKey, uint256 privateKey) {
