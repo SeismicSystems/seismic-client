@@ -124,6 +124,111 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         );
     }
 
+    /// @notice Verifies the AES key storage
+    /// @param baseSlot The base slot to verify
+    function _verifyAESKeyStorage(uint256 baseSlot) internal view {
+        // Check aesKey is set (slot 0)
+        bytes32 aesKey = vm.load(ALICE_ADDRESS, bytes32(baseSlot));
+        assertTrue(uint256(aesKey) != 0, "aesKey should be set");
+
+        // Check aesKeyInitialized is true (slot 1)
+        bytes32 initialized = vm.load(ALICE_ADDRESS, bytes32(baseSlot + 1));
+        assertEq(uint256(initialized) & 0xFF, 1, "aesKeyInitialized should be true");
+    }
+
+    /// @notice Verifies the keys array storage
+    /// @param baseSlot The base slot to verify
+    function _verifyKeysArrayStorage(uint256 baseSlot) internal {
+        // Check keys array length (slot 2)
+        bytes32 length = vm.load(ALICE_ADDRESS, bytes32(baseSlot + 2));
+        assertEq(uint256(length), 2, "Should have 2 keys");
+
+        // Check first key data
+        bytes32 keysSlot = keccak256(abi.encode(baseSlot + 2));
+        bytes32 firstKeyData = vm.load(ALICE_ADDRESS, keysSlot);
+
+        // Extract packed data from first slot of first key
+        uint40 expiry = uint40(uint256(firstKeyData));
+        uint8 keyType = uint8(uint256(firstKeyData) >> 40);
+        bool authorized = uint8(uint256(firstKeyData) >> 48) == 1;
+
+        assertTrue(expiry > block.timestamp, "Key should not be expired");
+        assertEq(keyType, uint8(KeyType.P256), "First key should be P256");
+        assertTrue(authorized, "Key should be authorized");
+    }
+
+    /// @notice Verifies the mapping storage
+    /// @param baseSlot The base slot to verify
+    function _verifyMappingStorage(uint256 baseSlot) internal {
+        // Create the same key identifier that was used
+        bytes32 keyHash = _generateKeyIdentifier(KeyType.P256, abi.encode(uint256(1), uint256(2)));
+
+        // Calculate mapping slot
+        bytes32 mappingSlot = keccak256(abi.encode(keyHash, baseSlot + 3));
+        bytes32 mappingValue = vm.load(ALICE_ADDRESS, mappingSlot);
+
+        // Should map to index 1 (first key)
+        assertEq(uint256(mappingValue), 1, "Mapping should point to first key");
+    }
+
+    /// @notice Verifies no standard slot collision
+    /// @param baseSlot The base slot to verify
+    function _verifyNoStandardSlotCollision(uint256 baseSlot) internal {
+        // Check slots 0-10 (excluding our base slot)
+        for (uint256 i = 0; i < 10; i++) {
+            if (i == baseSlot) continue;
+
+            bytes32 value = vm.load(ALICE_ADDRESS, bytes32(i));
+            assertEq(uint256(value), 0, string.concat("Slot ", vm.toString(i), " should be empty"));
+        }
+
+        // Check common proxy slots
+        uint256[3] memory proxySlots = [
+            uint256(0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc), // EIP-1967 implementation
+            uint256(keccak256("implementation")),
+            uint256(keccak256("admin"))
+        ];
+
+        for (uint256 i = 0; i < proxySlots.length; i++) {
+            if (proxySlots[i] == baseSlot) continue;
+
+            bytes32 value = vm.load(ALICE_ADDRESS, bytes32(proxySlots[i]));
+            assertEq(uint256(value), 0, "Proxy slot should be empty");
+        }
+    }
+
+    /// @notice Verifies storage isolation
+    /// @param baseSlot The base slot to verify
+    function _verifyStorageIsolation(uint256 baseSlot) internal {
+        // Store initial AES key value
+        bytes32 initialAesKey = vm.load(ALICE_ADDRESS, bytes32(baseSlot));
+
+        // Execute with first key to update its nonce
+        bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 0.1 * 10 ** 18);
+        (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
+
+        // Create a simple signature for key index 1
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce, cipher, bytes(""), 1);
+
+        // Verify AES key unchanged
+        bytes32 finalAesKey = vm.load(ALICE_ADDRESS, bytes32(baseSlot));
+        assertEq(finalAesKey, initialAesKey, "AES key should not change");
+
+        // Verify key array length unchanged
+        bytes32 length = vm.load(ALICE_ADDRESS, bytes32(baseSlot + 2));
+        assertEq(uint256(length), 2, "Keys array length should remain 2");
+    }
+
+    /// @notice Resets Bob's balance
+    function _resetBobBalance() internal {
+        vm.prank(BOB_ADDRESS);
+        uint256 bobBalance = tok.balanceOf();
+        assertGt(bobBalance, 0, "Bob should have some balance");
+        vm.prank(BOB_ADDRESS);
+        tok.transfer(ALICE_ADDRESS, suint256(bobBalance));
+    }
+
     /// @notice Creates a MultiSend-compatible call to transfer ETH
     /// @param recipient Address to receive ETH
     /// @param amount Amount of ETH to transfer
@@ -179,8 +284,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
             bytes32 keyHash = _generateKeyIdentifier(key.keyType, key.publicKey);
             return _secp256r1Sig(privateKey, keyHash, false, digest);
         } else if (key.keyType == KeyType.WebAuthnP256) {
-            // bytes32 keyHash = _generateKeyIdentifier(key.keyType, key.publicKey);
-            return _webauthnSig(privateKey, bytes32(0), false, digest);
+            return _webauthnSig(privateKey, digest);
         } else if (key.keyType == KeyType.Secp256k1) {
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
             return abi.encodePacked(r, s, v);
@@ -206,6 +310,8 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         ShieldedDelegationAccount(account).execute(nonce, cipher, signature, keyIndex);
     }
 
+    /// @notice Samples a random uniform short bytes
+    /// @return result The sampled bytes
     function _sampleRandomUniformShortBytes() internal returns (bytes memory result) {
         uint256 n = _generateRandomNumber();
         uint256 r = _generateRandomNumber();
@@ -238,7 +344,11 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         return abi.encodePacked(abi.encode(r, s), keyHash, uint8(prehash ? 1 : 0));
     }
 
-    function _webauthnSig(uint256 privateKey, bytes32 keyHash, bool prehash, bytes32 digest)
+    /// @notice Creates a WebAuthn signature
+    /// @param privateKey The private key to sign with
+    /// @param digest The digest to sign
+    /// @return signature The signature bytes
+    function _webauthnSig(uint256 privateKey, bytes32 digest)
         internal
         pure
         returns (bytes memory)
@@ -281,6 +391,9 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         return abi.encode(auth);
     }
 
+    /// @notice Generates a random secp256r1 key
+    /// @return publicKey The public key
+    /// @return privateKey The private key
     function _randomSecp256r1Key() internal returns (bytes memory publicKey, uint256 privateKey) {
         privateKey = _generateRandomNumber() & type(uint192).max;
         (uint256 x, uint256 y) = vm.publicKeyP256(privateKey);
@@ -288,6 +401,9 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         return (publicKey, privateKey);
     }
 
+    /// @notice Generates a random secp256k1 key
+    /// @return publicKey The public key
+    /// @return privateKey The private key
     function _randomSecp256k1Key() internal returns (bytes memory publicKey, uint256 privateKey) {
         privateKey = _generateRandomNumber() & type(uint192).max;
         address addr = vm.addr(privateKey);
@@ -295,6 +411,8 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         return (publicKey, privateKey);
     }
 
+    /// @notice Generates a random uint256 number
+    /// @return randomBytes The random number
     function _generateRandomNumber() internal view returns (uint256) {
         bytes memory personalization = abi.encodePacked("aes-key", block.timestamp);
         bytes memory input = abi.encodePacked(uint32(32), personalization);
@@ -311,6 +429,8 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         return uint256(randomBytes);
     }
 
+    /// @notice Signs, attaches and broadcasts a delegation
+    /// @param implementation The implementation address
     function _signAndAttachDelegation(address implementation) internal {
         Vm.SignedDelegation memory signedDelegation = vm.signDelegation(implementation, ALICE_PK);
         vm.broadcast(RELAY_PK);
@@ -318,187 +438,25 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         vm.stopBroadcast();
     }
 
-    //     ////////////////////////////////////////////////////////////////////////
-    //     // Test Cases
-    //     ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Test Functions
+    ////////////////////////////////////////////////////////////////////////
 
-    /// @notice Test that setAESKey reverts if AES key is already initialized
-    function test_setAESKey_ifAlreadyInitialized() public {
-        vm.prank(ALICE_ADDRESS);
-        // Initialize the AES key
-        ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
-
-        // Try to initialize the AES key again
-        vm.prank(ALICE_ADDRESS);
-        vm.expectRevert("AES key already initialized");
-        ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
-    }
-
-    function test_authorizeAllKeyTypes() public {
-        _test_authorizeKey(KeyType.P256);
-        _test_authorizeKey(KeyType.WebAuthnP256);
-        _test_authorizeKey(KeyType.Secp256k1);
-    }
-
-    // function test_challenge_encoding_simple() public {
-    //     bytes32 testDigest = keccak256("test message");
-
-    //     // What the contract passes to WebAuthn.verify
-    //     bytes memory contractChallenge = abi.encode(testDigest);
-    //     console.log("abi.encode(digest) length:", contractChallenge.length);
-
-    //     // The correct base64 encoding
-    //     string memory correctB64 = Base64.encode(contractChallenge, true, true);
-    //     console.log("Correct challenge B64:", correctB64);
-
-    //     // Show that abi.encode adds padding
-    //     console.log("First 32 bytes (offset):");
-    //     console.logBytes32(bytes32(contractChallenge));
-    //     console.log("Next 32 bytes (actual digest):");
-    //     console.logBytes32(bytes32(abi.encodePacked(contractChallenge[32:64])));
-    // }
-
-    // // Add this debug version of _test_execute to see what's happening
-    // function test_debug_webauthn() public {
-    //     (bytes memory publicKey, uint256 privateKey) = _randomSecp256r1Key();
-
-    //     // Grant a session
-    //     vm.prank(ALICE_ADDRESS);
-    //     ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
-    //         KeyType.WebAuthnP256, publicKey, uint40(block.timestamp + 24 hours), 1 ether
-    //     );
-
-    //     // Create token transfer call
-    //     bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
-    //     (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
-
-    //     // Get key metadata
-    //     uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(KeyType.WebAuthnP256, publicKey);
-    //     console.log("Key index:", keyIndex);
-
-    //     uint256 keyNonce = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyNonce(keyIndex);
-    //     console.log("Key nonce:", keyNonce);
-
-    //     bytes32 domainSeparator = _getDomainSeparator();
-    //     bytes32 structHash = keccak256(abi.encode(EXECUTE_TYPEHASH, keyNonce, keccak256(cipher)));
-    //     bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
-    //     console.logBytes32(digest);
-
-    //     // Try creating the signature
-    //     bytes32 keyHash = _generateKeyIdentifier(KeyType.WebAuthnP256, publicKey);
-    //     console.log("Key hash:");
-    //     console.logBytes32(keyHash);
-
-    //     bytes memory signature = _webauthnSig(privateKey, keyHash, false, digest);
-    //     console.log("Signature length:", signature.length);
-
-    //     // Try to execute
-    //     vm.prank(RELAY_ADDRESS);
-    //     try ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce, cipher, signature, keyIndex) {
-    //         console.log("Execute succeeded!");
-    //     } catch Error(string memory reason) {
-    //         console.log("Execute failed with reason:", reason);
-    //     } catch (bytes memory lowLevelData) {
-    //         console.log("Execute failed with low-level error");
-    //         console.logBytes(lowLevelData);
-    //     }
-    // }
-
-    // function test_debug_webauthn_decode() public {
-    //     // Create a simple WebAuthn auth struct
-    //     WebAuthn.WebAuthnAuth memory auth;
-    //     auth.authenticatorData = new bytes(37);
-    //     auth.authenticatorData[32] = 0x01;
-    //     auth.clientDataJSON = '{"type":"webauthn.get","challenge":"test"}';
-    //     auth.challengeIndex = 36;
-    //     auth.typeIndex = 9;
-    //     auth.r = bytes32(uint256(1));
-    //     auth.s = bytes32(uint256(2));
-
-    //     // Encode it
-    //     bytes memory encoded = abi.encode(auth);
-    //     console.log("Encoded length:", encoded.length);
-    //     console.log("Encoded bytes:");
-    //     console.logBytes(encoded);
-
-    //     // Try to decode it
-    //     WebAuthn.WebAuthnAuth memory decoded = WebAuthn.tryDecodeAuth(encoded);
-    //     console.log("Decoded successfully");
-    //     console.log("authenticatorData length:", decoded.authenticatorData.length);
-    //     console.log("clientDataJSON:", decoded.clientDataJSON);
-    //     console.log("challengeIndex:", decoded.challengeIndex);
-    //     console.log("typeIndex:", decoded.typeIndex);
-    //     console.logBytes32(decoded.r);
-    //     console.logBytes32(decoded.s);
-
-    //     // Now let's test with actual signing
-    //     (bytes memory publicKey, uint256 privateKey) = _randomSecp256r1Key();
-
-    //     vm.prank(ALICE_ADDRESS);
-    //     ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
-    //         KeyType.WebAuthnP256, publicKey, uint40(block.timestamp + 24 hours), 1 ether
-    //     );
-
-    //     // Create a test digest
-    //     bytes32 testDigest = keccak256("test message");
-
-    //     // Create WebAuthn signature using the exact format
-    //     string memory challengeB64 = Base64.encode(abi.encodePacked(testDigest), true, true);
-    //     string memory clientDataJSON =
-    //         string(abi.encodePacked('{"type":"webauthn.get","challenge":"', challengeB64, '"}'));
-
-    //     bytes memory authenticatorData = new bytes(37);
-    //     authenticatorData[32] = 0x01;
-
-    //     // Sign according to WebAuthn spec
-    //     bytes32 clientDataHash = sha256(bytes(clientDataJSON));
-    //     bytes32 messageHash = sha256(abi.encodePacked(authenticatorData, clientDataHash));
-    //     (bytes32 r, bytes32 s) = vm.signP256(privateKey, messageHash);
-    //     s = P256.normalized(s);
-
-    //     // Create the auth struct
-    //     WebAuthn.WebAuthnAuth memory authReal = WebAuthn.WebAuthnAuth({
-    //         authenticatorData: authenticatorData,
-    //         clientDataJSON: clientDataJSON,
-    //         challengeIndex: 36,
-    //         typeIndex: 9,
-    //         r: r,
-    //         s: s
-    //     });
-
-    //     // Encode and verify it can be decoded
-    //     bytes memory encodedReal = abi.encode(authReal);
-    //     console.log("\nReal auth encoded length:", encodedReal.length);
-
-    //     WebAuthn.WebAuthnAuth memory decodedReal = WebAuthn.tryDecodeAuth(encodedReal);
-    //     console.log("Real auth decoded successfully");
-
-    //     // Now let's verify this would work with WebAuthn.verify
-    //     (bytes32 x, bytes32 y) = P256.tryDecodePoint(publicKey);
-
-    //     // The contract uses abi.encode(dig) as the challenge
-    //     bool isValid = WebAuthn.verify(
-    //         abi.encode(testDigest), // This is what the contract passes as challenge
-    //         false,
-    //         decodedReal,
-    //         x,
-    //         y
-    //     );
-
-    //     console.log("WebAuthn.verify result:", isValid);
-    // }
-
+    /// @notice Tests the authorizeKey function
+    /// @param keyType The key type to authorize
     function _test_authorizeKey(KeyType keyType) internal {
+        // Generate a random public key, depending on the key type
         (bytes memory publicKey,) = keyType == KeyType.Secp256k1 ? _randomSecp256k1Key() : _randomSecp256r1Key();
 
+        // Authorize the key
         vm.prank(ALICE_ADDRESS);
         uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
             keyType, publicKey, uint40(block.timestamp + 24 hours), 1 ether
         );
-        console.log("Authorized key type %s at index %s", uint8(keyType), keyIndex);
 
         Key memory key = ShieldedDelegationAccount(ALICE_ADDRESS).keys(keyIndex);
 
+        // Verify the key properties
         assertEq(uint8(key.keyType), uint8(keyType), "Key type mismatch");
         assertEq(key.publicKey, publicKey, "Session signer should match");
         assertEq(key.expiry, block.timestamp + 24 hours, "Expiry should match");
@@ -507,13 +465,10 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         assertEq(key.nonce, 0, "Nonce should be zero initially");
     }
 
-    function test_grantAndRevokeMultipleSessions_AllKeyTypes() public {
-        _test_grantAndRevokeMultipleSessions(KeyType.P256);
-        _test_grantAndRevokeMultipleSessions(KeyType.WebAuthnP256);
-        _test_grantAndRevokeMultipleSessions(KeyType.Secp256k1);
-    }
-
+    /// @notice Tests the grantAndRevokeMultipleSessions function
+    /// @param keyType The key type to grant and revoke
     function _test_grantAndRevokeMultipleSessions(KeyType keyType) internal {
+        // Generate 3 random public keys, depending on the key type
         bytes memory publicKey1;
         bytes memory publicKey2;
         bytes memory publicKey3;
@@ -571,12 +526,8 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         assertEq(ShieldedDelegationAccount(ALICE_ADDRESS).keyCount(), 0);
     }
 
-    function test_revokeSessionWhenOnlyOneSessionExists_AllKeyTypes() public {
-        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.P256);
-        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.WebAuthnP256);
-        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.Secp256k1);
-    }
-
+    /// @notice Tests the revokeSessionWhenOnlyOneSessionExists function
+    /// @param keyType The key type to revoke
     function _test_revokeSessionWhenOnlyOneSessionExists(KeyType keyType) internal {
         bytes memory publicKey1;
         bytes memory publicKey2;
@@ -608,59 +559,8 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         ShieldedDelegationAccount(ALICE_ADDRESS).revokeKey(keyType, publicKey2);
     }
 
-    // function test_storageCollisionResistance() public {
-    //     // Step 1: Write a known value to _getStorage().aesKey
-    //     uint256 testAESKey = 0xaabbccddeeff00112233445566778899;
-    //     vm.prank(address(acc));
-    //     acc.setAESKey();
-
-    //     // Step 2: Derive the custom struct slot
-    //     bytes32 baseHash = keccak256("SHIELDED_DELEGATION_STORAGE");
-    //     uint256 customSlot = uint72(bytes9(baseHash)); // same logic as contract
-
-    //     // Check the aesKey slot (offset 0 inside struct)
-    //     bytes32 aesKeySlot = bytes32(customSlot + 0);
-    //     bytes32 aesKeyRaw = vm.load(address(acc), aesKeySlot);
-    //     assertEq(uint256(aesKeyRaw), testAESKey, "aesKey should be correctly stored");
-
-    //     // Step 3: Check slot 0-10 to ensure no unintentional collision (these are Solidity-managed)
-    //     for (uint256 i = 0; i < 10; i++) {
-    //         if (i == customSlot) continue; // skip the actual struct base slot
-    //         bytes32 otherSlotValue = vm.load(address(acc), bytes32(i));
-    //         assertEq(uint256(otherSlotValue), 0, string.concat("Unexpected data in slot ", vm.toString(i)));
-    //     }
-
-    //     // Step 4: Check DOMAIN_SEPARATOR is not colliding with our custom layout
-    //     bytes32 separatorSlot = bytes32(uint256(0)); // immutables go into bytecode, not SSTORE
-    //     bytes32 rawSlot0 = vm.load(address(acc), separatorSlot);
-    //     assertEq(uint256(rawSlot0), 0, "Slot 0 should be empty, immutables not stored here");
-
-    //     // Step 5: Check unused slots near the struct (±10)
-    //     for (uint256 i = 1; i <= 10; i++) {
-    //         bytes32 high = vm.load(address(acc), bytes32(customSlot + i));
-    //         bytes32 low = vm.load(address(acc), bytes32(customSlot - i));
-    //         assertEq(high, 0, "Unexpected data above struct");
-    //         assertEq(low, 0, "Unexpected data below struct");
-    //     }
-    // }
-
-    function _resetBobBalance() internal {
-        vm.prank(BOB_ADDRESS);
-        uint256 bobBalance = tok.balanceOf();
-        assertGt(bobBalance, 0, "Bob should have some balance");
-        vm.prank(BOB_ADDRESS);
-        tok.transfer(ALICE_ADDRESS, suint256(bobBalance));
-    }
-
-    function test_executeAsOwner_AllKeyTypes() public {
-        _test_executeAsOwner(KeyType.P256);
-        _resetBobBalance();
-        _test_executeAsOwner(KeyType.WebAuthnP256);
-        _resetBobBalance();
-        _test_executeAsOwner(KeyType.Secp256k1);
-        _resetBobBalance();
-    }
-
+    /// @notice Tests the executeAsOwner function
+    /// @param keyType The key type to execute as owner
     function _test_executeAsOwner(KeyType keyType) internal {
         bytes memory publicKey;
         if (keyType == KeyType.Secp256k1) {
@@ -691,72 +591,8 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
     }
 
-    // // Helper function to create WebAuthn signature
-    // function _createWebAuthnSig(uint256 privateKey, bytes32 digest) internal pure returns (bytes memory) {
-    //     // Create challenge as abi.encode(digest)
-    //     bytes memory challenge = abi.encode(digest);
-
-    //     // Create clientDataJSON
-    //     string memory clientDataJSON =
-    //         string(abi.encodePacked('{"type":"webauthn.get","challenge":"', Base64.encode(challenge, true, true), '"}'));
-
-    //     // Create authenticatorData
-    //     bytes memory authData = new bytes(37);
-    //     authData[32] = 0x01;
-
-    //     // Sign
-    //     bytes32 msgHash = sha256(abi.encodePacked(authData, sha256(bytes(clientDataJSON))));
-    //     (bytes32 r, bytes32 s) = vm.signP256(privateKey, msgHash);
-
-    //     // Return encoded auth
-    //     return abi.encode(authData, clientDataJSON, uint256(36), uint256(9), r, P256.normalized(s));
-    // }
-
-    // Simplified test
-    // function test_webauthn_simple() public {
-    //     (bytes memory publicKey, uint256 privateKey) = _randomSecp256r1Key();
-
-    //     // Setup
-    //     vm.prank(ALICE_ADDRESS);
-    //     ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
-    //         KeyType.WebAuthnP256, publicKey, uint40(block.timestamp + 24 hours), 1 ether
-    //     );
-
-    //     // Create call
-    //     bytes memory calls = _createTokenTransferCall(BOB_ADDRESS, 5 * 10 ** 18);
-    //     (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
-
-    //     // Get digest
-    //     uint32 keyIndex = 1;
-    //     uint256 keyNonce = 0;
-    //     bytes32 digest = keccak256(
-    //         abi.encodePacked(
-    //             "\x19\x01", _getDomainSeparator(), keccak256(abi.encode(EXECUTE_TYPEHASH, keyNonce, keccak256(cipher)))
-    //         )
-    //     );
-
-    //     // Create signature
-    //     bytes memory signature = _createWebAuthnSig(privateKey, digest);
-
-    //     // Execute
-    //     vm.prank(RELAY_ADDRESS);
-    //     ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce, cipher, signature, keyIndex);
-
-    //     // Verify
-    //     vm.prank(BOB_ADDRESS);
-    //     assertEq(tok.balanceOf(), 5 * 10 ** 18);
-    // }
-
-    function test_execute_AllKeyTypes() public {
-        _test_execute(KeyType.P256);
-        _resetBobBalance();
-
-        _test_execute(KeyType.WebAuthnP256);
-        _resetBobBalance();
-
-        _test_execute(KeyType.Secp256k1);
-    }
-
+    /// @notice Tests the execute function
+    /// @param keyType The key type to execute
     function _test_execute(KeyType keyType) internal {
         (bytes memory publicKey, uint256 privateKey) =
             keyType == KeyType.Secp256k1 ? _randomSecp256k1Key() : _randomSecp256r1Key();
@@ -786,7 +622,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         } else if (keyType == KeyType.P256) {
             signature = _secp256r1Sig(privateKey, digest, false, digest);
         } else {
-            signature = _webauthnSig(privateKey, digest, false, digest);
+            signature = _webauthnSig(privateKey, digest);
         }
         // Execute as relayer
         vm.prank(RELAY_ADDRESS);
@@ -836,6 +672,119 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         vm.prank(BOB_ADDRESS);
         uint256 bobBalance = tok.balanceOf();
         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Test Cases
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Test that setAESKey reverts if AES key is already initialized
+    function test_setAESKey_ifAlreadyInitialized() public {
+        vm.prank(ALICE_ADDRESS);
+        // Initialize the AES key
+        ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
+
+        // Try to initialize the AES key again
+        vm.prank(ALICE_ADDRESS);
+        vm.expectRevert("AES key already initialized");
+        ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
+    }
+
+    /// @notice Tests the storage collision resistance
+    function test_storageCollisionResistance() public {
+        // Initialize AES key
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).setAESKey();
+
+        // Add test keys
+        vm.startPrank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            KeyType.P256,
+            abi.encode(uint256(1), uint256(2)), // dummy public key
+            uint40(block.timestamp + 24 hours),
+            1 ether
+        );
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            KeyType.Secp256k1,
+            abi.encode(address(0x1234)), // dummy public key
+            uint40(block.timestamp + 48 hours),
+            2 ether
+        );
+        vm.stopPrank();
+
+        // Calculate base slot
+        uint256 slot = uint72(bytes9(keccak256("SHIELDED_DELEGATION_STORAGE")));
+
+        // Test 1: Verify AES key storage
+        _verifyAESKeyStorage(slot);
+
+        // Test 2: Verify keys array storage
+        _verifyKeysArrayStorage(slot);
+
+        // Test 3: Verify mapping storage
+        _verifyMappingStorage(slot);
+
+        // Test 4: Verify no collision with standard slots
+        _verifyNoStandardSlotCollision(slot);
+
+        // Test 5: Verify storage isolation after operations
+        _verifyStorageIsolation(slot);
+    }
+
+    /// @notice Tests the authorizeKey function for all key types
+    function test_authorizeAllKeyTypes() public {
+        // P256
+        _test_authorizeKey(KeyType.P256);
+        // WebAuthnP256
+        _test_authorizeKey(KeyType.WebAuthnP256);
+        // Secp256k1
+        _test_authorizeKey(KeyType.Secp256k1);
+    }
+
+    /// @notice Tests the grantAndRevokeMultipleSessions function for all key types
+    function test_grantAndRevokeMultipleSessions_AllKeyTypes() public {
+        // P256
+        _test_grantAndRevokeMultipleSessions(KeyType.P256);
+        // WebAuthnP256
+        _test_grantAndRevokeMultipleSessions(KeyType.WebAuthnP256);
+        // Secp256k1
+        _test_grantAndRevokeMultipleSessions(KeyType.Secp256k1);
+    }
+
+    /// @notice Tests the revokeSessionWhenOnlyOneSessionExists function for all key types
+    function test_revokeSessionWhenOnlyOneSessionExists_AllKeyTypes() public {
+        // P256
+        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.P256);
+        // WebAuthnP256
+        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.WebAuthnP256);
+        // Secp256k1
+        _test_revokeSessionWhenOnlyOneSessionExists(KeyType.Secp256k1);
+    }
+
+    function test_executeAsOwner_AllKeyTypes() public {
+        // P256
+        _test_executeAsOwner(KeyType.P256);
+        // reset Bob's balance back to 0 since we expect that 5 tokens were transferred
+        _resetBobBalance();
+        // WebAuthnP256
+        _test_executeAsOwner(KeyType.WebAuthnP256);
+        // reset Bob's balance back to 0 since we expect that 5 tokens were transferred
+        _resetBobBalance();
+        // Secp256k1
+        _test_executeAsOwner(KeyType.Secp256k1);
+    }
+
+    function test_execute_AllKeyTypes() public {
+        // P256
+        _test_execute(KeyType.P256);
+        // reset Bob's balance back to 0 since we expect that 5 tokens were transferred
+        _resetBobBalance();
+        // WebAuthnP256
+        _test_execute(KeyType.WebAuthnP256);
+        // reset Bob's balance back to 0 since we expect that 5 tokens were transferred
+        _resetBobBalance();
+        // Secp256k1
+        _test_execute(KeyType.Secp256k1);
     }
 
     /// @notice Test that execution is rejected when session has expired
