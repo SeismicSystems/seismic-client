@@ -2,6 +2,7 @@
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "solady/utils/SignatureCheckerLib.sol";
 import "../utils/MultiSend.sol";
 import "../utils/precompiles/CryptoUtils.sol";
 import "./interfaces/IShieldedDelegationAccount.sol";
@@ -18,8 +19,9 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     ////////////////////////////////////////////////////////////////////////
     struct ShieldedStorage {
         suint256 aesKey;
-        Session[] sessions;
-        mapping(address => uint32) signerToSessionIndex;
+        bool aesKeyInitialized;
+        Key[] keys;
+        mapping(bytes32 => uint32) keyToSessionIndex; // add 1 to the index to distinguish from 0 unset
     }
 
     function _getStorage() internal pure returns (ShieldedStorage storage $) {
@@ -71,43 +73,66 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         _;
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    // Session Management
-    ////////////////////////////////////////////////////////////////////////
-
-    function grantSession(address signer, uint256 expiry, uint256 limitWei) external onlySelf returns (uint32 idx) {
-        ShieldedStorage storage $ = _getStorage();
-
-        Session memory newSession = Session(signer, expiry, limitWei, 0, 0);
-
-        idx = uint32($.sessions.length);
-        $.sessions.push(newSession);
-        $.signerToSessionIndex[signer] = idx;
-
-        emit SessionGranted(idx, signer, expiry, limitWei);
+    modifier onlyUninitialized() {
+        require(!_getStorage().aesKeyInitialized, "AES key already initialized");
+        _;
     }
 
-    function revokeSession(address signer) external override onlySelf {
+    ////////////////////////////////////////////////////////////////////////
+    // Key Management
+    ////////////////////////////////////////////////////////////////////////
+    function authorizeKey(KeyType keyType, bytes calldata publicKey, uint40 expiry, uint256 limitWei)
+        external
+        override
+        onlySelf
+        returns (uint32 idx)
+    {
         ShieldedStorage storage $ = _getStorage();
-        uint32 idx = getSessionIndex(signer);
-        uint32 lastIdx = uint32($.sessions.length - 1);
+
+        Key memory newKey = Key({
+            keyType: keyType,
+            publicKey: publicKey,
+            expiry: expiry,
+            spendLimit: limitWei,
+            spentWei: 0,
+            nonce: 0,
+            isAuthorized: true
+        });
+
+        idx = uint32($.keys.length);
+        $.keys.push(newKey);
+        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+        $.keyToSessionIndex[keyHash] = idx + 1;
+
+        emit KeyAuthorized(keyHash, newKey);
+        return idx + 1;
+    }
+
+    function revokeKey(KeyType keyType, bytes calldata publicKey) external override onlySelf {
+        ShieldedStorage storage $ = _getStorage();
+        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+        uint32 idx = $.keyToSessionIndex[keyHash];
+
+        require(idx != 0, "key not found");
+
+        uint32 lastIdx = uint32($.keys.length);
 
         if (idx != lastIdx) {
-            // Swap with last session
-            Session memory lastSession = $.sessions[lastIdx];
-            $.sessions[idx] = lastSession;
-            $.signerToSessionIndex[lastSession.signer] = idx;
+            Key memory lastKey = $.keys[lastIdx - 1];
+            $.keys[idx - 1] = lastKey;
+            $.keyToSessionIndex[_generateKeyIdentifier(lastKey.keyType, lastKey.publicKey)] = idx;
         }
 
-        // Remove last session
-        $.sessions.pop();
-        delete $.signerToSessionIndex[signer];
+        $.keys.pop();
+        delete $.keyToSessionIndex[keyHash];
 
-        emit SessionRevoked(uint32(idx));
+        emit KeyRevoked(keyHash);
     }
 
-    function setAESKey(suint256 _aesKey) external override onlySelf {
-        _getStorage().aesKey = _aesKey;
+    function setAESKey() external override onlySelf onlyUninitialized {
+        ShieldedStorage storage $ = _getStorage();
+        $.aesKey = _generateRandomAESKey();
+        $.aesKeyInitialized = true;
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -135,20 +160,37 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             multiSend(decryptedCiphertext);
         } else {
-            Session storage S = $.sessions[idx];
-            require(S.expiry > block.timestamp, "expired");
-            require(idx == $.signerToSessionIndex[S.signer], "session key revoked");
+            Key storage S = $.keys[idx - 1];
+            require(S.expiry > block.timestamp, "key expired");
+            require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "key revoked");
 
             bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
-            address recoveredSigner = ECDSA.recover(dig, sig);
-            require(recoveredSigner == S.signer, "bad signature");
-
+            bool isValid;
+            if (S.keyType == KeyType.P256) {
+                // The try decode functions returns `(0,0)` if the bytes is too short,
+                // which will make the signature check fail.
+                (bytes32 r, bytes32 s) = P256.tryDecodePointCalldata(sig);
+                (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
+                isValid = P256.verifySignature(dig, r, s, x, y);
+            } else if (S.keyType == KeyType.WebAuthnP256) {
+                (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
+                isValid = WebAuthn.verify(
+                    abi.encode(dig), // Challenge.
+                    false, // Require user verification optional.
+                    // This is simply `abi.decode(signature, (WebAuthn.WebAuthnAuth))`.
+                    WebAuthn.tryDecodeAuth(sig), // Auth.
+                    x,
+                    y
+                );
+            } else if (S.keyType == KeyType.Secp256k1) {
+                isValid = SignatureCheckerLib.isValidSignatureNowCalldata(abi.decode(S.publicKey, (address)), dig, sig);
+            }
+            require(isValid, "invalid signature");
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
-
             uint256 totalValue = 0;
-            if (S.limitWei != 0) {
+            if (S.spendLimit != 0) {
                 totalValue = _calculateTotalSpend(decryptedCiphertext);
-                require(S.spentWei + totalValue <= S.limitWei, "spend limit exceeded");
+                require(S.spentWei + totalValue <= S.spendLimit, "spend limit exceeded");
                 S.spentWei += totalValue;
             }
 
@@ -170,6 +212,10 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     ////////////////////////////////////////////////////////////////////////
     // Helpers
     ////////////////////////////////////////////////////////////////////////
+
+    function _generateKeyIdentifier(KeyType keyType, bytes memory publicKey) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(uint8(keyType), keccak256(publicKey)));
+    }
 
     function _calculateTotalSpend(bytes memory data) internal pure returns (uint256 totalSpend) {
         uint256 i = 0;
@@ -196,32 +242,33 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return totalSpend;
     }
 
-    function getSessionNonce(uint32 idx) external view override returns (uint256) {
-        return _getStorage().sessions[idx].nonce;
+    function getKeyNonce(uint32 idx) external view override returns (uint256) {
+        return _getStorage().keys[idx - 1].nonce;
     }
 
     // Optional public accessors
-    function sessionCount() external view returns (uint256) {
-        return _getStorage().sessions.length;
+    function keyCount() external view returns (uint256) {
+        return _getStorage().keys.length;
     }
 
-    function getSession(uint32 idx) external view returns (Session memory) {
-        return _getStorage().sessions[idx];
+    function getKey(uint32 idx) external view returns (Key memory) {
+        return _getStorage().keys[idx - 1];
     }
 
-    function getSessionIndex(address signer) public view returns (uint32) {
-        uint32 idx = _getStorage().signerToSessionIndex[signer];
-        require(_getStorage().sessions.length > idx, "signer not found");
-        require(_getStorage().sessions[idx].signer == signer, "invalid signer mapping");
+    function getKeyIndex(KeyType keyType, bytes memory publicKey) public view returns (uint32) {
+        ShieldedStorage storage $ = _getStorage();
+        bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
+        uint32 idx = $.keyToSessionIndex[keyHash];
+        require(idx != 0, "key not found");
+        require(
+            $.keys[idx - 1].keyType == keyType && keccak256($.keys[idx - 1].publicKey) == keccak256(publicKey),
+            "invalid key mapping"
+        );
         return idx;
     }
 
-    function sessions(uint32 idx)
-        external
-        view
-        returns (address signer, uint256 expiry, uint256 limitWei, uint256 spentWei, uint256 nonce)
-    {
-        Session memory session = _getStorage().sessions[idx];
-        return (session.signer, session.expiry, session.limitWei, session.spentWei, session.nonce);
+    function keys(uint32 idx) external view returns (Key memory key) {
+        key = _getStorage().keys[idx - 1];
+        return key;
     }
 }
