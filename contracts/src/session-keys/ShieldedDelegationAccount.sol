@@ -12,6 +12,8 @@ import "./interfaces/IShieldedDelegationAccount.sol";
 /// @author ameya-deshmukh
 /// @notice Experimental EIP-7702 delegation contract which supports session keys
 /// @dev WARNING: THIS CONTRACT IS AN EXPERIMENT AND HAS NOT BEEN AUDITED
+/// @dev Credits: Inspired by https://github.com/ithacaxyz/exp-0001 by jxom (https://github.com/jxom)
+/// @dev Credits: Inspired by https://github.com/ithacaxyz/account by Tanishk Goyal (https://github.com/legion2002) and vectorized (https://github.com/vectorized)
 contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, CryptoUtils, EIP7702Utils {
     using ECDSA for bytes32;
 
