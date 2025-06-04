@@ -91,5 +91,5 @@ interface IShieldedDelegationAccount {
     /// @notice Accessor for keys array
     /// @param idx The index of the key to access
     /// @return key The key
-    function keys(uint32 idx) external view returns (Key memory key);
+    function getKey(uint32 idx) external view returns (Key memory key);
 }

@@ -138,7 +138,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
 
     /// @notice Verifies the keys array storage
     /// @param baseSlot The base slot to verify
-    function _verifyKeysArrayStorage(uint256 baseSlot) internal {
+    function _verifyKeysArrayStorage(uint256 baseSlot) internal view {
         // Check keys array length (slot 2)
         bytes32 length = vm.load(ALICE_ADDRESS, bytes32(baseSlot + 2));
         assertEq(uint256(length), 2, "Should have 2 keys");
@@ -159,7 +159,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
 
     /// @notice Verifies the mapping storage
     /// @param baseSlot The base slot to verify
-    function _verifyMappingStorage(uint256 baseSlot) internal {
+    function _verifyMappingStorage(uint256 baseSlot) internal view {
         // Create the same key identifier that was used
         bytes32 keyHash = _generateKeyIdentifier(KeyType.P256, abi.encode(uint256(1), uint256(2)));
 
@@ -173,7 +173,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
 
     /// @notice Verifies no standard slot collision
     /// @param baseSlot The base slot to verify
-    function _verifyNoStandardSlotCollision(uint256 baseSlot) internal {
+    function _verifyNoStandardSlotCollision(uint256 baseSlot) internal view {
         // Check slots 0-10 (excluding our base slot)
         for (uint256 i = 0; i < 10; i++) {
             if (i == baseSlot) continue;
@@ -268,10 +268,11 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @return signature The signature bytes
     function _signExecuteDigestWithKey(address account, uint32 keyIndex, bytes memory cipher, uint256 privateKey)
         internal
+        view
         returns (bytes memory signature)
     {
         uint256 keyNonce = ShieldedDelegationAccount(account).getKeyNonce(keyIndex);
-        Key memory key = ShieldedDelegationAccount(account).keys(keyIndex);
+        Key memory key = ShieldedDelegationAccount(account).getKey(keyIndex);
         bytes32 domainSeparator = _getDomainSeparator();
 
         // Create EIP-712 typed data hash for signing
@@ -312,7 +313,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
 
     /// @notice Samples a random uniform short bytes
     /// @return result The sampled bytes
-    function _sampleRandomUniformShortBytes() internal returns (bytes memory result) {
+    function _sampleRandomUniformShortBytes() internal view returns (bytes memory result) {
         uint256 n = _generateRandomNumber();
         uint256 r = _generateRandomNumber();
         /// @solidity memory-safe-assembly
@@ -348,11 +349,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param privateKey The private key to sign with
     /// @param digest The digest to sign
     /// @return signature The signature bytes
-    function _webauthnSig(uint256 privateKey, bytes32 digest)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function _webauthnSig(uint256 privateKey, bytes32 digest) internal pure returns (bytes memory) {
         // STEP 1: The contract passes abi.encode(digest) as the challenge
         bytes memory challenge = abi.encode(digest);
 
@@ -394,7 +391,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @notice Generates a random secp256r1 key
     /// @return publicKey The public key
     /// @return privateKey The private key
-    function _randomSecp256r1Key() internal returns (bytes memory publicKey, uint256 privateKey) {
+    function _randomSecp256r1Key() internal view returns (bytes memory publicKey, uint256 privateKey) {
         privateKey = _generateRandomNumber() & type(uint192).max;
         (uint256 x, uint256 y) = vm.publicKeyP256(privateKey);
         publicKey = abi.encode(x, y);
@@ -404,7 +401,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @notice Generates a random secp256k1 key
     /// @return publicKey The public key
     /// @return privateKey The private key
-    function _randomSecp256k1Key() internal returns (bytes memory publicKey, uint256 privateKey) {
+    function _randomSecp256k1Key() internal view returns (bytes memory publicKey, uint256 privateKey) {
         privateKey = _generateRandomNumber() & type(uint192).max;
         address addr = vm.addr(privateKey);
         publicKey = abi.encode(addr);
@@ -454,7 +451,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
             keyType, publicKey, uint40(block.timestamp + 24 hours), 1 ether
         );
 
-        Key memory key = ShieldedDelegationAccount(ALICE_ADDRESS).keys(keyIndex);
+        Key memory key = ShieldedDelegationAccount(ALICE_ADDRESS).getKey(keyIndex);
 
         // Verify the key properties
         assertEq(uint8(key.keyType), uint8(keyType), "Key type mismatch");
