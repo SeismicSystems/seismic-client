@@ -5,13 +5,16 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "solady/utils/SignatureCheckerLib.sol";
 import "../utils/MultiSend.sol";
 import "../utils/precompiles/CryptoUtils.sol";
+import "../utils/EIP7702Utils.sol";
 import "./interfaces/IShieldedDelegationAccount.sol";
 
 /// @title ShieldedDelegationAccount
 /// @author ameya-deshmukh
 /// @notice Experimental EIP-7702 delegation contract which supports session keys
 /// @dev WARNING: THIS CONTRACT IS AN EXPERIMENT AND HAS NOT BEEN AUDITED
-contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, CryptoUtils {
+/// @dev Credits: Inspired by https://github.com/ithacaxyz/exp-0001 by jxom (https://github.com/jxom)
+/// @dev Credits: Inspired by https://github.com/ithacaxyz/account by Tanishk Goyal (https://github.com/legion2002) and vectorized (https://github.com/vectorized)
+contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallOnly, CryptoUtils, EIP7702Utils {
     using ECDSA for bytes32;
 
     ////////////////////////////////////////////////////////////////////////
@@ -164,27 +167,8 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             require(S.expiry > block.timestamp, "key expired");
             require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "key revoked");
 
-            bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext);
-            bool isValid;
-            if (S.keyType == KeyType.P256) {
-                // The try decode functions returns `(0,0)` if the bytes is too short,
-                // which will make the signature check fail.
-                (bytes32 r, bytes32 s) = P256.tryDecodePointCalldata(sig);
-                (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
-                isValid = P256.verifySignature(dig, r, s, x, y);
-            } else if (S.keyType == KeyType.WebAuthnP256) {
-                (bytes32 x, bytes32 y) = P256.tryDecodePoint(S.publicKey);
-                isValid = WebAuthn.verify(
-                    abi.encode(dig), // Challenge.
-                    false, // Require user verification optional.
-                    // This is simply `abi.decode(signature, (WebAuthn.WebAuthnAuth))`.
-                    WebAuthn.tryDecodeAuth(sig), // Auth.
-                    x,
-                    y
-                );
-            } else if (S.keyType == KeyType.Secp256k1) {
-                isValid = SignatureCheckerLib.isValidSignatureNowCalldata(abi.decode(S.publicKey, (address)), dig, sig);
-            }
+            bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext, DOMAIN_SEPARATOR);
+            bool isValid = _verifySignature(S.keyType, S.publicKey, dig, sig);
             require(isValid, "invalid signature");
             decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
             uint256 totalValue = 0;
@@ -201,22 +185,12 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     ////////////////////////////////////////////////////////////////////////
-    // EIP-712 Hashing
-    ////////////////////////////////////////////////////////////////////////
-
-    function _hashTypedDataV4(uint256 _nonce, bytes memory _cipher) private view returns (bytes32) {
-        bytes32 structHash = keccak256(abi.encode(EXECUTE_TYPEHASH, _nonce, keccak256(_cipher)));
-        return keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
-    }
-
-    ////////////////////////////////////////////////////////////////////////
     // Helpers
     ////////////////////////////////////////////////////////////////////////
 
-    function _generateKeyIdentifier(KeyType keyType, bytes memory publicKey) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(uint8(keyType), keccak256(publicKey)));
-    }
-
+    /// @notice Calculates the total spend of a transaction
+    /// @param data The data of the transaction
+    /// @return totalSpend The total spend of the transaction
     function _calculateTotalSpend(bytes memory data) internal pure returns (uint256 totalSpend) {
         uint256 i = 0;
         uint256 len = data.length;
@@ -242,19 +216,30 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return totalSpend;
     }
 
+    /// @notice Returns the nonce of a key
+    /// @param idx The index of the key
+    /// @return The nonce of the key
     function getKeyNonce(uint32 idx) external view override returns (uint256) {
         return _getStorage().keys[idx - 1].nonce;
     }
 
-    // Optional public accessors
+    /// @notice Returns the number of keys
+    /// @return The number of keys
     function keyCount() external view returns (uint256) {
         return _getStorage().keys.length;
     }
 
+    /// @notice Returns a key
+    /// @param idx The index of the key
+    /// @return The key
     function getKey(uint32 idx) external view returns (Key memory) {
         return _getStorage().keys[idx - 1];
     }
 
+    /// @notice Returns the index of a key
+    /// @param keyType The type of key
+    /// @param publicKey The public key
+    /// @return The index of the key
     function getKeyIndex(KeyType keyType, bytes memory publicKey) public view returns (uint32) {
         ShieldedStorage storage $ = _getStorage();
         bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
@@ -267,8 +252,9 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return idx;
     }
 
-    function keys(uint32 idx) external view returns (Key memory key) {
-        key = _getStorage().keys[idx - 1];
-        return key;
+    /// @notice Returns the EIP-712 domain separator
+    /// @return The domain separator used for EIP-712 typed data signing
+    function getDomainSeparator() public view returns (bytes32) {
+        return DOMAIN_SEPARATOR;
     }
 }
