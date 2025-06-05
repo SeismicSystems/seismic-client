@@ -144,6 +144,8 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
 
     function encrypt(bytes calldata plaintext) external view override returns (uint96 nonce, bytes memory ciphertext) {
         nonce = _generateRandomNonce();
+        // Regenerate nonce if it's 0 (extremely unlikely but ensures we can use 0 as sentinel)
+        while (nonce == 0) nonce = _generateRandomNonce();
         ciphertext = _encrypt(_getStorage().aesKey, nonce, plaintext);
         return (nonce, ciphertext);
     }

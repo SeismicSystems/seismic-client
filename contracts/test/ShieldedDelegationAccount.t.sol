@@ -311,6 +311,27 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         ShieldedDelegationAccount(account).execute(nonce, cipher, signature, keyIndex);
     }
 
+    /// @notice Helper to execute a transparent (non-shielded) call via key
+    /// @param account The account to execute the call on
+    /// @param keyIndex The key index to use
+    /// @param calls The encoded calls to execute
+    /// @param privateKey The private key to sign with
+    /// @param expectSpendLimitRevert Whether to expect a spend limit revert
+    function _executeViaKeyTransparent(address account, uint32 keyIndex, bytes memory calls, uint256 privateKey, bool expectSpendLimitRevert) internal {
+        // Sign the execution request
+        bytes memory signature = _signExecuteDigestWithKey(account, keyIndex, calls, privateKey);
+
+        // Execute via relayer
+        if (expectSpendLimitRevert) {
+            vm.expectRevert("spend limit exceeded");
+            vm.prank(RELAY_ADDRESS);
+            ShieldedDelegationAccount(account).execute(uint96(0), calls, signature, keyIndex);
+        } else {
+            vm.prank(RELAY_ADDRESS);
+            ShieldedDelegationAccount(account).execute(uint96(0), calls, signature, keyIndex);
+        }
+    }
+
     /// @notice Samples a random uniform short bytes
     /// @return result The sampled bytes
     function _sampleRandomUniformShortBytes() internal view returns (bytes memory result) {
@@ -840,53 +861,35 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         // Test 1: First transfer of 6 ETH (should succeed)
         {
             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 6 ether);
-            _executeViaKey(ALICE_ADDRESS, keyIndex, calls, privateKey);
+            _executeViaKeyTransparent(ALICE_ADDRESS, keyIndex, calls, privateKey, false);
             assertEq(BOB_ADDRESS.balance, initialBalance + 6 ether, "First transfer should succeed");
         }
 
         // Test 2: Second transfer of 3 ETH (should succeed)
         {
             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 3 ether);
-            _executeViaKey(ALICE_ADDRESS, keyIndex, calls, privateKey);
+            _executeViaKeyTransparent(ALICE_ADDRESS, keyIndex, calls, privateKey, false);
             assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Second transfer should succeed");
         }
 
         // Test 3: Third transfer of 2 ETH (should fail - would exceed limit)
         {
             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 2 ether);
-
-            (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
-
-            // Sign the execution request
-            bytes memory signature = _signExecuteDigestWithKey(ALICE_ADDRESS, keyIndex, cipher, privateKey);
-
-            vm.prank(RELAY_ADDRESS);
-            vm.expectRevert("spend limit exceeded");
-            ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, keyIndex);
-
+            _executeViaKeyTransparent(ALICE_ADDRESS, keyIndex, calls, privateKey, true);
             assertEq(BOB_ADDRESS.balance, initialBalance + 9 ether, "Balance should not change after failed transfer");
         }
 
         // Test 4: Small transfer of 1 ETH (should succeed - exactly reaches limit)
         {
             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 1 ether);
-            _executeViaKey(ALICE_ADDRESS, keyIndex, calls, privateKey);
+            _executeViaKeyTransparent(ALICE_ADDRESS, keyIndex, calls, privateKey, false);
             assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "Should allow transfer that exactly reaches limit");
         }
 
         // Test 5: Final tiny transfer (should fail - exceeds limit)
         {
             bytes memory calls = _createEthTransferCall(BOB_ADDRESS, 0.1 ether);
-
-            (uint96 nonce96, bytes memory cipher) = ShieldedDelegationAccount(ALICE_ADDRESS).encrypt(calls);
-
-            // Sign the execution request
-            bytes memory signature = _signExecuteDigestWithKey(ALICE_ADDRESS, keyIndex, cipher, privateKey);
-
-            vm.prank(RELAY_ADDRESS);
-            vm.expectRevert("spend limit exceeded");
-            ShieldedDelegationAccount(ALICE_ADDRESS).execute(nonce96, cipher, signature, keyIndex);
-
+            _executeViaKeyTransparent(ALICE_ADDRESS, keyIndex, calls, privateKey, true);
             assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
         }
     }
