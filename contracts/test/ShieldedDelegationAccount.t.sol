@@ -317,7 +317,13 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param calls The encoded calls to execute
     /// @param privateKey The private key to sign with
     /// @param expectSpendLimitRevert Whether to expect a spend limit revert
-    function _executeViaKeyTransparent(address account, uint32 keyIndex, bytes memory calls, uint256 privateKey, bool expectSpendLimitRevert) internal {
+    function _executeViaKeyTransparent(
+        address account,
+        uint32 keyIndex,
+        bytes memory calls,
+        uint256 privateKey,
+        bool expectSpendLimitRevert
+    ) internal {
         // Sign the execution request
         bytes memory signature = _signExecuteDigestWithKey(account, keyIndex, calls, privateKey);
 

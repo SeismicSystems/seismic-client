@@ -71,11 +71,13 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     // Access Control
     ////////////////////////////////////////////////////////////////////////
 
+    /// @notice Modifier to ensure the caller is the contract itself
     modifier onlySelf() {
         require(msg.sender == address(this), "only self");
         _;
     }
 
+    /// @notice Modifier to ensure the AES key is not initialized
     modifier onlyUninitialized() {
         require(!_getStorage().aesKeyInitialized, "AES key already initialized");
         _;
@@ -84,6 +86,13 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     ////////////////////////////////////////////////////////////////////////
     // Key Management
     ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Authorizes a key
+    /// @param keyType The type of key
+    /// @param publicKey The public key of the key
+    /// @param expiry The expiry of the key
+    /// @param limitWei The spend limit of the key (in wei)
+    /// @return idx The index of the key
     function authorizeKey(KeyType keyType, bytes calldata publicKey, uint40 expiry, uint256 limitWei)
         external
         override
@@ -111,6 +120,9 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return idx + 1;
     }
 
+    /// @notice Revokes a key
+    /// @param keyType The type of key
+    /// @param publicKey The public key of the key
     function revokeKey(KeyType keyType, bytes calldata publicKey) external override onlySelf {
         ShieldedStorage storage $ = _getStorage();
         bytes32 keyHash = _generateKeyIdentifier(keyType, publicKey);
@@ -132,6 +144,7 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         emit KeyRevoked(keyHash);
     }
 
+    /// @notice Sets the AES key
     function setAESKey() external override onlySelf onlyUninitialized {
         ShieldedStorage storage $ = _getStorage();
         $.aesKey = _generateRandomAESKey();
@@ -142,6 +155,10 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     // Encryption Functions
     ////////////////////////////////////////////////////////////////////////
 
+    /// @notice Encrypts a call
+    /// @param plaintext The plaintext of the call
+    /// @return nonce The nonce of the call
+    /// @return ciphertext The ciphertext of the call
     function encrypt(bytes calldata plaintext) external view override returns (uint96 nonce, bytes memory ciphertext) {
         nonce = _generateRandomNonce();
         // Regenerate nonce if it's 0 (extremely unlikely but ensures we can use 0 as sentinel)
@@ -154,19 +171,20 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     // Execution
     ////////////////////////////////////////////////////////////////////////
 
-    function execute(uint96 nonce, bytes calldata ciphertext, bytes calldata sig, uint32 idx)
-        external
-        payable
-        override
-    {
+    /// @notice Executes a call via key
+    /// @param nonce The nonce of the call
+    /// @param calls The encoded calls to execute (plaintext if nonce is 0, ciphertext otherwise)
+    /// @param sig The signature of the call
+    /// @param idx The index of the key to use
+    function execute(uint96 nonce, bytes calldata calls, bytes calldata sig, uint32 idx) external payable override {
         ShieldedStorage storage $ = _getStorage();
         bytes memory executionData;
 
         if (msg.sender == address(this)) {
             if (nonce == 0) {
-                executionData = ciphertext;
+                executionData = calls;
             } else {
-                executionData = _decrypt($.aesKey, nonce, ciphertext);
+                executionData = _decrypt($.aesKey, nonce, calls);
             }
             multiSend(executionData);
         } else {
@@ -174,14 +192,14 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             require(S.expiry > block.timestamp, "key expired");
             require(idx == $.keyToSessionIndex[_generateKeyIdentifier(S.keyType, S.publicKey)], "key revoked");
 
-            bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext, DOMAIN_SEPARATOR);
+            bytes32 dig = _hashTypedDataV4(S.nonce, calls, DOMAIN_SEPARATOR);
             bool isValid = _verifySignature(S.keyType, S.publicKey, dig, sig);
             require(isValid, "invalid signature");
 
             if (nonce == 0) {
-                executionData = ciphertext;
+                executionData = calls;
             } else {
-                executionData = _decrypt($.aesKey, nonce, ciphertext);
+                executionData = _decrypt($.aesKey, nonce, calls);
             }
 
             uint256 totalValue = 0;
