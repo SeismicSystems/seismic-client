@@ -158,10 +158,15 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         override
     {
         ShieldedStorage storage $ = _getStorage();
-        bytes memory decryptedCiphertext;
+        bytes memory executionData;
+
         if (msg.sender == address(this)) {
-            decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
-            multiSend(decryptedCiphertext);
+            if (nonce == 0) {
+                executionData = ciphertext;
+            } else {
+                executionData = _decrypt($.aesKey, nonce, ciphertext);
+            }
+            multiSend(executionData);
         } else {
             Key storage S = $.keys[idx - 1];
             require(S.expiry > block.timestamp, "key expired");
@@ -170,17 +175,22 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
             bytes32 dig = _hashTypedDataV4(S.nonce, ciphertext, DOMAIN_SEPARATOR);
             bool isValid = _verifySignature(S.keyType, S.publicKey, dig, sig);
             require(isValid, "invalid signature");
-            decryptedCiphertext = _decrypt($.aesKey, nonce, ciphertext);
+
+            if (nonce == 0) {
+                executionData = ciphertext;
+            } else {
+                executionData = _decrypt($.aesKey, nonce, ciphertext);
+            }
+
             uint256 totalValue = 0;
             if (S.spendLimit != 0) {
-                totalValue = _calculateTotalSpend(decryptedCiphertext);
+                totalValue = _calculateTotalSpend(executionData);
                 require(S.spentWei + totalValue <= S.spendLimit, "spend limit exceeded");
                 S.spentWei += totalValue;
             }
 
             S.nonce++;
-
-            multiSend(decryptedCiphertext);
+            multiSend(executionData);
         }
     }
 
