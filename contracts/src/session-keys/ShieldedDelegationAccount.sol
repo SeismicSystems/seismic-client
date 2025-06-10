@@ -246,6 +246,25 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
         return totalSpend;
     }
 
+    /// @notice Verifies a signature and consumes the nonce
+    /// @dev This function is used to verify a signature and consume the nonce of a key
+    /// @dev This is primarily for external contracts to verify signatures and consume nonces to avoid replay attacks, for use cases like signed reads using passkeys/session keys.
+    /// @param idx The index of the key
+    /// @param message The message to verify
+    /// @param sig The signature to verify
+    /// @return valid True if the signature is valid
+    function verifyAndConsumeNonce(uint32 idx, bytes calldata message, bytes calldata sig) external returns (bool) {
+        Key storage key = _getStorage().keys[idx - 1];
+        require(key.expiry > block.timestamp, "key expired");
+        require(idx == getKeyIndex(key.keyType, key.publicKey), "key revoked");
+        bytes32 domainSeparator = getDomainSeparator();
+        bytes32 digest = _hashTypedDataV4(key.nonce, message, domainSeparator);
+        bool valid = _verifySignature(key.keyType, key.publicKey, digest, sig);
+        require(valid, "invalid sig");
+        key.nonce++;
+        return true;
+    }
+
     /// @notice Returns the nonce of a key
     /// @param idx The index of the key
     /// @return The nonce of the key
