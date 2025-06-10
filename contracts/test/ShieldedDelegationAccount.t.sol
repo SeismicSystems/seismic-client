@@ -698,6 +698,58 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         assertEq(bobBalance, 5 * 10 ** 18, "Bob should have received 5 tokens");
     }
 
+    /// @notice Tests the verifyAndConsumeNonce function
+    /// @param keyType The key type to verify and consume nonce
+    function _test_verifyAndConsumeNonce(KeyType keyType) internal {
+        // Get key pair based on type
+        (bytes memory publicKey, uint256 privateKey) =
+            keyType == KeyType.Secp256k1 ? _randomSecp256k1Key() : _randomSecp256r1Key();
+
+        // Authorize a key
+        vm.prank(ALICE_ADDRESS);
+        ShieldedDelegationAccount(ALICE_ADDRESS).authorizeKey(
+            keyType, publicKey, uint40(block.timestamp + 24 hours), 1 ether
+        );
+
+        uint32 keyIndex = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyIndex(keyType, publicKey);
+
+        // Create an arbitrary message
+        bytes memory message = "Hello World";
+
+        // Get domain separator
+        bytes32 domainSeparator = ShieldedDelegationAccount(ALICE_ADDRESS).getDomainSeparator();
+
+        // Get current nonce
+        uint256 nonce = ShieldedDelegationAccount(ALICE_ADDRESS).getKeyNonce(keyIndex);
+
+        // Create signature
+        bytes32 digest = _hashTypedDataV4(nonce, message, domainSeparator);
+        bytes memory signature;
+        if (keyType == KeyType.P256) {
+            signature = _secp256r1Sig(privateKey, _generateKeyIdentifier(KeyType.P256, publicKey), false, digest);
+        } else if (keyType == KeyType.WebAuthnP256) {
+            signature = _webauthnSig(privateKey, digest);
+        } else if (keyType == KeyType.Secp256k1) {
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
+            signature = abi.encodePacked(r, s, v);
+        }
+
+        // First verification should succeed
+        vm.prank(ADMIN_ADDRESS);
+        bool success = ShieldedDelegationAccount(ALICE_ADDRESS).verifyAndConsumeNonce(keyIndex, message, signature);
+        assertTrue(success, "First verification should succeed");
+
+        // Attempt replay attack - should fail
+        vm.prank(ADMIN_ADDRESS);
+        vm.expectRevert("invalid sig");
+        ShieldedDelegationAccount(ALICE_ADDRESS).verifyAndConsumeNonce(keyIndex, message, signature);
+
+        // Verify nonce was incremented
+        assertEq(
+            ShieldedDelegationAccount(ALICE_ADDRESS).getKeyNonce(keyIndex), nonce + 1, "Nonce should be incremented"
+        );
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // Test Cases
     ////////////////////////////////////////////////////////////////////////
@@ -845,6 +897,16 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         vm.prank(BOB_ADDRESS);
         uint256 bobBalance = tok.balanceOf();
         assertEq(bobBalance, 0, "Bob should not have received any tokens");
+    }
+
+    /// @notice Tests the verifyAndConsumeNonce function for all key types
+    function test_verifyAndConsumeNonce_AllKeyTypes() public {
+        // P256
+        _test_verifyAndConsumeNonce(KeyType.P256);
+        // WebAuthnP256
+        _test_verifyAndConsumeNonce(KeyType.WebAuthnP256);
+        // Secp256k1
+        _test_verifyAndConsumeNonce(KeyType.Secp256k1);
     }
 
     /// @notice Test that the session spending limit is enforced
