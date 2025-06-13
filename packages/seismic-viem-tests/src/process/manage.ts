@@ -4,7 +4,7 @@ import terminate from 'terminate/promise'
 
 export type ServerProcess = { process: ChildProcess }
 
-type RunProcessOptions = {
+export type RunProcessOptions = {
   args?: readonly string[]
   waitMs?: number
   cwd?: string

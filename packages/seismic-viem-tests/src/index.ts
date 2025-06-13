@@ -38,3 +38,10 @@ export {
 } from '@sviem-tests/tests/trace.ts'
 
 export { loadDotenv } from '@sviem-tests/util.ts'
+
+export type { RunProcessOptions } from '@sviem-tests/process/manage.ts'
+export {
+  runProcess,
+  killProcess,
+  waitForProcessExit,
+} from '@sviem-tests/process/manage.ts'
