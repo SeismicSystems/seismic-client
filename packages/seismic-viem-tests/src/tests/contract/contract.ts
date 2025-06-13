@@ -76,9 +76,7 @@ export const testSeismicTx = async ({
   // console.info(
   //   `[1] setNumber receipt: ${JSON.stringify(receipt1, stringifyBigInt, 2)}`
   // )
-
-  const { typeHex: typeHex1 } = await publicClient.getTransaction({ hash: tx1 })
-  expectSeismicTx(typeHex1)
+  expectSeismicTx(receipt1.type as `0x${string}` | null)
 
   // Try reading using explicit signedRead
   const isOdd1 = await seismicContract.read.isOdd()
@@ -99,9 +97,7 @@ export const testSeismicTx = async ({
   // console.info(
   //   `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
   // )
-
-  const { typeHex: typeHex2 } = await publicClient.getTransaction({ hash: tx2 })
-  expectSeismicTx(typeHex2)
+  expectSeismicTx(receipt2.type as `0x${string}` | null)
 
   // Try reading using unsigned (normal) read
   const isOdd2 = await seismicContract.tread.isOdd()
@@ -123,6 +119,7 @@ export const testSeismicTx = async ({
   // console.info(
   //   `[3] setNumber receipt: ${JSON.stringify(receipt3, stringifyBigInt, 2)}`
   // )
+  expectSeismicTx(receipt3.type as `0x${string}` | null)
 
   // Use non-explicit signed-read
   const isOdd3 = await seismicContract.tread.isOdd({
