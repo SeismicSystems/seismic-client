@@ -35,6 +35,11 @@ import {
   parseAbi,
 } from 'viem'
 
+import {
+  type PromiseWithResolvers,
+  withResolvers,
+} from '@sviem/viem-internal/withResolvers.ts'
+
 // We only want to perform a scheduled multicall if:
 // - The request has calldata,
 // - The request has a target address,
@@ -313,18 +318,6 @@ type SchedulerItem = {
 }
 
 const schedulerCache = /*#__PURE__*/ new Map<number | string, SchedulerItem[]>()
-
-export function withResolvers<type>(): PromiseWithResolvers<type> {
-  let resolve: PromiseWithResolvers<type>['resolve'] = () => undefined
-  let reject: PromiseWithResolvers<type>['reject'] = () => undefined
-
-  const promise = new Promise<type>((resolve_, reject_) => {
-    resolve = resolve_
-    reject = reject_
-  })
-
-  return { promise, resolve, reject }
-}
 
 export function createBatchScheduler<
   parameters,
