@@ -9,6 +9,7 @@ export type RunProcessOptions = {
   waitMs?: number
   cwd?: string
   stdio?: StdioOptions
+  env?: Record<string, string>
 }
 
 /**
@@ -18,10 +19,11 @@ export const runProcess = async (
   command: string,
   options: RunProcessOptions = {}
 ): Promise<ChildProcess> => {
-  const { args = [], waitMs = 100, cwd, stdio = 'inherit' } = options
+  const { args = [], waitMs = 100, cwd, stdio = 'inherit', env } = options
   const process = spawn(command, args, {
     cwd,
     stdio,
+    env,
   })
 
   if (waitMs) {
