@@ -19,8 +19,14 @@ export const runProcess = async (
   command: string,
   options: RunProcessOptions = {}
 ): Promise<ChildProcess> => {
-  const { args = [], waitMs = 100, cwd, stdio = 'inherit', env = {} } = options
-  const process = spawn(command, args, {
+  const {
+    args = [],
+    waitMs = 100,
+    cwd,
+    stdio = 'inherit',
+    env = process.env,
+  } = options
+  const childProcess = spawn(command, args, {
     cwd,
     stdio,
     env,
@@ -28,10 +34,10 @@ export const runProcess = async (
 
   if (waitMs) {
     await new Promise((resolve) => {
-      process.on('spawn', () => setTimeout(resolve, waitMs))
+      childProcess.on('spawn', () => setTimeout(resolve, waitMs))
     })
   }
-  return process
+  return childProcess
 }
 
 /**
