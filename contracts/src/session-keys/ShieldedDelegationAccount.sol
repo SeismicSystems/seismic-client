@@ -312,14 +312,8 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     function forwardEthToEoa() private {
-        // emit Log("forwardEthToEoa");
-        // // require(eoaAddress != address(0), "EOA address not set");
-        // (bool success, ) = eoaAddress.call{value: msg.value}("");
-        // if (!success) {
-        //     revert("Transfer failed");
-        // }
-        (bool success, ) = payable(eoaAddress).call{value: msg.value, gas: 2300}("");
-        require(success, "Transfer failed");
+        (bool success, ) = payable(eoaAddress).call{value: msg.value}("");
+        require(success, "Transfer ETH to EOA failed");
     }
 
     receive() external payable {
