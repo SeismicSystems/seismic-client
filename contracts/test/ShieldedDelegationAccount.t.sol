@@ -961,4 +961,16 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
             assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
         }
     }
+
+
+    function test_receiveEth() public {
+        vm.deal(ALICE_ADDRESS, 10 ether);
+
+        assertEq(address(acc).balance, 0 ether);
+
+        vm.prank(ALICE_ADDRESS);
+        payable(address(acc)).transfer(1 ether);
+
+        assertEq(address(acc).balance, 1 ether, "ShieldedDelegationAccount should have received 1 ETH");
+    }
 }
