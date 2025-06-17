@@ -266,7 +266,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param keyIndex Index of the key to use
     /// @param cipher Encrypted data to be executed
     /// @return signature The signature bytes
-    function _signExecuteDigestWithKey(address account, uint32 keyIndex, bytes memory cipher, uint256 privateKey)
+    function _signExecuteDigestWithKey(address payable account, uint32 keyIndex, bytes memory cipher, uint256 privateKey)
         internal
         view
         returns (bytes memory signature)
@@ -299,7 +299,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param keyIndex The key index to use
     /// @param calls The encoded calls to execute
     /// @param privateKey The private key to sign with
-    function _executeViaKey(address account, uint32 keyIndex, bytes memory calls, uint256 privateKey) internal {
+    function _executeViaKey(address payable account, uint32 keyIndex, bytes memory calls, uint256 privateKey) internal {
         // Encrypt the calls
         (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(account).encrypt(calls);
 
@@ -318,7 +318,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param privateKey The private key to sign with
     /// @param expectSpendLimitRevert Whether to expect a spend limit revert
     function _executeViaKeyTransparent(
-        address account,
+        address payable account,
         uint32 keyIndex,
         bytes memory calls,
         uint256 privateKey,
@@ -962,15 +962,16 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
         }
     }
 
-
     function test_receiveEth() public {
         vm.deal(ALICE_ADDRESS, 10 ether);
 
         assertEq(address(acc).balance, 0 ether);
 
         vm.prank(ALICE_ADDRESS);
-        payable(address(acc)).transfer(1 ether);
+        (bool success, ) = payable(address(acc)).call{value: 1 ether}("");
 
-        assertEq(address(acc).balance, 1 ether, "ShieldedDelegationAccount should have received 1 ETH");
+        assertTrue(success, "Transfer failed");
+        assertEq(address(acc).balance, 0 ether, "ShieldedDelegationAccount should forward the ETH to the EOA");
+        assertEq(acc.eoaAddress().balance, 1 ether, "EOA should have received the ETH");
     }
 }

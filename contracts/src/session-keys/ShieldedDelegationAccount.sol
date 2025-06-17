@@ -51,11 +51,15 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
 
     bytes32 private immutable DOMAIN_SEPARATOR;
 
+    // Owner of the contract
+    address public immutable eoaAddress;
+
     ////////////////////////////////////////////////////////////////////////
     // Constructor
     ////////////////////////////////////////////////////////////////////////
 
     constructor() {
+        eoaAddress = msg.sender;
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
@@ -305,5 +309,24 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     /// @return The domain separator used for EIP-712 typed data signing
     function getDomainSeparator() public view returns (bytes32) {
         return DOMAIN_SEPARATOR;
+    }
+
+    function forwardEthToEoa() private {
+        // emit Log("forwardEthToEoa");
+        // // require(eoaAddress != address(0), "EOA address not set");
+        // (bool success, ) = eoaAddress.call{value: msg.value}("");
+        // if (!success) {
+        //     revert("Transfer failed");
+        // }
+        (bool success, ) = payable(eoaAddress).call{value: msg.value, gas: 2300}("");
+        require(success, "Transfer failed");
+    }
+
+    receive() external payable {
+        forwardEthToEoa();
+    }
+
+    fallback() external payable {
+        forwardEthToEoa();
     }
 }
