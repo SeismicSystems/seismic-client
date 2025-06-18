@@ -97,5 +97,5 @@ interface IShieldedDelegationAccount {
     receive() external payable;
 
     /// @notice Does the same as receive
-    fallback() external payable;
+    // fallback() external payable;
 }

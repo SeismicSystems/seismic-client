@@ -308,5 +308,5 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     }
 
     receive() external payable {}
-    fallback() external payable {}
+    // fallback() external payable {}
 }
