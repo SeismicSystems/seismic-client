@@ -306,4 +306,6 @@ contract ShieldedDelegationAccount is IShieldedDelegationAccount, MultiSendCallO
     function getDomainSeparator() public view returns (bytes32) {
         return DOMAIN_SEPARATOR;
     }
+
+    receive() external payable {}
 }

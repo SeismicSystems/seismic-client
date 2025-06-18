@@ -92,4 +92,7 @@ interface IShieldedDelegationAccount {
     /// @param idx The index of the key to access
     /// @return key The key
     function getKey(uint32 idx) external view returns (Key memory key);
+
+    /// @notice Allows EOA to still receive ETH
+    receive() external payable;
 }

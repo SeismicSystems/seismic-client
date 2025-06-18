@@ -266,7 +266,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param keyIndex Index of the key to use
     /// @param cipher Encrypted data to be executed
     /// @return signature The signature bytes
-    function _signExecuteDigestWithKey(address account, uint32 keyIndex, bytes memory cipher, uint256 privateKey)
+    function _signExecuteDigestWithKey(address payable account, uint32 keyIndex, bytes memory cipher, uint256 privateKey)
         internal
         view
         returns (bytes memory signature)
@@ -299,7 +299,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param keyIndex The key index to use
     /// @param calls The encoded calls to execute
     /// @param privateKey The private key to sign with
-    function _executeViaKey(address account, uint32 keyIndex, bytes memory calls, uint256 privateKey) internal {
+    function _executeViaKey(address payable account, uint32 keyIndex, bytes memory calls, uint256 privateKey) internal {
         // Encrypt the calls
         (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(account).encrypt(calls);
 
@@ -318,7 +318,7 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param privateKey The private key to sign with
     /// @param expectSpendLimitRevert Whether to expect a spend limit revert
     function _executeViaKeyTransparent(
-        address account,
+        address payable account,
         uint32 keyIndex,
         bytes memory calls,
         uint256 privateKey,
@@ -960,5 +960,16 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
             _executeViaKeyTransparent(ALICE_ADDRESS, keyIndex, calls, privateKey, true);
             assertEq(BOB_ADDRESS.balance, initialBalance + 10 ether, "No more transfers should be possible");
         }
+    }
+
+    function test_receiveEth() public {
+        vm.deal(BOB_ADDRESS, 10 ether);
+
+        assertEq(ALICE_ADDRESS.balance, 0 ether);
+
+        vm.prank(BOB_ADDRESS);
+        bool success = ALICE_ADDRESS.send(1 ether);
+        assertTrue(success, "Transfer failed");
+        assertEq(ALICE_ADDRESS.balance, 1 ether, "ShieldedDelegationAccount should forward the ETH to the EOA");
     }
 }
