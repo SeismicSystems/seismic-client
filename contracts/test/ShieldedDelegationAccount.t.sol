@@ -963,15 +963,13 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     }
 
     function test_receiveEth() public {
-        vm.deal(ALICE_ADDRESS, 10 ether);
+        vm.deal(BOB_ADDRESS, 10 ether);
 
-        assertEq(address(acc).balance, 0 ether);
+        assertEq(ALICE_ADDRESS.balance, 0 ether);
 
-        vm.prank(ALICE_ADDRESS);
-        (bool success, ) = payable(address(acc)).call{value: 1 ether}("");
-
+        vm.prank(BOB_ADDRESS);
+        bool success = ALICE_ADDRESS.send(1 ether);
         assertTrue(success, "Transfer failed");
-        assertEq(address(acc).balance, 0 ether, "ShieldedDelegationAccount should forward the ETH to the EOA");
-        assertEq(acc.eoaAddress().balance, 1 ether, "EOA should have received the ETH");
+        assertEq(ALICE_ADDRESS.balance, 1 ether, "ShieldedDelegationAccount should forward the ETH to the EOA");
     }
 }
