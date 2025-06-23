@@ -10,7 +10,9 @@ const FAUCET_PK_3 = process.env.FAUCET_3_PRIVATE_KEY! as Hex
 
 const TRIVIA_ADMIN_ADDRESS = '0x124b6b46BC76115881367fC454c2212c1e7bc2Ac'
 const PUMP_DEPLOYER_ADDRESS = '0x000a2466401BE2B1090cB17fb51dD601C0642AFc'
-const POKER_DEPLOYER_ADDRESS = '0x75c01Dff58c161B96A334E2d6eCD4dF629439A2e'
+
+const POKER_DEPLOYER_ADDRESS = '0xbE26ce375D5DF7d6E936579a273d98D0bBA5771C'
+const POKER_RELAYER_ADDRESS = '0xccdBFBF91E57C03e87Df1BFf33d5226c93d048aa'
 
 export type Key = { pk: Hex; silent?: boolean }
 export type FaucetConfig = {
@@ -33,7 +35,11 @@ const faucets: Faucets = {
       { pk: FAUCET_PK_2 },
       { pk: FAUCET_PK_3, silent: true },
     ],
-    extraAddresses: [PUMP_DEPLOYER_ADDRESS, POKER_DEPLOYER_ADDRESS],
+    extraAddresses: [
+      PUMP_DEPLOYER_ADDRESS,
+      POKER_DEPLOYER_ADDRESS,
+      POKER_RELAYER_ADDRESS,
+    ],
   },
   'node-3': {
     chain: seismicDevnet3,
