@@ -47,6 +47,7 @@ jobs:
         run: |
           cd "$SFOUNDRY_ROOT"
           git checkout seismic
+          git reset --hard origin/seismic
           git pull
           cargo build --bin sanvil
           cargo sweep --time 1
@@ -80,6 +81,7 @@ jobs:
         run: |
           cd "$SRETH_ROOT"
           git checkout seismic
+          git reset --hard origin/seismic
           git pull
           cargo build --bin seismic-reth
           cargo sweep --time 1
