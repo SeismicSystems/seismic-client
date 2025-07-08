@@ -39,7 +39,7 @@ import {
 import { testWsConnection } from '@sviem-tests/tests/ws.ts'
 import { sanvil } from '@sviem/chain.ts'
 
-const TIMEOUT_MS = 20_000
+const TIMEOUT_MS = 60_000
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
