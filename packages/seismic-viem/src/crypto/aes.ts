@@ -4,8 +4,7 @@ import { gcm } from '@noble/ciphers/webcrypto'
 import { secp256k1 } from '@noble/curves/secp256k1'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
-
-export type EncryptionNonce = number | bigint | Hex
+import type { EncryptionNonce } from '@sviem/crypto/nonce.ts'
 
 export class AesGcmCrypto {
   private readonly NONCE_LENGTH = 12 // 96 bits is the recommended nonce length for GCM

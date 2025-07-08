@@ -1,7 +1,8 @@
 import { Hex } from 'viem'
 
-import { AesGcmCrypto, EncryptionNonce } from '@sviem/crypto/aes.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
 import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
+import type { EncryptionNonce } from '@sviem/crypto/nonce.ts'
 
 export type EncryptionActions = {
   getEncryption: () => Hex
