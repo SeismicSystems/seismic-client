@@ -6,7 +6,6 @@ import {
   createShieldedWalletClient,
   getPlaintextCalldata,
   signSeismicTxTypedData,
-  stringifyBigInt,
 } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
 import {
@@ -162,7 +161,6 @@ export const testSeismicTx = async ({
     encryptionNonce: encWrite.encryptionNonce,
     encryptionPubkey: walletClient.getEncryptionPublicKey(),
   }
-  console.log(JSON.stringify(typedDataWriteTx, stringifyBigInt, 2))
   const signedTdWrite = await signSeismicTxTypedData(
     walletClient,
     typedDataWriteTx
@@ -177,7 +175,6 @@ export const testSeismicTx = async ({
   const tdReceipt = await walletClient.waitForTransactionReceipt({
     hash: tdHash,
   })
-  console.log(JSON.stringify(tdReceipt, stringifyBigInt, 2))
   expect(tdReceipt.status).toBe('success')
 
   const plaintextRead = getPlaintextCalldata({
