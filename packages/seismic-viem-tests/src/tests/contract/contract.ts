@@ -1,11 +1,15 @@
 import { expect } from 'bun:test'
 import {
   SEISMIC_TX_TYPE,
+  TransactionSerializableSeismic,
   createShieldedPublicClient,
   createShieldedWalletClient,
+  getPlaintextCalldata,
+  signSeismicTxTypedData,
+  stringifyBigInt,
 } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
-import { Account, Chain, Hex, hexToNumber } from 'viem'
+import { Account, Chain, Hex, hexToNumber, parseGwei } from 'viem'
 import { http } from 'viem'
 
 import { seismicCounterAbi } from '@sviem-tests/tests/contract/abi.ts'
@@ -127,4 +131,27 @@ export const testSeismicTx = async ({
   })
   // number has been set back to 11
   expect(isOdd3).toBe(true)
+
+  // Sign a tx using typed data transaction
+  // @ts-expect-error: this is fine
+  const plaintext = getPlaintextCalldata({
+    abi: seismicCounterAbi,
+    functionName: 'increment',
+  })
+  const { ciphertext, encryptionNonce } = await walletClient.encrypt(plaintext)
+  const typedDataTx: TransactionSerializableSeismic = {
+    type: 'seismic',
+    chainId: walletClient.chain.id,
+    to: deployedContractAddress,
+    gas: 1_000_000n,
+    gasPrice: parseGwei('100'),
+    data: ciphertext,
+    encryptionNonce,
+    encryptionPubkey: walletClient.getEncryptionPublicKey(),
+  }
+  const { typedData, signature } = await signSeismicTxTypedData(
+    walletClient,
+    typedDataTx
+  )
+  console.log(JSON.stringify({ typedData, signature }, stringifyBigInt, 2))
 }

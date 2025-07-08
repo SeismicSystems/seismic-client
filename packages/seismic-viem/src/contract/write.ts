@@ -28,7 +28,7 @@ import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.ts'
 import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
 
-const getPlaintextCalldata = <
+export const getPlaintextCalldata = <
   TChain extends Chain | undefined,
   TAccount extends Account,
   const TAbi extends Abi | readonly unknown[],

@@ -5,6 +5,8 @@ import { secp256k1 } from '@noble/curves/secp256k1'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
+export type EncryptionNonce = number | bigint | Hex
+
 export class AesGcmCrypto {
   private readonly NONCE_LENGTH = 12 // 96 bits is the recommended nonce length for GCM
   private readonly U64_SIZE = 8 // Size of u64 in bytes
@@ -63,7 +65,7 @@ export class AesGcmCrypto {
    */
   public async encrypt(
     plaintext: Hex | null | undefined,
-    nonce: number | bigint | Hex
+    nonce: EncryptionNonce
   ): Promise<Hex> {
     if (!plaintext || plaintext === '0x') {
       return '0x'
@@ -88,7 +90,7 @@ export class AesGcmCrypto {
    */
   public async decrypt(
     ciphertext: Hex | null | undefined,
-    nonce: number | bigint | Hex
+    nonce: EncryptionNonce
   ): Promise<Hex> {
     if (!ciphertext || ciphertext === '0x') {
       return '0x'

@@ -26,6 +26,7 @@ export type { ShieldedWriteContractDebugResult } from '@sviem/contract/write.ts'
 export {
   shieldedWriteContract,
   shieldedWriteContractDebug,
+  getPlaintextCalldata,
 } from '@sviem/contract/write.ts'
 export { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 
