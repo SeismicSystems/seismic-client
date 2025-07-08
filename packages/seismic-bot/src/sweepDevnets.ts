@@ -13,7 +13,7 @@ const SWEEP_ADDRESS = '0xd412c5Ecd343e264381fF15aFC0aD78a67B79F35'
  * This corresponds to the the mnemonic
  * "test test test test test test test test test test test junk"
  */
-const privateKeys: Hex[] = [
+const devnetPrivateKeys: Hex[] = [
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
   '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
   '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
@@ -36,7 +36,7 @@ const privateKeys: Hex[] = [
   '0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e',
 ]
 
-for (const pk of privateKeys) {
+for (const pk of devnetPrivateKeys) {
   const account = privateKeyToAccount(pk)
   const client = await createShieldedWalletClient({
     chain: seismicDevnet3,
