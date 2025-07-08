@@ -139,7 +139,7 @@ export const testSeismicTx = async ({
   expect(isOdd3).toBe(true)
 
   /* 
-  TODO: turn these into full-fledged utility functions
+  TODO: turn these into utility functions
   */
   // Sign a tx using typed data transaction
   // @ts-expect-error: this is fine
