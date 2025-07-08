@@ -9,7 +9,14 @@ import {
   stringifyBigInt,
 } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
-import { Account, Chain, Hex, hexToNumber, parseGwei } from 'viem'
+import {
+  Account,
+  Chain,
+  Hex,
+  decodeFunctionResult,
+  hexToNumber,
+  parseGwei,
+} from 'viem'
 import { http } from 'viem'
 
 import { seismicCounterAbi } from '@sviem-tests/tests/contract/abi.ts'
@@ -132,26 +139,86 @@ export const testSeismicTx = async ({
   // number has been set back to 11
   expect(isOdd3).toBe(true)
 
+  /* 
+  TODO: turn these into full-fledged utility functions
+  */
   // Sign a tx using typed data transaction
   // @ts-expect-error: this is fine
-  const plaintext = getPlaintextCalldata({
+  const plaintextWrite = getPlaintextCalldata({
     abi: seismicCounterAbi,
     functionName: 'increment',
   })
-  const { ciphertext, encryptionNonce } = await walletClient.encrypt(plaintext)
-  const typedDataTx: TransactionSerializableSeismic = {
+  const encWrite = await walletClient.encrypt(plaintextWrite)
+  const typedDataWriteTx: TransactionSerializableSeismic = {
     type: 'seismic',
+    nonce: await walletClient.getTransactionCount({
+      address: walletClient.account.address,
+    }),
     chainId: walletClient.chain.id,
     to: deployedContractAddress,
     gas: 1_000_000n,
     gasPrice: parseGwei('100'),
-    data: ciphertext,
-    encryptionNonce,
+    data: encWrite.ciphertext,
+    encryptionNonce: encWrite.encryptionNonce,
     encryptionPubkey: walletClient.getEncryptionPublicKey(),
   }
-  const { typedData, signature } = await signSeismicTxTypedData(
+  console.log(JSON.stringify(typedDataWriteTx, stringifyBigInt, 2))
+  const signedTdWrite = await signSeismicTxTypedData(
     walletClient,
-    typedDataTx
+    typedDataWriteTx
   )
-  console.log(JSON.stringify({ typedData, signature }, stringifyBigInt, 2))
+  const tdHash = await walletClient.sendRawTransaction({
+    // @ts-expect-error: this is fine
+    serializedTransaction: {
+      data: signedTdWrite.typedData,
+      signature: signedTdWrite.signature,
+    },
+  })
+  const tdReceipt = await walletClient.waitForTransactionReceipt({
+    hash: tdHash,
+  })
+  console.log(JSON.stringify(tdReceipt, stringifyBigInt, 2))
+  expect(tdReceipt.status).toBe('success')
+
+  const plaintextRead = getPlaintextCalldata({
+    abi: seismicCounterAbi,
+    // @ts-expect-error: this is fine
+    functionName: 'isOdd',
+  })
+  const encRead = await walletClient.encrypt(plaintextRead)
+  const typedDataReadTx: TransactionSerializableSeismic = {
+    type: 'seismic',
+    nonce: await walletClient.getTransactionCount({
+      address: walletClient.account.address,
+    }),
+    chainId: walletClient.chain.id,
+    to: deployedContractAddress,
+    gas: 1_000_000n,
+    gasPrice: parseGwei('100'),
+    data: encRead.ciphertext,
+    encryptionNonce: encRead.encryptionNonce,
+    encryptionPubkey: walletClient.getEncryptionPublicKey(),
+  }
+  const signedTdRead = await signSeismicTxTypedData(
+    walletClient,
+    typedDataReadTx
+  )
+  // @ts-expect-error: this is fine
+  const tdResponse: Hex = await walletClient.publicRequest({
+    method: 'eth_call',
+    params: [
+      { data: signedTdRead.typedData, signature: signedTdRead.signature },
+    ],
+  })
+  const tdPlaintext = await walletClient.decrypt(
+    tdResponse,
+    encRead.encryptionNonce
+  )
+  const isOdd4 = decodeFunctionResult({
+    abi: seismicCounterAbi,
+    functionName: 'isOdd',
+    args: [],
+    data: tdPlaintext || '0x',
+  })
+  expect(isOdd4).toBe(false)
 }
