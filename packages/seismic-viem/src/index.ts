@@ -26,6 +26,7 @@ export type { ShieldedWriteContractDebugResult } from '@sviem/contract/write.ts'
 export {
   shieldedWriteContract,
   shieldedWriteContractDebug,
+  getPlaintextCalldata,
 } from '@sviem/contract/write.ts'
 export { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 
@@ -75,6 +76,7 @@ export {
   sharedSecretPoint,
 } from '@sviem/crypto/aes.ts'
 export { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
+export type { EncryptionNonce } from '@sviem/crypto/nonce.ts'
 
 export { rng, rngPrecompile } from '@sviem/precompiles/rng.ts'
 export { hdfk, hdfkPrecompile } from '@sviem/precompiles/hkdf.ts'

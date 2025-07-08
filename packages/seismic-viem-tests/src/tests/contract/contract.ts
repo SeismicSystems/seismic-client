@@ -1,11 +1,21 @@
 import { expect } from 'bun:test'
 import {
   SEISMIC_TX_TYPE,
+  TransactionSerializableSeismic,
   createShieldedPublicClient,
   createShieldedWalletClient,
+  getPlaintextCalldata,
+  signSeismicTxTypedData,
 } from 'seismic-viem'
 import { getShieldedContract } from 'seismic-viem'
-import { Account, Chain, Hex, hexToNumber } from 'viem'
+import {
+  Account,
+  Chain,
+  Hex,
+  decodeFunctionResult,
+  hexToNumber,
+  parseGwei,
+} from 'viem'
 import { http } from 'viem'
 
 import { seismicCounterAbi } from '@sviem-tests/tests/contract/abi.ts'
@@ -127,4 +137,85 @@ export const testSeismicTx = async ({
   })
   // number has been set back to 11
   expect(isOdd3).toBe(true)
+
+  /* 
+  TODO: turn these into utility functions
+  */
+  // Sign a tx using typed data transaction
+  // @ts-expect-error: this is fine
+  const plaintextWrite = getPlaintextCalldata({
+    abi: seismicCounterAbi,
+    functionName: 'increment',
+  })
+  const encWrite = await walletClient.encrypt(plaintextWrite)
+  const typedDataWriteTx: TransactionSerializableSeismic = {
+    type: 'seismic',
+    nonce: await walletClient.getTransactionCount({
+      address: walletClient.account.address,
+    }),
+    chainId: walletClient.chain.id,
+    to: deployedContractAddress,
+    gas: 1_000_000n,
+    gasPrice: parseGwei('100'),
+    data: encWrite.ciphertext,
+    encryptionNonce: encWrite.encryptionNonce,
+    encryptionPubkey: walletClient.getEncryptionPublicKey(),
+  }
+  const signedTdWrite = await signSeismicTxTypedData(
+    walletClient,
+    typedDataWriteTx
+  )
+  const tdHash = await walletClient.sendRawTransaction({
+    // @ts-expect-error: this is fine
+    serializedTransaction: {
+      data: signedTdWrite.typedData,
+      signature: signedTdWrite.signature,
+    },
+  })
+  const tdReceipt = await walletClient.waitForTransactionReceipt({
+    hash: tdHash,
+  })
+  expect(tdReceipt.status).toBe('success')
+
+  const plaintextRead = getPlaintextCalldata({
+    abi: seismicCounterAbi,
+    // @ts-expect-error: this is fine
+    functionName: 'isOdd',
+  })
+  const encRead = await walletClient.encrypt(plaintextRead)
+  const typedDataReadTx: TransactionSerializableSeismic = {
+    type: 'seismic',
+    nonce: await walletClient.getTransactionCount({
+      address: walletClient.account.address,
+    }),
+    chainId: walletClient.chain.id,
+    to: deployedContractAddress,
+    gas: 1_000_000n,
+    gasPrice: parseGwei('100'),
+    data: encRead.ciphertext,
+    encryptionNonce: encRead.encryptionNonce,
+    encryptionPubkey: walletClient.getEncryptionPublicKey(),
+  }
+  const signedTdRead = await signSeismicTxTypedData(
+    walletClient,
+    typedDataReadTx
+  )
+  // @ts-expect-error: this is fine
+  const tdResponse: Hex = await walletClient.publicRequest({
+    method: 'eth_call',
+    params: [
+      { data: signedTdRead.typedData, signature: signedTdRead.signature },
+    ],
+  })
+  const tdPlaintext = await walletClient.decrypt(
+    tdResponse,
+    encRead.encryptionNonce
+  )
+  const isOdd4 = decodeFunctionResult({
+    abi: seismicCounterAbi,
+    functionName: 'isOdd',
+    args: [],
+    data: tdPlaintext || '0x',
+  })
+  expect(isOdd4).toBe(false)
 }

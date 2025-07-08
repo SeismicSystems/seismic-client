@@ -2,6 +2,8 @@ import { Hex, bytesToHex, trim } from 'viem'
 
 import { randomBytes } from '@noble/ciphers/webcrypto'
 
+export type EncryptionNonce = number | bigint | Hex
+
 export const randomEncryptionNonce = (): Hex => {
   let nonce = bytesToHex(randomBytes(12))
   while (nonce != trim(nonce)) {
