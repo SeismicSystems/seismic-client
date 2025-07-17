@@ -113,6 +113,9 @@ export const testSeismicTx = async ({
   const isOdd2 = await seismicContract.tread.isOdd()
   expect(isOdd2).toBe(false)
 
+  // TODO(lyron): add something like `walletClient.dwriteContract(...)`
+  // to test your stuff works. Also want to check that the `plaintextTx` you get
+  // is equal to the `plaintextTx` below (use same [TEST_NUMBER] arg)
   const {
     txHash: tx3,
     plaintextTx,

@@ -175,6 +175,7 @@ export const shieldedWalletActions = <
   return {
     writeContract: (args) => shieldedWriteContract(client, args as any),
     twriteContract: (args) => writeContract(client, args as any),
+    // TODO(lyron): add dwriteContract as an action
     readContract: (args) => signedReadContract(client, args as any),
     treadContract: (args) => readContract(client, args as any),
     signedCall: (args) => signedCall(client, args as any),
