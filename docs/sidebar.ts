@@ -187,7 +187,7 @@ const reactSidebar = [
       //   text: 'WalletConnect',
       //   link: '/react/guides/walletconnect',
       // },
-      // TODO(christian): Add AppKit guide
+      // TODO(lyron): Add AppKit guide / make it work
       // {
       //   text: 'AppKit',
       //   link: '/react/guides/appkit',
