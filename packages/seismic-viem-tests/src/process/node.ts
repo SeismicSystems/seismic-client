@@ -75,7 +75,7 @@ export const buildNode = async (chain: Chain) => {
     case seismicDevnet.id:
       const srethDir = process.env.SRETH_ROOT
       if (srethDir) {
-        return buildReth(srethDir)
+        return buildReth(srethDir) 
       }
     default:
       throw new Error(`Unable to map Chain ${chain.id} to Backend`)
