@@ -116,7 +116,7 @@ export type ShieldedWalletActions<
       TAccount,
       TChainOverride
     >
-  ) => Promise<ShieldedWriteContractDebugResult<TChain, TAccount>>
+  ) => Promise<ShieldedWriteContractDebugResult<TChain | undefined, TAccount>>
   readContract: <
     TAbi extends Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
@@ -198,7 +198,12 @@ export const shieldedWalletActions = <
   return {
     writeContract: (args) => shieldedWriteContract(client, args as any),
     twriteContract: (args) => writeContract(client, args as any),
-    dwriteContract: (args) => shieldedWriteContractDebug(client, args as any),
+    dwriteContract: (args) => {
+      const debugResult = shieldedWriteContractDebug(client, args as any)
+      return debugResult as Promise<
+        ShieldedWriteContractDebugResult<TChain | undefined, TAccount>
+      >
+    },
     readContract: (args) => signedReadContract(client, args as any),
     treadContract: (args) => readContract(client, args as any),
     signedCall: (args) => signedCall(client, args as any),

@@ -20,7 +20,6 @@ import { http } from 'viem'
 
 import { seismicCounterAbi } from '@sviem-tests/tests/contract/abi.ts'
 import { seismicCounterBytecode } from '@sviem-tests/tests/contract/bytecode.ts'
-import { shieldedWalletActions } from '../../../../seismic-viem/src/actions/wallet.ts'
 
 export type ContractTestArgs = {
   chain: Chain
@@ -117,23 +116,25 @@ export const testSeismicTx = async ({
   const {
     txHash: tx3,
     plaintextTx,
+    shieldedTx,
   } = await seismicContract.dwrite.setNumber([TEST_NUMBER])
+  console.log("plaintextTx", plaintextTx);
 
-  const actions = shieldedWalletActions(walletClient);
-  const dwriteActionResult = await actions.dwriteContract({
+  const dwriteActionResult = await walletClient.dwriteContract({
     address: deployedContractAddress,
     abi: seismicCounterAbi,
     functionName: 'setNumber',
     args: [TEST_NUMBER],
   });
-  expect(dwriteActionResult.plaintextTx.data).toBe(plaintextTx.data);
+  console.log("dwriteActionResult", dwriteActionResult);
+  expect(dwriteActionResult.plaintextTx.data).toBe(plaintextTx.data); 
 
   // console.info(`[3] Set number tx: ${tx1}`)
   // console.info(
   //   `[3] Plaintext tx: ${JSON.stringify(plaintextTx, stringifyBigInt, 2)}`
   // )
   // console.info(
-  //   `[3] Shielded tx: ${JSON.stringi@fy(shieldedTx, stringifyBigInt, 2)}`
+  //   `[3] Shielded tx: ${JSON.stringify(shieldedTx, stringifyBigInt, 2)}`
   // )
   const receipt3 = await publicClient.waitForTransactionReceipt({ hash: tx3 })
   // console.info(
