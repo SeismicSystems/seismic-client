@@ -14,7 +14,11 @@ import { readContract, writeContract } from 'viem/actions'
 
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { signedReadContract } from '@sviem/contract/read.ts'
-import { shieldedWriteContract } from '@sviem/contract/write.ts'
+import {
+  ShieldedWriteContractDebugResult,
+  shieldedWriteContract,
+  shieldedWriteContractDebug,
+} from '@sviem/contract/write.ts'
 import type {
   SendSeismicTransactionParameters,
   SendSeismicTransactionRequest,
@@ -94,6 +98,25 @@ export type ShieldedWalletActions<
       TChainOverride
     >
   ) => Promise<WriteContractReturnType>
+  dwriteContract: <
+    TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, 'payable' | 'nonpayable'>,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      'payable' | 'nonpayable',
+      TFunctionName
+    >,
+    TChainOverride extends Chain | undefined = undefined,
+  >(
+    args: WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      TChain,
+      TAccount,
+      TChainOverride
+    >
+  ) => Promise<ShieldedWriteContractDebugResult<TChain | undefined, TAccount>>
   readContract: <
     TAbi extends Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
@@ -175,6 +198,12 @@ export const shieldedWalletActions = <
   return {
     writeContract: (args) => shieldedWriteContract(client, args as any),
     twriteContract: (args) => writeContract(client, args as any),
+    dwriteContract: (args) => {
+      const debugResult = shieldedWriteContractDebug(client, args as any)
+      return debugResult as Promise<
+        ShieldedWriteContractDebugResult<TChain | undefined, TAccount>
+      >
+    },
     readContract: (args) => signedReadContract(client, args as any),
     treadContract: (args) => readContract(client, args as any),
     signedCall: (args) => signedCall(client, args as any),
