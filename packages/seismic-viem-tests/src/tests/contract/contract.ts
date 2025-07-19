@@ -118,16 +118,14 @@ export const testSeismicTx = async ({
     plaintextTx,
     shieldedTx,
   } = await seismicContract.dwrite.setNumber([TEST_NUMBER])
-  console.log("plaintextTx", plaintextTx);
 
-  const dwriteActionResult = await walletClient.dwriteContract({
+  const {plaintextTx: dwritePlaintextTx} = await walletClient.dwriteContract({
     address: deployedContractAddress,
     abi: seismicCounterAbi,
     functionName: 'setNumber',
     args: [TEST_NUMBER],
   });
-  console.log("dwriteActionResult", dwriteActionResult);
-  expect(dwriteActionResult.plaintextTx.data).toBe(plaintextTx.data); 
+  expect(dwritePlaintextTx.data).toBe(plaintextTx.data); 
 
   // console.info(`[3] Set number tx: ${tx1}`)
   // console.info(
