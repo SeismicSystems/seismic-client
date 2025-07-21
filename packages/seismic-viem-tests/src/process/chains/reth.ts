@@ -14,7 +14,7 @@ import {
 
 type RethProcessOptions = NodeProcessOptions & {
   dev?: boolean
-  devBlockMaxTx?: number
+  devBlockTimeSeconds?: number
   enclaveMockServer?: boolean
 }
 
@@ -41,13 +41,13 @@ const runRethLocally = async (
     dev = true,
     waitMs = 5_000,
     verbosity,
-    devBlockMaxTx = 1,
+    devBlockTimeSeconds = 2,
     enclaveMockServer = true,
   } = options
 
   const devArg = dev ? ['--dev'] : []
-  const devBlockMaxTxArg = devBlockMaxTx
-    ? ['--dev.block-max-transactions', devBlockMaxTx.toString()]
+  const devBlockTimeArg = devBlockTimeSeconds
+    ? ['--dev.block-time', `${devBlockTimeSeconds}s`]
     : []
   const quietArg = silent ? ['--quiet'] : []
   const httpArgs = port ? ['--http', '--http.port', port.toString()] : []
@@ -83,7 +83,7 @@ const runRethLocally = async (
       '--',
       'node',
       ...devArg,
-      ...devBlockMaxTxArg,
+      ...devBlockTimeArg,
       ...httpArgs,
       ...wsArgs,
       ...enclaveMockServerArg,
