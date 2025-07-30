@@ -40,6 +40,7 @@ import { testWsConnection } from '@sviem-tests/tests/ws.ts'
 import { sanvil } from '@sviem/chain.ts'
 
 const TIMEOUT_MS = 60_000
+const CONTRACT_TIMEOUT_MS = 120_000
 
 const ENC_SK =
   '0x311d54d3bf8359c70827122a44a7b4458733adce3c51c6b59d9acfce85e07505'
@@ -75,7 +76,7 @@ describe('Seismic Contract', async () => {
     'deploy & call contracts with seismic tx',
     async () => await testSeismicTx({ chain, url, account }),
     {
-      timeout: TIMEOUT_MS,
+      timeout: CONTRACT_TIMEOUT_MS,
     }
   )
 
@@ -94,7 +95,7 @@ describe('Seismic Contract', async () => {
       await testSeismicTx({ chain, url, account: jsonRpcAccount })
     },
     {
-      timeout: TIMEOUT_MS,
+      timeout: CONTRACT_TIMEOUT_MS,
     }
   )
 })

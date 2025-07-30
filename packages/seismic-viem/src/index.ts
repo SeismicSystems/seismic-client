@@ -22,6 +22,7 @@ export { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 
 export { getShieldedContract } from '@sviem/contract/contract.ts'
 export { signedReadContract } from '@sviem/contract/read.ts'
+export { signedCall } from '@sviem/signedCall.ts'
 export type { ShieldedWriteContractDebugResult } from '@sviem/contract/write.ts'
 export {
   shieldedWriteContract,
