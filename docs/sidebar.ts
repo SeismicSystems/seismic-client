@@ -182,16 +182,10 @@ const reactSidebar = [
         text: 'Privy',
         link: '/react/guides/privy',
       },
-      // TODO(christian): Make walletconnect work
-      // {
-      //   text: 'WalletConnect',
-      //   link: '/react/guides/walletconnect',
-      // },
-      // TODO(lyron): Add AppKit guide / make it work
-      // {
-      //   text: 'AppKit',
-      //   link: '/react/guides/appkit',
-      // },
+      {
+        text: 'AppKit',
+        link: '/react/guides/appkit',
+      },
     ],
   },
 ]

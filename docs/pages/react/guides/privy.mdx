@@ -30,6 +30,7 @@ bun add viem seismic-viem seismic-react @privy-io/wagmi @privy-io/react-auth @ta
 
 ```tsx [Component.tsx]
 import React from 'react'
+import { parseEther } from 'viem'
 import { useShieldedWallet } from 'seismic-react'
 
 export const Component: React.FC = () => {
@@ -69,45 +70,44 @@ export default App
 ```tsx [Providers.tsx]
 import { ShieldedWalletProvider } from 'seismic-react'
 import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { http } from 'viem'
 
-import { PrivyProvider } from '@privy-io/react-auth'
-import { WagmiProvider, createConfig } from '@privy-io/wagmi'
+import { WagmiProvider } from 'wagmi'
+import { createAppKit } from '@reown/appkit/react'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const queryClient = new QueryClient()
-const privyAppId = 'j6tqymuasuiykx7hf4lm3fbsj'
+const projectId = '4486fd89eee982e3f04e57865c8976af'
 
-const CHAINS = [seismicDevnet1, sanvil]
+const networks = [seismicDevnet1, sanvil]
 
-const wagmiConfig = createConfig({
-  // @ts-expect-error: this is okay
-  chains: CHAINS,
+const wagmiAdapter = new WagmiAdapter({
+  networks,
+  projectId,
+  ssr: true,
   transports: {
     [sanvil.id]: http(),
     [seismicDevnet1.id]: http(),
   },
 })
 
+createAppKit({
+  adapters: [wagmiAdapter],
+  // @ts-expect-error: this is okay
+  networks,
+  projectId,
+})
+
 export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
-    <PrivyProvider
-      appId={privyAppId}
-      config={{
-        supportedChains: CHAINS,
-        defaultChain: seismicDevnet1,
-        embeddedWallets: {
-          createOnLogin: 'all-users',
-        },
-      }}
-    >
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={wagmiConfig}>
-          <ShieldedWalletProvider config={wagmiConfig}>
-            {children}
-          </ShieldedWalletProvider>
-        </WagmiProvider>
+        <ShieldedWalletProvider config={wagmiAdapter.wagmiConfig}>
+          {children}
+        </ShieldedWalletProvider>
       </QueryClientProvider>
-    </PrivyProvider>
+    </WagmiProvider>
   )
 }
 ```
