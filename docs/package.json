@@ -22,6 +22,6 @@
     "@privy-io/wagmi": "^1.0.3",
     "@rainbow-me/rainbowkit": "^2.0.0",
     "@tanstack/react-query": "^5.67.3",
-    "@walletconnect/ethereum-provider": "^2.19.0"
+    "@walletconnect/ethereum-provider": "^2.21.6"
   }
 }
