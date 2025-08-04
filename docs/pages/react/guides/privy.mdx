@@ -30,6 +30,7 @@ bun add viem seismic-viem seismic-react @privy-io/wagmi @privy-io/react-auth @ta
 
 ```tsx [Component.tsx]
 import React from 'react'
+import { parseEther } from 'viem'
 import { useShieldedWallet } from 'seismic-react'
 
 export const Component: React.FC = () => {
@@ -69,6 +70,7 @@ export default App
 ```tsx [Providers.tsx]
 import { ShieldedWalletProvider } from 'seismic-react'
 import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { http } from 'viem'
 
 import { PrivyProvider } from '@privy-io/react-auth'
 import { WagmiProvider, createConfig } from '@privy-io/wagmi'

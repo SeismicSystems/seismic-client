@@ -182,11 +182,10 @@ const reactSidebar = [
         text: 'Privy',
         link: '/react/guides/privy',
       },
-      // TODO(christian): Add AppKit guide
-      // {
-      //   text: 'AppKit',
-      //   link: '/react/guides/appkit',
-      // },
+      {
+        text: 'AppKit',
+        link: '/react/guides/appkit',
+      },
     ],
   },
 ]
