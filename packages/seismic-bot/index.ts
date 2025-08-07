@@ -26,7 +26,11 @@ const faucets: Faucets = {
   'node-1': {
     chain: seismicDevnet1,
     privateKeys: [{ pk: FAUCET_PK_1 }],
-    extraAddresses: [TRIVIA_ADMIN_ADDRESS],
+    extraAddresses: [
+      TRIVIA_ADMIN_ADDRESS,
+      POKER_DEPLOYER_ADDRESS,
+      POKER_RELAYER_ADDRESS,
+    ],
   },
   'node-2': {
     chain: seismicDevnet2,
