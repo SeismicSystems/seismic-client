@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.5
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.5
@@ -41,7 +41,7 @@ jobs:
       SFOUNDRY_ROOT: /home/azureuser/seismic/seismic-foundry
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build anvil
         # cargo sweep will remove files in target/ that are older than 1 day
         run: |
@@ -72,7 +72,7 @@ jobs:
       RETH_STATIC_FILES: /home/azureuser/.seismic-reth/static_files
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Clear reth files
         run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
       - name: Build reth
