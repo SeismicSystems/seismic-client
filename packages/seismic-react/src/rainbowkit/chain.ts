@@ -15,7 +15,7 @@ const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
     id: chain.id,
     name: chain.name,
     iconUrl:
-      'https://seismic-public-assets.s3.us-east-1.amazonaws.com/seismic-logo-light.png',
+      'https://seismic-public-assets.s3.amazonaws.com/seismic-logo-light.png',
     nativeCurrency: chain.nativeCurrency,
     rpcUrls: chain.rpcUrls,
     blockExplorers: chain.blockExplorers,
