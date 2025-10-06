@@ -34,6 +34,19 @@ export type FaucetConfig = {
 export type Faucets = Record<string, FaucetConfig>
 
 const faucets: Faucets = {
+  'internal-testnet': {
+    chain: internalTestnet,
+    privateKeys: [
+      { pk: FAUCET_PK_1 },
+      { pk: FAUCET_PK_2 },
+      { pk: FAUCET_PK_3, silent: true },
+    ],
+    extraAddresses: [
+      PUMP_DEPLOYER_ADDRESS,
+      POKER_DEPLOYER_ADDRESS,
+      POKER_RELAYER_ADDRESS,
+    ],
+  },
   'node-1': {
     chain: seismicDevnet1,
     privateKeys: [{ pk: FAUCET_PK_1 }],
@@ -60,19 +73,6 @@ const faucets: Faucets = {
     chain: seismicDevnet3,
     privateKeys: [{ pk: FAUCET_PK_1 }],
     extraAddresses: [],
-  },
-  'internal-testnet': {
-    chain: internalTestnet,
-    privateKeys: [
-      { pk: FAUCET_PK_1 },
-      { pk: FAUCET_PK_2 },
-      { pk: FAUCET_PK_3, silent: true },
-    ],
-    extraAddresses: [
-      PUMP_DEPLOYER_ADDRESS,
-      POKER_DEPLOYER_ADDRESS,
-      POKER_RELAYER_ADDRESS,
-    ],
   },
 }
 
