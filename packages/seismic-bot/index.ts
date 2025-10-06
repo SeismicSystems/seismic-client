@@ -2,7 +2,18 @@ import { Address, Chain } from 'viem'
 import { Hex } from 'viem'
 
 import { checkAllFaucets } from '@sbot/faucetChecker'
-import { seismicDevnet1, seismicDevnet2, seismicDevnet3 } from '@sviem/chain'
+import {
+  createSeismicDevnet,
+  seismicDevnet1,
+  seismicDevnet2,
+  seismicDevnet3,
+} from '@sviem/chain'
+
+const internalTestnet = createSeismicDevnet({
+  nodeHost: 'internal-testnet.seismictest.net',
+  explorerUrl: 'explorer.internal-testnet.seismictest.net',
+  node: 1,
+})
 
 const FAUCET_PK_1 = process.env.FAUCET_1_PRIVATE_KEY! as Hex
 const FAUCET_PK_2 = process.env.FAUCET_2_PRIVATE_KEY! as Hex
@@ -50,5 +61,19 @@ const faucets: Faucets = {
     privateKeys: [{ pk: FAUCET_PK_1 }],
     extraAddresses: [],
   },
+  'internal-testnet': {
+    chain: internalTestnet,
+    privateKeys: [
+      { pk: FAUCET_PK_1 },
+      { pk: FAUCET_PK_2 },
+      { pk: FAUCET_PK_3, silent: true },
+    ],
+    extraAddresses: [
+      PUMP_DEPLOYER_ADDRESS,
+      POKER_DEPLOYER_ADDRESS,
+      POKER_RELAYER_ADDRESS,
+    ],
+  },
 }
+
 checkAllFaucets(faucets)
