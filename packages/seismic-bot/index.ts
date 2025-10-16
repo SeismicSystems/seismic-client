@@ -48,6 +48,7 @@ const faucets: Faucets = {
       '0xdDBb6f358f290408D76847b4F602f0FD599295fd',
       '0x478669bB3846d79F2fF511CE99eAEE8f85554476',
       '0x8b2568E26Edcb132C8Ba7901be2924100C5155B9',
+      '0x88d213e2A577Bae274591fd5de5aC65F17b9881B', // terence
     ],
   },
   'node-1': {
