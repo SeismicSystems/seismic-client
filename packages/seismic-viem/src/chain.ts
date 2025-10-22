@@ -239,7 +239,10 @@ export const seismicChainFormatters: ChainFormatters = {
   },
 }
 
-export type CreateSeismicDevnetParams = { explorerUrl?: string } & (
+export type CreateSeismicDevnetParams = {
+  explorerUrl?: string
+  explorerName?: string
+} & (
   | { node?: number; nodeHost: string }
   | { node: number; nodeHost?: string }
 )
@@ -253,6 +256,7 @@ export type CreateSeismicDevnetParams = { explorerUrl?: string } & (
  *   - `nodeHost` (string, optional) - The direct hostname for the node. Required if `node` is not provided.
  *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided and `node` exists,
  *     defaults to `https://explorer-{node}.seismicdev.net`.
+ *   - `explorerName` (string, optional) - Custom block explorer name. Defaults to empty string.
  *
  * @throws {Error} Throws if neither node number nor nodeHost is provided.
  *
@@ -277,6 +281,7 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
   node,
   nodeHost,
   explorerUrl,
+  explorerName = '',
 }: CreateSeismicDevnetParams): Chain => {
   if (!node && !nodeHost) {
     throw new Error('Must set `nodeHost` argument, e.g. node-1.seismicdev.net')
@@ -301,7 +306,7 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
     blockExplorers: blockExplorerUrl
       ? {
           default: {
-            name: 'SeismicScan',
+            name: explorerName,
             url: blockExplorerUrl,
           },
         }
@@ -316,14 +321,20 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
  *
  * This is a single-node network running seismic's fork of reth on --dev mode
  */
-export const seismicDevnet1 = createSeismicDevnet({ node: 1 })
+export const seismicDevnet1 = createSeismicDevnet({
+  node: 1,
+  explorerName: 'Blockscout',
+})
 /**
  * The seismic devnet running at node-2.seismicdev.net
  * Its associated explorer is at explorer-2.seismicdev.net
  *
  * This is a single-node network running seismic's fork of reth on --dev mode
  */
-export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
+export const seismicDevnet2 = createSeismicDevnet({
+  node: 2,
+  explorerName: 'Blockscout',
+})
 
 /**
  * The seismic devnet running at node-3.seismicdev.net
@@ -331,7 +342,10 @@ export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
  *
  * This is a single-node network running seismic's fork of reth on --dev mode
  */
-export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
+export const seismicDevnet3 = createSeismicDevnet({
+  node: 3,
+  explorerName: 'Blockscout',
+})
 
 /**
  * The first seismic testnet
@@ -341,6 +355,7 @@ export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
 export const seismicTestnet = createSeismicDevnet({
   nodeHost: 'internal-testnet.seismictest.net',
   explorerUrl: 'https://seismic-testnet.socialscan.io',
+  explorerName: 'SocialScan',
 })
 
 /**

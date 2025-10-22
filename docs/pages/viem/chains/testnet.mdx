@@ -1,0 +1,97 @@
+---
+description: Pre-configured chain for connecting to the Seismic testnet
+---
+
+# Testnet
+
+Pre-configured chain for connecting to the Seismic testnet
+
+## Import
+
+```ts
+import { seismicTestnet } from 'seismic-viem'
+```
+
+## Usage
+
+`seismicTestnet` provides a pre-configured chain for connecting to the Seismic testnet.
+
+```ts
+import { seismicTestnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicTestnet,
+  transport: http(),
+})
+```
+
+## Description
+
+This is a pre-configured chain for connecting to the Seismic testnet running at `internal-testnet.seismictest.net`.
+
+- **Network Type**: Multi-node testnet network
+- **Block Explorer**: Available at `seismic-testnet.socialscan.io`
+- **Consensus**: Nodes coordinate using summit, Seismic's consensus client
+
+## Properties
+
+The `seismicTestnet` chain configuration contains the following properties:
+
+### id
+
+- **Type:** `number`
+- **Value:** `5124`
+
+The chain identifier.
+
+### name
+
+- **Type:** `string`
+- **Value:** `"Seismic"`
+
+Human-readable name of the chain.
+
+### nativeCurrency
+
+- **Type:** `object`
+- **Value:** `{ decimals: 18, name: "Ether", symbol: "ETH" }`
+
+The native currency configuration of the chain.
+
+### rpcUrls
+
+- **Type:** `object`
+- **Value:**
+  ```ts
+  {
+    default: {
+      http: ["https://internal-testnet.seismictest.net/rpc"],
+      webSocket: ["wss://internal-testnet.seismictest.net/ws"]
+    }
+  }
+  ```
+
+Collection of RPC endpoints for connecting to the Seismic testnet.
+
+### blockExplorers
+
+- **Type:** `object`
+- **Value:**
+  ```ts
+  {
+    default: {
+      name: "SocialScan",
+      url: "https://seismic-testnet.socialscan.io"
+    }
+  }
+  ```
+
+Block explorer configuration for the testnet.
+
+### formatters
+
+- **Type:** `ChainFormatters`
+- **Value:** `seismicChainFormatters`
+
+Custom formatters for Seismic-specific data structures.

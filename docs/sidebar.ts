@@ -58,6 +58,7 @@ const viemSidebar = [
       {
         text: 'Chain Specs',
         items: [
+          { text: 'testnet', link: '/viem/chains/testnet' },
           { text: 'sanvil', link: '/viem/chains/sanvil' },
           { text: 'devnet1', link: '/viem/chains/devnet1' },
           { text: 'devnet2', link: '/viem/chains/devnet2' },
