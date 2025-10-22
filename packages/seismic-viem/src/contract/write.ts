@@ -121,12 +121,12 @@ async function getShieldedWriteContractRequest<
  * @returns {Promise<WriteContractReturnType>} A promise that resolves to a transaction hash.
  *
  * @example
- * import { custom, parseAbi } from 'viem'
+ * import { custom, http, parseAbi } from 'viem'
  * import { createShieldedWalletContract, shieldedWriteContract, seismicDevnet } from 'seismic-viem'
  *
  * const client = createShieldedWalletClient({
  *   chain: seismicDevnet,
- *   transport: custom(window.ethereum),
+ *   transport: http(),
  * })
  * const hash = await shieldedWriteContract(client, {
  *   address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',

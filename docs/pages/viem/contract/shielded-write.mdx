@@ -42,11 +42,11 @@ import {
   seismicDevnet,
   shieldedWriteContract,
 } from 'seismic-viem'
-import { custom, parseAbi } from 'viem'
+import { custom, http, parseAbi } from 'viem'
 
 const client = createShieldedWalletClient({
   chain: seismicDevnet,
-  transport: custom(window.ethereum),
+  transport: http(),
 })
 
 const hash = await shieldedWriteContract(client, {
