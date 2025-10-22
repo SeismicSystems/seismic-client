@@ -334,6 +334,16 @@ export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
 export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
 
 /**
+ * The first seismic testnet
+ *
+ * Nodes coordinate using summit, Seismic's consensus client
+ */
+export const seismicTestnet = createSeismicDevnet({
+  nodeHost: 'internal-testnet.seismictest.net',
+  explorerUrl: 'https://seismic-testnet.socialscan.io',
+})
+
+/**
  * An alias for {@link seismicDevnet1}
  */
 export const seismicDevnet = seismicDevnet1
