@@ -72,6 +72,7 @@ const faucets: Faucets = {
       PUMP_DEPLOYER_ADDRESS,
       POKER_DEPLOYER_ADDRESS,
       POKER_RELAYER_ADDRESS,
+      '0xB83c733772fA07Ed130F58099342416b72f6d9eD',  // matt haines
     ],
   },
   'node-3': {
