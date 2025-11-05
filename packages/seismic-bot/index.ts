@@ -75,11 +75,13 @@ const faucets: Faucets = {
       '0xB83c733772fA07Ed130F58099342416b72f6d9eD',  // matt haines
     ],
   },
+  /*
   'node-3': {
     chain: seismicDevnet3,
     privateKeys: [{ pk: FAUCET_PK_1 }],
     extraAddresses: [],
   },
+  */
 }
 
 checkAllFaucets(faucets)
