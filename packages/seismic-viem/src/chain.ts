@@ -333,6 +333,19 @@ export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
  */
 export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
 
+
+/**
+ * The seismic internal testnet running at internal-testnet.seismictest.net
+ * Its associated explorer is at explorer.internal-testnet.seismictest.net
+ *
+ * This is a network running seismic's fork of reth on --dev mode with the summit consensus client.
+ */
+export const internalTestnet = createSeismicDevnet({
+  nodeHost: 'internal-testnet.seismictest.net',
+  explorerUrl: 'explorer.internal-testnet.seismictest.net',
+  node: 1,
+})
+
 /**
  * An alias for {@link seismicDevnet1}
  */
