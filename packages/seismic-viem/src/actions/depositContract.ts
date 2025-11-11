@@ -1,8 +1,9 @@
-import type { Account, Chain, Transport, PublicClient, WalletClient, ReadContractReturnType } from "viem";
+import type { Account, Chain, Transport, PublicClient, WalletClient, ReadContractReturnType, WriteContractParameters } from "viem";
 
 import type { WriteContractReturnType } from "viem";
 import { readContract, writeContract } from "viem/actions";
 import { getDepositContract } from "@sviem/abis/depositContract.ts";
+import { Hex } from "viem";
 
 export type DepositContractActions = {
     deposit: (params: DepositParameters) => Promise<WriteContractReturnType>
@@ -34,7 +35,7 @@ export type ReadDepositParameters = {
 export async function deposit<TTransport extends Transport, TChain extends Chain, TAccount extends Account>(
     client: WalletClient<TTransport, TChain, TAccount>, 
     args: DepositParameters
-) {
+): Promise<WriteContractReturnType> {
     const contract = getDepositContract()
     return writeContract(client, {
         abi: contract.abi,
@@ -42,6 +43,5 @@ export async function deposit<TTransport extends Transport, TChain extends Chain
         functionName: 'deposit',
         args: [args.nodePubkey, args.consensusPubkey, args.withdrawalCredentials, args.nodeSignature, args.consensusSignature, args.depositDataRoot],
         value: args.value,
-        chain: client.chain,
-    })
+    } as any )
 }
