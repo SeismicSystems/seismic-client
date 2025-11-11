@@ -4,6 +4,7 @@ import type { WriteContractReturnType } from "viem";
 import { readContract, writeContract } from "viem/actions";
 import { getDepositContract } from "@sviem/abis/depositContract.ts";
 import { Hex } from "viem";
+import { depositContractAbi } from "@sviem/abis/depositContract.ts";
 
 export type DepositContractActions = {
     deposit: (params: DepositParameters) => Promise<WriteContractReturnType>
@@ -11,6 +12,8 @@ export type DepositContractActions = {
 }
 
 export type DepositParameters = {
+    /** Deposit contract address */
+    address: `0x${string}`
     /** Validator public key*/
     nodePubkey: `0x${string}`
     /** Consensus public key */
@@ -32,17 +35,21 @@ export type ReadDepositParameters = {
     pubkey: `0x${string}`
 }
 
-export async function deposit<TTransport extends Transport, TChain extends Chain, TAccount extends Account>(
+export async function deposit<
+    TTransport extends Transport, 
+    TChain extends Chain | undefined,
+    TAccount extends Account
+>(
     client: WalletClient<TTransport, TChain, TAccount>, 
     args: DepositParameters
 ): Promise<WriteContractReturnType> {
-    const contract = getDepositContract()
     return writeContract(client, {
-        abi: contract.abi,
-        address: contract.address,
+        abi: depositContractAbi,
+        address: args.address,
         functionName: 'deposit',
         args: [args.nodePubkey, args.consensusPubkey, args.withdrawalCredentials, args.nodeSignature, args.consensusSignature, args.depositDataRoot],
         value: args.value,
-        // TODO: fix type issue
-    } as any )
+        chain: client.chain,
+        account: client.account,
+    } as WriteContractParameters<typeof depositContractAbi, 'deposit'>)
 }
