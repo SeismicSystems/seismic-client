@@ -43,5 +43,6 @@ export async function deposit<TTransport extends Transport, TChain extends Chain
         functionName: 'deposit',
         args: [args.nodePubkey, args.consensusPubkey, args.withdrawalCredentials, args.nodeSignature, args.consensusSignature, args.depositDataRoot],
         value: args.value,
+        // TODO: fix type issue
     } as any )
 }
