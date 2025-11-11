@@ -266,11 +266,12 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param keyIndex Index of the key to use
     /// @param cipher Encrypted data to be executed
     /// @return signature The signature bytes
-    function _signExecuteDigestWithKey(address payable account, uint32 keyIndex, bytes memory cipher, uint256 privateKey)
-        internal
-        view
-        returns (bytes memory signature)
-    {
+    function _signExecuteDigestWithKey(
+        address payable account,
+        uint32 keyIndex,
+        bytes memory cipher,
+        uint256 privateKey
+    ) internal view returns (bytes memory signature) {
         uint256 keyNonce = ShieldedDelegationAccount(account).getKeyNonce(keyIndex);
         Key memory key = ShieldedDelegationAccount(account).getKey(keyIndex);
         bytes32 domainSeparator = _getDomainSeparator();
@@ -299,7 +300,9 @@ contract ShieldedDelegationAccountTest is Test, ShieldedDelegationAccount {
     /// @param keyIndex The key index to use
     /// @param calls The encoded calls to execute
     /// @param privateKey The private key to sign with
-    function _executeViaKey(address payable account, uint32 keyIndex, bytes memory calls, uint256 privateKey) internal {
+    function _executeViaKey(address payable account, uint32 keyIndex, bytes memory calls, uint256 privateKey)
+        internal
+    {
         // Encrypt the calls
         (uint96 nonce, bytes memory cipher) = ShieldedDelegationAccount(account).encrypt(calls);
 
