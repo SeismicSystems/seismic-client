@@ -6,7 +6,6 @@ import type {
   ReadContractReturnType,
   Transport,
   WalletClient,
-  WriteContractParameters,
 } from 'viem'
 import type { WriteContractReturnType } from 'viem'
 import { readContract, writeContract } from 'viem/actions'
@@ -41,7 +40,6 @@ export type GetDepositCountParameters = {
   /** Deposit contract address */
   address: `0x${string}`
 }
-
 
 export type DepositContractPublicActions = {
   getDepositRoot: (

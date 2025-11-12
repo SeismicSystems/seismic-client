@@ -54,4 +54,3 @@ export function getDepositContract(): DepositContractConfig {
 export function resetDepositContract() {
   customDepositContract = null
 }
-

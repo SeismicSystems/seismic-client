@@ -19,6 +19,14 @@ import {
 } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
+import type {
+  DepositContractPublicActions,
+  DepositContractWalletActions,
+} from '@sviem/actions/depositContract.ts'
+import {
+  depositContractPublicActions,
+  depositContractWalletActions,
+} from '@sviem/actions/depositContract.ts'
 import {
   EncryptionActions,
   encryptionActions,
@@ -30,14 +38,6 @@ import { shieldedWalletActions } from '@sviem/actions/wallet.ts'
 import { seismicRpcSchema } from '@sviem/chain.ts'
 import { generateAesKey } from '@sviem/crypto/aes.ts'
 import { compressPublicKey } from '@sviem/crypto/secp.ts'
-import type { 
-  DepositContractPublicActions,
-  DepositContractWalletActions 
-} from '@sviem/actions/depositContract.ts'
-import { 
-  depositContractPublicActions,
-  depositContractWalletActions 
-} from '@sviem/actions/depositContract.ts'
 
 /**
  * This is the same as viem's public client, with a few notable differences:
@@ -57,7 +57,9 @@ export type ShieldedPublicClient<
     rpcSchema extends RpcSchema
       ? [...PublicRpcSchema, ...rpcSchema]
       : PublicRpcSchema,
-    PublicActions<transport, chain> & ShieldedPublicActions & DepositContractPublicActions
+    PublicActions<transport, chain> &
+      ShieldedPublicActions &
+      DepositContractPublicActions
   >
 >
 
@@ -179,9 +181,12 @@ export const createShieldedPublicClient = <
     undefined,
     rpcSchema
   >(parameters) as ShieldedPublicClient<transport, chain, undefined, rpcSchema>
-  return viemPublicClient.extend(shieldedPublicActions as any)
-    // @ts-ignore
-    .extend(depositContractPublicActions as any)
+  return (
+    viemPublicClient
+      .extend(shieldedPublicActions as any)
+      // @ts-ignore
+      .extend(depositContractPublicActions as any)
+  )
 }
 
 export const getSeismicClients = async <
