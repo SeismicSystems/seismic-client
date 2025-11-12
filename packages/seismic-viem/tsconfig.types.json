@@ -13,5 +13,5 @@
       "@sviem/*": ["./*"]
     }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.json"]
 }
