@@ -87,8 +87,8 @@ export async function getDepositRoot<
   return readContract(client, {
     abi: depositContractAbi,
     address: args.address,
-    functionName: 'getDepositRoot',
-  } as ReadContractParameters<typeof depositContractAbi, 'getDepositRoot'>)
+    functionName: 'get_deposit_root',
+  } as ReadContractParameters<typeof depositContractAbi, 'get_deposit_root'>)
 }
 
 export async function getDepositCount<
@@ -102,6 +102,6 @@ export async function getDepositCount<
   return readContract(client, {
     abi: depositContractAbi,
     address: args.address,
-    functionName: 'getDepositCount',
-  } as ReadContractParameters<typeof depositContractAbi, 'getDepositCount'>)
+    functionName: 'get_deposit_count',
+  } as ReadContractParameters<typeof depositContractAbi, 'get_deposit_count'>)
 }
