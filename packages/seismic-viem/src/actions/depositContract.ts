@@ -13,10 +13,6 @@ import { readContract, writeContract } from 'viem/actions'
 
 import { depositContractAbi } from '@sviem/abis/depositContract.ts'
 
-// ============================================================================
-// Types
-// ============================================================================
-
 export type DepositParameters = {
   /** Deposit contract address */
   address: `0x${string}`
@@ -93,7 +89,7 @@ export const depositContractWalletActions = <
 ): DepositContractWalletActions => ({
   deposit: async (args) =>
     writeContract(client, {
-      abi: depositContractAbi
+      abi: depositContractAbi,
       address: args.address,
       functionName: 'deposit',
       args: [
@@ -105,7 +101,5 @@ export const depositContractWalletActions = <
         args.depositDataRoot,
       ],
       value: args.value,
-      chain: client.chain 
-      account: client.account,
-    } as WriteContractParameters<typeof depositContractAbi, 'deposit'>),
+    } as any),
 })
