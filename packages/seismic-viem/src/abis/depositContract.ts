@@ -1,4 +1,5 @@
 import type { Abi } from 'abitype'
+
 import depositContractAbiJson from '@sviem/abis/depositContract.json' with { type: 'json' }
 
 export const depositContractAbi = depositContractAbiJson.abi as Abi
