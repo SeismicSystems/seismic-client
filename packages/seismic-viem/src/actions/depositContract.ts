@@ -13,11 +13,9 @@ import { readContract, writeContract } from 'viem/actions'
 
 import { depositContractAbi } from '@sviem/abis/depositContract.ts'
 
-export type DepositContractActions = {
-  deposit: (params: DepositParameters) => Promise<WriteContractReturnType>
-  getDepositRoot: () => Promise<ReadContractReturnType>
-  getDepositCount: () => Promise<ReadContractReturnType>
-}
+// ============================================================================
+// Types
+// ============================================================================
 
 export type DepositParameters = {
   /** Deposit contract address */
@@ -48,62 +46,66 @@ export type GetDepositCountParameters = {
   address: `0x${string}`
 }
 
-export async function deposit<
-  TTransport extends Transport,
-  TChain extends Chain | undefined,
-  TAccount extends Account,
->(
-  client: WalletClient<TTransport, TChain, TAccount>,
-  args: DepositParameters
-): Promise<WriteContractReturnType> {
-  return writeContract(client, {
-    abi: depositContractAbi,
-    address: args.address,
-    functionName: 'deposit',
-    args: [
-      args.nodePubkey,
-      args.consensusPubkey,
-      args.withdrawalCredentials,
-      args.nodeSignature,
-      args.consensusSignature,
-      args.depositDataRoot,
-    ],
-    value: args.value,
-    chain: client.chain,
-    account: client.account,
-  } as WriteContractParameters<typeof depositContractAbi, 'deposit'>)
+
+export type DepositContractPublicActions = {
+  getDepositRoot: (
+    args: GetDepositRootParameters
+  ) => Promise<ReadContractReturnType>
+  getDepositCount: (
+    args: GetDepositCountParameters
+  ) => Promise<ReadContractReturnType>
 }
 
-export async function getDepositRoot<
+export const depositContractPublicActions = <
   TTransport extends Transport,
-  TChain extends Chain | undefined,
-  TAccount extends Account,
+  TChain extends Chain | undefined = Chain | undefined,
 >(
-  client:
-    | WalletClient<TTransport, TChain, TAccount>
-    | PublicClient<TTransport, TChain>,
-  args: GetDepositRootParameters
-): Promise<ReadContractReturnType> {
-  return readContract(client, {
-    abi: depositContractAbi,
-    address: args.address,
-    functionName: 'get_deposit_root',
-  } as ReadContractParameters<typeof depositContractAbi, 'get_deposit_root'>)
+  client: PublicClient<TTransport, TChain>
+): DepositContractPublicActions => ({
+  getDepositRoot: async (args) =>
+    readContract(client, {
+      abi: depositContractAbi,
+      address: args.address,
+      functionName: 'get_deposit_root',
+    } as ReadContractParameters<typeof depositContractAbi, 'get_deposit_root'>),
+
+  getDepositCount: async (args) =>
+    readContract(client, {
+      abi: depositContractAbi,
+      address: args.address,
+      functionName: 'get_deposit_count',
+    } as ReadContractParameters<
+      typeof depositContractAbi,
+      'get_deposit_count'
+    >),
+})
+
+export type DepositContractWalletActions = {
+  deposit: (args: DepositParameters) => Promise<WriteContractReturnType>
 }
 
-export async function getDepositCount<
+export const depositContractWalletActions = <
   TTransport extends Transport,
-  TChain extends Chain | undefined,
-  TAccount extends Account,
+  TChain extends Chain | undefined = Chain | undefined,
+  TAccount extends Account | undefined = Account | undefined,
 >(
-  client:
-    | WalletClient<TTransport, TChain, TAccount>
-    | PublicClient<TTransport, TChain>,
-  args: GetDepositCountParameters
-): Promise<ReadContractReturnType> {
-  return readContract(client, {
-    abi: depositContractAbi,
-    address: args.address,
-    functionName: 'get_deposit_count',
-  } as ReadContractParameters<typeof depositContractAbi, 'get_deposit_count'>)
-}
+  client: WalletClient<TTransport, TChain, TAccount>
+): DepositContractWalletActions => ({
+  deposit: async (args) =>
+    writeContract(client, {
+      abi: depositContractAbi
+      address: args.address,
+      functionName: 'deposit',
+      args: [
+        args.nodePubkey,
+        args.consensusPubkey,
+        args.withdrawalCredentials,
+        args.nodeSignature,
+        args.consensusSignature,
+        args.depositDataRoot,
+      ],
+      value: args.value,
+      chain: client.chain 
+      account: client.account,
+    } as WriteContractParameters<typeof depositContractAbi, 'deposit'>),
+})
