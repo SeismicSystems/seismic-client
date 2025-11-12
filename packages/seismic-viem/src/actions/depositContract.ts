@@ -9,10 +9,8 @@ import type {
   WriteContractParameters,
 } from 'viem'
 import type { WriteContractReturnType } from 'viem'
-import { Hex } from 'viem'
 import { readContract, writeContract } from 'viem/actions'
 
-import { getDepositContract } from '@sviem/abis/depositContract.ts'
 import { depositContractAbi } from '@sviem/abis/depositContract.ts'
 
 export type DepositContractActions = {
@@ -81,7 +79,7 @@ export async function getDepositRoot<
   TChain extends Chain | undefined,
   TAccount extends Account,
 >(
-  client: WalletClient<TTransport, TChain, TAccount>,
+  client: WalletClient<TTransport, TChain, TAccount> | PublicClient<TTransport, TChain>,
   args: GetDepositRootParameters
 ): Promise<ReadContractReturnType> {
   return readContract(client, {
@@ -96,7 +94,7 @@ export async function getDepositCount<
   TChain extends Chain | undefined,
   TAccount extends Account,
 >(
-  client: WalletClient<TTransport, TChain, TAccount>,
+  client: WalletClient<TTransport, TChain, TAccount> | PublicClient<TTransport, TChain>,
   args: GetDepositCountParameters
 ): Promise<ReadContractReturnType> {
   return readContract(client, {
