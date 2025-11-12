@@ -79,7 +79,9 @@ export async function getDepositRoot<
   TChain extends Chain | undefined,
   TAccount extends Account,
 >(
-  client: WalletClient<TTransport, TChain, TAccount> | PublicClient<TTransport, TChain>,
+  client:
+    | WalletClient<TTransport, TChain, TAccount>
+    | PublicClient<TTransport, TChain>,
   args: GetDepositRootParameters
 ): Promise<ReadContractReturnType> {
   return readContract(client, {
@@ -94,7 +96,9 @@ export async function getDepositCount<
   TChain extends Chain | undefined,
   TAccount extends Account,
 >(
-  client: WalletClient<TTransport, TChain, TAccount> | PublicClient<TTransport, TChain>,
+  client:
+    | WalletClient<TTransport, TChain, TAccount>
+    | PublicClient<TTransport, TChain>,
   args: GetDepositCountParameters
 ): Promise<ReadContractReturnType> {
   return readContract(client, {
