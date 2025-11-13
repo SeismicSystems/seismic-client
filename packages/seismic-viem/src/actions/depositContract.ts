@@ -31,15 +31,14 @@ export type DepositParameters = {
   value: bigint
 }
 
-export type GetDepositRootParameters = {
+/** Base parameters for deposit contract read operations */
+export type DepositContractBaseParameters = {
   /** Deposit contract address */
   address: `0x${string}`
 }
 
-export type GetDepositCountParameters = {
-  /** Deposit contract address */
-  address: `0x${string}`
-}
+export type GetDepositRootParameters = DepositContractBaseParameters
+export type GetDepositCountParameters = DepositContractBaseParameters
 
 export type DepositContractPublicActions = {
   getDepositRoot: (
