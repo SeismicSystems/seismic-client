@@ -10,6 +10,7 @@ import {
   testSeismicTx,
 } from '@sviem-tests/index.ts'
 import { testAesKeygen } from '@sviem-tests/tests/aesKeygen.ts'
+import { testDepositContract } from '@sviem-tests/tests/contract/depositContract.ts'
 import { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
 import { testRng } from '@sviem-tests/tests/precompiles.ts'
 import { testHkdfHex } from '@sviem-tests/tests/precompiles.ts'
@@ -94,6 +95,16 @@ describe('Seismic Contract', async () => {
       // @ts-ignore
       await testSeismicTx({ chain, url, account: jsonRpcAccount })
     },
+    {
+      timeout: CONTRACT_TIMEOUT_MS,
+    }
+  )
+})
+
+describe('Deposit Contract', async () => {
+  test(
+    'deploy & test deposit contract functionality',
+    async () => await testDepositContract({ chain, url, account }),
     {
       timeout: CONTRACT_TIMEOUT_MS,
     }
