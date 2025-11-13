@@ -2,18 +2,30 @@ import type { Abi } from 'abitype'
 
 export const depositContractAbi = [
   {
+    type: 'constructor',
+    inputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
     type: 'function',
     name: 'deposit',
     inputs: [
-      { name: 'nodePubkey', type: 'bytes', internalType: 'bytes' },
-      { name: 'consensusPubkey', type: 'bytes', internalType: 'bytes' },
-      { name: 'withdrawalCredentials', type: 'bytes', internalType: 'bytes' },
-      { name: 'nodeSignature', type: 'bytes', internalType: 'bytes' },
-      { name: 'consensusSignature', type: 'bytes', internalType: 'bytes' },
-      { name: 'depositDataRoot', type: 'bytes32', internalType: 'bytes32' },
+      { name: 'node_pubkey', type: 'bytes', internalType: 'bytes' },
+      { name: 'consensus_pubkey', type: 'bytes', internalType: 'bytes' },
+      { name: 'withdrawal_credentials', type: 'bytes', internalType: 'bytes' },
+      { name: 'node_signature', type: 'bytes', internalType: 'bytes' },
+      { name: 'consensus_signature', type: 'bytes', internalType: 'bytes' },
+      { name: 'deposit_data_root', type: 'bytes32', internalType: 'bytes32' },
     ],
     outputs: [],
     stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'get_deposit_count',
+    inputs: [],
+    outputs: [{ name: '', type: 'bytes', internalType: 'bytes' }],
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -24,9 +36,23 @@ export const depositContractAbi = [
   },
   {
     type: 'function',
-    name: 'get_deposit_count',
-    inputs: [],
-    outputs: [{ name: '', type: 'bytes', internalType: 'bytes' }],
-    stateMutability: 'view',
+    name: 'supportsInterface',
+    inputs: [{ name: 'interfaceId', type: 'bytes4', internalType: 'bytes4' }],
+    outputs: [{ name: '', type: 'bool', internalType: 'bool' }],
+    stateMutability: 'pure',
+  },
+  {
+    type: 'event',
+    name: 'DepositEvent',
+    inputs: [
+      { name: 'node_pubkey', type: 'bytes', indexed: false, internalType: 'bytes' },
+      { name: 'consensus_pubkey', type: 'bytes', indexed: false, internalType: 'bytes' },
+      { name: 'withdrawal_credentials', type: 'bytes', indexed: false, internalType: 'bytes' },
+      { name: 'amount', type: 'bytes', indexed: false, internalType: 'bytes' },
+      { name: 'node_signature', type: 'bytes', indexed: false, internalType: 'bytes' },
+      { name: 'consensus_signature', type: 'bytes', indexed: false, internalType: 'bytes' },
+      { name: 'index', type: 'bytes', indexed: false, internalType: 'bytes' },
+    ],
+    anonymous: false,
   },
 ] as const satisfies Abi
