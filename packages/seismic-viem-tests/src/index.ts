@@ -36,6 +36,18 @@ export {
   testLegacyTxTrace,
   testSeismicTxTrace,
 } from '@sviem-tests/tests/trace.ts'
+export {
+  testDepositContract,
+  testDepositContractReads,
+  testDepositContractWrites,
+  validateDepositContract,
+  getMockDepositData,
+} from '@sviem-tests/tests/depositContract.ts'
+export type {
+  DepositContractTestArgs,
+  DepositTestData,
+  DepositTestResult,
+} from '@sviem-tests/tests/depositContract.ts'
 
 export { loadDotenv } from '@sviem-tests/util.ts'
 
