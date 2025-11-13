@@ -31,7 +31,6 @@ function generateWithdrawalCredentials(address: `0x${string}`): `0x${string}` {
   return `0x${Buffer.from(credentials).toString('hex')}` as `0x${string}`
 }
 
-// Helper function to generate validator data
 function generateValidatorData() {
   const nodePubkey = `0x${'00'.repeat(32)}` as `0x${string}`
 
@@ -84,24 +83,24 @@ function computeDepositDataRoot(
     'hex'
   )
 
-  // 1. consensus_pubkey_hash = sha256(consensus_pubkey || bytes16(0))
+  // consensus_pubkey_hash = sha256(consensus_pubkey || bytes16(0))
   const consensusPubkeyHash = createHash('sha256')
     .update(consensusPubkeyBytes)
     .update(Buffer.alloc(16, 0)) // bytes16(0)
     .digest()
 
-  // 2. pubkey_root = sha256(node_pubkey || consensus_pubkey_hash)
+  // pubkey_root = sha256(node_pubkey || consensus_pubkey_hash)
   const pubkeyRoot = createHash('sha256')
     .update(nodePubkeyBytes)
     .update(consensusPubkeyHash)
     .digest()
 
-  // 3. node_signature_hash = sha256(node_signature)
+  // node_signature_hash = sha256(node_signature)
   const nodeSignatureHash = createHash('sha256')
     .update(nodeSignatureBytes)
     .digest()
 
-  // 4. consensus_signature_hash = sha256(sha256(consensus_signature[0:64]) || sha256(consensus_signature[64:96] || bytes32(0)))
+  // consensus_signature_hash = sha256(sha256(consensus_signature[0:64]) || sha256(consensus_signature[64:96] || bytes32(0)))
   const consensusSigPart1 = createHash('sha256')
     .update(consensusSignatureBytes.slice(0, 64))
     .digest()
@@ -116,18 +115,18 @@ function computeDepositDataRoot(
     .update(consensusSigPart2)
     .digest()
 
-  // 5. signature_root = sha256(node_signature_hash || consensus_signature_hash)
+  // signature_root = sha256(node_signature_hash || consensus_signature_hash)
   const signatureRoot = createHash('sha256')
     .update(nodeSignatureHash)
     .update(consensusSignatureHash)
     .digest()
 
-  // 6. Convert amount to 8-byte little-endian (gwei)
+  // Convert amount to 8-byte little-endian (gwei)
   const amountGwei = amount / BigInt(10 ** 9) // Convert wei to gwei
   const amountBytes = Buffer.alloc(8)
   amountBytes.writeBigUInt64LE(amountGwei, 0)
 
-  // 7. node = sha256(sha256(pubkey_root || withdrawal_credentials) || sha256(amount || bytes24(0) || signature_root))
+  // node = sha256(sha256(pubkey_root || withdrawal_credentials) || sha256(amount || bytes24(0) || signature_root))
   const leftNode = createHash('sha256')
     .update(pubkeyRoot)
     .update(withdrawalCredentialsBytes)
