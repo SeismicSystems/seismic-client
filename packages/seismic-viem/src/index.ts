@@ -12,6 +12,8 @@ export {
   seismicDevnet3,
   seismicDevnet,
   seismicTestnet,
+  seismicTestnet200,
+  seismicTestnet201,
   localSeismicDevnet,
   createSeismicDevnet,
   serializeSeismicTransaction,

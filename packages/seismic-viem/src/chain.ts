@@ -244,6 +244,11 @@ export type CreateSeismicDevnetParams = { explorerUrl?: string } & (
   | { node: number; nodeHost?: string }
 )
 
+export type CreateSeismicTestnetParams = {
+  nodeHost: string
+  explorerUrl?: string
+}
+
 /**
  * Creates a Seismic development network chain configuration.
  *
@@ -310,6 +315,12 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
   })
 }
 
+export const createSeismicAzTestnet = (n: number) =>
+  createSeismicDevnet({
+    nodeHost: `https://az-${n}.seismictest.net`,
+    explorerUrl: 'https://seismic-testnet.socialscan.io',
+  })
+
 /**
  * The seismic devnet running at node-1.seismicdev.net
  * Its associated explorer is at explorer-1.seismicdev.net
@@ -338,10 +349,9 @@ export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
  *
  * Nodes coordinate using summit, Seismic's consensus client
  */
-export const seismicTestnet = createSeismicDevnet({
-  nodeHost: 'internal-testnet.seismictest.net',
-  explorerUrl: 'https://seismic-testnet.socialscan.io',
-})
+export const seismicTestnet200 = createSeismicAzTestnet(200)
+export const seismicTestnet201 = createSeismicAzTestnet(201)
+export const seismicTestnet = seismicTestnet200
 
 /**
  * An alias for {@link seismicDevnet1}
