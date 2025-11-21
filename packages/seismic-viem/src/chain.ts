@@ -317,7 +317,7 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
 
 export const createSeismicAzTestnet = (n: number) =>
   createSeismicDevnet({
-    nodeHost: `https://az-${n}.seismictest.net`,
+    nodeHost: `az-${n}.seismictest.net`,
     explorerUrl: 'https://seismic-testnet.socialscan.io',
   })
 
