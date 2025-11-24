@@ -15,7 +15,7 @@
     "vocs": "^1",
     "typescript": "^5.5.4",
     "viem": "2.x",
-    "wagmi": "2.x",
+    "wagmi": "3.x",
     "seismic-viem": "workspace:*",
     "seismic-react": "workspace:*",
     "@privy-io/react-auth": "^2.6.2",
