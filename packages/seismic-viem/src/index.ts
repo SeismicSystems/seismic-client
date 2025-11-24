@@ -12,6 +12,8 @@ export {
   seismicDevnet3,
   seismicDevnet,
   seismicTestnet,
+  seismicTestnet1,
+  seismicTestnet2,
   seismicTestnet200,
   seismicTestnet201,
   localSeismicDevnet,
