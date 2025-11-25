@@ -7,6 +7,7 @@ export type {
 
 export { testSeismicTxEncoding } from '@sviem-tests/tests/encoding.ts'
 export { testSeismicTx } from '@sviem-tests/tests/contract/contract.ts'
+export { testDepositContract } from '@sviem-tests/tests/contract/depositContract.ts'
 export {
   testContractTreadIsntSeismicTx,
   testShieldedWalletClientTreadIsntSeismicTx,

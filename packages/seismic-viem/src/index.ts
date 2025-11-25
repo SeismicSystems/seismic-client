@@ -105,3 +105,4 @@ export {
 export type { Secp256K1SigParams } from '@sviem/precompiles/secp256k1.ts'
 
 export type { CallClient, Precompile } from '@sviem/precompiles/precompile.ts'
+export { DEPOSIT_CONTRACT_ADDRESS } from '@sviem/actions/depositContract.ts'
