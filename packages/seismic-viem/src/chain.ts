@@ -349,9 +349,13 @@ export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
  *
  * Nodes coordinate using summit, Seismic's consensus client
  */
+
+export const seismicTestnet1 = createSeismicAzTestnet(1)
+export const seismicTestnet2 = createSeismicAzTestnet(2)
+export const seismicTestnet = seismicTestnet1
+
 export const seismicTestnet200 = createSeismicAzTestnet(200)
 export const seismicTestnet201 = createSeismicAzTestnet(201)
-export const seismicTestnet = seismicTestnet200
 
 /**
  * An alias for {@link seismicDevnet1}
