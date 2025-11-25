@@ -1,6 +1,8 @@
 import type {
   Account,
+  Address,
   Chain,
+  Hex,
   PublicClient,
   ReadContractParameters,
   ReadContractReturnType,
@@ -12,21 +14,24 @@ import { readContract, writeContract } from 'viem/actions'
 
 import { depositContractAbi } from '@sviem/abis/depositContract.ts'
 
+export const DEPOSIT_CONTRACT_ADDRESS: Address =
+  '0x00000000219ab540356cBB839Cbe05303d7705Fa'
+
 export type DepositParameters = {
   /** Deposit contract address */
-  address: `0x${string}`
+  address?: Address
   /** Validator public key*/
-  nodePubkey: `0x${string}`
+  nodePubkey: Hex
   /** Consensus public key */
-  consensusPubkey: `0x${string}`
+  consensusPubkey: Hex
   /** Withdrawal credentials */
-  withdrawalCredentials: `0x${string}`
+  withdrawalCredentials: Hex
   /** Node signature */
-  nodeSignature: `0x${string}`
+  nodeSignature: Hex
   /** Consensus signature */
-  consensusSignature: `0x${string}`
+  consensusSignature: Hex
   /** Deposit data root */
-  depositDataRoot: `0x${string}`
+  depositDataRoot: Hex
   /** Amount of ETH to deposit */
   value: bigint
 }
@@ -34,7 +39,7 @@ export type DepositParameters = {
 /** Base parameters for deposit contract read operations */
 export type DepositContractBaseParameters = {
   /** Deposit contract address */
-  address: `0x${string}`
+  address?: Address
 }
 
 export type GetDepositRootParameters = DepositContractBaseParameters
@@ -58,14 +63,14 @@ export const depositContractPublicActions = <
   getDepositRoot: async (args) =>
     readContract(client, {
       abi: depositContractAbi,
-      address: args.address,
+      address: args.address || DEPOSIT_CONTRACT_ADDRESS,
       functionName: 'get_deposit_root',
     } as ReadContractParameters<typeof depositContractAbi, 'get_deposit_root'>),
 
   getDepositCount: async (args) =>
     readContract(client, {
       abi: depositContractAbi,
-      address: args.address,
+      address: args.address || DEPOSIT_CONTRACT_ADDRESS,
       functionName: 'get_deposit_count',
     } as ReadContractParameters<
       typeof depositContractAbi,
@@ -87,7 +92,7 @@ export const depositContractWalletActions = <
   deposit: async (args) =>
     writeContract(client, {
       abi: depositContractAbi,
-      address: args.address,
+      address: args.address || DEPOSIT_CONTRACT_ADDRESS,
       functionName: 'deposit',
       args: [
         args.nodePubkey,
