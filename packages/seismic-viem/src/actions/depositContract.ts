@@ -90,7 +90,7 @@ export const depositContractWalletActions = <
   client: WalletClient<TTransport, TChain, TAccount>
 ): DepositContractWalletActions => ({
   deposit: async (args) =>
-    writeContract(client, {
+    client.writeContract({
       abi: depositContractAbi,
       address: args.address || DEPOSIT_CONTRACT_ADDRESS,
       functionName: 'deposit',
