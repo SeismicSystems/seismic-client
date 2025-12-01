@@ -187,6 +187,11 @@ export const testDepositContract = async ({
 
   const validatorData = generateValidatorData()
 
+  // Get initial balance of the account before deposit
+  const initialAccountBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+
   const depositTx = await walletClient.deposit({
     address: deployedContractAddress,
     nodePubkey: validatorData.nodePubkey,
@@ -205,6 +210,21 @@ export const testDepositContract = async ({
   expect(depositReceipt.status).toBe('success')
 
   expect(depositReceipt.logs.length).toBeGreaterThan(0)
+
+  const finalAccountBalance = await publicClient.getBalance({
+    address: account.address,
+  })
+
+  const contractBalance = await publicClient.getBalance({
+    address: deployedContractAddress,
+  })
+
+  const balanceDifference = initialAccountBalance - finalAccountBalance
+  const expectedDeposit = parseEther(VALIDATOR_MINIMUM_STAKE.toString())
+
+  expect(contractBalance).toBe(expectedDeposit)
+
+  expect(balanceDifference).toBeGreaterThanOrEqual(expectedDeposit)
 
   const newDepositCount = await publicClient.getDepositCount({
     address: deployedContractAddress,
@@ -226,5 +246,8 @@ export const testDepositContract = async ({
     newDepositCount,
     newDepositRoot,
     validatorData,
+    initialAccountBalance,
+    finalAccountBalance,
+    contractBalance,
   }
 }
