@@ -43,6 +43,9 @@ import { compressPublicKey } from '@sviem/crypto/secp.ts'
  * This is the same as viem's public client, with a few notable differences:
  * - `getTeePublicKey`: a new function specific to Seismic. It takes no parameters and returns a Promise that resolves to the network's public key
  * - `getStorageAt` and `getTransaction`: both of these will return an error since Seismic does not support these endpoints
+ * - `deposit`: deposit into the deposit contract
+ * - `getDepositRoot`: get the deposit root from the deposit contract
+ * - `getDepositCount`: get the deposit count from the deposit contract
  */
 export type ShieldedPublicClient<
   transport extends Transport = Transport,
@@ -76,7 +79,7 @@ export type ShieldedPublicClient<
  *   - `treadContract`: call a contract function with an unsigned read (from the zero address)
  *   - `writeContract`: execute a function on a contract via a Seismic transaction, encrypting the calldata
  *   - `twriteContract`: execute a function on a contract via a standard ethereum transaction
-
+ *   - `deposit`: deposit into the deposit contract
  */
 export type ShieldedWalletClient<
   transport extends Transport = Transport,

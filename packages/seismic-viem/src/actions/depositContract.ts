@@ -10,7 +10,7 @@ import type {
   WalletClient,
 } from 'viem'
 import type { WriteContractReturnType } from 'viem'
-import { readContract, writeContract } from 'viem/actions'
+import { readContract } from 'viem/actions'
 
 import { depositContractAbi } from '@sviem/abis/depositContract.ts'
 
