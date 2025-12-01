@@ -187,7 +187,6 @@ export const testDepositContract = async ({
 
   const validatorData = generateValidatorData()
 
-  // Get initial balance of the account before deposit
   const initialAccountBalance = await publicClient.getBalance({
     address: account.address,
   })
