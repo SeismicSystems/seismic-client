@@ -321,6 +321,12 @@ export const createSeismicAzTestnet = (n: number) =>
     explorerUrl: 'https://seismic-testnet.socialscan.io',
   })
 
+export const createSeismicGcpTestnet = (n: number) =>
+  createSeismicDevnet({
+    nodeHost: `gcp-${n}.seismictest.net`,
+    explorerUrl: 'https://seismic-testnet.socialscan.io',
+  })
+
 /**
  * The seismic devnet running at node-1.seismicdev.net
  * Its associated explorer is at explorer-1.seismicdev.net
@@ -352,11 +358,14 @@ export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
 
 export const seismicTestnet1 = createSeismicAzTestnet(1)
 export const seismicTestnet2 = createSeismicAzTestnet(2)
-export const seismicTestnet = seismicTestnet1
+
+export const seismicTestnetGcp1 = createSeismicGcpTestnet(1)
+export const seismicTestnetGcp2 = createSeismicGcpTestnet(2)
 
 export const seismicTestnet200 = createSeismicAzTestnet(200)
 export const seismicTestnet201 = createSeismicAzTestnet(201)
 
+export const seismicTestnet = seismicTestnet1
 /**
  * An alias for {@link seismicDevnet1}
  */
