@@ -4,8 +4,8 @@ import { keccak256 } from 'viem'
 import { DIRECTORY_ADDRESS } from '@sviem/abis/directory.ts'
 import { DirectoryAbi } from '@sviem/abis/directory.ts'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
-import { shieldedWriteContract } from '@sviem/contract/write.ts'
 import { signedReadContract } from '@sviem/contract/read.ts'
+import { shieldedWriteContract } from '@sviem/contract/write.ts'
 
 const TX_TIMEOUT_MS = 30_000
 
@@ -45,9 +45,7 @@ export async function getKeyHash(
   return keyHash as Hex
 }
 
-export async function getKey(
-  client: ShieldedWalletClient,
-): Promise<Hex> {
+export async function getKey(client: ShieldedWalletClient): Promise<Hex> {
   const key = await signedReadContract(client, {
     address: DIRECTORY_ADDRESS,
     abi: DirectoryAbi,

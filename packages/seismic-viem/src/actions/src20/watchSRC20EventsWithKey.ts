@@ -1,16 +1,16 @@
 import type { Address, Hex } from 'viem'
-import type { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client.ts'
-import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
-import { SRC20Abi } from '@sviem/abis/src20.ts'
-import { computeKeyHash } from '@sviem/actions/src20/directory.ts'
-import type { WatchSRC20EventsParams, DecryptedTransferLog, DecryptedApprovalLog } from '@sviem/actions/src20/types.ts'
-import { parseEncryptedData } from '@sviem/actions/src20/crypto.ts'
 
+import { SRC20Abi } from '@sviem/abis/src20.ts'
+import { parseEncryptedData } from '@sviem/actions/src20/crypto.ts'
+import { computeKeyHash } from '@sviem/actions/src20/directory.ts'
+import type { WatchSRC20EventsParams } from '@sviem/actions/src20/types.ts'
+import type { ShieldedPublicClient } from '@sviem/client.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
 
 /**
  * Watch SRC20 events with a viewing key.
  * Uses a `ShieldedPublicClient` to watch events.
- * 
+ *
  * @example
  *
  * const unwatch = await client.watchSRC20EventsWithKey({
@@ -18,7 +18,7 @@ import { parseEncryptedData } from '@sviem/actions/src20/crypto.ts'
  *   onTransfer: (log) => console.log(`Received ${log.decryptedAmount} from ${log.from}`),
  *   onApproval: (log) => console.log(`Approved ${log.decryptedAmount} to ${log.spender}`),
  * })
- * 
+ *
  * // Later: stop watching
  * unwatch()
  *  */
@@ -44,12 +44,11 @@ export async function watchSRC20EventsWithKey(
     onLogs: async (logs) => {
       for (const log of logs) {
         try {
-          const { ciphertext, nonce } = parseEncryptedData(log.args.encryptedAmount as Hex)
-          
-          const decryptedAmount = await aesCipher.decrypt(
-            ciphertext,
-            nonce,
+          const { ciphertext, nonce } = parseEncryptedData(
+            log.args.encryptedAmount as Hex
           )
+
+          const decryptedAmount = await aesCipher.decrypt(ciphertext, nonce)
           onTransfer?.({
             from: log.args.from as Address,
             to: log.args.to as Address,
@@ -75,11 +74,10 @@ export async function watchSRC20EventsWithKey(
     onLogs: async (logs) => {
       for (const log of logs) {
         try {
-          const { ciphertext, nonce } = parseEncryptedData(log.args.encryptedAmount as Hex)
-          const decryptedAmount = await aesCipher.decrypt(
-            ciphertext,
-            nonce,
+          const { ciphertext, nonce } = parseEncryptedData(
+            log.args.encryptedAmount as Hex
           )
+          const decryptedAmount = await aesCipher.decrypt(ciphertext, nonce)
           onApproval?.({
             owner: log.args.owner as Address,
             spender: log.args.spender as Address,

@@ -1,4 +1,4 @@
-import type { Address, Hex, Log } from 'viem'
+import type { Address, Hex } from 'viem'
 
 export type DecryptedTransferLog = {
   from: Address
