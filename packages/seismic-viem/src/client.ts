@@ -254,6 +254,8 @@ export const getSeismicClients = async <
     .extend(depositContractWalletActions as any)
     // @ts-ignore
     .extend(src20WalletActions as any)
+    // @ts-ignore
+    .extend(src20PublicActions as any)
   return {
     public: pubClient,
     wallet,
