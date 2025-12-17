@@ -1,8 +1,12 @@
 import type { Account, Chain, Hex, Transport } from 'viem'
-import type { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client.ts'
+
 import type { WatchSRC20EventsParams } from '@sviem/actions/src20/types.ts'
 import { watchSRC20Events } from '@sviem/actions/src20/watchSRC20Events.ts'
 import { watchSRC20EventsWithKey } from '@sviem/actions/src20/watchSRC20EventsWithKey.ts'
+import type {
+  ShieldedPublicClient,
+  ShieldedWalletClient,
+} from '@sviem/client.ts'
 
 /** Actions for SRC20 on a public client */
 export type SRC20PublicActions = {
