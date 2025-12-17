@@ -128,3 +128,13 @@ export type {
   WatchSRC20EventsParams,
   WatchSRC20EventsWithKeyParams,
 } from '@sviem/actions/src20/types.ts'
+
+// Directory contract helpers
+export {
+  checkRegistration,
+  getKeyHash,
+  getKey,
+  registerKey,
+  computeKeyHash,
+} from '@sviem/actions/src20/directory.ts'
+export { DIRECTORY_ADDRESS, DirectoryAbi } from '@sviem/abis/directory.ts'
