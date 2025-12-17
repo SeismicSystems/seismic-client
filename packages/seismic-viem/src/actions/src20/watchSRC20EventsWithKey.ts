@@ -1,19 +1,19 @@
 import type { Address, Hex } from 'viem'
-import type { ShieldedWalletClient } from '@sviem/client.ts'
+import type { ShieldedPublicClient, ShieldedWalletClient } from '@sviem/client.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
 import { SRC20Abi } from '@sviem/abis/src20.ts'
-import { computeKeyHash, getKey} from '@sviem/actions/src20/directory.ts'
+import { computeKeyHash } from '@sviem/actions/src20/directory.ts'
 import type { WatchSRC20EventsParams, DecryptedTransferLog, DecryptedApprovalLog } from '@sviem/actions/src20/types.ts'
 import { parseEncryptedData } from '@sviem/actions/src20/crypto.ts'
 
 
 /**
- * Watch SRC20 events for the connected wallet.
- * Automatically fetches the user's AES key from the Directory contract.
+ * Watch SRC20 events with a viewing key.
+ * Uses a `ShieldedPublicClient` to watch events.
  * 
  * @example
  *
- * const unwatch = await client.watchSRC20Events({
+ * const unwatch = await client.watchSRC20EventsWithKey({
  *   address: '0x...',
  *   onTransfer: (log) => console.log(`Received ${log.decryptedAmount} from ${log.from}`),
  *   onApproval: (log) => console.log(`Approved ${log.decryptedAmount} to ${log.spender}`),
@@ -22,23 +22,18 @@ import { parseEncryptedData } from '@sviem/actions/src20/crypto.ts'
  * // Later: stop watching
  * unwatch()
  *  */
-export async function watchSRC20Events(
-  client: ShieldedWalletClient,
+export async function watchSRC20EventsWithKey(
+  client: ShieldedPublicClient,
+  viewingKey: Hex,
   params: WatchSRC20EventsParams
 ): Promise<() => void> {
   const { address, onTransfer, onApproval, onError } = params
 
-  // Get user's AES key from Directory via signed read
-  const aesKey = await getKey(client)
-  if (!aesKey || aesKey === '0x' || aesKey === '0x0000000000000000000000000000000000000000000000000000000000000000') {
-    throw new Error('No AES key registered in Directory for this address')
-  }
+  // Create AES cipher
+  const aesCipher = new AesGcmCrypto(viewingKey)
 
   // Compute encryptKeyHash for filtering events
-  const encryptKeyHash = computeKeyHash(aesKey)
-
-  // Create AES cipher
-  const aesCipher = new AesGcmCrypto(aesKey)
+  const encryptKeyHash = computeKeyHash(viewingKey)
 
   // Watch Transfer events
   const unwatchTransfer = client.watchContractEvent({
