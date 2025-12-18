@@ -92,7 +92,6 @@ export type ShieldedPublicClient<
  *   - `twriteContract`: execute a function on a contract via a standard ethereum transaction
  *   - `deposit`: deposit into the deposit contract
  *   - `watchSRC20Events`: watch SRC20 events for the connected wallet
- *   - `watchSRC20EventsWithKey`: watch SRC20 events with a viewing key
  */
 export type ShieldedWalletClient<
   transport extends Transport = Transport,
@@ -111,8 +110,7 @@ export type ShieldedWalletClient<
     ShieldedWalletActions<chain, account> &
     DepositContractPublicActions &
     DepositContractWalletActions &
-    SRC20WalletActions &
-    SRC20PublicActions
+    SRC20WalletActions
 >
 
 type SeismicClients<
@@ -254,8 +252,6 @@ export const getSeismicClients = async <
     .extend(depositContractWalletActions as any)
     // @ts-ignore
     .extend(src20WalletActions as any)
-    // @ts-ignore
-    .extend(src20PublicActions as any)
   return {
     public: pubClient,
     wallet,
