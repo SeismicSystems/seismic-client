@@ -110,3 +110,31 @@ export type { Secp256K1SigParams } from '@sviem/precompiles/secp256k1.ts'
 
 export type { CallClient, Precompile } from '@sviem/precompiles/precompile.ts'
 export { DEPOSIT_CONTRACT_ADDRESS } from '@sviem/actions/depositContract.ts'
+
+// SRC20 event watching
+export { watchSRC20Events } from '@sviem/actions/src20/watchSRC20Events.ts'
+export { watchSRC20EventsWithKey } from '@sviem/actions/src20/watchSRC20EventsWithKey.ts'
+export {
+  src20PublicActions,
+  src20WalletActions,
+} from '@sviem/actions/src20/src20Actions.ts'
+export type {
+  SRC20PublicActions,
+  SRC20WalletActions,
+} from '@sviem/actions/src20/src20Actions.ts'
+export type {
+  DecryptedTransferLog,
+  DecryptedApprovalLog,
+  WatchSRC20EventsParams,
+  WatchSRC20EventsWithKeyParams,
+} from '@sviem/actions/src20/types.ts'
+
+// Directory contract helpers
+export {
+  checkRegistration,
+  getKeyHash,
+  getKey,
+  registerKey,
+  computeKeyHash,
+} from '@sviem/actions/src20/directory.ts'
+export { DIRECTORY_ADDRESS, DirectoryAbi } from '@sviem/abis/directory.ts'

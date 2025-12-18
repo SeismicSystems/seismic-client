@@ -33,6 +33,14 @@ import {
 } from '@sviem/actions/encryption.ts'
 import type { ShieldedPublicActions } from '@sviem/actions/public.ts'
 import { shieldedPublicActions } from '@sviem/actions/public.ts'
+import type {
+  SRC20PublicActions,
+  SRC20WalletActions,
+} from '@sviem/actions/src20/src20Actions.ts'
+import {
+  src20PublicActions,
+  src20WalletActions,
+} from '@sviem/actions/src20/src20Actions.ts'
 import type { ShieldedWalletActions } from '@sviem/actions/wallet.ts'
 import { shieldedWalletActions } from '@sviem/actions/wallet.ts'
 import { seismicRpcSchema } from '@sviem/chain.ts'
@@ -46,6 +54,8 @@ import { compressPublicKey } from '@sviem/crypto/secp.ts'
  * - `deposit`: deposit into the deposit contract
  * - `getDepositRoot`: get the deposit root from the deposit contract
  * - `getDepositCount`: get the deposit count from the deposit contract
+ * - `watchSRC20Events`: watch SRC20 events for the connected wallet
+ * - `watchSRC20EventsWithKey`: watch SRC20 events with a viewing key
  */
 export type ShieldedPublicClient<
   transport extends Transport = Transport,
@@ -62,7 +72,8 @@ export type ShieldedPublicClient<
       : PublicRpcSchema,
     PublicActions<transport, chain> &
       ShieldedPublicActions &
-      DepositContractPublicActions
+      DepositContractPublicActions &
+      SRC20PublicActions
   >
 >
 
@@ -80,6 +91,7 @@ export type ShieldedPublicClient<
  *   - `writeContract`: execute a function on a contract via a Seismic transaction, encrypting the calldata
  *   - `twriteContract`: execute a function on a contract via a standard ethereum transaction
  *   - `deposit`: deposit into the deposit contract
+ *   - `watchSRC20Events`: watch SRC20 events for the connected wallet
  */
 export type ShieldedWalletClient<
   transport extends Transport = Transport,
@@ -97,7 +109,8 @@ export type ShieldedWalletClient<
     ShieldedPublicActions<TRpcSchema> &
     ShieldedWalletActions<chain, account> &
     DepositContractPublicActions &
-    DepositContractWalletActions
+    DepositContractWalletActions &
+    SRC20WalletActions
 >
 
 type SeismicClients<
@@ -189,6 +202,8 @@ export const createShieldedPublicClient = <
       .extend(shieldedPublicActions as any)
       // @ts-ignore
       .extend(depositContractPublicActions as any)
+      // @ts-ignore
+      .extend(src20PublicActions as any)
   )
 }
 
@@ -235,6 +250,8 @@ export const getSeismicClients = async <
     .extend(shieldedWalletActions)
     // @ts-ignore
     .extend(depositContractWalletActions as any)
+    // @ts-ignore
+    .extend(src20WalletActions as any)
   return {
     public: pubClient,
     wallet,
