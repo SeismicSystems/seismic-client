@@ -49,6 +49,14 @@ const viemSidebar = [
         text: 'Wallet',
         link: '/viem/actions/wallet',
       },
+      {
+        text: 'Deposit Contract',
+        link: '/viem/actions/deposit',
+      },
+      {
+        text: 'SRC20 Events',
+        link: '/viem/actions/src20',
+      },
     ],
   },
   {

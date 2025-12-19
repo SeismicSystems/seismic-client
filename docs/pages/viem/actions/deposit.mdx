@@ -1,0 +1,230 @@
+---
+description: Actions for interacting with the Seismic Deposit Contract for validator staking operations.
+---
+
+# Deposit Contract Actions
+
+Actions for interacting with the Seismic Deposit Contract, enabling validator staking operations.
+
+## What is the Deposit Contract?
+
+The Deposit Contract is the entry point for staking on Seismic's blockchain. It allows users to deposit ETH to become validators, similar to Ethereum 2.0's deposit contract. The contract handles:
+
+- Validator registration with node and consensus public keys
+- Deposit tracking and root computation
+- Withdrawal credential management
+
+## Import
+
+```ts
+import {
+  depositContractPublicActions,
+  depositContractWalletActions,
+  DEPOSIT_CONTRACT_ADDRESS,
+} from 'seismic-viem'
+```
+
+## Usage
+
+### Extending Clients
+
+The deposit contract actions are provided as client extensions that can be added to your existing clients:
+
+```ts
+import {
+  createShieldedPublicClient,
+  createShieldedWalletClient,
+  depositContractPublicActions,
+  depositContractWalletActions,
+  seismicDevnet,
+} from 'seismic-viem'
+import { http, custom } from 'viem'
+
+// Extend public client with deposit contract read actions
+const publicClient = createShieldedPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+}).extend(depositContractPublicActions)
+
+// Extend wallet client with deposit contract write actions
+const walletClient = createShieldedWalletClient({
+  chain: seismicDevnet,
+  transport: custom(window.ethereum),
+}).extend(depositContractWalletActions)
+```
+
+## Public Actions
+
+### getDepositRoot
+
+Retrieves the current deposit root hash from the contract.
+
+```ts
+const depositRoot = await publicClient.getDepositRoot({
+  address: DEPOSIT_CONTRACT_ADDRESS, // optional, uses default if not specified
+})
+
+console.log('Deposit root:', depositRoot)
+```
+
+#### Parameters
+
+##### address (optional)
+
+- **Type:** `Address`
+
+The deposit contract address. Defaults to `DEPOSIT_CONTRACT_ADDRESS`.
+
+#### Return Value
+
+`Promise<Hex>` - The SHA-256 hash of the deposit root.
+
+---
+
+### getDepositCount
+
+Retrieves the current deposit count from the contract.
+
+```ts
+const depositCount = await publicClient.getDepositCount({
+  address: DEPOSIT_CONTRACT_ADDRESS, // optional
+})
+
+console.log('Total deposits:', depositCount)
+```
+
+#### Parameters
+
+##### address (optional)
+
+- **Type:** `Address`
+
+The deposit contract address. Defaults to `DEPOSIT_CONTRACT_ADDRESS`.
+
+#### Return Value
+
+`Promise<Hex>` - The deposit count encoded as a little endian 64-bit number.
+
+## Wallet Actions
+
+### deposit
+
+Submits a deposit to register as a validator on the Seismic network.
+
+```ts
+const txHash = await walletClient.deposit({
+  nodePubkey: '0x...', // ED25519 public key (32 bytes)
+  consensusPubkey: '0x...', // BLS12-381 public key (48 bytes)
+  withdrawalCredentials: '0x...', // Commitment to withdrawal public key
+  nodeSignature: '0x...', // ED25519 signature (64 bytes)
+  consensusSignature: '0x...', // BLS12-381 signature (96 bytes)
+  depositDataRoot: '0x...', // SHA-256 hash of SSZ-encoded DepositData
+  value: 32000000000000000000n, // Amount in wei (e.g., 32 ETH)
+})
+
+console.log('Deposit transaction:', txHash)
+```
+
+#### Parameters
+
+##### nodePubkey
+
+- **Type:** `Hex`
+
+The validator's ED25519 public key (32 bytes).
+
+##### consensusPubkey
+
+- **Type:** `Hex`
+
+The validator's BLS12-381 public key for consensus (48 bytes).
+
+##### withdrawalCredentials
+
+- **Type:** `Hex`
+
+Commitment to a public key for future withdrawals.
+
+##### nodeSignature
+
+- **Type:** `Hex`
+
+ED25519 signature over the deposit data (64 bytes).
+
+##### consensusSignature
+
+- **Type:** `Hex`
+
+BLS12-381 signature over the deposit data (96 bytes).
+
+##### depositDataRoot
+
+- **Type:** `Hex`
+
+The SHA-256 hash of the SSZ-encoded DepositData object. Used as a protection against malformed input.
+
+##### value
+
+- **Type:** `bigint`
+
+The amount of ETH to deposit, in wei.
+
+##### address (optional)
+
+- **Type:** `Address`
+
+The deposit contract address. Defaults to `DEPOSIT_CONTRACT_ADDRESS`.
+
+#### Return Value
+
+`Promise<Hex>` - The transaction hash.
+
+## Complete Example
+
+```ts
+import {
+  createShieldedPublicClient,
+  createShieldedWalletClient,
+  depositContractPublicActions,
+  depositContractWalletActions,
+  seismicDevnet,
+} from 'seismic-viem'
+import { http, custom, parseEther } from 'viem'
+
+// Create clients with deposit contract extensions
+const publicClient = createShieldedPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+}).extend(depositContractPublicActions)
+
+const walletClient = createShieldedWalletClient({
+  chain: seismicDevnet,
+  transport: custom(window.ethereum),
+}).extend(depositContractWalletActions)
+
+// Check current deposit state
+const depositRoot = await publicClient.getDepositRoot({})
+const depositCount = await publicClient.getDepositCount({})
+
+console.log('Current deposit root:', depositRoot)
+console.log('Total deposits:', depositCount)
+
+// Submit a validator deposit
+const txHash = await walletClient.deposit({
+  nodePubkey: '0x...your-node-pubkey...',
+  consensusPubkey: '0x...your-consensus-pubkey...',
+  withdrawalCredentials: '0x...your-withdrawal-credentials...',
+  nodeSignature: '0x...your-node-signature...',
+  consensusSignature: '0x...your-consensus-signature...',
+  depositDataRoot: '0x...your-deposit-data-root...',
+  value: parseEther('32'),
+})
+
+console.log('Deposit submitted:', txHash)
+```
+
+## Remarks
+
+- The deposit contract address is pre-configured but can be overridden for testing or alternative deployments.
+- Ensure all signatures and keys are properly formatted before submitting a deposit.
+- The `depositDataRoot` serves as a checksum to prevent malformed deposit data from being accepted.

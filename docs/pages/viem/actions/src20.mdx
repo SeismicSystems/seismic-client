@@ -1,0 +1,250 @@
+---
+description: Actions for watching and decrypting SRC20 token events with privacy-preserving capabilities.
+---
+
+# SRC20 Event Actions
+
+Actions for watching and decrypting SRC20 token events. SRC20 is Seismic's privacy-preserving token standard that encrypts transfer amounts in events.
+
+## What is SRC20?
+
+SRC20 is Seismic's confidential token standard, similar to ERC20 but with privacy-preserving features. Unlike standard ERC20 tokens where all transfer amounts are publicly visible on-chain, SRC20:
+
+- Encrypts transfer and approval amounts in events
+- Uses AES-GCM encryption with user-specific viewing keys
+- Allows users to decrypt only events relevant to them via `encryptKeyHash` filtering
+
+The SRC20 event actions provide utilities to watch for these encrypted events and automatically decrypt them using either:
+- A wallet client (automatically fetches the user's key from the Directory contract)
+- A public client with an explicit viewing key
+
+## Import
+
+```ts
+import {
+  src20PublicActions,
+  src20WalletActions,
+} from 'seismic-viem'
+```
+
+## Usage
+
+### Extending Clients
+
+The SRC20 actions are provided as client extensions:
+
+```ts
+import {
+  createShieldedPublicClient,
+  createShieldedWalletClient,
+  src20PublicActions,
+  src20WalletActions,
+  seismicDevnet,
+} from 'seismic-viem'
+import { http, custom } from 'viem'
+
+// For watching events with an explicit viewing key
+const publicClient = createShieldedPublicClient({
+  chain: seismicDevnet,
+  transport: http(),
+}).extend(src20PublicActions)
+
+// For watching events with automatic key retrieval
+const walletClient = createShieldedWalletClient({
+  chain: seismicDevnet,
+  transport: custom(window.ethereum),
+}).extend(src20WalletActions)
+```
+
+## Wallet Actions
+
+### watchSRC20Events
+
+Watches for SRC20 Transfer and Approval events, automatically decrypting amounts using the connected wallet's viewing key from the Directory contract.
+
+```ts
+const unwatch = await walletClient.watchSRC20Events({
+  address: '0x...', // SRC20 token contract address
+  onTransfer: (log) => {
+    console.log(`Transfer: ${log.from} → ${log.to}`)
+    console.log(`Amount: ${log.decryptedAmount}`)
+  },
+  onApproval: (log) => {
+    console.log(`Approval: ${log.owner} → ${log.spender}`)
+    console.log(`Amount: ${log.decryptedAmount}`)
+  },
+  onError: (error) => {
+    console.error('Decryption error:', error)
+  },
+})
+
+// Later: stop watching
+unwatch()
+```
+
+#### Parameters
+
+##### address
+
+- **Type:** `Address`
+
+The SRC20 token contract address to watch.
+
+##### onTransfer (optional)
+
+- **Type:** `(log: DecryptedTransferLog) => void`
+
+Callback function called when a Transfer event is detected and decrypted.
+
+##### onApproval (optional)
+
+- **Type:** `(log: DecryptedApprovalLog) => void`
+
+Callback function called when an Approval event is detected and decrypted.
+
+##### onError (optional)
+
+- **Type:** `(error: Error) => void`
+
+Callback function called when a decryption error occurs.
+
+#### Return Value
+
+`Promise<() => void>` - A function to stop watching events.
+
+#### Throws
+
+Throws an error if no AES key is registered in the Directory contract for the connected address.
+
+## Public Actions
+
+### watchSRC20EventsWithKey
+
+Watches for SRC20 Transfer and Approval events using an explicit viewing key. Useful for:
+- Server-side monitoring
+- Watching events without a connected wallet
+- Monitoring multiple addresses with different keys
+
+```ts
+const viewingKey = '0x...' // 32-byte AES key
+
+const unwatch = await publicClient.watchSRC20EventsWithKey(viewingKey, {
+  address: '0x...', // SRC20 token contract address
+  onTransfer: (log) => {
+    console.log(`Transfer: ${log.from} → ${log.to}`)
+    console.log(`Amount: ${log.decryptedAmount}`)
+  },
+  onApproval: (log) => {
+    console.log(`Approval: ${log.owner} → ${log.spender}`)
+    console.log(`Amount: ${log.decryptedAmount}`)
+  },
+  onError: (error) => {
+    console.error('Decryption error:', error)
+  },
+})
+
+// Later: stop watching
+unwatch()
+```
+
+#### Parameters
+
+##### viewingKey
+
+- **Type:** `Hex`
+
+The 32-byte AES viewing key used to decrypt event amounts.
+
+##### params
+
+Same as `watchSRC20Events` parameters (address, onTransfer, onApproval, onError).
+
+#### Return Value
+
+`Promise<() => void>` - A function to stop watching events.
+
+## Event Log Types
+
+### DecryptedTransferLog
+
+```ts
+type DecryptedTransferLog = {
+  from: Address // Sender address
+  to: Address // Recipient address
+  encryptKeyHash: Hex // Hash of the encryption key
+  encryptedAmount: Hex // Original encrypted amount
+  decryptedAmount: bigint // Decrypted transfer amount
+  transactionHash: Hex // Transaction hash
+  blockNumber: bigint // Block number
+}
+```
+
+### DecryptedApprovalLog
+
+```ts
+type DecryptedApprovalLog = {
+  owner: Address // Token owner address
+  spender: Address // Approved spender address
+  encryptKeyHash: Hex // Hash of the encryption key
+  encryptedAmount: Hex // Original encrypted amount
+  decryptedAmount: bigint // Decrypted approval amount
+  transactionHash: Hex // Block number
+  blockNumber: bigint // Block number
+}
+```
+
+## Complete Example
+
+```ts
+import {
+  createShieldedWalletClient,
+  src20WalletActions,
+  seismicDevnet,
+} from 'seismic-viem'
+import { custom } from 'viem'
+
+// Create wallet client with SRC20 extensions
+const walletClient = createShieldedWalletClient({
+  chain: seismicDevnet,
+  transport: custom(window.ethereum),
+}).extend(src20WalletActions)
+
+// Watch for all SRC20 events on a token
+const unwatch = await walletClient.watchSRC20Events({
+  address: '0x1234...', // Your SRC20 token address
+  onTransfer: (log) => {
+    if (log.to === walletClient.account.address) {
+      console.log(`Received ${log.decryptedAmount} tokens from ${log.from}`)
+    } else if (log.from === walletClient.account.address) {
+      console.log(`Sent ${log.decryptedAmount} tokens to ${log.to}`)
+    }
+  },
+  onApproval: (log) => {
+    console.log(
+      `Approved ${log.spender} to spend ${log.decryptedAmount} tokens`
+    )
+  },
+  onError: (error) => {
+    console.error('Failed to decrypt event:', error.message)
+  },
+})
+
+// Clean up when done
+// unwatch()
+```
+
+## How Event Decryption Works
+
+1. **Key Registration**: Users register their AES viewing key in the Directory contract.
+2. **Event Emission**: When a Transfer or Approval occurs, the SRC20 contract emits an event with:
+   - The `encryptKeyHash` (keccak256 hash of the viewing key)
+   - The `encryptedAmount` (AES-GCM encrypted amount)
+3. **Event Filtering**: The watcher filters events by `encryptKeyHash` to only receive events decryptable with the user's key.
+4. **Decryption**: Each event's `encryptedAmount` is decrypted using the viewing key to reveal the actual amount.
+
+## Remarks
+
+- The `encryptKeyHash` is used to efficiently filter events on-chain, so users only receive events they can decrypt.
+- For `watchSRC20Events`, the viewing key is automatically fetched from the Directory contract using a signed read.
+- Events are processed as they arrive; there may be a slight delay in decryption for high-throughput scenarios.
+- Always call the returned `unwatch` function when you no longer need to monitor events to clean up resources.
