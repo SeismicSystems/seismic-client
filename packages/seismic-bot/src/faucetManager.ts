@@ -164,7 +164,7 @@ export class FaucetManager {
    * Note: We request pending nonce first intentionally,
    *       because it gives slightly more time for any pending txs
    *       to be included in the next block.
-   *       When we check if we're up to date, we allow the confimed nonce
+   *       When we check if we're up to date, we allow the confirmed nonce
    *       to be ahead of the pending nonce (but not behind)
    */
   private async getNonces() {
