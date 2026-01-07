@@ -27,7 +27,8 @@ export const testSeismicTxEncoding = async ({
   expect(encryptionPubkey).toBe(
     compressPublicKey(privateKeyToAccount(encryptionSk).publicKey)
   )
-  console.log(encryptionPubkey)
+
+  const plaintext = '0xdeadbeef'
   const tx: TransactionSerializableLegacy = {
     chainId: chain.id,
     nonce: 2,
@@ -35,7 +36,7 @@ export const testSeismicTxEncoding = async ({
     gas: 100000n,
     to: '0xd3e8763675e4c425df46cc3b5c0f6cbdac396046',
     value: 1000000000000000n,
-    data: '0xfc3c2cf4943c327f19af0efaf3b07201f608dd5c8e3954399a919b72588d3872b6819ac3d13d3656cbb38833a39ffd1e73963196a1ddfa9e4a5d595fdbebb875',
+    data: plaintext,
   }
 
   const client = await createShieldedWalletClient({
