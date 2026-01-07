@@ -2,6 +2,7 @@ import {
   concatHex,
   defineChain,
   formatTransactionRequest,
+  hexToBytes,
   toHex,
   toRlp,
 } from 'viem'
@@ -31,6 +32,67 @@ import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 export const SEISMIC_TX_TYPE = 74 // '0x4a'
 
 /**
+ * Encodes transaction metadata as Additional Authenticated Data (AAD) for AEAD encryption
+ * This matches the Rust implementation in TxSeismicMetadata::encode_as_aad
+ */
+export function encodeSeismicMetadataAsAAD(params: {
+  chainId: number
+  nonce: bigint
+  gasPrice: bigint
+  gas: bigint
+  to: Address | null | undefined
+  value: bigint
+  encryptionPubkey: Hex
+  encryptionNonce: Hex
+  messageVersion: number
+  recentBlockHash: Hex
+  expiresAtBlock: bigint
+  signedRead: boolean
+}): Uint8Array {
+  const {
+    chainId,
+    nonce,
+    gasPrice,
+    gas,
+    to,
+    value,
+    encryptionPubkey,
+    encryptionNonce,
+    messageVersion,
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead,
+  } = params
+
+  // Encode legacy transaction fields
+  const legacyFields: Hex[] = [
+    toHex(chainId),
+    toHex(nonce),
+    toHex(gasPrice),
+    toHex(gas),
+    to ?? '0x',
+    toHex(value),
+  ]
+
+  // Encode seismic elements
+  const seismicElements: Hex[] = [
+    encryptionPubkey,
+    encryptionNonce,
+    toHex(messageVersion),
+    recentBlockHash,
+    toHex(expiresAtBlock),
+    signedRead ? '0x01' : '0x',
+  ]
+
+  // Combine and RLP encode
+  const combined: Hex[] = [...legacyFields, ...seismicElements]
+  const rlpEncoded = toRlp(combined)
+
+  // Convert hex to Uint8Array
+  return hexToBytes(rlpEncoded)
+}
+
+/**
  * The additional fields added to a Seismic transaction
  * @interface SeismicTxExtras
  * @property {Hex} [encryptionPubkey] - The public key used to encrypt the calldata. This uses AES encryption, where the user's keypair is combined with the network's keypair
@@ -41,12 +103,18 @@ type SeismicTxExtrasBlank = {
   encryptionPubkey?: undefined
   encryptionNonce?: undefined
   messageVersion?: undefined
+  recentBlockHash?: undefined
+  expiresAtBlock?: undefined
+  signedRead?: undefined
 }
 
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
   encryptionNonce?: Hex | undefined
   messageVersion?: number | undefined
+  recentBlockHash?: Hex | undefined
+  expiresAtBlock?: bigint | undefined
+  signedRead?: boolean | undefined
 }
 
 /**
@@ -84,6 +152,9 @@ export type TxSeismic = {
   encryptionPubkey: Hex
   encryptionNonce: Hex
   messageVersion?: number
+  recentBlockHash?: Hex
+  expiresAtBlock?: bigint
+  signedRead?: boolean
 }
 
 export type SeismicTxSerializer = SerializeTransactionFn<
@@ -105,15 +176,25 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     value = 0n,
     encryptionPubkey,
     encryptionNonce,
-    messageVersion = 0,
+    messageVersion,
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead,
   } = transaction
 
   if (!chainId) {
     throw new Error('Seismic transactions require chainId argument')
   }
 
+  // Set defaults for seismic fields only if encryptionPubkey is set
+  const hasSeismicFields = encryptionPubkey !== undefined
+  const defaultMessageVersion = messageVersion ?? (hasSeismicFields ? 0 : undefined)
+  const defaultRecentBlockHash = recentBlockHash ?? (hasSeismicFields ? '0x0000000000000000000000000000000000000000000000000000000000000000' : undefined)
+  const defaultExpiresAtBlock = expiresAtBlock ?? (hasSeismicFields ? 0xffffffffffffffffn : undefined)
+  const defaultSignedRead = signedRead ?? (hasSeismicFields ? false : undefined)
+
   // Log all transaction properties for debugging
-  let rlpArray = [
+  const rlpArray: Hex[] = [
     toHex(chainId),
     nonce ? toHex(nonce) : '0x',
     gasPrice ? toHex(gasPrice) : '0x',
@@ -122,7 +203,10 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     value ? toHex(value) : '0x',
     encryptionPubkey ?? '0x',
     encryptionNonce ?? '0x',
-    messageVersion ? toHex(messageVersion) : '0x',
+    defaultMessageVersion !== undefined ? toHex(defaultMessageVersion) : '0x',
+    defaultRecentBlockHash ?? '0x',
+    defaultExpiresAtBlock !== undefined ? toHex(defaultExpiresAtBlock) : '0x',
+    defaultSignedRead ? '0x01' : '0x',
     data ?? '0x',
     ...toYParitySignatureArray(
       transaction as TransactionSerializableLegacy,
@@ -233,6 +317,9 @@ export const seismicChainFormatters: ChainFormatters = {
         encryptionPubkey: request.encryptionPubkey,
         encryptionNonce: request.encryptionNonce,
         messageVersion: hasSeismicFields(request) ? '0x0' : undefined,
+        recentBlockHash: request.recentBlockHash,
+        expiresAtBlock: request.expiresAtBlock,
+        signedRead: request.signedRead,
       }
     },
     type: 'transactionRequest',

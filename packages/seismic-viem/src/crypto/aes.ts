@@ -64,7 +64,8 @@ export class AesGcmCrypto {
    */
   public async encrypt(
     plaintext: Hex | null | undefined,
-    nonce: EncryptionNonce
+    nonce: EncryptionNonce,
+    aad?: Uint8Array
   ): Promise<Hex> {
     if (!plaintext || plaintext === '0x') {
       return '0x'
@@ -79,7 +80,7 @@ export class AesGcmCrypto {
 
     const key = hexToBytes(this.key)
     const plaintextBytes = hexToBytes(plaintext)
-    const ciphertextBytes = await gcm(key, nonceBuffer).encrypt(plaintextBytes)
+    const ciphertextBytes = await gcm(key, nonceBuffer, aad).encrypt(plaintextBytes)
     return bytesToHex(ciphertextBytes)
   }
 
@@ -89,7 +90,8 @@ export class AesGcmCrypto {
    */
   public async decrypt(
     ciphertext: Hex | null | undefined,
-    nonce: EncryptionNonce
+    nonce: EncryptionNonce,
+    aad?: Uint8Array
   ): Promise<Hex> {
     if (!ciphertext || ciphertext === '0x') {
       return '0x'
@@ -104,7 +106,7 @@ export class AesGcmCrypto {
 
     const key = hexToBytes(this.key)
     const ciphertextBytes = hexToBytes(ciphertext)
-    const plaintextBytes = await gcm(key, nonceBuffer).decrypt(ciphertextBytes)
+    const plaintextBytes = await gcm(key, nonceBuffer, aad).decrypt(ciphertextBytes)
     return bytesToHex(plaintextBytes)
   }
 }

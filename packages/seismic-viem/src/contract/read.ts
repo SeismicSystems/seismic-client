@@ -20,6 +20,9 @@ import {
 import { parseAccount } from 'viem/accounts'
 import { formatAbiItem } from 'viem/utils'
 
+import { getChainId, prepareTransactionRequest } from 'viem/actions'
+
+import { encodeSeismicMetadataAsAAD } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
@@ -33,6 +36,7 @@ export type SignedReadContractParameters<
   TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 > = ReadContractParameters<TAbi, TFunctionName, TArgs> & {
   nonce?: number
+  blocksWindow?: bigint
 }
 
 const fillNonce = async <
@@ -83,6 +87,7 @@ const fillNonce = async <
  *   - `functionName` (string) - The name of the function to call.
  *   - `args` (array) - The arguments for the function.
  *   - `address` ({@link Hex}) - The contract's address on the blockchain.
+ *   - `blocksWindow` (bigint, optional) - Number of blocks until transaction expires (default: 100n).
  *   - Additional options for customizing the call request.
  *
  * @returns {Promise<ReadContractReturnType>} A promise that resolves to the response from the contract.
@@ -96,6 +101,7 @@ const fillNonce = async <
  *   functionName: 'getBalance',
  *   args: ['0x1234...'],
  *   address: '0x5678...',
+ *   blocksWindow: 200n, // Optional: transaction valid for 200 blocks
  * });
  * console.log('Balance:', result);
  * ```
@@ -122,8 +128,9 @@ export async function signedReadContract<
     functionName,
     args = [],
     address,
+    blocksWindow = 100n,
     ...rest
-  } = parameters as ReadContractParameters
+  } = parameters as ReadContractParameters & { blocksWindow?: bigint }
 
   // If they specify no address, then use the standard read contract,
   // since it doesn't have to be signed
@@ -140,25 +147,64 @@ export async function signedReadContract<
   const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
   const plaintextCalldata = `${selector}${encodedParams}` as `0x${string}`
 
+  // Prepare transaction to get all metadata fields
+  const chainId = await getChainId(client)
+  const accountAddress = typeof account === 'string' ? account : account?.address
+  const preparedTx = await prepareTransactionRequest(client, {
+    to: address,
+    data: plaintextCalldata,
+    nonce,
+    from: accountAddress,
+    type: 'legacy',
+  } as any)
+
+  // Get the most recent block info
+  const recentBlock = await client.getBlock({ blockTag: 'latest' })
+  const recentBlockHash = recentBlock.hash!
+  const expiresAtBlock = recentBlock.number! + blocksWindow
+
+  const encryptionPubkey = client.getEncryptionPublicKey()
+  const encryptionNonce = randomEncryptionNonce()
+
+  // Encode metadata as AAD for authenticated encryption
+  const aad = encodeSeismicMetadataAsAAD({
+    chainId,
+    nonce: preparedTx.nonce!,
+    gasPrice: preparedTx.gasPrice!,
+    gas: preparedTx.gas!,
+    to: preparedTx.to!,
+    value: preparedTx.value ?? 0n,
+    encryptionPubkey,
+    encryptionNonce,
+    messageVersion: 0,
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead: true,
+  })
+
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
-
-  const encryptionNonce = randomEncryptionNonce()
   const encryptedCalldata = await aesCipher.encrypt(
     plaintextCalldata,
-    encryptionNonce
+    encryptionNonce,
+    aad
   )
 
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
-    nonce,
+    nonce: preparedTx.nonce,
     to: address!,
     data: encryptedCalldata,
-    encryptionPubkey: client.getEncryptionPublicKey(),
+    gas: preparedTx.gas,
+    gasPrice: preparedTx.gasPrice,
+    encryptionPubkey,
     encryptionNonce,
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead: true,
   }
   const { data: encryptedData } = await signedCall(client, request)
-  const data = await aesCipher.decrypt(encryptedData, encryptionNonce)
+  const data = await aesCipher.decrypt(encryptedData, encryptionNonce, aad)
   return decodeFunctionResult({
     abi,
     args,

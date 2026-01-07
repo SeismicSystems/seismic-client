@@ -19,8 +19,9 @@ import {
   toFunctionSelector,
 } from 'viem'
 import { formatAbiItem } from 'viem/utils'
+import { getChainId, prepareTransactionRequest } from 'viem/actions'
 
-import { SEISMIC_TX_TYPE } from '@sviem/chain.ts'
+import { SEISMIC_TX_TYPE, encodeSeismicMetadataAsAAD } from '@sviem/chain.ts'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
@@ -80,27 +81,66 @@ async function getShieldedWriteContractRequest<
     TAccount,
     TChainOverride
   >,
-  plaintextCalldata: Hex
+  plaintextCalldata: Hex,
+  blocksWindow: bigint = 100n
 ): Promise<SendSeismicTransactionParameters<TChain, TAccount>> {
   const { address, gas, gasPrice, value, nonce } = parameters
 
+  // Prepare transaction to get all metadata fields
+  const chainId = await getChainId(client)
+  const preparedTx = await prepareTransactionRequest(client, {
+    to: address,
+    data: plaintextCalldata,
+    nonce,
+    value,
+    gas,
+    gasPrice,
+    from: client.account?.address,
+    type: 'legacy',
+  } as any)
+
+  // Get the most recent block info
+  const recentBlock = await client.getBlock({ blockTag: 'latest' })
+  const recentBlockHash = recentBlock.hash!
+  const expiresAtBlock = recentBlock.number! + blocksWindow
+
+  const encryptionPubkey = client.getEncryptionPublicKey()
+  const encryptionNonce = randomEncryptionNonce()
+
+  // Encode metadata as AAD for authenticated encryption
+  const aad = encodeSeismicMetadataAsAAD({
+    chainId,
+    nonce: preparedTx.nonce!,
+    gasPrice: preparedTx.gasPrice!,
+    gas: preparedTx.gas!,
+    to: preparedTx.to!,
+    value: preparedTx.value ?? 0n,
+    encryptionPubkey,
+    encryptionNonce,
+    messageVersion: 0,
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead: false,
+  })
+
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
-
-  const encryptionNonce = randomEncryptionNonce()
-  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
+  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce, aad)
 
   return {
     account: client.account,
     chain: undefined,
     to: address,
     data,
-    nonce,
-    value,
-    gas,
-    gasPrice,
-    encryptionPubkey: client.getEncryptionPublicKey(),
+    nonce: preparedTx.nonce,
+    value: preparedTx.value,
+    gas: preparedTx.gas,
+    gasPrice: preparedTx.gasPrice,
+    encryptionPubkey,
     encryptionNonce,
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead: false,
   }
 }
 
@@ -109,7 +149,7 @@ async function getShieldedWriteContractRequest<
  *
  *
  * @param {ShieldedWalletClient} client - The client to use.
- * @param {WriteContractParameters} parameters - The configuration object for the write operation.
+ * @param {ShieldedWriteContractParameters} parameters - The configuration object for the write operation.
  *   - `address` ({@link Hex}) - The address of the contract.
  *   - `abi` ({@link Abi}) - The contract's ABI.
  *   - `functionName` (string) - The name of the contract function to call.
@@ -117,6 +157,7 @@ async function getShieldedWriteContractRequest<
  *   - `gas` (bigint, optional) - Optional gas limit for the transaction.
  *   - `gasPrice` (bigint, optional) - Optional gas price for the transaction.
  *   - `value` (bigint, optional) - Optional value (native token amount) to send with the transaction.
+ *   - `blocksWindow` (bigint, optional) - Number of blocks until transaction expires (default: 100n).
  *
  * @returns {Promise<WriteContractReturnType>} A promise that resolves to a transaction hash.
  *
@@ -133,8 +174,20 @@ async function getShieldedWriteContractRequest<
  *   abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
  *   functionName: 'mint',
  *   args: [69420],
+ *   blocksWindow: 200n, // Optional: transaction valid for 200 blocks
  * })
  */
+export type ShieldedWriteContractParameters<
+  TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'nonpayable' | 'payable', TFunctionName>,
+  TChain extends Chain | undefined = Chain | undefined,
+  TAccount extends Account | undefined = Account | undefined,
+  TChainOverride extends Chain | undefined = Chain | undefined,
+> = WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, TChainOverride> & {
+  blocksWindow?: bigint
+}
+
 export async function shieldedWriteContract<
   TTransport extends Transport,
   TChain extends Chain | undefined,
@@ -149,7 +202,7 @@ export async function shieldedWriteContract<
   chainOverride extends Chain | undefined = undefined,
 >(
   client: ShieldedWalletClient<TTransport, TChain, TAccount>,
-  parameters: WriteContractParameters<
+  parameters: ShieldedWriteContractParameters<
     TAbi,
     TFunctionName,
     TArgs,
@@ -158,11 +211,13 @@ export async function shieldedWriteContract<
     chainOverride
   >
 ): Promise<WriteContractReturnType> {
-  const plaintextCalldata = getPlaintextCalldata(parameters)
+  const { blocksWindow = 100n, ...writeParams } = parameters
+  const plaintextCalldata = getPlaintextCalldata(writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>)
   const request = await getShieldedWriteContractRequest(
     client,
-    parameters,
-    plaintextCalldata
+    writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>,
+    plaintextCalldata,
+    blocksWindow
   )
   return sendShieldedTransaction(client, request)
 }
@@ -190,7 +245,7 @@ export type ShieldedWriteContractDebugResult<
  * Creates a transaction for a shielded write. Returns both plaintext and shielded transaction versions. Useful for debugging.
  *
  * @param {ShieldedWalletClient} client - The client to use.
- * @param {WriteContractParameters} parameters - The configuration object for the write operation.
+ * @param {ShieldedWriteContractDebugParameters} parameters - The configuration object for the write operation.
  *   - `address` ({@link Hex}) - The address of the contract.
  *   - `abi` ({@link Abi}) - The contract's ABI.
  *   - `functionName` (string) - The name of the contract function to call.
@@ -198,9 +253,22 @@ export type ShieldedWriteContractDebugResult<
  *   - `gas` (bigint, optional) - Optional gas limit for the transaction.
  *   - `gasPrice` (bigint, optional) - Optional gas price for the transaction.
  *   - `value` (bigint, optional) - Optional value (native token amount) to send with the transaction.
+ *   - `checkContractDeployed` (boolean, optional) - Whether to check if contract is deployed.
+ *   - `blocksWindow` (bigint, optional) - Number of blocks until transaction expires (default: 100n).
  *
  * @returns {ShieldedWriteContractDebugResult} Object containing both the plaintext and shielded transaction parameters.
  */
+export type ShieldedWriteContractDebugParameters<
+  TAbi extends Abi | readonly unknown[],
+  TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
+  TArgs extends ContractFunctionArgs<TAbi, 'nonpayable' | 'payable', TFunctionName>,
+  TChain extends Chain | undefined = Chain | undefined,
+  TAccount extends Account | undefined = Account | undefined,
+  TChainOverride extends Chain | undefined = Chain | undefined,
+> = ShieldedWriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, TChainOverride> & {
+  checkContractDeployed?: boolean
+}
+
 export async function shieldedWriteContractDebug<
   TTransport extends Transport,
   TChain extends Chain | undefined,
@@ -215,27 +283,29 @@ export async function shieldedWriteContractDebug<
   chainOverride extends Chain | undefined = undefined,
 >(
   client: ShieldedWalletClient<TTransport, TChain, TAccount>,
-  parameters: WriteContractParameters<
+  parameters: ShieldedWriteContractDebugParameters<
     TAbi,
     TFunctionName,
     TArgs,
     TChain,
     TAccount,
     chainOverride
-  >,
-  checkContractDeployed?: boolean
+  >
 ): Promise<ShieldedWriteContractDebugResult<TChain, TAccount>> {
+  const { checkContractDeployed, blocksWindow = 100n, ...writeParams } = parameters
+
   if (checkContractDeployed) {
     const code = await client.getCode({ address: parameters.address })
     if (code === undefined) {
       throw new Error('Contract not found')
     }
   }
-  const plaintextCalldata = getPlaintextCalldata(parameters)
+  const plaintextCalldata = getPlaintextCalldata(writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>)
   const request = await getShieldedWriteContractRequest(
     client,
-    parameters,
-    plaintextCalldata
+    writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>,
+    plaintextCalldata,
+    blocksWindow
   )
   const txHash = await sendShieldedTransaction(client, request)
   return {
