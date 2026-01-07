@@ -66,32 +66,40 @@ export function encodeSeismicMetadataAsAAD(params: {
     signedRead,
   } = params
 
-  // Encode legacy transaction fields
-  const legacyFields: Hex[] = [
+  // Encode each field individually and concatenate (NOT wrapped in RLP list)
+  // This matches Rust's implementation which encodes fields directly
+  const fields: Hex[] = [
     toHex(chainId),
     toHex(nonce),
     toHex(gasPrice),
     toHex(gas),
     to ?? '0x',
     toHex(value),
-  ]
-
-  // Encode seismic elements
-  const seismicElements: Hex[] = [
     encryptionPubkey,
-    encryptionNonce,
-    toHex(messageVersion),
+    encryptionNonce === '0x00' || encryptionNonce === '0x0' ? '0x' : encryptionNonce,
+    messageVersion === 0 ? '0x' : toHex(messageVersion),
     recentBlockHash,
     toHex(expiresAtBlock),
-    signedRead ? '0x01' : '0x00',
+    signedRead ? '0x01' : '0x',
   ]
 
-  // Combine and RLP encode
-  const combined: Hex[] = [...legacyFields, ...seismicElements]
-  const rlpEncoded = toRlp(combined)
+  // Encode each field separately and concatenate the RLP bytes
+  // Do NOT wrap in an RLP list - just concatenate the individual RLP encodings
+  const rlpEncodedFields = fields.map((field) => {
+    // Encode each field as a single value (not wrapped in array/list)
+    return hexToBytes(toRlp(field as any))
+  })
 
-  // Convert hex to Uint8Array
-  return hexToBytes(rlpEncoded)
+  // Concatenate all the RLP-encoded fields
+  const totalLength = rlpEncodedFields.reduce((sum, bytes) => sum + bytes.length, 0)
+  const result = new Uint8Array(totalLength)
+  let offset = 0
+  for (const bytes of rlpEncodedFields) {
+    result.set(bytes, offset)
+    offset += bytes.length
+  }
+
+  return result
 }
 
 /**
@@ -203,7 +211,8 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   const defaultExpiresAtBlock =
     expiresAtBlock ?? (hasSeismicFields ? 0xffffffffffffffffn : undefined)
 
-  // Log all transaction properties for debugging
+  // Seismic elements are encoded FLAT (not nested) - each field is a separate RLP item
+  // Note: Zero values are encoded as empty bytes (0x) to match Rust's alloy-rlp encoding
   const rlpArray: Hex[] = [
     toHex(chainId),
     nonce ? toHex(nonce) : '0x',
@@ -211,12 +220,14 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     gas ? toHex(gas) : '0x',
     to ?? '0x',
     value ? toHex(value) : '0x',
+    // Seismic elements fields (encoded flat, not as a nested list)
     encryptionPubkey ?? '0x',
-    encryptionNonce ?? '0x',
-    defaultMessageVersion !== undefined ? toHex(defaultMessageVersion) : '0x',
+    encryptionNonce === '0x00' || encryptionNonce === '0x0' ? '0x' : encryptionNonce ?? '0x',
+    defaultMessageVersion === 0 ? '0x' : defaultMessageVersion !== undefined ? toHex(defaultMessageVersion) : '0x',
     defaultRecentBlockHash ?? '0x',
     defaultExpiresAtBlock !== undefined ? toHex(defaultExpiresAtBlock) : '0x',
-    signedRead ? '0x1' : '0x0',
+    signedRead ? '0x01' : '0x',
+    // Input field comes after seismic elements
     data ?? '0x',
     ...toYParitySignatureArray(
       transaction as TransactionSerializableLegacy,

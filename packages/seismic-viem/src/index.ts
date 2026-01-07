@@ -24,6 +24,7 @@ export {
   createSeismicGcpTestnet,
   serializeSeismicTransaction,
   seismicChainFormatters,
+  encodeSeismicMetadataAsAAD,
   SEISMIC_TX_TYPE,
 } from '@sviem/chain.ts'
 
