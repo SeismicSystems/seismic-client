@@ -18,8 +18,8 @@ import {
   numberToHex,
   toFunctionSelector,
 } from 'viem'
-import { formatAbiItem } from 'viem/utils'
 import { getChainId, prepareTransactionRequest } from 'viem/actions'
+import { formatAbiItem } from 'viem/utils'
 
 import { SEISMIC_TX_TYPE, encodeSeismicMetadataAsAAD } from '@sviem/chain.ts'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
@@ -180,11 +180,22 @@ async function getShieldedWriteContractRequest<
 export type ShieldedWriteContractParameters<
   TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<TAbi, 'nonpayable' | 'payable', TFunctionName>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends Account | undefined = Account | undefined,
   TChainOverride extends Chain | undefined = Chain | undefined,
-> = WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, TChainOverride> & {
+> = WriteContractParameters<
+  TAbi,
+  TFunctionName,
+  TArgs,
+  TChain,
+  TAccount,
+  TChainOverride
+> & {
   blocksWindow?: bigint
 }
 
@@ -212,10 +223,26 @@ export async function shieldedWriteContract<
   >
 ): Promise<WriteContractReturnType> {
   const { blocksWindow = 100n, ...writeParams } = parameters
-  const plaintextCalldata = getPlaintextCalldata(writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>)
+  const plaintextCalldata = getPlaintextCalldata(
+    writeParams as WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      TChain,
+      TAccount,
+      chainOverride
+    >
+  )
   const request = await getShieldedWriteContractRequest(
     client,
-    writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>,
+    writeParams as WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      TChain,
+      TAccount,
+      chainOverride
+    >,
     plaintextCalldata,
     blocksWindow
   )
@@ -261,11 +288,22 @@ export type ShieldedWriteContractDebugResult<
 export type ShieldedWriteContractDebugParameters<
   TAbi extends Abi | readonly unknown[],
   TFunctionName extends ContractFunctionName<TAbi, 'nonpayable' | 'payable'>,
-  TArgs extends ContractFunctionArgs<TAbi, 'nonpayable' | 'payable', TFunctionName>,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'nonpayable' | 'payable',
+    TFunctionName
+  >,
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends Account | undefined = Account | undefined,
   TChainOverride extends Chain | undefined = Chain | undefined,
-> = ShieldedWriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, TChainOverride> & {
+> = ShieldedWriteContractParameters<
+  TAbi,
+  TFunctionName,
+  TArgs,
+  TChain,
+  TAccount,
+  TChainOverride
+> & {
   checkContractDeployed?: boolean
 }
 
@@ -292,7 +330,11 @@ export async function shieldedWriteContractDebug<
     chainOverride
   >
 ): Promise<ShieldedWriteContractDebugResult<TChain, TAccount>> {
-  const { checkContractDeployed, blocksWindow = 100n, ...writeParams } = parameters
+  const {
+    checkContractDeployed,
+    blocksWindow = 100n,
+    ...writeParams
+  } = parameters
 
   if (checkContractDeployed) {
     const code = await client.getCode({ address: parameters.address })
@@ -300,10 +342,26 @@ export async function shieldedWriteContractDebug<
       throw new Error('Contract not found')
     }
   }
-  const plaintextCalldata = getPlaintextCalldata(writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>)
+  const plaintextCalldata = getPlaintextCalldata(
+    writeParams as WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      TChain,
+      TAccount,
+      chainOverride
+    >
+  )
   const request = await getShieldedWriteContractRequest(
     client,
-    writeParams as WriteContractParameters<TAbi, TFunctionName, TArgs, TChain, TAccount, chainOverride>,
+    writeParams as WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      TChain,
+      TAccount,
+      chainOverride
+    >,
     plaintextCalldata,
     blocksWindow
   )

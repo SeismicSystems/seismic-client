@@ -80,7 +80,9 @@ export class AesGcmCrypto {
 
     const key = hexToBytes(this.key)
     const plaintextBytes = hexToBytes(plaintext)
-    const ciphertextBytes = await gcm(key, nonceBuffer, aad).encrypt(plaintextBytes)
+    const ciphertextBytes = await gcm(key, nonceBuffer, aad).encrypt(
+      plaintextBytes
+    )
     return bytesToHex(ciphertextBytes)
   }
 
@@ -106,7 +108,9 @@ export class AesGcmCrypto {
 
     const key = hexToBytes(this.key)
     const ciphertextBytes = hexToBytes(ciphertext)
-    const plaintextBytes = await gcm(key, nonceBuffer, aad).decrypt(ciphertextBytes)
+    const plaintextBytes = await gcm(key, nonceBuffer, aad).decrypt(
+      ciphertextBytes
+    )
     return bytesToHex(plaintextBytes)
   }
 }

@@ -188,9 +188,15 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
 
   // Set defaults for seismic fields only if encryptionPubkey is set
   const hasSeismicFields = encryptionPubkey !== undefined
-  const defaultMessageVersion = messageVersion ?? (hasSeismicFields ? 0 : undefined)
-  const defaultRecentBlockHash = recentBlockHash ?? (hasSeismicFields ? '0x0000000000000000000000000000000000000000000000000000000000000000' : undefined)
-  const defaultExpiresAtBlock = expiresAtBlock ?? (hasSeismicFields ? 0xffffffffffffffffn : undefined)
+  const defaultMessageVersion =
+    messageVersion ?? (hasSeismicFields ? 0 : undefined)
+  const defaultRecentBlockHash =
+    recentBlockHash ??
+    (hasSeismicFields
+      ? '0x0000000000000000000000000000000000000000000000000000000000000000'
+      : undefined)
+  const defaultExpiresAtBlock =
+    expiresAtBlock ?? (hasSeismicFields ? 0xffffffffffffffffn : undefined)
   const defaultSignedRead = signedRead ?? (hasSeismicFields ? false : undefined)
 
   // Log all transaction properties for debugging

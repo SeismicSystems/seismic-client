@@ -18,9 +18,8 @@ import {
   toFunctionSelector,
 } from 'viem'
 import { parseAccount } from 'viem/accounts'
-import { formatAbiItem } from 'viem/utils'
-
 import { getChainId, prepareTransactionRequest } from 'viem/actions'
+import { formatAbiItem } from 'viem/utils'
 
 import { encodeSeismicMetadataAsAAD } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
@@ -149,7 +148,8 @@ export async function signedReadContract<
 
   // Prepare transaction to get all metadata fields
   const chainId = await getChainId(client)
-  const accountAddress = typeof account === 'string' ? account : account?.address
+  const accountAddress =
+    typeof account === 'string' ? account : account?.address
   const preparedTx = await prepareTransactionRequest(client, {
     to: address,
     data: plaintextCalldata,
