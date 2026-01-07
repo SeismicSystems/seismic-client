@@ -44,7 +44,7 @@ export function encodeSeismicMetadataAsAAD(params: {
   value: bigint
   encryptionPubkey: Hex
   encryptionNonce: Hex
-  messageVersion: number
+  messageVersion?: number
   recentBlockHash: Hex
   expiresAtBlock: bigint
   signedRead: boolean
@@ -58,7 +58,7 @@ export function encodeSeismicMetadataAsAAD(params: {
     value,
     encryptionPubkey,
     encryptionNonce,
-    messageVersion,
+    messageVersion = 0,
     recentBlockHash,
     expiresAtBlock,
     signedRead,
