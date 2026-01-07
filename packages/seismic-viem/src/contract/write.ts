@@ -21,10 +21,9 @@ import {
 import { getChainId, prepareTransactionRequest } from 'viem/actions'
 import { formatAbiItem } from 'viem/utils'
 
-import { SEISMIC_TX_TYPE, encodeSeismicMetadataAsAAD } from '@sviem/chain.ts'
+import { SEISMIC_TX_TYPE } from '@sviem/chain.ts'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
-import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
 import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.ts'
 import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
@@ -107,31 +106,14 @@ async function getShieldedWriteContractRequest<
   const encryptionPubkey = client.getEncryptionPublicKey()
   const encryptionNonce = randomEncryptionNonce()
 
-  // Encode metadata as AAD for authenticated encryption
-  const aad = encodeSeismicMetadataAsAAD({
-    chainId,
-    nonce: preparedTx.nonce!,
-    gasPrice: preparedTx.gasPrice!,
-    gas: preparedTx.gas!,
-    to: preparedTx.to!,
-    value: preparedTx.value ?? 0n,
-    encryptionPubkey,
-    encryptionNonce,
-    messageVersion: 0,
-    recentBlockHash,
-    expiresAtBlock,
-    signedRead: false,
-  })
-
-  const aesKey = client.getEncryption()
-  const aesCipher = new AesGcmCrypto(aesKey)
-  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce, aad)
-
+  // IMPORTANT: Pass PLAINTEXT calldata to sendShieldedTransaction
+  // Encryption will happen AFTER the final prepareTransactionRequest call
+  // to ensure AAD is computed with the exact final transaction values
   return {
     account: client.account,
     chain: undefined,
     to: address,
-    data,
+    data: plaintextCalldata, // PLAINTEXT, not encrypted
     nonce: preparedTx.nonce,
     value: preparedTx.value,
     gas: preparedTx.gas,

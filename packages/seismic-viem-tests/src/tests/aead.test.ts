@@ -4,15 +4,14 @@ import { hexToBytes, bytesToHex, toHex } from 'viem'
 import type { Hex } from 'viem'
 
 // Import AEAD encryption functions
-// We'll need to check if these exist in seismic-viem
 import { secp256k1 } from '@noble/curves/secp256k1'
-import { chacha20poly1305 } from '@noble/ciphers/chacha'
+import { gcm } from '@noble/ciphers/aes'
 import { hkdf } from '@noble/hashes/hkdf'
 import { sha256 } from '@noble/hashes/sha256'
 
 /**
- * ECDH encryption using ChaCha20-Poly1305 AEAD
- * This should match the Rust implementation in seismic-enclave
+ * ECDH encryption using AES-256-GCM AEAD
+ * This matches the Rust implementation in seismic-enclave
  */
 function ecdhEncryptAead(
   theirPublicKey: Hex,
@@ -25,29 +24,44 @@ function ecdhEncryptAead(
   const theirPubKeyBytes = hexToBytes(theirPublicKey)
   const ourSecKeyBytes = hexToBytes(ourSecretKey)
 
-  // Multiply their public key by our secret key to get shared point
-  const sharedPoint = secp256k1.getSharedSecret(ourSecKeyBytes, theirPubKeyBytes, true)
-  console.log('  Shared point (compressed):', bytesToHex(sharedPoint))
+  // Multiply their public key by our secret key to get shared point (uncompressed)
+  const sharedPointUncompressed = secp256k1.getSharedSecret(ourSecKeyBytes, theirPubKeyBytes, false)
+  console.log('  Shared point (uncompressed):', bytesToHex(sharedPointUncompressed))
 
-  // 2. Derive encryption key using HKDF
-  // Use the x-coordinate of the shared point (skip the prefix byte)
-  const sharedSecret = sharedPoint.slice(1)
-  console.log('  Shared secret (x-coord):', bytesToHex(sharedSecret))
+  // 2. Rust's non-standard ECDH: hash (version_byte + x_coordinate)
+  // where version_byte = (y_last_byte & 0x01) | 0x02
+  const sharedPoint64 = sharedPointUncompressed.slice(1) // Remove prefix byte (0x04)
+  const xCoord = sharedPoint64.slice(0, 32)
+  const yCoord = sharedPoint64.slice(32, 64)
+  console.log('  X-coordinate:', bytesToHex(xCoord))
+  console.log('  Y-coordinate:', bytesToHex(yCoord))
 
-  // HKDF with SHA-256
-  const encryptionKey = hkdf(sha256, sharedSecret, undefined, undefined, 32)
+  const yLastByte = yCoord[31]
+  const version = (yLastByte & 0x01) | 0x02
+  console.log('  Version byte:', `0x${version.toString(16).padStart(2, '0')}`)
+
+  // SHA256(version_byte + x_coordinate)
+  const sharedSecret = sha256.create()
+    .update(new Uint8Array([version]))
+    .update(xCoord)
+    .digest()
+  console.log('  Shared secret (SHA-256 of version+x):', bytesToHex(sharedSecret))
+
+  // HKDF with SHA-256 and info="aes-gcm key" (matches Rust implementation)
+  const info = new TextEncoder().encode('aes-gcm key')
+  const encryptionKey = hkdf(sha256, sharedSecret, undefined, info, 32)
   console.log('  Encryption key:', bytesToHex(encryptionKey))
 
-  // 3. Encrypt using ChaCha20-Poly1305 (12-byte nonce)
+  // 3. Encrypt using AES-256-GCM (12-byte nonce)
   const plaintextBytes = hexToBytes(plaintext)
-  const cipher = chacha20poly1305(encryptionKey, nonce, aad)
+  const cipher = gcm(encryptionKey, nonce, aad)
   const ciphertext = cipher.encrypt(plaintextBytes)
 
   return bytesToHex(ciphertext)
 }
 
 /**
- * ECDH decryption using ChaCha20-Poly1305 AEAD
+ * ECDH decryption using AES-256-GCM AEAD
  */
 function ecdhDecryptAead(
   theirPublicKey: Hex,
@@ -60,15 +74,31 @@ function ecdhDecryptAead(
   const theirPubKeyBytes = hexToBytes(theirPublicKey)
   const ourSecKeyBytes = hexToBytes(ourSecretKey)
 
-  const sharedPoint = secp256k1.getSharedSecret(ourSecKeyBytes, theirPubKeyBytes, true)
+  // Multiply their public key by our secret key to get shared point (uncompressed)
+  const sharedPointUncompressed = secp256k1.getSharedSecret(ourSecKeyBytes, theirPubKeyBytes, false)
 
-  // 2. Derive encryption key using HKDF
-  const sharedSecret = sharedPoint.slice(1)
-  const encryptionKey = hkdf(sha256, sharedSecret, undefined, undefined, 32)
+  // 2. Rust's non-standard ECDH: hash (version_byte + x_coordinate)
+  // where version_byte = (y_last_byte & 0x01) | 0x02
+  const sharedPoint64 = sharedPointUncompressed.slice(1) // Remove prefix byte (0x04)
+  const xCoord = sharedPoint64.slice(0, 32)
+  const yCoord = sharedPoint64.slice(32, 64)
 
-  // 3. Decrypt using ChaCha20-Poly1305 (12-byte nonce)
+  const yLastByte = yCoord[31]
+  const version = (yLastByte & 0x01) | 0x02
+
+  // SHA256(version_byte + x_coordinate)
+  const sharedSecret = sha256.create()
+    .update(new Uint8Array([version]))
+    .update(xCoord)
+    .digest()
+
+  // HKDF with SHA-256 and info="aes-gcm key" (matches Rust implementation)
+  const info = new TextEncoder().encode('aes-gcm key')
+  const encryptionKey = hkdf(sha256, sharedSecret, undefined, info, 32)
+
+  // 3. Decrypt using AES-256-GCM (12-byte nonce)
   const ciphertextBytes = hexToBytes(ciphertext)
-  const cipher = chacha20poly1305(encryptionKey, nonce, aad)
+  const cipher = gcm(encryptionKey, nonce, aad)
   const plaintext = cipher.decrypt(ciphertextBytes)
 
   return bytesToHex(plaintext)

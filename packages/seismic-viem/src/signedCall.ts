@@ -27,7 +27,9 @@ import {
   SeismicTxSerializer,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
+  encodeSeismicMetadataAsAAD,
 } from '@sviem/chain.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { SignedCallError } from '@sviem/error/signedCall.ts'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
@@ -323,9 +325,47 @@ export async function signedCall<
 
     const preparedTx = await prepareTransactionRequest(client, request)
     const encryptionPubkey = client.getEncryptionPublicKey()
+
+    // Always encrypt seismic transaction data using FINAL prepared values
+    let finalData = preparedTx.data
+    if (finalData && finalData !== '0x') {
+      const plaintextData = finalData
+
+      // Get AES key from client
+      const aesKey = client.getEncryption()
+      if (!aesKey) {
+        throw new Error('Client must have encryption key for shielded transactions')
+      }
+
+      // Compute AAD using FINAL preparedTx values
+      const aad = encodeSeismicMetadataAsAAD({
+        chainId: Number(preparedTx.chainId!),
+        nonce: BigInt(preparedTx.nonce!),
+        gasPrice: BigInt(preparedTx.gasPrice!),
+        gas: BigInt(preparedTx.gas!),
+        to: preparedTx.to!,
+        value: preparedTx.value ? BigInt(preparedTx.value) : 0n,
+        encryptionPubkey,
+        encryptionNonce: (rest as any).encryptionNonce!,
+        messageVersion: (rest as any).messageVersion ?? 0,
+        recentBlockHash: (rest as any).recentBlockHash!,
+        expiresAtBlock: BigInt((rest as any).expiresAtBlock!),
+        signedRead: (rest as any).signedRead ?? false,
+      })
+
+      // Encrypt the plaintext data
+      const aesCipher = new AesGcmCrypto(aesKey)
+      finalData = await aesCipher.encrypt(
+        plaintextData,
+        (rest as any).encryptionNonce!,
+        aad
+      ) as any
+    }
+
     // @ts-ignore
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
+      data: finalData as any,
       encryptionPubkey,
       type: 'seismic',
     }

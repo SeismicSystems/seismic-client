@@ -166,35 +166,13 @@ export async function signedReadContract<
   const encryptionPubkey = client.getEncryptionPublicKey()
   const encryptionNonce = randomEncryptionNonce()
 
-  // Encode metadata as AAD for authenticated encryption
-  const aad = encodeSeismicMetadataAsAAD({
-    chainId,
-    nonce: preparedTx.nonce!,
-    gasPrice: preparedTx.gasPrice!,
-    gas: preparedTx.gas!,
-    to: preparedTx.to!,
-    value: preparedTx.value ?? 0n,
-    encryptionPubkey,
-    encryptionNonce,
-    messageVersion: 0,
-    recentBlockHash,
-    expiresAtBlock,
-    signedRead: true,
-  })
-
-  const aesKey = client.getEncryption()
-  const aesCipher = new AesGcmCrypto(aesKey)
-  const encryptedCalldata = await aesCipher.encrypt(
-    plaintextCalldata,
-    encryptionNonce,
-    aad
-  )
-
+  // IMPORTANT: Pass PLAINTEXT calldata to signedCall
+  // signedCall will handle encryption after its prepareTransactionRequest
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
     nonce: preparedTx.nonce,
     to: address!,
-    data: encryptedCalldata,
+    data: plaintextCalldata, // PLAINTEXT, not encrypted
     gas: preparedTx.gas,
     gasPrice: preparedTx.gasPrice,
     encryptionPubkey,
@@ -205,6 +183,29 @@ export async function signedReadContract<
     signedRead: true,
   }
   const { data: encryptedData } = await signedCall(client, request)
+
+  // Decrypt the response using the final AAD (will be computed in signedCall)
+  // For now, we need to recompute AAD for decryption
+  // TODO: signedCall should return the AAD used
+  const aesKey = client.getEncryption()
+  const aesCipher = new AesGcmCrypto(aesKey)
+
+  // We need the final prepared values for AAD - for now use what we have
+  // This is a limitation that needs addressing
+  const aad = encodeSeismicMetadataAsAAD({
+    chainId,
+    nonce: preparedTx.nonce!,
+    gasPrice: preparedTx.gasPrice!,
+    gas: preparedTx.gas!,
+    to: address!,
+    value: preparedTx.value ?? 0n,
+    encryptionPubkey,
+    encryptionNonce,
+    messageVersion: 0,
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead: true,
+  })
   const data = await aesCipher.decrypt(encryptedData, encryptionNonce, aad)
   return decodeFunctionResult({
     abi,

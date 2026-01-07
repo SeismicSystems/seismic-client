@@ -45,7 +45,9 @@ import {
   SeismicTxExtras,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
+  encodeSeismicMetadataAsAAD,
 } from '@sviem/chain.ts'
+import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
 import type {
   AccountNotFoundErrorType,
   AccountTypeNotSupportedErrorType,
@@ -233,10 +235,51 @@ export async function sendShieldedTransaction<
 
       const { type: _legacy, ...viemPreparedTx } =
         await prepareTransactionRequest(client, request)
-      const preparedTx = {
+      let preparedTx = {
         ...viemPreparedTx,
         type: 'seismic',
       } as TransactionSerializableSeismic
+
+      // Always encrypt seismic transaction data using FINAL prepared values
+      if (preparedTx.data && preparedTx.data !== '0x' && client.account) {
+        const plaintextData = preparedTx.data
+
+        // Get AES key from client
+        const aesKey = (client as any).getEncryption()
+        if (!aesKey) {
+          throw new Error('Client must have encryption key for shielded transactions')
+        }
+
+        // Compute AAD using FINAL preparedTx values
+        const aad = encodeSeismicMetadataAsAAD({
+          chainId: Number(preparedTx.chainId!),
+          nonce: BigInt(preparedTx.nonce!),
+          gasPrice: BigInt(preparedTx.gasPrice!),
+          gas: BigInt(preparedTx.gas!),
+          to: preparedTx.to!,
+          value: preparedTx.value ? BigInt(preparedTx.value) : 0n,
+          encryptionPubkey: preparedTx.encryptionPubkey!,
+          encryptionNonce: preparedTx.encryptionNonce!,
+          messageVersion: preparedTx.messageVersion ?? 0,
+          recentBlockHash: preparedTx.recentBlockHash!,
+          expiresAtBlock: BigInt(preparedTx.expiresAtBlock!),
+          signedRead: preparedTx.signedRead ?? false,
+        })
+
+        // Encrypt the plaintext data
+        const aesCipher = new AesGcmCrypto(aesKey)
+        const encryptedData = await aesCipher.encrypt(
+          plaintextData,
+          preparedTx.encryptionNonce!,
+          aad
+        )
+
+        // Update preparedTx with encrypted data
+        preparedTx = {
+          ...preparedTx,
+          data: encryptedData,
+        }
+      }
 
       if (account?.type === 'json-rpc') {
         const { typedData, signature } = await signSeismicTxTypedData(
