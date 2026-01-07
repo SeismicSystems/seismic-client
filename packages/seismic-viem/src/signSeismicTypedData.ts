@@ -38,6 +38,18 @@ const seismicTxTypedData = <
     throw new Error('Seismic transactions require encryptionNonce argument')
   }
 
+  if (tx.recentBlockHash === undefined) {
+    throw new Error('Seismic transactions require recentBlockHash argument')
+  }
+
+  if (tx.expiresAtBlock === undefined) {
+    throw new Error('Seismic transactions require expiresAtBlock argument')
+  }
+
+  if (tx.signedRead === undefined) {
+    throw new Error('Seismic transactions require signedRead argument')
+  }
+
   const message: TxSeismic = {
     chainId: tx.chainId,
     nonce: tx.nonce !== undefined ? BigInt(tx.nonce) : undefined,
@@ -49,6 +61,9 @@ const seismicTxTypedData = <
     encryptionPubkey: tx.encryptionPubkey,
     encryptionNonce: tx.encryptionNonce,
     messageVersion: parseInt(MESSAGE_VERSION),
+    recentBlockHash: tx.recentBlockHash,
+    expiresAtBlock: tx.expiresAtBlock,
+    signedRead: tx.signedRead,
   }
 
   // @ts-ignore
@@ -73,6 +88,9 @@ const seismicTxTypedData = <
         { name: 'encryptionPubkey', type: 'bytes' },
         { name: 'encryptionNonce', type: 'uint96' },
         { name: 'messageVersion', type: 'uint8' },
+        { name: 'recentBlockHash', type: 'bytes32' },
+        { name: 'expiresAtBlock', type: 'uint64' },
+        { name: 'signedRead', type: 'bool' },
       ],
     },
     primaryType: 'TxSeismic',

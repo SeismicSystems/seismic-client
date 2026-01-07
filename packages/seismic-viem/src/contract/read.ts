@@ -199,6 +199,7 @@ export async function signedReadContract<
     gasPrice: preparedTx.gasPrice,
     encryptionPubkey,
     encryptionNonce,
+    messageVersion: 0,
     recentBlockHash,
     expiresAtBlock,
     signedRead: true,

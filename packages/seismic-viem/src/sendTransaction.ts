@@ -58,6 +58,8 @@ import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 import { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
+import { stringifyBigInt } from './utils.ts'
+
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
   chainOverride extends Chain | undefined = Chain | undefined,
@@ -169,6 +171,7 @@ export async function sendShieldedTransaction<
     value,
     ...rest
   } = parameters
+  console.log(`Params: ${JSON.stringify(parameters, stringifyBigInt, 2)}`)
   if (typeof account_ === 'undefined')
     throw new AccountNotFoundError({
       // TODO: link this
@@ -250,6 +253,9 @@ export async function sendShieldedTransaction<
           serializedTransaction: { data: typedData, signature },
         })
       } else {
+        console.log(
+          `Prepared tx: ${JSON.stringify(preparedTx, stringifyBigInt, 2)}`
+        )
         const serializedTransaction = await account!.signTransaction!(
           preparedTx,
           { serializer: serializeSeismicTransaction }

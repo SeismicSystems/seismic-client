@@ -29,6 +29,8 @@ import type {
 
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 
+import { stringifyBigInt } from './utils.ts'
+
 export const SEISMIC_TX_TYPE = 74 // '0x4a'
 
 /**
@@ -81,7 +83,7 @@ export function encodeSeismicMetadataAsAAD(params: {
     toHex(messageVersion),
     recentBlockHash,
     toHex(expiresAtBlock),
-    signedRead ? '0x01' : '0x',
+    signedRead ? '0x01' : '0x00',
   ]
 
   // Combine and RLP encode
@@ -166,6 +168,9 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   transaction: OneOf<TransactionSerializable | TransactionSerializableSeismic>,
   signature?: Signature
 ): Hex => {
+  console.log(
+    `Serialize seismic tx: ${JSON.stringify(transaction, stringifyBigInt, 2)}`
+  )
   const {
     chainId,
     nonce,
@@ -197,7 +202,6 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
       : undefined)
   const defaultExpiresAtBlock =
     expiresAtBlock ?? (hasSeismicFields ? 0xffffffffffffffffn : undefined)
-  const defaultSignedRead = signedRead ?? (hasSeismicFields ? false : undefined)
 
   // Log all transaction properties for debugging
   const rlpArray: Hex[] = [
@@ -212,13 +216,15 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     defaultMessageVersion !== undefined ? toHex(defaultMessageVersion) : '0x',
     defaultRecentBlockHash ?? '0x',
     defaultExpiresAtBlock !== undefined ? toHex(defaultExpiresAtBlock) : '0x',
-    defaultSignedRead ? '0x01' : '0x',
+    signedRead ? '0x1' : '0x0',
     data ?? '0x',
     ...toYParitySignatureArray(
       transaction as TransactionSerializableLegacy,
       signature
     ),
   ]
+
+  console.log(`RLP Array: ${JSON.stringify(rlpArray, stringifyBigInt, 2)}`)
 
   const rlpEncoded = toRlp(rlpArray)
 
@@ -313,6 +319,21 @@ export const seismicChainFormatters: ChainFormatters = {
         if (request.messageVersion) {
           throw new Error(
             'Message version must be 0 for seismic transaction requests'
+          )
+        }
+        if (!request.recentBlockHash) {
+          throw new Error(
+            'recentBlockHash is required for seismic transaction requests'
+          )
+        }
+        if (!request.expiresAtBlock) {
+          throw new Error(
+            'expiresAtBlock is required for seismic transaction requests'
+          )
+        }
+        if (request.signedRead === undefined) {
+          throw new Error(
+            'signedRead is required for seismic transaction requests'
           )
         }
       }

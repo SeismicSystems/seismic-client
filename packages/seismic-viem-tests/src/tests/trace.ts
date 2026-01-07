@@ -4,6 +4,7 @@ import {
   createShieldedPublicClient,
   createShieldedWalletClient,
   randomEncryptionNonce,
+  stringifyBigInt,
 } from 'seismic-viem'
 import { Account, Chain } from 'viem'
 import { http } from 'viem'
@@ -32,6 +33,10 @@ export const testSeismicTxTrace = async ({
   const nonce = await publicClient.getTransactionCount({
     address: account.address,
   })
+  const recentBlock = await publicClient.getBlock({ blockTag: 'latest' })
+  console.log(
+    `Recent Block: ${JSON.stringify(recentBlock, stringifyBigInt, 2)}`
+  )
 
   const aesKey = walletClient.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
@@ -50,6 +55,9 @@ export const testSeismicTxTrace = async ({
     messageVersion: 0,
     gas: 30_000_000n,
     nonce,
+    recentBlockHash: recentBlock.hash,
+    expiresAtBlock: recentBlock.number + 100n,
+    signedRead: false,
   })
 
   await publicClient.waitForTransactionReceipt({ hash })

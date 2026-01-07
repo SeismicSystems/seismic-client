@@ -138,6 +138,7 @@ async function getShieldedWriteContractRequest<
     gasPrice: preparedTx.gasPrice,
     encryptionPubkey,
     encryptionNonce,
+    messageVersion: 0,
     recentBlockHash,
     expiresAtBlock,
     signedRead: false,
