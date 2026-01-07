@@ -84,6 +84,7 @@ async function getShieldedWriteContractRequest<
 ): Promise<SendSeismicTransactionParameters<TChain, TAccount>> {
   const { address, gas, gasPrice, value, nonce } = parameters
 
+  // TODO: move inside sendTransaction
   const aesKey = client.getEncryption()
   const aesCipher = new AesGcmCrypto(aesKey)
 
@@ -94,7 +95,7 @@ async function getShieldedWriteContractRequest<
     account: client.account,
     chain: undefined,
     to: address,
-    data,
+    data: plaintextCalldata,
     nonce,
     value,
     gas,

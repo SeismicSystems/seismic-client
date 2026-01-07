@@ -58,6 +58,10 @@ import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 import { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
+import { ShieldedWalletClient } from './client.ts'
+import { AesGcmCrypto } from './crypto/aes.ts'
+import { randomEncryptionNonce } from './crypto/nonce.ts'
+
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
   chainOverride extends Chain | undefined = Chain | undefined,
@@ -145,7 +149,7 @@ export async function sendShieldedTransaction<
   const TRequest extends SendSeismicTransactionRequest<TChain, TChainOverride>,
   TChainOverride extends Chain | undefined = undefined,
 >(
-  client: Client<Transport, TChain, TAccount>,
+  client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SendSeismicTransactionParameters<
     TChain,
     TAccount,
@@ -159,7 +163,7 @@ export async function sendShieldedTransaction<
     accessList,
     authorizationList,
     blobs,
-    data,
+    data: plaintextCalldata,
     gas,
     gasPrice,
     maxFeePerBlobGas,
@@ -213,7 +217,7 @@ export async function sendShieldedTransaction<
         authorizationList,
         blobs,
         chainId,
-        data,
+        data: plaintextCalldata,
         from: account?.address,
         gas,
         gasPrice,
@@ -230,9 +234,20 @@ export async function sendShieldedTransaction<
 
       const { type: _legacy, ...viemPreparedTx } =
         await prepareTransactionRequest(client, request)
+
+      const aesKey = client.getEncryption()
+      const aesCipher = new AesGcmCrypto(aesKey)
+
+      const encryptionNonce = randomEncryptionNonce()
+      const encryptedCalldata = await aesCipher.encrypt(
+        plaintextCalldata,
+        encryptionNonce
+      )
+
       const preparedTx = {
         ...viemPreparedTx,
         type: 'seismic',
+        data: encryptedCalldata,
       } as TransactionSerializableSeismic
 
       if (account?.type === 'json-rpc') {
