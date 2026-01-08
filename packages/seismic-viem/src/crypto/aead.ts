@@ -23,7 +23,7 @@ export const encodeSeismicMetadataAsAAD = ({
   const fields: Hex[] = [
     sender,
     toHex(chainId),
-    toHex(nonce),
+    nonce === 0 ? '0x' : toHex(nonce),
     to ?? '0x',
     toHex(value),
     encryptionPubkey,
