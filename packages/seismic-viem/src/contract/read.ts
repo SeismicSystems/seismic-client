@@ -110,9 +110,8 @@ export async function signedReadContract<
       signedRead: true,
     },
   })
-  const encryptedCalldata = client.encrypt(plaintextCalldata, metadata)
+  const encryptedCalldata = await client.encrypt(plaintextCalldata, metadata)
 
-  // @ts-ignore TODO: typing
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
     nonce: metadata.legacyFields.nonce,

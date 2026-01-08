@@ -23,8 +23,8 @@ import { formatAbiItem } from 'viem/utils'
 import { SEISMIC_TX_TYPE } from '@sviem/chain.ts'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
-import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
 import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
+import { buildTxSeismicMetadata } from '@sviem/metadata.ts'
 import type { SendSeismicTransactionParameters } from '@sviem/sendTransaction.ts'
 import { sendShieldedTransaction } from '@sviem/sendTransaction.ts'
 
@@ -83,14 +83,6 @@ async function getShieldedWriteContractRequest<
   plaintextCalldata: Hex
 ): Promise<SendSeismicTransactionParameters<TChain, TAccount>> {
   const { address, gas, gasPrice, value, nonce } = parameters
-
-  // TODO: move inside sendTransaction
-  const aesKey = client.getEncryption()
-  const aesCipher = new AesGcmCrypto(aesKey)
-
-  const encryptionNonce = randomEncryptionNonce()
-  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
-
   return {
     account: client.account,
     chain: undefined,
@@ -100,8 +92,6 @@ async function getShieldedWriteContractRequest<
     value,
     gas,
     gasPrice,
-    encryptionPubkey: client.getEncryptionPublicKey(),
-    encryptionNonce,
   }
 }
 
@@ -224,7 +214,8 @@ export async function shieldedWriteContractDebug<
     TAccount,
     chainOverride
   >,
-  checkContractDeployed?: boolean
+  checkContractDeployed?: boolean,
+  blocksWindow: bigint = 100n
 ): Promise<ShieldedWriteContractDebugResult<TChain, TAccount>> {
   if (checkContractDeployed) {
     const code = await client.getCode({ address: parameters.address })
@@ -238,7 +229,25 @@ export async function shieldedWriteContractDebug<
     parameters,
     plaintextCalldata
   )
-  const txHash = await sendShieldedTransaction(client, request)
+  const encryptionNonce = randomEncryptionNonce()
+  const metadata = await buildTxSeismicMetadata({
+    client,
+    params: {
+      account: parameters.account || client.account,
+      nonce: request.nonce,
+      to: request.to!,
+      value: request.value,
+      encryptionNonce,
+      blocksWindow,
+      signedRead: false,
+    },
+  })
+  const txHash = await sendShieldedTransaction(
+    client,
+    request,
+    blocksWindow,
+    encryptionNonce
+  )
   return {
     plaintextTx: {
       to: request.to || null,
@@ -249,7 +258,11 @@ export async function shieldedWriteContractDebug<
       gasPrice: request.gasPrice,
       value: request.value,
     },
-    shieldedTx: { ...request, type: numberToHex(SEISMIC_TX_TYPE) },
+    shieldedTx: {
+      type: numberToHex(SEISMIC_TX_TYPE),
+      ...request,
+      ...metadata.seismicElements,
+    },
     txHash,
   }
 }

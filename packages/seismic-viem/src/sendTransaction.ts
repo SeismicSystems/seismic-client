@@ -10,23 +10,19 @@ import type {
   GetChainIdErrorType,
   GetChainParameter,
   Hash,
+  Hex,
   PrepareTransactionRequestErrorType,
   SendRawTransactionErrorType,
   SendTransactionParameters,
   Transport,
   UnionOmit,
 } from 'viem'
-import { assertCurrentChain } from 'viem'
 import type {
   ParseAccountErrorType,
   SignTransactionErrorType,
 } from 'viem/accounts'
 import { parseAccount } from 'viem/accounts'
-import {
-  getChainId,
-  prepareTransactionRequest,
-  sendRawTransaction,
-} from 'viem/actions'
+import { prepareTransactionRequest, sendRawTransaction } from 'viem/actions'
 import type { RecoverAuthorizationAddressErrorType } from 'viem/experimental'
 import type {
   AssertRequestErrorType,
@@ -156,7 +152,8 @@ export async function sendShieldedTransaction<
     TChainOverride,
     TRequest
   >,
-  blocksWindow: bigint = 100n
+  blocksWindow: bigint = 100n,
+  encryptionNonce?: Hex
 ): Promise<SendSeismicTransactionReturnType> {
   const {
     account: account_ = client.account,
@@ -216,6 +213,7 @@ export async function sendShieldedTransaction<
           value,
           blocksWindow,
           signedRead: false,
+          encryptionNonce,
         },
       })
       const encryptedCalldata = await client.encrypt(

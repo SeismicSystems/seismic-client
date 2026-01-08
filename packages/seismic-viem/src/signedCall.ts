@@ -13,7 +13,6 @@ import type {
 } from 'viem'
 import {
   BaseError,
-  CounterfactualDeploymentFailedError,
   assertRequest,
   numberToHex,
   offchainLookup,
@@ -31,11 +30,7 @@ import {
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { SignedCallError } from '@sviem/error/signedCall.ts'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
-import {
-  getRevertErrorData,
-  toDeploylessCallViaBytecodeData,
-  toDeploylessCallViaFactoryData,
-} from '@sviem/viem-internal/call.ts'
+import { getRevertErrorData } from '@sviem/viem-internal/call.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
 const doSignedCall = async <
@@ -205,7 +200,7 @@ export async function signedCall<
     accessList,
     blobs,
     code,
-    data: data_,
+    data: encryptedCalldata,
     factory,
     factoryData,
     gas = 30_000_000,
@@ -229,6 +224,7 @@ export async function signedCall<
   if (code && to)
     throw new BaseError('Cannot provide both `code` & `to` as parameters.')
 
+  /*
   // Check if the call is deployless via bytecode.
   const deploylessCallViaBytecode = code && data_
   // Check if the call is deployless via a factory.
@@ -250,6 +246,7 @@ export async function signedCall<
       })
     return data_
   })()
+  */
 
   try {
     const assertRequestParams = {
@@ -288,14 +285,14 @@ export async function signedCall<
       from: fromAddress,
       accessList,
       blobs,
-      data,
+      data: encryptedCalldata,
       gas,
       gasPrice,
       maxFeePerBlobGas,
       maxFeePerGas,
       maxPriorityFeePerGas,
       nonce: nonce_,
-      to: deploylessCall ? undefined : to,
+      to, // : deploylessCall ? undefined : to,
       value,
       // prepareTransactionRequest will fill the required fields using legacy spec
       type: 'legacy',
@@ -322,11 +319,9 @@ export async function signedCall<
     */
 
     const preparedTx = await prepareTransactionRequest(client, request)
-    const encryptionPubkey = client.getEncryptionPublicKey()
     // @ts-ignore
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
-      encryptionPubkey,
       type: 'seismic',
     }
 
@@ -344,9 +339,11 @@ export async function signedCall<
     )
       return { data: await offchainLookup(client, { data, to }) }
 
+    /*
     // Check for counterfactual deployment error.
     if (deploylessCall && data?.slice(0, 10) === '0x101bb98d')
       throw new CounterfactualDeploymentFailedError({ factory })
+    */
 
     throw getCallError(err as ErrorType, {
       account,

@@ -4,6 +4,7 @@ import {
   Chain,
   GetBlockParameters,
   GetTransactionCountParameters,
+  Hex,
   Transport,
 } from 'viem'
 import { parseAccount } from 'viem/accounts'
@@ -57,6 +58,7 @@ type BuildTxSeismicMetadataParams = {
   nonce?: number
   to: Address
   value?: bigint
+  encryptionNonce?: Hex
   blocksWindow?: bigint
   signedRead?: boolean
 }
@@ -71,6 +73,7 @@ export const buildTxSeismicMetadata = async <
     nonce,
     to,
     value = 0n,
+    encryptionNonce,
     blocksWindow = 100n,
     signedRead = false,
   },
@@ -106,7 +109,7 @@ export const buildTxSeismicMetadata = async <
     },
     seismicElements: {
       encryptionPubkey: client.getEncryptionPublicKey(),
-      encryptionNonce: randomEncryptionNonce(),
+      encryptionNonce: encryptionNonce ?? randomEncryptionNonce(),
       messageVersion: useTypedDataTx ? TYPED_DATA_MESSAGE_VERSION : 0,
       recentBlockHash: recentBlock.hash,
       expiresAtBlock: recentBlock.number + blocksWindow,
