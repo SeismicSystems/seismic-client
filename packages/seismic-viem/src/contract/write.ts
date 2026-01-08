@@ -20,7 +20,7 @@ import {
 } from 'viem'
 import { formatAbiItem } from 'viem/utils'
 
-import { SEISMIC_TX_TYPE } from '@sviem/chain.ts'
+import { SEISMIC_TX_TYPE, SeismicSecurityParams } from '@sviem/chain.ts'
 import type { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
 import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
@@ -215,7 +215,10 @@ export async function shieldedWriteContractDebug<
     chainOverride
   >,
   checkContractDeployed?: boolean,
-  blocksWindow: bigint = 100n
+  {
+    blocksWindow = 100n,
+    encryptionNonce: userEncNonce,
+  }: SeismicSecurityParams = {}
 ): Promise<ShieldedWriteContractDebugResult<TChain, TAccount>> {
   if (checkContractDeployed) {
     const code = await client.getCode({ address: parameters.address })
@@ -229,7 +232,7 @@ export async function shieldedWriteContractDebug<
     parameters,
     plaintextCalldata
   )
-  const encryptionNonce = randomEncryptionNonce()
+  const encryptionNonce = userEncNonce ?? randomEncryptionNonce()
   const metadata = await buildTxSeismicMetadata(client, {
     account: parameters.account || client.account,
     nonce: request.nonce,
@@ -239,12 +242,10 @@ export async function shieldedWriteContractDebug<
     blocksWindow,
     signedRead: false,
   })
-  const txHash = await sendShieldedTransaction(
-    client,
-    request,
+  const txHash = await sendShieldedTransaction(client, request, {
     blocksWindow,
-    encryptionNonce
-  )
+    encryptionNonce,
+  })
   return {
     plaintextTx: {
       to: request.to || null,

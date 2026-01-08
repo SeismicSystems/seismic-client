@@ -4,12 +4,11 @@ import {
   Chain,
   GetBlockParameters,
   GetTransactionCountParameters,
-  Hex,
   Transport,
 } from 'viem'
 import { parseAccount } from 'viem/accounts'
 
-import type { SeismicElements } from '@sviem/chain.ts'
+import type { SeismicElements, SeismicSecurityParams } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import { TYPED_DATA_MESSAGE_VERSION } from '@sviem/signSeismicTypedData.ts'
@@ -58,10 +57,8 @@ type BuildTxSeismicMetadataParams = {
   nonce?: number
   to: Address
   value?: bigint
-  encryptionNonce?: Hex
-  blocksWindow?: bigint
   signedRead?: boolean
-}
+} & SeismicSecurityParams
 
 export const buildTxSeismicMetadata = async <
   TChain extends Chain | undefined,

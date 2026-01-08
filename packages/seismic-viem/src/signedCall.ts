@@ -22,6 +22,7 @@ import { prepareTransactionRequest } from 'viem/actions'
 import { extract, getCallError, parseAccount } from 'viem/utils'
 
 import {
+  SeismicSecurityParams,
   SeismicTxExtras,
   SeismicTxSerializer,
   TransactionSerializableSeismic,
@@ -29,6 +30,7 @@ import {
 } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { SignedCallError } from '@sviem/error/signedCall.ts'
+import { buildTxSeismicMetadata } from '@sviem/metadata.ts'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
 import { getRevertErrorData } from '@sviem/viem-internal/call.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
@@ -148,7 +150,8 @@ export type SignedCallParameters<chain extends Chain | undefined> = UnionOmit<
  * ```
  */
 export type SignedCall<chain extends Chain | undefined> = (
-  args: SignedCallParameters<chain>
+  args: SignedCallParameters<chain>,
+  securityParams?: SeismicSecurityParams
 ) => Promise<CallReturnType>
 
 /**
@@ -190,7 +193,8 @@ export async function signedCall<
   TAccount extends Account,
 >(
   client: ShieldedWalletClient<TTransport, TChain, TAccount>,
-  args: SignedCallParameters<TChain>
+  args: SignedCallParameters<TChain>,
+  { blocksWindow = 100n, encryptionNonce }: SeismicSecurityParams = {}
 ): Promise<CallReturnType> {
   const {
     account: account_ = client.account,
@@ -200,7 +204,7 @@ export async function signedCall<
     accessList,
     blobs,
     code,
-    data: encryptedCalldata,
+    data: plaintextCalldata,
     factory,
     factoryData,
     gas = 30_000_000,
@@ -217,12 +221,9 @@ export async function signedCall<
 
   const account = account_ ? parseAccount(account_) : undefined
 
-  if (code && (factory || factoryData))
-    throw new BaseError(
-      'Cannot provide both `code` & `factory`/`factoryData` as parameters.'
-    )
-  if (code && to)
-    throw new BaseError('Cannot provide both `code` & `to` as parameters.')
+  if (!to) {
+    throw new BaseError("Signed calls must set 'to' address")
+  }
 
   /*
   // Check if the call is deployless via bytecode.
@@ -279,6 +280,15 @@ export async function signedCall<
       })
     }
 
+    const metadata = await buildTxSeismicMetadata(client, {
+      account: account_,
+      to: to!,
+      blocksWindow,
+      encryptionNonce,
+      signedRead: true,
+    })
+    const encryptedCalldata = await client.encrypt(plaintextCalldata, metadata)
+
     const request = {
       // Pick out extra data that might exist on the chain's transaction request type.
       ...extract({ ...rest, type: 'seismic' }, { format: chainFormat }),
@@ -327,7 +337,8 @@ export async function signedCall<
 
     const response = await doSignedCall(client, seismicTx, { block })
     if (response === '0x') return { data: undefined }
-    return { data: response }
+    const decryptedResponse = await client.decrypt(response, metadata)
+    return { data: decryptedResponse }
   } catch (err) {
     const data = getRevertErrorData(err)
 

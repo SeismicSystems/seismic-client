@@ -1,9 +1,8 @@
 import { expect } from 'bun:test'
 import {
-  AesGcmCrypto,
+  buildTxSeismicMetadata,
   createShieldedPublicClient,
   createShieldedWalletClient,
-  randomEncryptionNonce,
 } from 'seismic-viem'
 import { Account, Chain } from 'viem'
 import { http } from 'viem'
@@ -32,29 +31,34 @@ export const testSeismicTxTrace = async ({
   const nonce = await publicClient.getTransactionCount({
     address: account.address,
   })
-
-  const aesKey = walletClient.getEncryption()
-  const aesCipher = new AesGcmCrypto(aesKey)
-
   const plaintextCalldata = '0x1234567890abcdef'
-  const encryptionNonce = randomEncryptionNonce()
-  const data = await aesCipher.encrypt(plaintextCalldata, encryptionNonce)
-
+  const to = '0x0000000000000000000000000000000000000000'
+  const value = 1n
+  const metadata = await buildTxSeismicMetadata(walletClient, {
+    account,
+    nonce,
+    to,
+    value,
+    encryptionNonce: '0xffffffffffffffffffffffff',
+  })
+  const encryptedCalldata = await walletClient.encrypt(
+    plaintextCalldata,
+    metadata
+  )
+  // console.log(`Viem encrypted calldata: ${data}`)
   const hash = await walletClient.sendShieldedTransaction({
-    to: '0x0000000000000000000000000000000000000000',
+    to,
     chain,
-    data,
-    value: 1n,
-    encryptionPubkey: walletClient.getEncryptionPublicKey(),
-    encryptionNonce,
-    messageVersion: 0,
+    data: plaintextCalldata,
+    value,
     gas: 30_000_000n,
     nonce,
+    // ...metadata.seismicElements,
   })
 
   await publicClient.waitForTransactionReceipt({ hash })
   const tx = await publicClient.getTransaction({ hash })
-  expect(tx.input).toBe(data)
+  expect(tx.input).toBe(encryptedCalldata)
 }
 
 export const testLegacyTxTrace = async ({

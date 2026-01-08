@@ -27,7 +27,6 @@ import type {
   UnionOmit,
 } from 'viem'
 
-import { stringifyBigInt } from '@sviem/utils.ts'
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 
 export const SEISMIC_TX_TYPE = 74 // '0x4a'
@@ -64,6 +63,11 @@ export type SeismicElements = {
   recentBlockHash: Hex
   expiresAtBlock: bigint
   signedRead: boolean
+}
+
+export type SeismicSecurityParams = {
+  blocksWindow?: bigint
+  encryptionNonce?: Hex
 }
 
 /**
@@ -115,7 +119,6 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   tx: OneOf<TransactionSerializable | TransactionSerializableSeismic>,
   signature?: Signature
 ): Hex => {
-  console.log(`Serialize seismic tx: ${JSON.stringify(tx, stringifyBigInt, 2)}`)
   const {
     chainId,
     nonce,
@@ -163,20 +166,6 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
   if (data === undefined) {
     throw new Error('Seismic transactions require input')
   }
-  // Note: value, messageVersion, and signedRead have defaults in destructuring
-  // so they will never be undefined after destructuring
-
-  // Set defaults for seismic fields only if encryptionPubkey is set
-  const hasSeismicFields = encryptionPubkey !== undefined
-  const defaultMessageVersion =
-    messageVersion ?? (hasSeismicFields ? 0 : undefined)
-  const defaultRecentBlockHash =
-    recentBlockHash ??
-    (hasSeismicFields
-      ? '0x0000000000000000000000000000000000000000000000000000000000000000'
-      : undefined)
-  const defaultExpiresAtBlock =
-    expiresAtBlock ?? (hasSeismicFields ? 0xffffffffffffffffn : undefined)
 
   // Seismic elements are encoded FLAT (not nested) - each field is a separate RLP item
   // Note: Zero values are encoded as empty bytes (0x) to match Rust's alloy-rlp encoding

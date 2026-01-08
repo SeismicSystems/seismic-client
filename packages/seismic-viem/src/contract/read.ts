@@ -19,9 +19,9 @@ import {
 } from 'viem'
 import { formatAbiItem } from 'viem/utils'
 
+import { SeismicSecurityParams } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
-import { buildTxSeismicMetadata } from '@sviem/metadata.ts'
 import type { SignedCallParameters } from '@sviem/signedCall.ts'
 import { signedCall } from '@sviem/signedCall.ts'
 
@@ -86,7 +86,7 @@ export async function signedReadContract<
 >(
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>,
-  blocksWindow: bigint = 100n
+  securityParams?: SeismicSecurityParams
 ): Promise<ReadContractReturnType> {
   const {
     abi,
@@ -101,23 +101,12 @@ export async function signedReadContract<
   const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
   const plaintextCalldata = `${selector}${encodedParams}` as Hex
 
-  const metadata = await buildTxSeismicMetadata(client, {
-    account: rest.account,
-    to: address!,
-    blocksWindow,
-    signedRead: true,
-  })
-  const encryptedCalldata = await client.encrypt(plaintextCalldata, metadata)
-
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
-    nonce: metadata.legacyFields.nonce,
     to: address!,
-    data: encryptedCalldata,
-    ...metadata.seismicElements,
+    data: plaintextCalldata,
   }
-  const { data: encryptedData } = await signedCall(client, request)
-  const data = await client.decrypt(encryptedData, metadata)
+  const { data } = await signedCall(client, request, securityParams)
   return decodeFunctionResult({
     abi,
     args,

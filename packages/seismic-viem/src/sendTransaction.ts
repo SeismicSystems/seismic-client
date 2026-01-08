@@ -10,7 +10,6 @@ import type {
   GetChainIdErrorType,
   GetChainParameter,
   Hash,
-  Hex,
   PrepareTransactionRequestErrorType,
   SendRawTransactionErrorType,
   SendTransactionParameters,
@@ -37,6 +36,7 @@ import {
 } from 'viem/utils'
 
 import {
+  SeismicSecurityParams,
   SeismicTxExtras,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
@@ -55,6 +55,7 @@ import {
   TYPED_DATA_MESSAGE_VERSION,
   signSeismicTxTypedData,
 } from '@sviem/signSeismicTypedData.ts'
+import { stringifyBigInt } from '@sviem/utils.ts'
 import { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
@@ -152,8 +153,7 @@ export async function sendShieldedTransaction<
     TChainOverride,
     TRequest
   >,
-  blocksWindow: bigint = 100n,
-  encryptionNonce?: Hex
+  { blocksWindow = 100n, encryptionNonce }: SeismicSecurityParams = {}
 ): Promise<SendSeismicTransactionReturnType> {
   const {
     account: account_ = client.account,
@@ -180,6 +180,7 @@ export async function sendShieldedTransaction<
   if (account === null) {
     throw new Error(`Account must not be null to send a Seismic transaction`)
   }
+  console.log(`Input to plaintext calldata: ${plaintextCalldata}`)
 
   try {
     const assertRequestParams = {
@@ -214,10 +215,14 @@ export async function sendShieldedTransaction<
         plaintextCalldata,
         metadata
       )
+      console.log(`Send tx enc cd: ${encryptedCalldata}`)
 
       const chainFormat = client.chain?.formatters?.transactionRequest?.format
       const request = {
-        ...extract({ ...rest, type: 'seismic' }, { format: chainFormat }),
+        ...extract(
+          { ...rest, ...metadata.seismicElements, type: 'seismic' },
+          { format: chainFormat }
+        ),
         accessList,
         authorizationList,
         blobs,
@@ -237,6 +242,8 @@ export async function sendShieldedTransaction<
         ...rest,
       } as any
 
+      console.log(JSON.stringify(request, stringifyBigInt, 2))
+
       const { type: _legacy, ...viemPreparedTx } =
         await prepareTransactionRequest(client, request)
 
@@ -245,6 +252,7 @@ export async function sendShieldedTransaction<
         type: 'seismic',
       } as TransactionSerializableSeismic
 
+      console.log(JSON.stringify(preparedTx, stringifyBigInt, 2))
       if (
         metadata.seismicElements.messageVersion === TYPED_DATA_MESSAGE_VERSION
       ) {
