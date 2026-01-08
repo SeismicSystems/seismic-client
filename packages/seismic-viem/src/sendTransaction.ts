@@ -201,17 +201,14 @@ export async function sendShieldedTransaction<
       account?.type === 'local' ||
       account?.type === 'json-rpc'
     ) {
-      const metadata = await buildTxSeismicMetadata({
-        client,
-        params: {
-          account: account_,
-          nonce,
-          to: to!,
-          value,
-          blocksWindow,
-          signedRead: false,
-          encryptionNonce,
-        },
+      const metadata = await buildTxSeismicMetadata(client, {
+        account: account_,
+        nonce,
+        to: to!,
+        value,
+        blocksWindow,
+        signedRead: false,
+        encryptionNonce,
       })
       const encryptedCalldata = await client.encrypt(
         plaintextCalldata,

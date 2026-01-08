@@ -230,17 +230,14 @@ export async function shieldedWriteContractDebug<
     plaintextCalldata
   )
   const encryptionNonce = randomEncryptionNonce()
-  const metadata = await buildTxSeismicMetadata({
-    client,
-    params: {
-      account: parameters.account || client.account,
-      nonce: request.nonce,
-      to: request.to!,
-      value: request.value,
-      encryptionNonce,
-      blocksWindow,
-      signedRead: false,
-    },
+  const metadata = await buildTxSeismicMetadata(client, {
+    account: parameters.account || client.account,
+    nonce: request.nonce,
+    to: request.to!,
+    value: request.value,
+    encryptionNonce,
+    blocksWindow,
+    signedRead: false,
   })
   const txHash = await sendShieldedTransaction(
     client,

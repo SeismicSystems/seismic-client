@@ -2,6 +2,7 @@ import { expect } from 'bun:test'
 import {
   SEISMIC_TX_TYPE,
   TransactionSerializableSeismic,
+  buildTxSeismicMetadata,
   createShieldedPublicClient,
   createShieldedWalletClient,
   getPlaintextCalldata,
@@ -156,19 +157,26 @@ export const testSeismicTx = async ({
     abi: seismicCounterAbi,
     functionName: 'increment',
   })
-  const encWrite = await walletClient.encrypt(plaintextWrite)
-  const typedDataWriteTx: TransactionSerializableSeismic = {
-    type: 'seismic',
+  const writeMetadata = await buildTxSeismicMetadata(walletClient, {
+    account,
     nonce: await walletClient.getTransactionCount({
       address: walletClient.account.address,
     }),
+    to: deployedContractAddress,
+  })
+  const writeCiphertext = await walletClient.encrypt(
+    plaintextWrite,
+    writeMetadata
+  )
+  const typedDataWriteTx: TransactionSerializableSeismic = {
+    type: 'seismic',
+    nonce: writeMetadata.legacyFields.nonce,
     chainId: walletClient.chain.id,
     to: deployedContractAddress,
     gas: 1_000_000n,
     gasPrice: parseGwei('100'),
-    data: encWrite.ciphertext,
-    encryptionNonce: encWrite.encryptionNonce,
-    encryptionPubkey: walletClient.getEncryptionPublicKey(),
+    data: writeCiphertext,
+    ...writeMetadata.seismicElements,
   }
   const signedTdWrite = await signSeismicTxTypedData(
     walletClient,
@@ -191,7 +199,15 @@ export const testSeismicTx = async ({
     // @ts-expect-error: this is fine
     functionName: 'isOdd',
   })
-  const encRead = await walletClient.encrypt(plaintextRead)
+  const readMetadata = await buildTxSeismicMetadata(walletClient, {
+    account,
+    nonce: await walletClient.getTransactionCount({
+      address: walletClient.account.address,
+    }),
+    to: deployedContractAddress,
+    signedRead: true,
+  })
+  const ciphertext = await walletClient.encrypt(plaintextRead, readMetadata)
   const typedDataReadTx: TransactionSerializableSeismic = {
     type: 'seismic',
     nonce: await walletClient.getTransactionCount({
@@ -201,9 +217,8 @@ export const testSeismicTx = async ({
     to: deployedContractAddress,
     gas: 1_000_000n,
     gasPrice: parseGwei('100'),
-    data: encRead.ciphertext,
-    encryptionNonce: encRead.encryptionNonce,
-    encryptionPubkey: walletClient.getEncryptionPublicKey(),
+    data: ciphertext,
+    ...readMetadata.seismicElements,
   }
   const signedTdRead = await signSeismicTxTypedData(
     walletClient,
@@ -216,10 +231,7 @@ export const testSeismicTx = async ({
       { data: signedTdRead.typedData, signature: signedTdRead.signature },
     ],
   })
-  const tdPlaintext = await walletClient.decrypt(
-    tdResponse,
-    encRead.encryptionNonce
-  )
+  const tdPlaintext = await walletClient.decrypt(tdResponse, readMetadata)
   const isOdd4 = decodeFunctionResult({
     abi: seismicCounterAbi,
     functionName: 'isOdd',

@@ -66,9 +66,9 @@ type BuildTxSeismicMetadataParams = {
 export const buildTxSeismicMetadata = async <
   TChain extends Chain | undefined,
   TAccount extends Account,
->({
-  client,
-  params: {
+>(
+  client: ShieldedWalletClient<Transport, TChain, TAccount>,
+  {
     account: paramsAcct,
     nonce,
     to,
@@ -76,11 +76,8 @@ export const buildTxSeismicMetadata = async <
     encryptionNonce,
     blocksWindow = 100n,
     signedRead = false,
-  },
-}: {
-  client: ShieldedWalletClient<Transport, TChain, TAccount>
-  params: BuildTxSeismicMetadataParams
-}): Promise<TxSeismicMetadata> => {
+  }: BuildTxSeismicMetadataParams
+): Promise<TxSeismicMetadata> => {
   const account = parseAccount(paramsAcct || client.account)
   if (!account) {
     throw new Error(`Signed reads must have an account`)

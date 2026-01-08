@@ -101,14 +101,11 @@ export async function signedReadContract<
   const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
   const plaintextCalldata = `${selector}${encodedParams}` as Hex
 
-  const metadata = await buildTxSeismicMetadata({
-    client,
-    params: {
-      account: rest.account,
-      to: address!,
-      blocksWindow,
-      signedRead: true,
-    },
+  const metadata = await buildTxSeismicMetadata(client, {
+    account: rest.account,
+    to: address!,
+    blocksWindow,
+    signedRead: true,
   })
   const encryptedCalldata = await client.encrypt(plaintextCalldata, metadata)
 
