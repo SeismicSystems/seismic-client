@@ -5,6 +5,8 @@ export type {
   CreateSeismicDevnetParams,
 } from '@sviem/chain.ts'
 
+export type { TxSeismicMetadata } from '@sviem/metadata.ts'
+export { buildTxSeismicMetadata } from '@sviem/metadata.ts'
 export {
   sanvil,
   seismicDevnet1,
@@ -78,6 +80,7 @@ export {
 
 export { stringifyBigInt } from '@sviem/utils.ts'
 export { compressPublicKey } from '@sviem/crypto/secp.ts'
+export { encodeSeismicMetadataAsAAD } from '@sviem/crypto/aead.ts'
 export {
   AesGcmCrypto,
   generateAesKey,

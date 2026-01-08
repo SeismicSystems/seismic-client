@@ -17,7 +17,7 @@ import {
 
 // reserve 0 for normal seismic tx
 // reserve 1 for personal_sign (ledger/trezor compatible)
-const MESSAGE_VERSION = '2'
+export const TYPED_DATA_MESSAGE_VERSION: number = 2
 
 const seismicTxTypedData = <
   typedData extends TypedData | Record<string, unknown>,
@@ -29,13 +29,20 @@ const seismicTxTypedData = <
   if (tx.chainId === undefined) {
     throw new Error('Seismic transactions require chainId argument')
   }
-
   if (tx.encryptionPubkey === undefined) {
     throw new Error('Seismic transactions require encryptionPubkey argument')
   }
-
   if (tx.encryptionNonce === undefined) {
     throw new Error('Seismic transactions require encryptionNonce argument')
+  }
+  if (tx.recentBlockHash === undefined) {
+    throw new Error('Seismic transactions require recentBlockHash')
+  }
+  if (tx.expiresAtBlock === undefined) {
+    throw new Error('Seismic transactions require expiresAtBlock')
+  }
+  if (tx.signedRead === undefined) {
+    throw new Error('Seismic transactions require signedRead')
   }
 
   const message: TxSeismic = {
@@ -48,7 +55,10 @@ const seismicTxTypedData = <
     input: tx.data ?? '0x',
     encryptionPubkey: tx.encryptionPubkey,
     encryptionNonce: tx.encryptionNonce,
-    messageVersion: parseInt(MESSAGE_VERSION),
+    messageVersion: TYPED_DATA_MESSAGE_VERSION,
+    recentBlockHash: tx.recentBlockHash,
+    expiresAtBlock: tx.expiresAtBlock,
+    signedRead: tx.signedRead,
   }
 
   // @ts-ignore
@@ -78,7 +88,7 @@ const seismicTxTypedData = <
     primaryType: 'TxSeismic',
     domain: {
       name: 'Seismic Transaction',
-      version: MESSAGE_VERSION,
+      version: `${TYPED_DATA_MESSAGE_VERSION}`,
       chainId: tx.chainId,
       // no verifying contract since this happens in RPC
       verifyingContract: '0x0000000000000000000000000000000000000000',

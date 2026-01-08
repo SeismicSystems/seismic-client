@@ -2,6 +2,7 @@ import {
   concatHex,
   defineChain,
   formatTransactionRequest,
+  hexToBigInt,
   toHex,
   toRlp,
 } from 'viem'
@@ -26,6 +27,7 @@ import type {
   UnionOmit,
 } from 'viem'
 
+import { stringifyBigInt } from '@sviem/utils.ts'
 import { toYParitySignatureArray } from '@sviem/viem-internal/signature.ts'
 
 export const SEISMIC_TX_TYPE = 74 // '0x4a'
@@ -41,12 +43,27 @@ type SeismicTxExtrasBlank = {
   encryptionPubkey?: undefined
   encryptionNonce?: undefined
   messageVersion?: undefined
+  recentBlockHash?: undefined
+  expiresAtBlock?: undefined
+  signedRead?: undefined
 }
 
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
   encryptionNonce?: Hex | undefined
   messageVersion?: number | undefined
+  recentBlockHash?: Hex | undefined
+  expiresAtBlock?: bigint | undefined
+  signedRead?: boolean | undefined
+}
+
+export type SeismicElements = {
+  encryptionPubkey: Hex
+  encryptionNonce: Hex
+  messageVersion: number
+  recentBlockHash: Hex
+  expiresAtBlock: bigint
+  signedRead: boolean
 }
 
 /**
@@ -83,7 +100,10 @@ export type TxSeismic = {
   input?: Hex
   encryptionPubkey: Hex
   encryptionNonce: Hex
-  messageVersion?: number
+  messageVersion: number
+  recentBlockHash: Hex
+  expiresAtBlock: bigint
+  signedRead: boolean
 }
 
 export type SeismicTxSerializer = SerializeTransactionFn<
@@ -92,9 +112,10 @@ export type SeismicTxSerializer = SerializeTransactionFn<
 >
 
 export const serializeSeismicTransaction: SeismicTxSerializer = (
-  transaction: OneOf<TransactionSerializable | TransactionSerializableSeismic>,
+  tx: OneOf<TransactionSerializable | TransactionSerializableSeismic>,
   signature?: Signature
 ): Hex => {
+  console.log(`Serialize seismic tx: ${JSON.stringify(tx, stringifyBigInt, 2)}`)
   const {
     chainId,
     nonce,
@@ -106,35 +127,80 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     encryptionPubkey,
     encryptionNonce,
     messageVersion = 0,
-  } = transaction
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead = false,
+  } = tx
 
-  if (!chainId) {
-    throw new Error('Seismic transactions require chainId argument')
+  if (chainId === undefined) {
+    throw new Error('Seismic transactions require chainId')
   }
+  if (nonce === undefined) {
+    throw new Error('Seismic transactions require nonce')
+  }
+  if (gasPrice === undefined) {
+    throw new Error('Seismic transactions require gasPrice')
+  }
+  if (gas === undefined) {
+    throw new Error('Seismic transactions require gas')
+  }
+  if (to === undefined) {
+    throw new Error('Seismic transactions require to')
+  }
+  // value, input can be undefined
+  if (encryptionPubkey === undefined) {
+    throw new Error('Seismic transactions require encryptionPubkey')
+  }
+  if (encryptionNonce === undefined) {
+    throw new Error('Seismic transactions require encryptionNonce')
+  }
+  if (recentBlockHash === undefined) {
+    throw new Error('Seismic transactions require recentBlockHash')
+  }
+  if (expiresAtBlock === undefined) {
+    throw new Error('Seismic transactions require expiresAtBlock')
+  }
+  if (data === undefined) {
+    throw new Error('Seismic transactions require input')
+  }
+  // Note: value, messageVersion, and signedRead have defaults in destructuring
+  // so they will never be undefined after destructuring
 
-  // Log all transaction properties for debugging
-  let rlpArray = [
+  // Set defaults for seismic fields only if encryptionPubkey is set
+  const hasSeismicFields = encryptionPubkey !== undefined
+  const defaultMessageVersion =
+    messageVersion ?? (hasSeismicFields ? 0 : undefined)
+  const defaultRecentBlockHash =
+    recentBlockHash ??
+    (hasSeismicFields
+      ? '0x0000000000000000000000000000000000000000000000000000000000000000'
+      : undefined)
+  const defaultExpiresAtBlock =
+    expiresAtBlock ?? (hasSeismicFields ? 0xffffffffffffffffn : undefined)
+
+  // Seismic elements are encoded FLAT (not nested) - each field is a separate RLP item
+  // Note: Zero values are encoded as empty bytes (0x) to match Rust's alloy-rlp encoding
+  const rlpArray: Hex[] = [
     toHex(chainId),
     nonce ? toHex(nonce) : '0x',
     gasPrice ? toHex(gasPrice) : '0x',
     gas ? toHex(gas) : '0x',
     to ?? '0x',
     value ? toHex(value) : '0x',
+    // Seismic elements fields (encoded flat, not as a nested list)
     encryptionPubkey ?? '0x',
-    encryptionNonce ?? '0x',
-    messageVersion ? toHex(messageVersion) : '0x',
+    hexToBigInt(encryptionNonce) === 0n ? '0x' : encryptionNonce,
+    messageVersion === 0 ? '0x' : toHex(messageVersion),
+    recentBlockHash,
+    toHex(expiresAtBlock),
+    signedRead ? '0x01' : '0x',
+    // Input field comes after seismic elements
     data ?? '0x',
-    ...toYParitySignatureArray(
-      transaction as TransactionSerializableLegacy,
-      signature
-    ),
+    ...toYParitySignatureArray(tx as TransactionSerializableLegacy, signature),
   ]
 
   const rlpEncoded = toRlp(rlpArray)
-
-  const encodedTx = concatHex([toHex(SEISMIC_TX_TYPE), rlpEncoded])
-
-  return encodedTx
+  return concatHex([toHex(SEISMIC_TX_TYPE), rlpEncoded])
 }
 
 export const estimateGasRpcSchema = {
@@ -225,6 +291,21 @@ export const seismicChainFormatters: ChainFormatters = {
             'Message version must be 0 for seismic transaction requests'
           )
         }
+        if (!request.recentBlockHash) {
+          throw new Error(
+            'recentBlockHash is required for seismic transaction requests'
+          )
+        }
+        if (!request.expiresAtBlock) {
+          throw new Error(
+            'expiresAtBlock is required for seismic transaction requests'
+          )
+        }
+        if (request.signedRead === undefined) {
+          throw new Error(
+            'signedRead is required for seismic transaction requests'
+          )
+        }
       }
 
       return {
@@ -233,6 +314,9 @@ export const seismicChainFormatters: ChainFormatters = {
         encryptionPubkey: request.encryptionPubkey,
         encryptionNonce: request.encryptionNonce,
         messageVersion: hasSeismicFields(request) ? '0x0' : undefined,
+        recentBlockHash: request.recentBlockHash,
+        expiresAtBlock: request.expiresAtBlock,
+        signedRead: request.signedRead,
       }
     },
     type: 'transactionRequest',
