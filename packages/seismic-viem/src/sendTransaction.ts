@@ -180,9 +180,6 @@ export async function sendShieldedTransaction<
   if (account === null) {
     throw new Error(`Account must not be null to send a Seismic transaction`)
   }
-  if (blocksWindow <= 0n) {
-    throw new Error(`blocksWindow param must be > 0`)
-  }
 
   try {
     const assertRequestParams = {

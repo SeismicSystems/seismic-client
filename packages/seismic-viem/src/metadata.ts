@@ -85,6 +85,9 @@ export const buildTxSeismicMetadata = async <
   if (!account) {
     throw new Error(`Signed reads must have an account`)
   }
+  if (blocksWindow <= 0n) {
+    throw new Error(`blocksWindow param must be > 0`)
+  }
 
   const useTypedDataTx = account.type === 'json-rpc'
   const [nonce_, chainId, recentBlock] = await Promise.all([
