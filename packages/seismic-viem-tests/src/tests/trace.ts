@@ -4,7 +4,6 @@ import {
   createShieldedPublicClient,
   createShieldedWalletClient,
   encodeSeismicMetadataAsAAD,
-  stringifyBigInt,
 } from 'seismic-viem'
 import { Account, Chain, bytesToHex } from 'viem'
 import { http } from 'viem'

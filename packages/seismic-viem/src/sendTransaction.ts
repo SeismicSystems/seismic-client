@@ -55,7 +55,6 @@ import {
   TYPED_DATA_MESSAGE_VERSION,
   signSeismicTxTypedData,
 } from '@sviem/signSeismicTypedData.ts'
-import { stringifyBigInt } from '@sviem/utils.ts'
 import { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
