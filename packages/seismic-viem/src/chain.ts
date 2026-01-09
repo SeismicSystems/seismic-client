@@ -2,6 +2,7 @@ import {
   concatHex,
   defineChain,
   formatTransactionRequest,
+  hexToBigInt,
   toHex,
   toRlp,
 } from 'viem'
@@ -41,12 +42,37 @@ type SeismicTxExtrasBlank = {
   encryptionPubkey?: undefined
   encryptionNonce?: undefined
   messageVersion?: undefined
+  recentBlockHash?: undefined
+  expiresAtBlock?: undefined
+  signedRead?: undefined
 }
 
 export type SeismicTxExtras = {
   encryptionPubkey?: Hex | undefined
   encryptionNonce?: Hex | undefined
   messageVersion?: number | undefined
+  recentBlockHash?: Hex | undefined
+  expiresAtBlock?: bigint | undefined
+  signedRead?: boolean | undefined
+}
+
+export type SeismicBlockParams = {
+  recentBlockHash: Hex
+  expiresAtBlock: bigint
+}
+
+export type SeismicElements = {
+  encryptionPubkey: Hex
+  encryptionNonce: Hex
+  messageVersion: number
+  signedRead: boolean
+} & SeismicBlockParams
+
+export type SeismicSecurityParams = {
+  blocksWindow?: bigint
+  encryptionNonce?: Hex
+  recentBlockHash?: Hex
+  expiresAtBlock?: bigint
 }
 
 /**
@@ -83,7 +109,10 @@ export type TxSeismic = {
   input?: Hex
   encryptionPubkey: Hex
   encryptionNonce: Hex
-  messageVersion?: number
+  messageVersion: number
+  recentBlockHash: Hex
+  expiresAtBlock: bigint
+  signedRead: boolean
 }
 
 export type SeismicTxSerializer = SerializeTransactionFn<
@@ -92,7 +121,7 @@ export type SeismicTxSerializer = SerializeTransactionFn<
 >
 
 export const serializeSeismicTransaction: SeismicTxSerializer = (
-  transaction: OneOf<TransactionSerializable | TransactionSerializableSeismic>,
+  tx: OneOf<TransactionSerializable | TransactionSerializableSeismic>,
   signature?: Signature
 ): Hex => {
   const {
@@ -106,35 +135,66 @@ export const serializeSeismicTransaction: SeismicTxSerializer = (
     encryptionPubkey,
     encryptionNonce,
     messageVersion = 0,
-  } = transaction
+    recentBlockHash,
+    expiresAtBlock,
+    signedRead = false,
+  } = tx
 
-  if (!chainId) {
-    throw new Error('Seismic transactions require chainId argument')
+  if (chainId === undefined) {
+    throw new Error('Seismic transactions require chainId')
+  }
+  if (nonce === undefined) {
+    throw new Error('Seismic transactions require nonce')
+  }
+  if (gasPrice === undefined) {
+    throw new Error('Seismic transactions require gasPrice')
+  }
+  if (gas === undefined) {
+    throw new Error('Seismic transactions require gas')
+  }
+  if (to === undefined) {
+    throw new Error('Seismic transactions require to')
+  }
+  // value, input can be undefined
+  if (encryptionPubkey === undefined) {
+    throw new Error('Seismic transactions require encryptionPubkey')
+  }
+  if (encryptionNonce === undefined) {
+    throw new Error('Seismic transactions require encryptionNonce')
+  }
+  if (recentBlockHash === undefined) {
+    throw new Error('Seismic transactions require recentBlockHash')
+  }
+  if (expiresAtBlock === undefined) {
+    throw new Error('Seismic transactions require expiresAtBlock')
+  }
+  if (data === undefined) {
+    throw new Error('Seismic transactions require input')
   }
 
-  // Log all transaction properties for debugging
-  let rlpArray = [
+  // Seismic elements are encoded FLAT (not nested) - each field is a separate RLP item
+  // Note: Zero values are encoded as empty bytes (0x) to match Rust's alloy-rlp encoding
+  const rlpArray: Hex[] = [
     toHex(chainId),
     nonce ? toHex(nonce) : '0x',
     gasPrice ? toHex(gasPrice) : '0x',
     gas ? toHex(gas) : '0x',
     to ?? '0x',
     value ? toHex(value) : '0x',
+    // Seismic elements fields (encoded flat, not as a nested list)
     encryptionPubkey ?? '0x',
-    encryptionNonce ?? '0x',
-    messageVersion ? toHex(messageVersion) : '0x',
+    hexToBigInt(encryptionNonce) === 0n ? '0x' : encryptionNonce,
+    messageVersion === 0 ? '0x' : toHex(messageVersion),
+    recentBlockHash,
+    toHex(expiresAtBlock),
+    signedRead ? '0x01' : '0x',
+    // Input field comes after seismic elements
     data ?? '0x',
-    ...toYParitySignatureArray(
-      transaction as TransactionSerializableLegacy,
-      signature
-    ),
+    ...toYParitySignatureArray(tx as TransactionSerializableLegacy, signature),
   ]
 
   const rlpEncoded = toRlp(rlpArray)
-
-  const encodedTx = concatHex([toHex(SEISMIC_TX_TYPE), rlpEncoded])
-
-  return encodedTx
+  return concatHex([toHex(SEISMIC_TX_TYPE), rlpEncoded])
 }
 
 export const estimateGasRpcSchema = {
@@ -167,7 +227,11 @@ export const seismicRpcSchema: RpcSchema = [estimateGasRpcSchema, callRpcSchema]
 const hasSeismicFields = (request: SeismicTransactionRequest) => {
   return (
     request.encryptionPubkey !== undefined &&
-    request.encryptionNonce !== undefined
+    request.encryptionNonce !== undefined &&
+    request.messageVersion !== undefined &&
+    request.recentBlockHash !== undefined &&
+    request.expiresAtBlock !== undefined &&
+    request.signedRead !== undefined
   )
 }
 
@@ -220,20 +284,39 @@ export const seismicChainFormatters: ChainFormatters = {
             'Encryption public key is required for seismic transactions'
           )
         }
-        if (request.messageVersion) {
+        if (request.messageVersion !== 0 && request.messageVersion !== 2) {
           throw new Error(
-            'Message version must be 0 for seismic transaction requests'
+            'Message version must be set to 0 or 2 for seismic transactions'
+          )
+        }
+        if (!request.recentBlockHash) {
+          throw new Error(
+            'recentBlockHash is required for seismic transaction requests'
+          )
+        }
+        if (!request.expiresAtBlock) {
+          throw new Error(
+            'expiresAtBlock is required for seismic transaction requests'
+          )
+        }
+        if (request.signedRead === undefined) {
+          throw new Error(
+            'signedRead is required for seismic transaction requests'
           )
         }
       }
 
-      return {
+      const fmtSeismicReq = {
         ...formattedRpcRequest,
         chainId,
         encryptionPubkey: request.encryptionPubkey,
         encryptionNonce: request.encryptionNonce,
-        messageVersion: hasSeismicFields(request) ? '0x0' : undefined,
+        messageVersion: request.messageVersion,
+        recentBlockHash: request.recentBlockHash,
+        expiresAtBlock: request.expiresAtBlock,
+        signedRead: request.signedRead,
       }
+      return fmtSeismicReq
     },
     type: 'transactionRequest',
   },
