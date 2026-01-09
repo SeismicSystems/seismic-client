@@ -25,7 +25,7 @@ export const encodeSeismicMetadataAsAAD = ({
     toHex(chainId),
     nonce === 0 ? '0x' : toHex(nonce),
     to ?? '0x',
-    toHex(value),
+    value === 0n ? '0x' : toHex(value),
     encryptionPubkey,
     encryptionNonce === '0x00' || encryptionNonce === '0x0'
       ? '0x'
