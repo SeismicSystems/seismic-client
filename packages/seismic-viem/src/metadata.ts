@@ -58,7 +58,18 @@ type BuildTxSeismicMetadataParams = {
   to: Address
   value?: bigint
   signedRead?: boolean
+  typedDataTx?: boolean
 } & SeismicSecurityParams
+
+const inferTypedDataTx = (
+  typedDataTx: boolean | undefined,
+  account: Account
+): boolean => {
+  if (typedDataTx !== undefined) {
+    return typedDataTx
+  }
+  return account.type === 'json-rpc'
+}
 
 export const buildTxSeismicMetadata = async <
   TChain extends Chain | undefined,
@@ -73,6 +84,7 @@ export const buildTxSeismicMetadata = async <
     encryptionNonce,
     blocksWindow = 100n,
     signedRead = false,
+    typedDataTx,
   }: BuildTxSeismicMetadataParams
 ): Promise<TxSeismicMetadata> => {
   const account = parseAccount(paramsAcct || client.account)
@@ -83,7 +95,7 @@ export const buildTxSeismicMetadata = async <
     throw new Error(`blocksWindow param must be > 0`)
   }
 
-  const useTypedDataTx = account.type === 'json-rpc'
+  const useTypedDataTx = inferTypedDataTx(typedDataTx, account)
   const [nonce_, chainId, recentBlock] = await Promise.all([
     fillNonce(client, { account, nonce }),
     client.getChainId(),
