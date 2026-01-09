@@ -50,9 +50,6 @@ export const testSeismicCallTypedData = async ({
   })
   const encodedMetadata = bytesToHex(encodeSeismicMetadataAsAAD(metadata))
   const encrypted = await client.encrypt(plaintext, metadata)
-  console.log(
-    JSON.stringify({ encrypted, encodedMetadata, metadata }, stringifyBigInt, 2)
-  )
 
   const baseTx: TransactionSerializableLegacy = {
     nonce,
@@ -71,10 +68,6 @@ export const testSeismicCallTypedData = async ({
     method: 'eth_call',
     params: [{ data: typedData, signature }],
   })
-  const ts =
-    '0xf88294f39fd6e51aad88f6f4ce6ab8827279cfffb92266827a698094000000000000000000000000000000000000000400a1028e76821eb4d77fd30223ca971c49738eb5b5b71eabe93f96b348fdce788ae5a08c4066c1973ad71d80c2db821f02a0f46b3dcf9f96e7cfafe5c09de08b32273af1ffa07bf82b6e462d27facc6e11466401'
-  const rs =
-    '0xf88294f39fd6e51aad88f6f4ce6ab8827279cfffb92266827a698094000000000000000000000000000000000000000480a1028e76821eb4d77fd30223ca971c49738eb5b5b71eabe93f96b348fdce788ae5a08c4066c1973ad71d80c2db821f02a0f46b3dcf9f96e7cfafe5c09de08b32273af1ffa07bf82b6e462d27facc6e11466401'
 
   const decrypted = await client.decrypt(ciphertext, metadata)
   expect(decrypted).toBe(plaintext)

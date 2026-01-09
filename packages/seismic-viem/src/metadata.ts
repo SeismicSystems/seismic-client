@@ -8,7 +8,11 @@ import {
 } from 'viem'
 import { parseAccount } from 'viem/accounts'
 
-import type { SeismicElements, SeismicSecurityParams } from '@sviem/chain.ts'
+import type {
+  SeismicBlockParams,
+  SeismicElements,
+  SeismicSecurityParams,
+} from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import { TYPED_DATA_MESSAGE_VERSION } from '@sviem/signSeismicTypedData.ts'
@@ -57,8 +61,8 @@ type BuildTxSeismicMetadataParams = {
   nonce?: number
   to: Address
   value?: bigint
-  signedRead?: boolean
   typedDataTx?: boolean
+  signedRead?: boolean
 } & SeismicSecurityParams
 
 const inferTypedDataTx = (
@@ -83,8 +87,10 @@ export const buildTxSeismicMetadata = async <
     value = 0n,
     encryptionNonce,
     blocksWindow = 100n,
-    signedRead = false,
+    recentBlockHash,
+    expiresAtBlock,
     typedDataTx,
+    signedRead = false,
   }: BuildTxSeismicMetadataParams
 ): Promise<TxSeismicMetadata> => {
   const account = parseAccount(paramsAcct || client.account)
@@ -95,11 +101,37 @@ export const buildTxSeismicMetadata = async <
     throw new Error(`blocksWindow param must be > 0`)
   }
 
+  const resolveBlockParams = async (): Promise<SeismicBlockParams> => {
+    if (recentBlockHash && expiresAtBlock) {
+      return { recentBlockHash, expiresAtBlock }
+    }
+    if (recentBlockHash) {
+      const recentBlock = await client.getBlock({ blockHash: recentBlockHash })
+      return {
+        recentBlockHash: recentBlock.hash,
+        expiresAtBlock: recentBlock.number + blocksWindow,
+      }
+    }
+    const latestBlock = await client.getBlock({ blockTag: 'latest' })
+    if (expiresAtBlock) {
+      if (expiresAtBlock <= latestBlock.number) {
+        throw new Error(
+          `expiresAtBlock param ${expiresAtBlock} is in the past (latest block is #${latestBlock.number})`
+        )
+      }
+      return { recentBlockHash: latestBlock.hash, expiresAtBlock }
+    }
+    return {
+      recentBlockHash: latestBlock.hash,
+      expiresAtBlock: latestBlock.number + blocksWindow,
+    }
+  }
+
   const useTypedDataTx = inferTypedDataTx(typedDataTx, account)
-  const [nonce_, chainId, recentBlock] = await Promise.all([
+  const [nonce_, chainId, blockParams] = await Promise.all([
     fillNonce(client, { account, nonce }),
     client.getChainId(),
-    client.getBlock({ blockTag: 'latest' }),
+    resolveBlockParams(),
   ])
 
   if (client.chain) {
@@ -120,8 +152,8 @@ export const buildTxSeismicMetadata = async <
       encryptionPubkey: client.getEncryptionPublicKey(),
       encryptionNonce: encryptionNonce ?? randomEncryptionNonce(),
       messageVersion: useTypedDataTx ? TYPED_DATA_MESSAGE_VERSION : 0,
-      recentBlockHash: recentBlock.hash,
-      expiresAtBlock: recentBlock.number + blocksWindow,
+      recentBlockHash: blockParams.recentBlockHash,
+      expiresAtBlock: blockParams.expiresAtBlock,
       signedRead,
     },
   }

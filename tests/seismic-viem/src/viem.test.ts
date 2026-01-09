@@ -74,7 +74,7 @@ beforeAll(async () => {
 
 describe('Seismic Contract', async () => {
   test(
-    'deploy & call contracts with seismic tx',
+    'deploy & call contracts with seismic tx via private key account',
     async () => await testSeismicTx({ chain, url, account }),
     {
       timeout: CONTRACT_TIMEOUT_MS,

@@ -1,5 +1,6 @@
 import type {
   Account,
+  Address,
   BlockTag,
   CallParameters,
   CallReturnType,
@@ -154,6 +155,21 @@ export type SignedCall<chain extends Chain | undefined> = (
   securityParams?: SeismicSecurityParams
 ) => Promise<CallReturnType>
 
+const prepareAccount = (
+  paramsAccount: Account | Address,
+  clientAccount: Account
+): Account => {
+  const account = parseAccount(paramsAccount)
+  if (account.address === clientAccount.address) {
+    // if they put in an address, and it matches their local account,
+    // then we should use their local account because they can sign for it right here
+    return clientAccount
+  }
+  // if not, they will have their JSON-RPC account sign,
+  // meaning they will use messageVersion = 2 for signed reads
+  return account
+}
+
 /**
  * Executes a signed Ethereum call or contract deployment.
  *
@@ -219,8 +235,7 @@ export async function signedCall<
     ...rest
   } = args
 
-  const account = account_ ? parseAccount(account_) : undefined
-
+  const account = prepareAccount(account_, client.account)
   if (!to) {
     throw new BaseError("Signed calls must set 'to' address")
   }
@@ -281,7 +296,7 @@ export async function signedCall<
     }
 
     const metadata = await buildTxSeismicMetadata(client, {
-      account: account_,
+      account,
       to: to!,
       blocksWindow,
       encryptionNonce,
@@ -291,7 +306,10 @@ export async function signedCall<
 
     const request = {
       // Pick out extra data that might exist on the chain's transaction request type.
-      ...extract({ ...rest, type: 'seismic' }, { format: chainFormat }),
+      ...extract(
+        { ...rest, ...metadata.seismicElements, type: 'seismic' },
+        { format: chainFormat }
+      ),
       from: fromAddress,
       accessList,
       blobs,

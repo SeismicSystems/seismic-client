@@ -64,7 +64,7 @@ export const testSeismicTx = async ({
   })
 
   const deployedContractAddress = deployReceipt.contractAddress!
-  // console.info(`Deployed contract address: ${deployedContractAddress}`)
+  console.info(`Deployed contract address: ${deployedContractAddress}`)
 
   const seismicContract = getShieldedContract({
     abi: seismicCounterAbi,
@@ -89,21 +89,23 @@ export const testSeismicTx = async ({
   // )
   expectSeismicTx(receipt1.type as `0x${string}` | null)
 
+  // console.log('[1] calling signed read...')
   // Try reading using explicit signedRead
   const isOdd1 = await seismicContract.read.isOdd()
   // number has been set to 11
   expect(isOdd1).toBe(true)
 
+  // console.log('[1] calling transparent read...')
   const isOdd1_tread = await seismicContract.tread.isOdd()
   expect(isOdd1_tread).toBe(true)
 
+  // console.log('[2] calling write contract...')
   const tx2 = await walletClient.writeContract({
     address: deployedContractAddress,
     abi: seismicCounterAbi,
     functionName: 'increment',
   })
   // console.info(`[2] Incremented number in tx: ${tx2}`)
-  // console.info(`dwrite: ${JSON.stringify(debug, stringifyBigInt, 2)}`)
   const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 })
   // console.info(
   //   `[2] Increment receipt: ${JSON.stringify(receipt2, stringifyBigInt, 2)}`
@@ -141,6 +143,7 @@ export const testSeismicTx = async ({
   // )
   expectSeismicTx(receipt3.type as `0x${string}` | null)
 
+  // console.log(`[3] Using non-explicit signed read...`)
   // Use non-explicit signed-read
   const isOdd3 = await seismicContract.tread.isOdd({
     account: walletClient.account.address,
@@ -148,6 +151,7 @@ export const testSeismicTx = async ({
   // number has been set back to 11
   expect(isOdd3).toBe(true)
 
+  // console.log('[4] Signing using typed data tx...')
   /* 
   TODO: turn these into utility functions
   */
@@ -163,6 +167,7 @@ export const testSeismicTx = async ({
       address: walletClient.account.address,
     }),
     to: deployedContractAddress,
+    typedDataTx: true,
   })
   const writeCiphertext = await walletClient.encrypt(
     plaintextWrite,
@@ -182,6 +187,7 @@ export const testSeismicTx = async ({
     walletClient,
     typedDataWriteTx
   )
+
   const tdHash = await walletClient.sendRawTransaction({
     // @ts-expect-error: this is fine
     serializedTransaction: {
@@ -206,6 +212,7 @@ export const testSeismicTx = async ({
     }),
     to: deployedContractAddress,
     signedRead: true,
+    typedDataTx: true,
   })
   const ciphertext = await walletClient.encrypt(plaintextRead, readMetadata)
   const typedDataReadTx: TransactionSerializableSeismic = {

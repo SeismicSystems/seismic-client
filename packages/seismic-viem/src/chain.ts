@@ -56,18 +56,23 @@ export type SeismicTxExtras = {
   signedRead?: boolean | undefined
 }
 
+export type SeismicBlockParams = {
+  recentBlockHash: Hex
+  expiresAtBlock: bigint
+}
+
 export type SeismicElements = {
   encryptionPubkey: Hex
   encryptionNonce: Hex
   messageVersion: number
-  recentBlockHash: Hex
-  expiresAtBlock: bigint
   signedRead: boolean
-}
+} & SeismicBlockParams
 
 export type SeismicSecurityParams = {
   blocksWindow?: bigint
   encryptionNonce?: Hex
+  recentBlockHash?: Hex
+  expiresAtBlock?: bigint
 }
 
 /**
@@ -222,7 +227,11 @@ export const seismicRpcSchema: RpcSchema = [estimateGasRpcSchema, callRpcSchema]
 const hasSeismicFields = (request: SeismicTransactionRequest) => {
   return (
     request.encryptionPubkey !== undefined &&
-    request.encryptionNonce !== undefined
+    request.encryptionNonce !== undefined &&
+    request.messageVersion !== undefined &&
+    request.recentBlockHash !== undefined &&
+    request.expiresAtBlock !== undefined &&
+    request.signedRead !== undefined
   )
 }
 
@@ -275,9 +284,9 @@ export const seismicChainFormatters: ChainFormatters = {
             'Encryption public key is required for seismic transactions'
           )
         }
-        if (request.messageVersion) {
+        if (request.messageVersion !== 0 && request.messageVersion !== 2) {
           throw new Error(
-            'Message version must be 0 for seismic transaction requests'
+            'Message version must be set to 0 or 2 for seismic transactions'
           )
         }
         if (!request.recentBlockHash) {
@@ -297,16 +306,17 @@ export const seismicChainFormatters: ChainFormatters = {
         }
       }
 
-      return {
+      const fmtSeismicReq = {
         ...formattedRpcRequest,
         chainId,
         encryptionPubkey: request.encryptionPubkey,
         encryptionNonce: request.encryptionNonce,
-        messageVersion: hasSeismicFields(request) ? '0x0' : undefined,
+        messageVersion: request.messageVersion,
         recentBlockHash: request.recentBlockHash,
         expiresAtBlock: request.expiresAtBlock,
         signedRead: request.signedRead,
       }
+      return fmtSeismicReq
     },
     type: 'transactionRequest',
   },
