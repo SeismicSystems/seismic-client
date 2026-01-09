@@ -5,7 +5,6 @@ import {
   encodeSeismicMetadataAsAAD,
   randomEncryptionNonce,
   signSeismicTxTypedData,
-  stringifyBigInt,
 } from 'seismic-viem'
 import { bytesToHex, http } from 'viem'
 import type { Account, Chain, TransactionSerializableLegacy } from 'viem'

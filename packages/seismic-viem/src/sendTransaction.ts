@@ -58,8 +58,6 @@ import {
 import { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
-import { stringifyBigInt } from './utils.ts'
-
 export type SendSeismicTransactionRequest<
   chain extends Chain | undefined = Chain | undefined,
   chainOverride extends Chain | undefined = Chain | undefined,
