@@ -41,7 +41,7 @@ const fillNonce = async <
 ) => {
   let account = parseAccount(parameters.account || client.account)
   const { nonce: nonce_ } = parameters
-  if (nonce_) {
+  if (nonce_ !== undefined) {
     return nonce_
   }
 
