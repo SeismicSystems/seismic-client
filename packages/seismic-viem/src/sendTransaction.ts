@@ -4,7 +4,6 @@ import type {
   AssertCurrentChainErrorType,
   BaseError,
   Chain,
-  Client,
   DeriveChain,
   ExactPartial,
   FormattedTransactionRequest,
@@ -17,17 +16,12 @@ import type {
   Transport,
   UnionOmit,
 } from 'viem'
-import { assertCurrentChain } from 'viem'
 import type {
   ParseAccountErrorType,
   SignTransactionErrorType,
 } from 'viem/accounts'
 import { parseAccount } from 'viem/accounts'
-import {
-  getChainId,
-  prepareTransactionRequest,
-  sendRawTransaction,
-} from 'viem/actions'
+import { prepareTransactionRequest, sendRawTransaction } from 'viem/actions'
 import type { RecoverAuthorizationAddressErrorType } from 'viem/experimental'
 import type {
   AssertRequestErrorType,
@@ -42,10 +36,12 @@ import {
 } from 'viem/utils'
 
 import {
+  SeismicSecurityParams,
   SeismicTxExtras,
   TransactionSerializableSeismic,
   serializeSeismicTransaction,
 } from '@sviem/chain.ts'
+import { ShieldedWalletClient } from '@sviem/client.ts'
 import type {
   AccountNotFoundErrorType,
   AccountTypeNotSupportedErrorType,
@@ -54,7 +50,11 @@ import {
   AccountNotFoundError,
   AccountTypeNotSupportedError,
 } from '@sviem/error/account.ts'
-import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
+import { buildTxSeismicMetadata } from '@sviem/metadata.ts'
+import {
+  TYPED_DATA_MESSAGE_VERSION,
+  signSeismicTxTypedData,
+} from '@sviem/signSeismicTypedData.ts'
 import { GetAccountParameter } from '@sviem/viem-internal/account.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
@@ -145,13 +145,14 @@ export async function sendShieldedTransaction<
   const TRequest extends SendSeismicTransactionRequest<TChain, TChainOverride>,
   TChainOverride extends Chain | undefined = undefined,
 >(
-  client: Client<Transport, TChain, TAccount>,
+  client: ShieldedWalletClient<Transport, TChain, TAccount>,
   parameters: SendSeismicTransactionParameters<
     TChain,
     TAccount,
     TChainOverride,
     TRequest
-  >
+  >,
+  { blocksWindow = 100n, encryptionNonce }: SeismicSecurityParams = {}
 ): Promise<SendSeismicTransactionReturnType> {
   const {
     account: account_ = client.account,
@@ -159,7 +160,7 @@ export async function sendShieldedTransaction<
     accessList,
     authorizationList,
     blobs,
-    data,
+    data: plaintextCalldata,
     gas,
     gasPrice,
     maxFeePerBlobGas,
@@ -175,6 +176,9 @@ export async function sendShieldedTransaction<
       // docsPath: '/docs/actions/wallet/sendSeismicTransaction',
     })
   const account = account_ ? parseAccount(account_) : null
+  if (account === null) {
+    throw new Error(`Account must not be null to send a Seismic transaction`)
+  }
 
   try {
     const assertRequestParams = {
@@ -196,31 +200,38 @@ export async function sendShieldedTransaction<
       account?.type === 'local' ||
       account?.type === 'json-rpc'
     ) {
-      let chainId: number | undefined
-      if (chain !== null) {
-        chainId = await getAction(client, getChainId, 'getChainId')({})
-        assertCurrentChain({
-          currentChainId: chainId,
-          chain,
-        })
-      }
+      const metadata = await buildTxSeismicMetadata(client, {
+        account: account_,
+        nonce,
+        to: to!,
+        value,
+        blocksWindow,
+        signedRead: false,
+        encryptionNonce,
+      })
+      const encryptedCalldata = await client.encrypt(
+        plaintextCalldata,
+        metadata
+      )
 
       const chainFormat = client.chain?.formatters?.transactionRequest?.format
-
       const request = {
-        ...extract({ ...rest, type: 'seismic' }, { format: chainFormat }),
+        ...extract(
+          { ...rest, ...metadata.seismicElements, type: 'seismic' },
+          { format: chainFormat }
+        ),
         accessList,
         authorizationList,
         blobs,
-        chainId,
-        data,
-        from: account?.address,
+        chainId: metadata.legacyFields.chainId,
+        data: encryptedCalldata,
+        from: account.address,
         gas,
         gasPrice,
         maxFeePerBlobGas,
         maxFeePerGas,
         maxPriorityFeePerGas,
-        nonce,
+        nonce: metadata.legacyFields.nonce,
         to,
         value,
         // prepareTransactionRequest will fill the required fields using legacy spec
@@ -230,12 +241,15 @@ export async function sendShieldedTransaction<
 
       const { type: _legacy, ...viemPreparedTx } =
         await prepareTransactionRequest(client, request)
+
       const preparedTx = {
         ...viemPreparedTx,
         type: 'seismic',
       } as TransactionSerializableSeismic
 
-      if (account?.type === 'json-rpc') {
+      if (
+        metadata.seismicElements.messageVersion === TYPED_DATA_MESSAGE_VERSION
+      ) {
         const { typedData, signature } = await signSeismicTxTypedData(
           client,
           preparedTx

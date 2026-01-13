@@ -427,7 +427,9 @@ export function getShieldedContract<
             functionName,
             args,
             // Force account to be their account
-            account: walletClient.account.address,
+            // Node will reject it if they stick in a different account here,
+            // because of the AEAD in encryption
+            account: walletClient.account,
             ...options,
           })
         }

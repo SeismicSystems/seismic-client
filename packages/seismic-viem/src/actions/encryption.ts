@@ -1,16 +1,20 @@
 import { Hex } from 'viem'
 
+import { encodeSeismicMetadataAsAAD } from '@sviem/crypto/aead.ts'
 import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
-import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
-import type { EncryptionNonce } from '@sviem/crypto/nonce.ts'
+import type { TxSeismicMetadata } from '@sviem/metadata.ts'
 
 export type EncryptionActions = {
   getEncryption: () => Hex
   getEncryptionPublicKey: () => Hex
   encrypt: (
-    plaintext: Hex
-  ) => Promise<{ ciphertext: Hex; encryptionNonce: Hex }>
-  decrypt: (ciphertext: Hex, encryptionNonce: EncryptionNonce) => Promise<Hex>
+    plaintext: Hex | undefined,
+    metadata: TxSeismicMetadata
+  ) => Promise<Hex>
+  decrypt: (
+    ciphertext: Hex | undefined,
+    metadata: TxSeismicMetadata
+  ) => Promise<Hex>
 }
 
 export const encryptionActions = (
@@ -20,15 +24,30 @@ export const encryptionActions = (
   return {
     getEncryption: () => encryption,
     getEncryptionPublicKey: () => encryptionPublicKey,
-    encrypt: async (plaintext: Hex) => {
+    encrypt: async (
+      plaintext: Hex | undefined,
+      metadata: TxSeismicMetadata
+    ) => {
       const aesCipher = new AesGcmCrypto(encryption)
-      const encryptionNonce = randomEncryptionNonce()
-      const ciphertext = await aesCipher.encrypt(plaintext, encryptionNonce)
-      return { ciphertext, encryptionNonce }
+      const aad = encodeSeismicMetadataAsAAD(metadata)
+      const ciphertext = await aesCipher.encrypt(
+        plaintext,
+        metadata.seismicElements.encryptionNonce,
+        aad
+      )
+      return ciphertext
     },
-    decrypt: async (ciphertext: Hex, encryptionNonce: EncryptionNonce) => {
+    decrypt: async (
+      ciphertext: Hex | undefined,
+      metadata: TxSeismicMetadata
+    ) => {
       const aesCipher = new AesGcmCrypto(encryption)
-      return await aesCipher.decrypt(ciphertext, encryptionNonce)
+      const aad = encodeSeismicMetadataAsAAD(metadata)
+      return await aesCipher.decrypt(
+        ciphertext,
+        metadata.seismicElements.encryptionNonce,
+        aad
+      )
     },
   }
 }

@@ -12,6 +12,7 @@ import type {
 } from 'viem'
 import { readContract, writeContract } from 'viem/actions'
 
+import { SeismicSecurityParams } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { signedReadContract } from '@sviem/contract/read.ts'
 import {
@@ -77,7 +78,8 @@ export type ShieldedWalletActions<
       TChain,
       TAccount,
       TChainOverride
-    >
+    >,
+    securityParams?: SeismicSecurityParams
   ) => Promise<WriteContractReturnType>
   twriteContract: <
     TAbi extends Abi | readonly unknown[],
@@ -115,21 +117,24 @@ export type ShieldedWalletActions<
       TChain,
       TAccount,
       TChainOverride
-    >
+    >,
+    securityParams?: SeismicSecurityParams
   ) => Promise<ShieldedWriteContractDebugResult<TChain | undefined, TAccount>>
   readContract: <
     TAbi extends Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
     TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
   >(
-    args: ReadContractParameters<TAbi, TFunctionName, TArgs>
+    args: ReadContractParameters<TAbi, TFunctionName, TArgs>,
+    securityParams?: SeismicSecurityParams
   ) => Promise<ReadContractReturnType>
   treadContract: <
     TAbi extends Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
     TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
   >(
-    args: ReadContractParameters<TAbi, TFunctionName, TArgs>
+    args: ReadContractParameters<TAbi, TFunctionName, TArgs>,
+    securityParams?: SeismicSecurityParams
   ) => Promise<ReadContractReturnType>
   signedCall: SignedCall<TChain>
   sendShieldedTransaction: <
@@ -141,7 +146,8 @@ export type ShieldedWalletActions<
       TAccount,
       TChainOverride,
       request
-    >
+    >,
+    securityParams?: SeismicSecurityParams
   ) => Promise<SendSeismicTransactionReturnType>
 }
 
@@ -204,10 +210,12 @@ export const shieldedWalletActions = <
         ShieldedWriteContractDebugResult<TChain | undefined, TAccount>
       >
     },
-    readContract: (args) => signedReadContract(client, args as any),
+    readContract: (args, securityParams) =>
+      signedReadContract(client, args as any, securityParams),
     treadContract: (args) => readContract(client, args as any),
-    signedCall: (args) => signedCall(client, args as any),
-    sendShieldedTransaction: (args) =>
-      sendShieldedTransaction(client, args as any),
+    signedCall: (args, securityParams) =>
+      signedCall(client, args as any, securityParams),
+    sendShieldedTransaction: (args, securityParams) =>
+      sendShieldedTransaction(client, args as any, securityParams),
   }
 }

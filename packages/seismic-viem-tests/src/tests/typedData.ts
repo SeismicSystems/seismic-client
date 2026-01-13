@@ -1,11 +1,12 @@
 import { expect } from 'bun:test'
 import {
-  AesGcmCrypto,
+  buildTxSeismicMetadata,
   createShieldedWalletClient,
+  encodeSeismicMetadataAsAAD,
   randomEncryptionNonce,
   signSeismicTxTypedData,
 } from 'seismic-viem'
-import { http } from 'viem'
+import { bytesToHex, http } from 'viem'
 import type { Account, Chain, TransactionSerializableLegacy } from 'viem'
 import type { Hex } from 'viem'
 import { parseEther } from 'viem/utils'
@@ -37,20 +38,28 @@ export const testSeismicCallTypedData = async ({
   })
 
   const plaintext = '0x68656c6c6f20776f726c64'
-  const aes = new AesGcmCrypto(client.getEncryption())
-  const encryptionNonce = randomEncryptionNonce()
-  const encrypted = await aes.encrypt(plaintext, encryptionNonce)
+  const to = '0x0000000000000000000000000000000000000004'
+  const metadata = await buildTxSeismicMetadata(client, {
+    account,
+    nonce,
+    to,
+    encryptionNonce: randomEncryptionNonce(),
+    signedRead: true,
+    typedDataTx: true,
+  })
+  const encodedMetadata = bytesToHex(encodeSeismicMetadataAsAAD(metadata))
+  const encrypted = await client.encrypt(plaintext, metadata)
 
   const baseTx: TransactionSerializableLegacy = {
     nonce,
-    to: '0x0000000000000000000000000000000000000004',
+    to,
     data: encrypted,
     chainId: chain.id,
     type: 'legacy',
     gas: 30_000_000n,
   }
   const preparedTx = await client.prepareTransactionRequest(baseTx)
-  const tx = { ...preparedTx, encryptionPubkey, encryptionNonce }
+  const tx = { ...preparedTx, ...metadata.seismicElements }
 
   // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
@@ -59,7 +68,7 @@ export const testSeismicCallTypedData = async ({
     params: [{ data: typedData, signature }],
   })
 
-  const decrypted = await aes.decrypt(ciphertext, encryptionNonce)
+  const decrypted = await client.decrypt(ciphertext, metadata)
   expect(decrypted).toBe(plaintext)
 }
 
@@ -85,7 +94,13 @@ export const testSeismicTxTypedData = async ({
   const nonce = await client.getTransactionCount({
     address: account.address,
   })
-  const encryptionNonce = randomEncryptionNonce()
+  const metadata = await buildTxSeismicMetadata(client, {
+    account,
+    nonce,
+    to: recipientAddress,
+    value,
+    encryptionNonce: randomEncryptionNonce(),
+  })
   const baseTx: TransactionSerializableLegacy = {
     to: recipientAddress,
     chainId: chain.id,
@@ -96,7 +111,7 @@ export const testSeismicTxTypedData = async ({
   }
 
   const preparedTx = await client.prepareTransactionRequest(baseTx)
-  const tx = { ...preparedTx, encryptionPubkey, encryptionNonce }
+  const tx = { ...preparedTx, ...metadata.seismicElements }
 
   // @ts-ignore
   const { typedData, signature } = await signSeismicTxTypedData(client, tx)
