@@ -6,7 +6,7 @@ import type {
   Chain,
   ContractFunctionArgs,
   ContractFunctionName,
-  GetTransactionCountParameters,
+  Hex,
   ReadContractParameters,
   ReadContractReturnType,
   Transport,
@@ -17,13 +17,11 @@ import {
   getAbiItem,
   toFunctionSelector,
 } from 'viem'
-import { parseAccount } from 'viem/accounts'
 import { formatAbiItem } from 'viem/utils'
 
+import { SeismicSecurityParams } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { remapSeismicAbiInputs } from '@sviem/contract/abi.ts'
-import { AesGcmCrypto } from '@sviem/crypto/aes.ts'
-import { randomEncryptionNonce } from '@sviem/crypto/nonce.ts'
 import type { SignedCallParameters } from '@sviem/signedCall.ts'
 import { signedCall } from '@sviem/signedCall.ts'
 
@@ -33,33 +31,6 @@ export type SignedReadContractParameters<
   TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 > = ReadContractParameters<TAbi, TFunctionName, TArgs> & {
   nonce?: number
-}
-
-const fillNonce = async <
-  TChain extends Chain | undefined,
-  TAccount extends Account,
-  const TAbi extends Abi | readonly unknown[],
-  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'>,
-  TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
->(
-  client: ShieldedWalletClient<Transport, TChain, TAccount>,
-  parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
-) => {
-  let account = parseAccount(parameters.account || client.account)
-  const { nonce: nonce_ } = parameters
-  if (nonce_) {
-    return nonce_
-  }
-
-  const { blockNumber, blockTag = 'latest' } = parameters
-  let args: GetTransactionCountParameters = {
-    address: account.address,
-    blockTag,
-  }
-  if (blockNumber) {
-    args = { address: account.address, blockNumber }
-  }
-  return client.getTransactionCount(args)
 }
 
 /**
@@ -114,8 +85,8 @@ export async function signedReadContract<
   TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
 >(
   client: ShieldedWalletClient<Transport, TChain, TAccount>,
-  parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>
-  // aesKey: Hex,
+  parameters: SignedReadContractParameters<TAbi, TFunctionName, TArgs>,
+  securityParams?: SeismicSecurityParams
 ): Promise<ReadContractReturnType> {
   const {
     abi,
@@ -124,41 +95,18 @@ export async function signedReadContract<
     address,
     ...rest
   } = parameters as ReadContractParameters
-
-  // If they specify no address, then use the standard read contract,
-  // since it doesn't have to be signed
-  let account = rest.account
-  if (!rest.account) {
-    account = client.account
-  }
-
-  const nonce = await fillNonce(client, parameters)
-
   const seismicAbi = getAbiItem({ abi: abi, name: functionName }) as AbiFunction
   const selector = toFunctionSelector(formatAbiItem(seismicAbi))
   const ethAbi = remapSeismicAbiInputs(seismicAbi)
   const encodedParams = encodeAbiParameters(ethAbi.inputs, args).slice(2)
-  const plaintextCalldata = `${selector}${encodedParams}` as `0x${string}`
-
-  const aesKey = client.getEncryption()
-  const aesCipher = new AesGcmCrypto(aesKey)
-
-  const encryptionNonce = randomEncryptionNonce()
-  const encryptedCalldata = await aesCipher.encrypt(
-    plaintextCalldata,
-    encryptionNonce
-  )
+  const plaintextCalldata = `${selector}${encodedParams}` as Hex
 
   const request: SignedCallParameters<TChain> = {
     ...(rest as CallParameters),
-    nonce,
     to: address!,
-    data: encryptedCalldata,
-    encryptionPubkey: client.getEncryptionPublicKey(),
-    encryptionNonce,
+    data: plaintextCalldata,
   }
-  const { data: encryptedData } = await signedCall(client, request)
-  const data = await aesCipher.decrypt(encryptedData, encryptionNonce)
+  const { data } = await signedCall(client, request, securityParams)
   return decodeFunctionResult({
     abi,
     args,

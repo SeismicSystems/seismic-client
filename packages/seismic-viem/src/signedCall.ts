@@ -1,5 +1,6 @@
 import type {
   Account,
+  Address,
   BlockTag,
   CallParameters,
   CallReturnType,
@@ -13,7 +14,6 @@ import type {
 } from 'viem'
 import {
   BaseError,
-  CounterfactualDeploymentFailedError,
   assertRequest,
   numberToHex,
   offchainLookup,
@@ -23,6 +23,7 @@ import { prepareTransactionRequest } from 'viem/actions'
 import { extract, getCallError, parseAccount } from 'viem/utils'
 
 import {
+  SeismicSecurityParams,
   SeismicTxExtras,
   SeismicTxSerializer,
   TransactionSerializableSeismic,
@@ -30,12 +31,9 @@ import {
 } from '@sviem/chain.ts'
 import { ShieldedWalletClient } from '@sviem/client.ts'
 import { SignedCallError } from '@sviem/error/signedCall.ts'
+import { buildTxSeismicMetadata } from '@sviem/metadata.ts'
 import { signSeismicTxTypedData } from '@sviem/signSeismicTypedData.ts'
-import {
-  getRevertErrorData,
-  toDeploylessCallViaBytecodeData,
-  toDeploylessCallViaFactoryData,
-} from '@sviem/viem-internal/call.ts'
+import { getRevertErrorData } from '@sviem/viem-internal/call.ts'
 import type { ErrorType } from '@sviem/viem-internal/error.ts'
 
 const doSignedCall = async <
@@ -153,8 +151,24 @@ export type SignedCallParameters<chain extends Chain | undefined> = UnionOmit<
  * ```
  */
 export type SignedCall<chain extends Chain | undefined> = (
-  args: SignedCallParameters<chain>
+  args: SignedCallParameters<chain>,
+  securityParams?: SeismicSecurityParams
 ) => Promise<CallReturnType>
+
+const prepareAccount = (
+  paramsAccount: Account | Address,
+  clientAccount: Account
+): Account => {
+  const account = parseAccount(paramsAccount)
+  if (account.address === clientAccount.address) {
+    // if they put in an address, and it matches their local account,
+    // then we should use their local account because they can sign for it right here
+    return clientAccount
+  }
+  // if not, they will have their JSON-RPC account sign,
+  // meaning they will use messageVersion = 2 for signed reads
+  return account
+}
 
 /**
  * Executes a signed Ethereum call or contract deployment.
@@ -195,7 +209,8 @@ export async function signedCall<
   TAccount extends Account,
 >(
   client: ShieldedWalletClient<TTransport, TChain, TAccount>,
-  args: SignedCallParameters<TChain>
+  args: SignedCallParameters<TChain>,
+  { blocksWindow = 100n, encryptionNonce }: SeismicSecurityParams = {}
 ): Promise<CallReturnType> {
   const {
     account: account_ = client.account,
@@ -205,7 +220,7 @@ export async function signedCall<
     accessList,
     blobs,
     code,
-    data: data_,
+    data: plaintextCalldata,
     factory,
     factoryData,
     gas = 30_000_000,
@@ -220,15 +235,12 @@ export async function signedCall<
     ...rest
   } = args
 
-  const account = account_ ? parseAccount(account_) : undefined
+  const account = prepareAccount(account_, client.account)
+  if (!to) {
+    throw new BaseError("Signed calls must set 'to' address")
+  }
 
-  if (code && (factory || factoryData))
-    throw new BaseError(
-      'Cannot provide both `code` & `factory`/`factoryData` as parameters.'
-    )
-  if (code && to)
-    throw new BaseError('Cannot provide both `code` & `to` as parameters.')
-
+  /*
   // Check if the call is deployless via bytecode.
   const deploylessCallViaBytecode = code && data_
   // Check if the call is deployless via a factory.
@@ -250,6 +262,7 @@ export async function signedCall<
       })
     return data_
   })()
+  */
 
   try {
     const assertRequestParams = {
@@ -282,20 +295,32 @@ export async function signedCall<
       })
     }
 
+    const metadata = await buildTxSeismicMetadata(client, {
+      account,
+      to: to!,
+      blocksWindow,
+      encryptionNonce,
+      signedRead: true,
+    })
+    const encryptedCalldata = await client.encrypt(plaintextCalldata, metadata)
+
     const request = {
       // Pick out extra data that might exist on the chain's transaction request type.
-      ...extract({ ...rest, type: 'seismic' }, { format: chainFormat }),
+      ...extract(
+        { ...rest, ...metadata.seismicElements, type: 'seismic' },
+        { format: chainFormat }
+      ),
       from: fromAddress,
       accessList,
       blobs,
-      data,
+      data: encryptedCalldata,
       gas,
       gasPrice,
       maxFeePerBlobGas,
       maxFeePerGas,
       maxPriorityFeePerGas,
       nonce: nonce_,
-      to: deploylessCall ? undefined : to,
+      to, // : deploylessCall ? undefined : to,
       value,
       // prepareTransactionRequest will fill the required fields using legacy spec
       type: 'legacy',
@@ -322,17 +347,16 @@ export async function signedCall<
     */
 
     const preparedTx = await prepareTransactionRequest(client, request)
-    const encryptionPubkey = client.getEncryptionPublicKey()
     // @ts-ignore
     const seismicTx: TransactionSerializableSeismic = {
       ...preparedTx,
-      encryptionPubkey,
       type: 'seismic',
     }
 
     const response = await doSignedCall(client, seismicTx, { block })
     if (response === '0x') return { data: undefined }
-    return { data: response }
+    const decryptedResponse = await client.decrypt(response, metadata)
+    return { data: decryptedResponse }
   } catch (err) {
     const data = getRevertErrorData(err)
 
@@ -344,9 +368,11 @@ export async function signedCall<
     )
       return { data: await offchainLookup(client, { data, to }) }
 
+    /*
     // Check for counterfactual deployment error.
     if (deploylessCall && data?.slice(0, 10) === '0x101bb98d')
       throw new CounterfactualDeploymentFailedError({ factory })
+    */
 
     throw getCallError(err as ErrorType, {
       account,

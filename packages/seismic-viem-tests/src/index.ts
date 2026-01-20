@@ -46,3 +46,8 @@ export {
   killProcess,
   waitForProcessExit,
 } from '@sviem-tests/process/manage.ts'
+
+export type { RethProcessOptions } from '@sviem-tests/process/chains/reth.ts'
+export { setupRethNode } from '@sviem-tests/process/chains/reth.ts'
+
+export { setupAnvilNode } from '@sviem-tests/process/chains/anvil.ts'

@@ -12,7 +12,7 @@ import {
   parseVerbosity,
 } from '@sviem-tests/process/node.ts'
 
-type RethProcessOptions = NodeProcessOptions & {
+export type RethProcessOptions = NodeProcessOptions & {
   dev?: boolean
   devBlockTimeSeconds?: number
   enclaveMockServer?: boolean
@@ -106,7 +106,7 @@ const runRethLocally = async (
 export const setupRethNode = async ({
   port = 8545,
   ...rest
-}: NodeProcessOptions = {}): Promise<SpawnedNode> => {
+}: RethProcessOptions = {}): Promise<SpawnedNode> => {
   const rethProcess = await runRethLocally({
     port,
     ...rest,
