@@ -1,15 +1,16 @@
-ENCRYPTED KEY STORE APPROACH - FLOW DIAGRAM
-===========================================
+# Encrypted Key Store Approach - Flow Diagram
 
-OVERVIEW:
+## Overview
+
 - Works even if Fireblocks signatures are NOT deterministic
 - Stores encrypted keys (useless without Fireblocks authorization)
 - Master key derived from Fireblocks signature protects all tx keys
 
+---
 
-ONE-TIME SETUP (Derive Master Key)
-==================================
+## One-Time Setup (Derive Master Key)
 
+```
 ┌──────────────┐                                    
 │    Client    │  Build master seed message:        
 │              │  hash("Seismic Master Key" + address + chainId)
@@ -28,11 +29,13 @@ ONE-TIME SETUP (Derive Master Key)
 │    Client    │  masterKey = HKDF(masterSig)       
 │              │  (Used to encrypt per-tx keys)     
 └──────────────┘                                    
+```
 
+---
 
-ENCRYPTION FLOW (Sending a Transaction)
-=======================================
+## Encryption Flow (Sending a Transaction)
 
+```
 ┌──────────────┐                                    
 │    Client    │  Generate random encryptionSk      
 │              │  (unique per transaction)          
@@ -69,11 +72,13 @@ ENCRYPTION FLOW (Sending a Transaction)
        │                                            
        ▼                                            
    Submit to Seismic Network                        
+```
 
+---
 
-DECRYPTION FLOW (Viewing Past Transactions)
-===========================================
+## Decryption Flow (Viewing Past Transactions)
 
+```
 ┌──────────────┐                                    
 │    Client    │  Request master signature          
 │              │  (same master seed message)        
@@ -95,13 +100,15 @@ DECRYPTION FLOW (Viewing Past Transactions)
 │              │  4. Derive aesKey from encryptionSk
 │              │  5. Decrypt transaction            
 └──────────────┘                                    
+```
 
-       ⚠️  NOTE: If masterSig differs each time,
-           you must store the original masterSig
-           OR use deterministic signatures for master key
+> **Note:** If masterSig differs each time, you must store the original masterSig OR use deterministic signatures for master key
 
+---
 
-STORAGE MODEL:
+## Storage Model
+
+```
 ┌─────────────────────────────────────────────────────────────┐
 │                     Encrypted Key Store                     │
 │                                                             │
@@ -113,9 +120,12 @@ STORAGE MODEL:
 │  All values are ENCRYPTED                                   │
 │  Useless without Fireblocks signing the master message      │
 └─────────────────────────────────────────────────────────────┘
+```
 
+---
 
-KEY PROPERTIES:
+## Key Properties
+
 - Stored keys are encrypted (protected by Fireblocks signature)
 - Per-transaction unique keys (better security isolation)
 - Works even without deterministic ECDSA

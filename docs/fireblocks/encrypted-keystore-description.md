@@ -1,25 +1,31 @@
-*Encrypted Key Store Approach*
+# Encrypted Key Store Approach
 
-*Overview*
+## Overview
+
 Each transaction uses a unique encryption key. Keys are stored encrypted, protected by a master key derived from Fireblocks signature. Stored data is useless without Fireblocks.
 
-*Flow*
+## Flow
+
 1. One-time: Fireblocks signs master seed → derive `masterKey`
 2. Per transaction: generate unique `encryptionSk`, encrypt calldata, store `AES(masterKey, encryptionSk)`
 3. Stored keys are encrypted and worthless without Fireblocks authorization
 
-*Decrypting Past Transactions*
+## Decrypting Past Transactions
+
 Request master signature → derive `masterKey` → decrypt stored `encryptionSk` → decrypt transaction
 
-*Requirements*
+## Requirements
+
 - Secure storage for encrypted keys
 - If non-deterministic signatures: must also store original `masterSig`
 
-*Properties*
+## Properties
+
 - No plaintext keys stored
 - Encrypted keys useless without Fireblocks
 - Works with non-deterministic ECDSA
 - Per-transaction key isolation
 
-*Trade-off*
+## Trade-off
+
 Requires storing encrypted key material (protected by Fireblocks-derived key)
