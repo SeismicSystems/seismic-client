@@ -23,9 +23,9 @@ const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
 }
 
 /** Seismic's testnet at:
- * - https: https://internal-testnet.seismictest.net/rpc
- * - wss: wss://internal-testnet.seismictest.net/ws
- * - explorer: https://explorer.
+ * - https: https://gcp-1.seismictest.net/rpc
+ * - wss: wss://gcp-1.seismictest.net/ws
+ * - explorer: https://seismic-testnet.socialscan.io
  */
 export const seismicTestnet = toRainbowKitChain(seismicTestnetViem)
 
