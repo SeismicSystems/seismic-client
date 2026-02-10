@@ -9,15 +9,9 @@ export type { TxSeismicMetadata } from '@sviem/metadata.ts'
 export { buildTxSeismicMetadata } from '@sviem/metadata.ts'
 export {
   sanvil,
-  seismicDevnet1,
-  seismicDevnet2,
-  seismicDevnet3,
-  seismicDevnet,
   seismicTestnet,
   seismicTestnet1,
   seismicTestnet2,
-  seismicTestnet200,
-  seismicTestnet201,
   seismicTestnetGcp1,
   seismicTestnetGcp2,
   localSeismicDevnet,

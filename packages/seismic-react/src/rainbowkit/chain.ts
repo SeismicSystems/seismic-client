@@ -2,8 +2,6 @@ import {
   createSeismicDevnet as createSeismicDevnetViem,
   localSeismicDevnet as localSeismicDevnetViem,
   sanvil as sanvilViem,
-  seismicDevnet1 as seismicDevnetViem1,
-  seismicDevnet2 as seismicDevnetViem2,
   seismicTestnet as seismicTestnetViem,
 } from 'seismic-viem'
 import type { CreateSeismicDevnetParams } from 'seismic-viem'
@@ -45,16 +43,13 @@ export const localSeismicDevnet = toRainbowKitChain(
 )
 
 /**
- * Creates a Seismic development network chain configuration.
+ * Creates a Seismic chain configuration.
  *
- * @param {CreateSeismicDevnetParams} params - The parameters for creating a Seismic devnet.
- *   - `node` (number, optional) - The node number for the network. If provided without `nodeHost`,
- *     the hostname will be generated as `gcp-{node}.seismictest.net`.
- *   - `nodeHost` (string, optional) - The direct hostname for the node. Required if `node` is not provided.
- *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided,
- *     defaults to `https://seismic-testnet.socialscan.io`.
+ * @param {CreateSeismicDevnetParams} params - The parameters for creating a Seismic chain.
+ *   - `nodeHost` (string) - The hostname for the node (e.g. `gcp-1.seismictest.net`).
+ *   - `explorerUrl` (string, optional) - Block explorer URL.
  *
- * @throws {Error} Throws if neither node number nor nodeHost is provided.
+ * @throws {Error} Throws if `nodeHost` is not provided.
  *
  * @returns {RainbowKitChain} A chain configuration object containing:
  *   - Chain ID: 5124.
@@ -66,11 +61,7 @@ export const localSeismicDevnet = toRainbowKitChain(
  *
  * @example
  * ```typescript
- * // Create using node number
- * const devnet1 = createSeismicDevnet({ node: 1 });
- *
- * // Create using custom host
- * const devnet2 = createSeismicDevnet({ nodeHost: 'custom.node.example.com' });
+ * const chain = createSeismicDevnet({ nodeHost: 'gcp-1.seismictest.net' });
  * ```
  */
 export const createSeismicDevnet = (

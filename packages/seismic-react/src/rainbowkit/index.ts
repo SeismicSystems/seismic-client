@@ -1,7 +1,5 @@
 export {
-  seismicDevnet1,
-  seismicDevnet2,
-  seismicDevnet,
+  seismicTestnet,
   sanvil,
   localSeismicDevnet,
   createSeismicDevnet,
