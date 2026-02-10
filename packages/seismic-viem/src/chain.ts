@@ -396,7 +396,6 @@ export const createSeismicGcpTestnet = (n: number) =>
     explorerUrl: 'https://seismic-testnet.socialscan.io',
   })
 
-
 /**
  * The first seismic testnet
  *
