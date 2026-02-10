@@ -69,7 +69,7 @@ export default App
 ```tsx [Providers.tsx]
 import React from 'react'
 import { ShieldedWalletProvider } from 'seismic-react'
-import { seismicDevnet1 } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 import { Config, WagmiProvider } from 'wagmi'
 
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
@@ -79,12 +79,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const config = getDefaultConfig({
   appName: 'The Most Tremendous Seismic App',
   projectId: 'd3588a2dd653029165b9a2d7c2f0a88c',
-  chains: [seismicDevnet1],
+  chains: [seismicTestnet],
 })
 const client = new QueryClient()
 
 export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const publicChain = seismicDevnet1
+  const publicChain = seismicTestnet
   const publicTransport = http(publicChain.rpcUrls.default.http[0])
   return (
     <WagmiProvider config={config}>

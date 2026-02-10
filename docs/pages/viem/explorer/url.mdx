@@ -25,22 +25,22 @@ Generates a URL for viewing different types of blockchain entities (transactions
 
 ```ts
 import { getExplorerUrl } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 
 // Generate a basic explorer URL for a transaction
-const txUrl = getExplorerUrl(seismicDevnet, {
+const txUrl = getExplorerUrl(seismicTestnet, {
   item: 'tx',
   id: '0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048',
 })
-// Returns: "https://explorer-1.seismicdev.net/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048"
+// Returns: "https://seismic-testnet.socialscan.io/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048"
 
 // Generate an explorer URL for an address with a specific tab
-const addressLogsUrl = getExplorerUrl(seismicDevnet, {
+const addressLogsUrl = getExplorerUrl(seismicTestnet, {
   item: 'address',
   id: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
   tab: 'logs',
 })
-// Returns: "https://explorer-1.seismicdev.net/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266/logs"
+// Returns: "https://seismic-testnet.socialscan.io/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266/logs"
 ```
 
 ## Return Value
@@ -62,7 +62,7 @@ The chain configuration object containing block explorer information.
 The configuration options for the explorer URL.
 
 ```ts
-const url = getExplorerUrl(seismicDevnet, {
+const url = getExplorerUrl(seismicTestnet, {
   item: 'tx', // [!code focus] Type of item to view (required)
   id: '0x1234...', // [!code focus] Identifier for the item (required)
   tab: 'logs', // [!code focus] Specific tab to view (optional)

@@ -18,22 +18,22 @@ Generates a URL for viewing a token on a block explorer for Seismic networks.
 
 ```ts
 import { tokenExplorerUrl } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 
 // Generate a basic explorer URL for a token
 const url = tokenExplorerUrl({
   address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  chain: seismicDevnet,
+  chain: seismicTestnet,
 })
-// Will return something like: "https://explorer-1.seismicdev.net/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+// Will return something like: "https://seismic-testnet.socialscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
 
 // Generate a URL for a specific token tab (holders)
 const holdersUrl = tokenExplorerUrl({
   address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   tab: 'holders',
 })
-// Will return something like: "https://explorer-1.seismicdev.net/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/holders"
+// Will return something like: "https://seismic-testnet.socialscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/holders"
 ```
 
 ## Return Value
@@ -47,7 +47,7 @@ const holdersUrl = tokenExplorerUrl({
 ```ts
 const url = tokenExplorerUrl({
   address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // [!code focus]
-  chain: seismicDevnet, // [!code focus]
+  chain: seismicTestnet, // [!code focus]
   tab: 'holders', // [!code focus] (optional)
 })
 ```

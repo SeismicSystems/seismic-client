@@ -31,7 +31,7 @@ bun add viem seismic-viem
 ## 1. Set up a client
 
 ```ts twoslash
-import { createShieldedWalletClient, seismicDevnet1 } from 'seismic-viem'
+import { createShieldedWalletClient, seismicTestnet } from 'seismic-viem'
 import { http } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
@@ -39,7 +39,7 @@ const account = privateKeyToAccount(generatePrivateKey())
 
 // [!code focus:5]
 const wallet = await createShieldedWalletClient({
-  chain: seismicDevnet1,
+  chain: seismicTestnet,
   transport: http(),
   account,
 })
@@ -49,7 +49,7 @@ const wallet = await createShieldedWalletClient({
 
 ```ts twoslash
 //---cut-start---
-import { createShieldedWalletClient, seismicDevnet1 } from 'seismic-viem'
+import { createShieldedWalletClient, seismicTestnet } from 'seismic-viem'
 // ---cut-end---
 import { parseEther } from 'viem'
 // ---cut-start---
@@ -58,7 +58,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
 const account = privateKeyToAccount(generatePrivateKey())
 const wallet = await createShieldedWalletClient({
-  chain: seismicDevnet1,
+  chain: seismicTestnet,
   transport: http(),
   account,
 })

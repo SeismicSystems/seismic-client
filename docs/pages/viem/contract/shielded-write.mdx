@@ -39,13 +39,13 @@ Executes a shielded write function on a contract, where the calldata is encrypte
 ```ts
 import {
   createShieldedWalletClient,
-  seismicDevnet,
+  seismicTestnet,
   shieldedWriteContract,
 } from 'seismic-viem'
 import { custom, parseAbi } from 'viem'
 
 const client = createShieldedWalletClient({
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   transport: custom(window.ethereum),
 })
 

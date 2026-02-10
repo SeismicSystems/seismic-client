@@ -24,23 +24,6 @@ const toRainbowKitChain = (chain: ViemChain): RainbowKitChain => {
   }
 }
 
-/** The Seismic devnet at:
- * - https: https://node-1.seismicdev.net/rpc
- * - wss: wss://node-1.seismicdev.net/ws
- * - explorer: https://explorer-1.seismicdev.net
- * */
-export const seismicDevnet1 = toRainbowKitChain(seismicDevnetViem1)
-
-/** The Seismic devnet at:
- * - https: https://node-2.seismicdev.net/rpc
- * - wss: wss://node-2.seismicdev.net/ws
- * - explorer: https://explorer-2.seismicdev.net
- * */
-export const seismicDevnet2 = toRainbowKitChain(seismicDevnetViem2)
-
-/** An alias for {@link seismicDevnet1} */
-export const seismicDevnet = toRainbowKitChain(seismicDevnetViem1)
-
 /** Seismic's testnet at:
  * - https: https://internal-testnet.seismictest.net/rpc
  * - wss: wss://internal-testnet.seismictest.net/ws

@@ -20,17 +20,17 @@ import { ShieldedWalletProvider } from 'seismic-react'
 
 ```tsx
 import React from 'react'
-import { ShieldedWalletProvider, seismicDevnet } from 'seismic-react'
-import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { ShieldedWalletProvider, seismicTestnet } from 'seismic-react'
+import { sanvil, seismicTestnet } from 'seismic-viem'
 import { http } from 'viem'
 import { WagmiProvider, createConfig } from 'wagmi'
 
-const CHAINS = [seismicDevnet1, sanvil]
+const CHAINS = [seismicTestnet, sanvil]
 const config = createConfig({
   chains: CHAINS,
   transports: {
     [sanvil.id]: http(),
-    [seismicDevnet1.id]: http(),
+    [seismicTestnet.id]: http(),
   },
 })
 
@@ -62,15 +62,15 @@ export default function App(): React.FC {
 The Wagmi configuration used to initialize the shielded wallet client
 
 ```tsx
-import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { sanvil, seismicTestnet } from 'seismic-viem'
 import { http } from 'viem'
 import { createConfig } from 'wagmi'
 
 const config = createConfig({
-  chains: [seismicDevnet1, sanvil],
+  chains: [seismicTestnet, sanvil],
   transports: {
     [sanvil.id]: http(),
-    [seismicDevnet1.id]: http(),
+    [seismicTestnet.id]: http(),
   },
 })
 ```

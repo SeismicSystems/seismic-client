@@ -1,0 +1,96 @@
+---
+description: Pre-configured chain for connecting to the Seismic testnet
+---
+
+# Testnet
+
+Pre-configured chain for connecting to the Seismic testnet
+
+## Import
+
+```ts
+import { seismicTestnet } from 'seismic-viem'
+```
+
+## Usage
+
+`seismicTestnet` provides a pre-configured chain for connecting to the Seismic testnet.
+
+```ts
+import { seismicTestnet } from 'seismic-viem'
+import { createPublicClient, http } from 'viem'
+
+const client = createPublicClient({
+  chain: seismicTestnet,
+  transport: http(),
+})
+```
+
+## Description
+
+The Seismic testnet is a multi-node network where nodes coordinate using Summit, Seismic's consensus client.
+
+- **Block Explorer**: [seismic-testnet.socialscan.io](https://seismic-testnet.socialscan.io)
+- **RPC Endpoints**: Multiple RPC URLs are available (`gcp-1.seismictest.net`, `gcp-2.seismictest.net`), all pointing to the same network
+
+## Properties
+
+The `seismicTestnet` chain configuration contains the following properties:
+
+### id
+
+- **Type:** `number`
+- **Value:** `5124`
+
+The chain identifier.
+
+### name
+
+- **Type:** `string`
+- **Value:** `"Seismic"`
+
+Human-readable name of the chain.
+
+### nativeCurrency
+
+- **Type:** `object`
+- **Value:** `{ decimals: 18, name: "Ether", symbol: "ETH" }`
+
+The native currency configuration of the chain.
+
+### rpcUrls
+
+- **Type:** `object`
+- **Value:**
+  ```ts
+  {
+    default: {
+      http: ["https://gcp-1.seismictest.net/rpc"],
+      webSocket: ["wss://gcp-1.seismictest.net/ws"]
+    }
+  }
+  ```
+
+Collection of RPC endpoints for connecting to the Seismic testnet.
+
+### blockExplorers
+
+- **Type:** `object`
+- **Value:**
+  ```ts
+  {
+    default: {
+      name: "SeismicScan",
+      url: "https://seismic-testnet.socialscan.io"
+    }
+  }
+  ```
+
+Block explorer configuration for the testnet.
+
+### formatters
+
+- **Type:** `ChainFormatters`
+- **Value:** `seismicChainFormatters`
+
+Custom formatters for Seismic-specific data structures.
