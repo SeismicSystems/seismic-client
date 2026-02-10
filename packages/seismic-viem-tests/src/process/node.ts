@@ -1,4 +1,4 @@
-import { sanvil, localSeismicDevnet } from 'seismic-viem'
+import { localSeismicDevnet, sanvil } from 'seismic-viem'
 import type { Chain } from 'viem'
 
 import {
