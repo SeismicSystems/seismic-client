@@ -336,11 +336,11 @@ export type CreateSeismicTestnetParams = {
  * Creates a Seismic development network chain configuration.
  *
  * @param {CreateSeismicDevnetParams} params - The parameters for creating a Seismic devnet.
- *   - `node` (number, optional) - The node number for the devnet. If provided without `nodeHost`,
- *     the hostname will be generated as `node-{node}.seismicdev.net`.
+ *   - `node` (number, optional) - The node number for the network. If provided without `nodeHost`,
+ *     the hostname will be generated as `gcp-{node}.seismictest.net`.
  *   - `nodeHost` (string, optional) - The direct hostname for the node. Required if `node` is not provided.
- *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided and `node` exists,
- *     defaults to `https://explorer-{node}.seismicdev.net`.
+ *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided,
+ *     defaults to `https://seismic-testnet.socialscan.io`.
  *
  * @throws {Error} Throws if neither node number nor nodeHost is provided.
  *
@@ -367,14 +367,13 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
   explorerUrl,
 }: CreateSeismicDevnetParams): Chain => {
   if (!node && !nodeHost) {
-    throw new Error('Must set `nodeHost` argument, e.g. node-1.seismicdev.net')
+    throw new Error('Must set `nodeHost` argument, e.g. gcp-1.seismictest.net')
   } else if (!nodeHost) {
-    nodeHost = `node-${node}.seismicdev.net`
+    nodeHost = `gcp-${node}.seismictest.net`
   }
 
   let blockExplorerUrl =
-    explorerUrl ??
-    (node ? `https://explorer-${node}.seismicdev.net` : undefined)
+    explorerUrl ?? 'https://seismic-testnet.socialscan.io'
 
   return defineChain({
     id: 5124,

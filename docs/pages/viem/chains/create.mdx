@@ -60,7 +60,7 @@ const devnet = createSeismicDevnet({
 
 - **Type:** `number`
 
-The node number for the devnet. If provided without `nodeHost`, the hostname will be generated as `node-{node}.seismicdev.net`.
+The node number for the network. If provided without `nodeHost`, the hostname will be generated as `gcp-{node}.seismictest.net`.
 
 #### nodeHost (optional)
 
@@ -72,7 +72,7 @@ The direct hostname for the node. Required if `node` is not provided.
 
 - **Type:** `string`
 
-Custom block explorer URL. If not provided and `node` exists, defaults to `https://explorer-{node}.seismicdev.net`.
+Custom block explorer URL. If not provided, defaults to `https://seismic-testnet.socialscan.io`.
 
 ## Throws
 

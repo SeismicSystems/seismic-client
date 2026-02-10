@@ -48,11 +48,11 @@ export const localSeismicDevnet = toRainbowKitChain(
  * Creates a Seismic development network chain configuration.
  *
  * @param {CreateSeismicDevnetParams} params - The parameters for creating a Seismic devnet.
- *   - `node` (number, optional) - The node number for the devnet. If provided without `nodeHost`,
- *     the hostname will be generated as `node-{node}.seismicdev.net`.
+ *   - `node` (number, optional) - The node number for the network. If provided without `nodeHost`,
+ *     the hostname will be generated as `gcp-{node}.seismictest.net`.
  *   - `nodeHost` (string, optional) - The direct hostname for the node. Required if `node` is not provided.
- *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided and `node` exists,
- *     defaults to `https://explorer-{node}.seismicdev.net`.
+ *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided,
+ *     defaults to `https://seismic-testnet.socialscan.io`.
  *
  * @throws {Error} Throws if neither node number nor nodeHost is provided.
  *
