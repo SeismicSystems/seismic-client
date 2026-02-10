@@ -1,6 +1,6 @@
 {
   "name": "seismic-viem",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Typescript interface for Seismic",
   "type": "module",
   "main": "./dist/_cjs/index.js",
