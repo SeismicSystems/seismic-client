@@ -113,10 +113,10 @@ async function getShieldedWriteContractRequest<
  *
  * @example
  * import { custom, parseAbi } from 'viem'
- * import { createShieldedWalletContract, shieldedWriteContract, seismicDevnet } from 'seismic-viem'
+ * import { createShieldedWalletContract, shieldedWriteContract, seismicTestnet } from 'seismic-viem'
  *
  * const client = createShieldedWalletClient({
- *   chain: seismicDevnet,
+ *   chain: seismicTestnet,
  *   transport: custom(window.ethereum),
  * })
  * const hash = await shieldedWriteContract(client, {
