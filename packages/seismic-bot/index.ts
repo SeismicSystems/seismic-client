@@ -22,7 +22,7 @@ export type FaucetConfig = {
 export type Faucets = Record<string, FaucetConfig>
 
 const faucets: Faucets = {
-  'testnet': {
+  testnet: {
     chain: seismicTestnet,
     privateKeys: [
       { pk: FAUCET_PK_1 },
