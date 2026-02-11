@@ -381,6 +381,7 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
         }
       : undefined,
     formatters: seismicChainFormatters,
+    testnet: true,
   })
 }
 
@@ -402,11 +403,11 @@ export const createSeismicGcpTestnet = (n: number) =>
  * Nodes coordinate using summit, Seismic's consensus client
  */
 
-export const seismicTestnet1 = createSeismicAzTestnet(1)
-export const seismicTestnet2 = createSeismicAzTestnet(2)
-
 export const seismicTestnetGcp1 = createSeismicGcpTestnet(1)
 export const seismicTestnetGcp2 = createSeismicGcpTestnet(2)
+
+export const seismicTestnet1 = seismicTestnetGcp1
+export const seismicTestnet2 = seismicTestnetGcp2
 
 export const seismicTestnet = seismicTestnet1
 
@@ -424,6 +425,7 @@ export const localSeismicDevnet = /*#__PURE__*/ defineChain({
     },
   },
   formatters: seismicChainFormatters,
+  testnet: true,
 })
 
 /**
@@ -441,4 +443,5 @@ export const sanvil = /*#__PURE__*/ defineChain({
     },
   },
   formatters: seismicChainFormatters,
+  testnet: true,
 })
