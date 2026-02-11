@@ -48,6 +48,7 @@ const getTestnetConfig = (chain: Chain): FaucetConfig => ({
     '0x5B458bF97e86779927576Ea308Ea26FEE0b8a820', // tyler web3 technologies
     '0x959807B8D94B324A74117956731F09E2893aCd72', // dalton
     '0xfA82916B7c548e2D946351AA20dEAA1EEbdFd296', // christian studio desktop
+    '0x7A6039B12d1e63369e758195A99a99699c384a5F', // henry
   ],
 })
 
