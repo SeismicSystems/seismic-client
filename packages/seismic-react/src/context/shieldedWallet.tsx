@@ -76,7 +76,7 @@ type ShieldedWalletProviderProps = {
  * import { getDefaultConfig } from '@rainbow-me/rainbowkit'
  * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
  * import { WagmiProvider } from 'wagmi'
- * import { ShieldedWalletProvider, seismicDevnet } from 'seismic-react'
+ * import { ShieldedWalletProvider, seismicTestnet } from 'seismic-react'
  *
  * const client = new QueryClient();
  *

@@ -166,7 +166,7 @@ export const getEncryption = (
  * Creates a public client for the Seismic network.
  *
  * @param parameters {@link https://viem.sh/docs/clients/public.html#parameters PublicClientConfig}: The same parameters passed into viem's {@link https://viem.sh/docs/clients/public.html | createPublicClient}. Two common args are:
- *   - `chain` ({@link Chain} | undefined) - The chain configuration to target (e.g., `seismicDevnet`).
+ *   - `chain` ({@link Chain} | undefined) - The chain configuration to target (e.g., `seismicTestnet`).
  *   - `transport` ({@link Transport}) - The transport layer to use (e.g., an HTTP transport).
  *
  * @returns {ShieldedPublicClient<transport, chain, undefined, rpcSchema>}
@@ -174,7 +174,7 @@ export const getEncryption = (
  * @example
  * ```typescript
  * import { http } from 'viem'
- * import { seismicDevnet, createShieldedPublicClient } from 'seismic-viem'
+ * import { seismicTestnet, createShieldedPublicClient } from 'seismic-viem'
  *
  * const client = await createShieldedPublicClient({
  *   transport: http(),
@@ -262,7 +262,7 @@ export const getSeismicClients = async <
  * Creates a wallet client to perform reads & writes on the Seismic network
  *
  * @param {GetSeismicClientsParameters} parameters - The configuration object.
- *   - `chain` ({@link Chain} | undefined) - The chain configuration to target (e.g., `seismicDevnet`).
+ *   - `chain` ({@link Chain} | undefined) - The chain configuration to target (e.g., `seismicTestnet`).
  *   - `transport` ({@link Transport}) - The transport layer to use (e.g., an HTTP transport).
  *   - `account` ({@link Account}) - The account to use for wallet operations.
  *   - `encryptionSk` (string) - The secret key used for shielded encryption.
@@ -274,10 +274,10 @@ export const getSeismicClients = async <
  * ```typescript
  * import { http } from 'viem'
  * import { privateKeyToAccount } from 'viem/accounts'
- * import { seismicDevnet, createShieldedWalletClient } from 'seismic-viem'
+ * import { seismicTestnet, createShieldedWalletClient } from 'seismic-viem'
  *
  * const walletClient = await createShieldedWalletClient({
- *   chain: seismicDevnet,
+ *   chain: seismicTestnet,
  *   transport: http(),
  *   account: privateKeyToAccount('0x0123...')
  * });

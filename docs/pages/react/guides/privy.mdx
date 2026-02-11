@@ -69,7 +69,7 @@ export default App
 
 ```tsx [Providers.tsx]
 import { ShieldedWalletProvider } from 'seismic-react'
-import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { sanvil, seismicTestnet } from 'seismic-viem'
 import { http } from 'viem'
 
 import { PrivyProvider } from '@privy-io/react-auth'
@@ -79,14 +79,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 const privyAppId = 'j6tqymuasuiykx7hf4lm3fbsj'
 
-const CHAINS = [seismicDevnet1, sanvil]
+const CHAINS = [seismicTestnet, sanvil]
 
 const wagmiConfig = createConfig({
   // @ts-expect-error: this is okay
   chains: CHAINS,
   transports: {
     [sanvil.id]: http(),
-    [seismicDevnet1.id]: http(),
+    [seismicTestnet.id]: http(),
   },
 })
 
@@ -96,7 +96,7 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
       appId={privyAppId}
       config={{
         supportedChains: CHAINS,
-        defaultChain: seismicDevnet1,
+        defaultChain: seismicTestnet,
         embeddedWallets: {
           createOnLogin: 'all-users',
         },

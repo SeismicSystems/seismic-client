@@ -322,10 +322,10 @@ export const seismicChainFormatters: ChainFormatters = {
   },
 }
 
-export type CreateSeismicDevnetParams = { explorerUrl?: string } & (
-  | { node?: number; nodeHost: string }
-  | { node: number; nodeHost?: string }
-)
+export type CreateSeismicDevnetParams = {
+  nodeHost: string
+  explorerUrl?: string
+}
 
 export type CreateSeismicTestnetParams = {
   nodeHost: string
@@ -333,16 +333,13 @@ export type CreateSeismicTestnetParams = {
 }
 
 /**
- * Creates a Seismic development network chain configuration.
+ * Creates a Seismic chain configuration.
  *
- * @param {CreateSeismicDevnetParams} params - The parameters for creating a Seismic devnet.
- *   - `node` (number, optional) - The node number for the devnet. If provided without `nodeHost`,
- *     the hostname will be generated as `node-{node}.seismicdev.net`.
- *   - `nodeHost` (string, optional) - The direct hostname for the node. Required if `node` is not provided.
- *   - `explorerUrl` (string, optional) - Custom block explorer URL. If not provided and `node` exists,
- *     defaults to `https://explorer-{node}.seismicdev.net`.
+ * @param {CreateSeismicDevnetParams} params - The parameters for creating a Seismic chain.
+ *   - `nodeHost` (string) - The hostname for the node (e.g. `gcp-1.seismictest.net`).
+ *   - `explorerUrl` (string, optional) - Block explorer URL.
  *
- * @throws {Error} Throws if neither node number nor nodeHost is provided.
+ * @throws {Error} Throws if `nodeHost` is not provided.
  *
  * @returns {Chain} A chain configuration object containing:
  *   - Chain ID: 5124.
@@ -354,27 +351,16 @@ export type CreateSeismicTestnetParams = {
  *
  * @example
  * ```typescript
- * // Create using node number
- * const devnet1 = createSeismicDevnet({ node: 1 });
- *
- * // Create using custom host
- * const devnet2 = createSeismicDevnet({ nodeHost: 'custom.node.example.com' });
+ * const chain = createSeismicDevnet({ nodeHost: 'gcp-1.seismictest.net' });
  * ```
  */
 export const createSeismicDevnet = /*#__PURE__*/ ({
-  node,
   nodeHost,
   explorerUrl,
 }: CreateSeismicDevnetParams): Chain => {
-  if (!node && !nodeHost) {
-    throw new Error('Must set `nodeHost` argument, e.g. node-1.seismicdev.net')
-  } else if (!nodeHost) {
-    nodeHost = `node-${node}.seismicdev.net`
+  if (!nodeHost) {
+    throw new Error('Must set `nodeHost` argument, e.g. gcp-1.seismictest.net')
   }
-
-  let blockExplorerUrl =
-    explorerUrl ??
-    (node ? `https://explorer-${node}.seismicdev.net` : undefined)
 
   return defineChain({
     id: 5124,
@@ -386,15 +372,16 @@ export const createSeismicDevnet = /*#__PURE__*/ ({
         webSocket: [`wss://${nodeHost}/ws`],
       },
     },
-    blockExplorers: blockExplorerUrl
+    blockExplorers: explorerUrl
       ? {
           default: {
             name: 'SeismicScan',
-            url: blockExplorerUrl,
+            url: explorerUrl,
           },
         }
       : undefined,
     formatters: seismicChainFormatters,
+    testnet: true,
   })
 }
 
@@ -411,48 +398,18 @@ export const createSeismicGcpTestnet = (n: number) =>
   })
 
 /**
- * The seismic devnet running at node-1.seismicdev.net
- * Its associated explorer is at explorer-1.seismicdev.net
- *
- * This is a single-node network running seismic's fork of reth on --dev mode
- */
-export const seismicDevnet1 = createSeismicDevnet({ node: 1 })
-/**
- * The seismic devnet running at node-2.seismicdev.net
- * Its associated explorer is at explorer-2.seismicdev.net
- *
- * This is a single-node network running seismic's fork of reth on --dev mode
- */
-export const seismicDevnet2 = createSeismicDevnet({ node: 2 })
-
-/**
- * The seismic devnet running at node-3.seismicdev.net
- * Its associated explorer is at explorer-3.seismicdev.net
- *
- * This is a single-node network running seismic's fork of reth on --dev mode
- */
-export const seismicDevnet3 = createSeismicDevnet({ node: 3 })
-
-/**
  * The first seismic testnet
  *
  * Nodes coordinate using summit, Seismic's consensus client
  */
 
-export const seismicTestnet1 = createSeismicAzTestnet(1)
-export const seismicTestnet2 = createSeismicAzTestnet(2)
-
 export const seismicTestnetGcp1 = createSeismicGcpTestnet(1)
 export const seismicTestnetGcp2 = createSeismicGcpTestnet(2)
 
-export const seismicTestnet200 = createSeismicAzTestnet(200)
-export const seismicTestnet201 = createSeismicAzTestnet(201)
+export const seismicTestnet1 = seismicTestnetGcp1
+export const seismicTestnet2 = seismicTestnetGcp2
 
 export const seismicTestnet = seismicTestnet1
-/**
- * An alias for {@link seismicDevnet1}
- */
-export const seismicDevnet = seismicDevnet1
 
 /**
  * For connecting to a locally-running seismic-reth instance on --dev mode
@@ -468,6 +425,7 @@ export const localSeismicDevnet = /*#__PURE__*/ defineChain({
     },
   },
   formatters: seismicChainFormatters,
+  testnet: true,
 })
 
 /**
@@ -485,4 +443,5 @@ export const sanvil = /*#__PURE__*/ defineChain({
     },
   },
   formatters: seismicChainFormatters,
+  testnet: true,
 })

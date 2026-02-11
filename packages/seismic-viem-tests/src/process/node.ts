@@ -1,4 +1,4 @@
-import { sanvil, seismicDevnet } from 'seismic-viem'
+import { localSeismicDevnet, sanvil } from 'seismic-viem'
 import type { Chain } from 'viem'
 
 import {
@@ -33,7 +33,7 @@ const nameToChain = (name: ChainName): Chain => {
     case ChainName.Anvil:
       return sanvil as Chain
     case ChainName.Devnet:
-      return seismicDevnet as Chain
+      return localSeismicDevnet as Chain
     default:
       throw new Error(`Unable to map ${name} to Chain`)
   }
@@ -58,7 +58,7 @@ export const setupNode = async (
   switch (chain.id) {
     case sanvil.id:
       return setupAnvilNode({ port, ...rest })
-    case seismicDevnet.id:
+    case localSeismicDevnet.id:
       return setupRethNode({ port, ...rest })
     default:
       throw new Error(`Unable to map Chain ${chain.id} to Backend`)
@@ -72,7 +72,7 @@ export const buildNode = async (chain: Chain) => {
       if (sfoundryDir) {
         return buildAnvil(sfoundryDir)
       }
-    case seismicDevnet.id:
+    case localSeismicDevnet.id:
       const srethDir = process.env.SRETH_ROOT
       if (srethDir) {
         return buildReth(srethDir)

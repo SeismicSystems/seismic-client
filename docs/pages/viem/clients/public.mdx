@@ -17,12 +17,12 @@ import { createShieldedPublicClient } from 'seismic-viem'
 Creates a public client for the Seismic network with additional privacy-preserving features.
 
 ```ts
-import { createShieldedPublicClient, seismicDevnet } from 'seismic-viem'
+import { createShieldedPublicClient, seismicTestnet } from 'seismic-viem'
 import { http } from 'viem'
 
 const client = await createShieldedPublicClient({
   transport: http(),
-  chain: seismicDevnet,
+  chain: seismicTestnet,
 })
 
 const teePublicKey = await client.getTeePublicKey()
@@ -41,7 +41,7 @@ The same parameters passed into viem's [createPublicClient](https://viem.sh/docs
 ```ts
 const client = await createShieldedPublicClient({
   transport: http(), // [!code focus]
-  chain: seismicDevnet, // [!code focus]
+  chain: seismicTestnet, // [!code focus]
 })
 ```
 
@@ -55,4 +55,4 @@ The transport layer to use (e.g., an HTTP transport).
 
 - **Type:** `Chain | undefined`
 
-The chain configuration to target (e.g., `seismicDevnet`).
+The chain configuration to target (e.g., `seismicTestnet`).

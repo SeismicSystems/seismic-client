@@ -18,11 +18,11 @@ Executes the HKDF (Hash-based Key Derivation Function) precompile to derive cryp
 
 ```ts
 import { hdfk } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 import { createPublicClient, http } from 'viem'
 
 const client = createPublicClient({
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   transport: http(),
 })
 

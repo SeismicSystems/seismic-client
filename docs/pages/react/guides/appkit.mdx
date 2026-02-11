@@ -69,7 +69,7 @@ export default App
 
 ```tsx [Providers.tsx]
 import { ShieldedWalletProvider } from 'seismic-react'
-import { sanvil, seismicDevnet1 } from 'seismic-viem'
+import { sanvil, seismicTestnet } from 'seismic-viem'
 import { http } from 'viem'
 
 import { WagmiProvider } from 'wagmi'
@@ -80,7 +80,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 const projectId = '5575ga98aaa982e3f04e57865c8976af'
 
-const networks = [seismicDevnet1, sanvil]
+const networks = [seismicTestnet, sanvil]
 
 const wagmiAdapter = new WagmiAdapter({
   networks,
@@ -88,7 +88,7 @@ const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   transports: {
     [sanvil.id]: http(),
-    [seismicDevnet1.id]: http(),
+    [seismicTestnet.id]: http(),
   },
 })
 

@@ -18,11 +18,11 @@ Encrypts plaintext using AES-GCM encryption through a precompile contract on the
 
 ```ts
 import { aesGcmEncrypt } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 import { createPublicClient, http } from 'viem'
 
 const client = createPublicClient({
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   transport: http(),
 })
 
@@ -107,11 +107,11 @@ Decrypts ciphertext using AES-GCM decryption through a precompile contract on th
 
 ```ts
 import { aesGcmDecrypt } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 import { createPublicClient, http } from 'viem'
 
 const client = createPublicClient({
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   transport: http(),
 })
 

@@ -18,22 +18,22 @@ Generates a URL for viewing a block on a block explorer for Seismic networks.
 
 ```ts
 import { blockExplorerUrl } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 
 // Generate an explorer URL for a block
 const url = blockExplorerUrl({
   blockNumber: 123456,
-  chain: seismicDevnet,
+  chain: seismicTestnet,
 })
-// Will return: "https://explorer-1.seismicdev.net/block/123456"
+// Will return: "https://seismic-testnet.socialscan.io/block/123456"
 
 // Generate a URL for a specific block tab (transactions)
 const txsUrl = blockExplorerUrl({
   blockNumber: 123456,
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   tab: 'txs',
 })
-// Will return: "https://explorer-1.seismicdev.net/block/123456/txs"
+// Will return: "https://seismic-testnet.socialscan.io/block/123456/txs"
 ```
 
 ## Return Value
@@ -47,7 +47,7 @@ const txsUrl = blockExplorerUrl({
 ```ts
 const url = blockExplorerUrl({
   blockNumber: 123456, // [!code focus]
-  chain: seismicDevnet, // [!code focus]
+  chain: seismicTestnet, // [!code focus]
   tab: 'txs', // [!code focus] (optional)
 })
 ```

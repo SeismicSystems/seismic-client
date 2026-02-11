@@ -18,22 +18,22 @@ Generates a URL for viewing a transaction on a block explorer for Seismic networ
 
 ```ts
 import { txExplorerUrl } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 
 // Generate a basic explorer URL for a transaction
 const url = txExplorerUrl({
   hash: '0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048',
-  chain: seismicDevnet,
+  chain: seismicTestnet,
 })
-// Will return something like: "https://explorer-1.seismicdev.net/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048"
+// Will return something like: "https://seismic-testnet.socialscan.io/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048"
 
 // Generate a URL for a specific transaction tab (logs)
 const logsUrl = txExplorerUrl({
   hash: '0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048',
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   tab: 'logs',
 })
-// Will return something like: "https://explorer-1.seismicdev.net/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048/logs"
+// Will return something like: "https://seismic-testnet.socialscan.io/tx/0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048/logs"
 ```
 
 ## Return Value
@@ -47,7 +47,7 @@ const logsUrl = txExplorerUrl({
 ```ts
 const url = txExplorerUrl({
   hash: '0x4605e26acce0a22204048574139412d8e5474d961a4c2918db12ba94555f0048', // [!code focus]
-  chain: seismicDevnet, // [!code focus]
+  chain: seismicTestnet, // [!code focus]
   tab: 'logs', // [!code focus] (optional)
 })
 ```

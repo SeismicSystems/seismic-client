@@ -36,11 +36,11 @@ The precompile utility provides a robust, type-safe mechanism for interacting wi
 ### Basic Precompile Call
 
 ```ts
-import { callPrecompile, rngPrecompile, seismicDevnet1 } from 'seismic-viem'
+import { callPrecompile, rngPrecompile, seismicTestnet } from 'seismic-viem'
 import { createPublicClient, http } from 'viem'
 
 const client = createPublicClient({
-  chain: seismicDevnet1,
+  chain: seismicTestnet,
   transport: http(),
 })
 

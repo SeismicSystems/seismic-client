@@ -2,7 +2,7 @@ import { createShieldedWalletClient } from 'seismic-viem'
 import { Hex, http, parseEther } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
-import { seismicDevnet3 } from '@sviem/chain.ts'
+import { seismicTestnet2 } from '@sviem/chain.ts'
 
 const SWEEP_ADDRESS = '0xd412c5Ecd343e264381fF15aFC0aD78a67B79F35'
 
@@ -39,7 +39,7 @@ const devnetPrivateKeys: Hex[] = [
 for (const pk of devnetPrivateKeys) {
   const account = privateKeyToAccount(pk)
   const client = await createShieldedWalletClient({
-    chain: seismicDevnet3,
+    chain: seismicTestnet2,
     transport: http(),
     account,
   })

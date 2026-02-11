@@ -18,22 +18,22 @@ Generates a URL for viewing an address on a block explorer for Seismic networks.
 
 ```ts
 import { addressExplorerUrl } from 'seismic-viem'
-import { seismicDevnet } from 'seismic-viem'
+import { seismicTestnet } from 'seismic-viem'
 
 // Generate a basic explorer URL for an address
 const url = addressExplorerUrl({
   address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-  chain: seismicDevnet,
+  chain: seismicTestnet,
 })
-// Will return: "https://explorer-1.seismicdev.net/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+// Will return: "https://seismic-testnet.socialscan.io/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
 // Generate a URL for a specific address tab (logs)
 const logsUrl = addressExplorerUrl({
   address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   tab: 'logs',
 })
-// Will return: "https://explorer-1.seismicdev.net/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266/logs"
+// Will return: "https://seismic-testnet.socialscan.io/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266/logs"
 ```
 
 ## Return Value
@@ -47,7 +47,7 @@ const logsUrl = addressExplorerUrl({
 ```ts
 const url = addressExplorerUrl({
   address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // [!code focus]
-  chain: seismicDevnet, // [!code focus]
+  chain: seismicTestnet, // [!code focus]
   tab: 'logs', // [!code focus] (optional)
 })
 ```

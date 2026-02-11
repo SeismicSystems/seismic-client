@@ -17,12 +17,12 @@ import { createShieldedWalletClient } from 'seismic-viem'
 Creates a wallet client to perform privacy-preserving reads and writes on the Seismic network.
 
 ```ts
-import { createShieldedWalletClient, seismicDevnet } from 'seismic-viem'
+import { createShieldedWalletClient, seismicTestnet } from 'seismic-viem'
 import { http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const walletClient = await createShieldedWalletClient({
-  chain: seismicDevnet,
+  chain: seismicTestnet,
   transport: http(),
   account: privateKeyToAccount('0x0123...'),
 })
@@ -52,7 +52,7 @@ The configuration object for creating a ShieldedWalletClient.
 
 ```ts
 const walletClient = await createShieldedWalletClient({
-  chain: seismicDevnet, // [!code focus]
+  chain: seismicTestnet, // [!code focus]
   transport: http(), // [!code focus]
   account: privateKeyToAccount('0x0123...'), // [!code focus]
   encryptionSk: '0xabcdef...', // [!code focus]
@@ -64,7 +64,7 @@ const walletClient = await createShieldedWalletClient({
 
 - **Type:** `Chain | undefined`
 
-The chain configuration to target (e.g., `seismicDevnet`).
+The chain configuration to target (e.g., `seismicTestnet`).
 
 #### transport
 
