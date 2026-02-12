@@ -6,7 +6,7 @@
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
     "test:anvil": "CHAIN=anvil bun test",
-    "test:devnet": "CHAIN=devnet bun test"
+    "test:reth": "CHAIN=reth bun test"
   },
   "devDependencies": {
     "dotenv": "^16.4.7",

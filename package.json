@@ -26,7 +26,7 @@
     "viem:build": "bun run --cwd packages/seismic-viem build",
     "viem:publish": "npm publish -w packages/seismic-viem",
     "viem:test:anvil": "bun run --cwd tests/seismic-viem test:anvil",
-    "viem:test:devnet": "bun run --cwd tests/seismic-viem test:devnet",
+    "viem:test:reth": "bun run --cwd tests/seismic-viem test:reth",
     "react:typecheck": "bun run viem:build && bun run --cwd packages/seismic-react typecheck",
     "react:build": "bun run --cwd packages/seismic-react build",
     "react:publish": "npm publish -w packages/seismic-react",
