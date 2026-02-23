@@ -30,6 +30,7 @@ bun add viem wagmi seismic-viem seismic-react @rainbow-me/rainbowkit @tanstack/r
 
 ```tsx [Component.tsx]
 import React from 'react'
+import { parseEther } from 'viem'
 import { useShieldedWallet } from 'seismic-react'
 
 export const Component: React.FC = () => {
@@ -68,6 +69,7 @@ export default App
 
 ```tsx [Providers.tsx]
 import React from 'react'
+import { http } from 'viem'
 import { ShieldedWalletProvider } from 'seismic-react'
 import { seismicTestnet } from 'seismic-viem'
 import { Config, WagmiProvider } from 'wagmi'
