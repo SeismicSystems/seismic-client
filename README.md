@@ -1,3 +1,6 @@
+> [!WARNING]
+> This repository has been archived, and its contents moved to the [seismic monorepo](https://github.com/SeismicSystems/seismic/tree/main/clients/ts).
+
 # Seismic Client
 
 Seismic's typescript client. This repository contains:
