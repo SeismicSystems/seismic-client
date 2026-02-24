@@ -7,9 +7,11 @@ Bun monorepo containing TypeScript client libraries for the [Seismic blockchain]
 Requires **Bun >=1.2.5**.
 
 ```bash
+# If bun is not installed already:
 curl -fsSL https://bun.sh/install | bash
-bun install
-bun run all:build               # builds seismic-viem, seismic-react, seismic-viem-tests
+
+bun install         # install dependencies
+bun run all:build   # builds seismic-viem, seismic-react, seismic-viem-tests
 ```
 
 ### Verify
