@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.7.0",
-    "@noble/curves": "^1.8.0",
+    "@noble/curves": "^2.0.1",
     "@noble/ciphers": "^1.2.0"
   },
   "peerDependencies": {
