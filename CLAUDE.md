@@ -4,22 +4,12 @@ Bun monorepo containing TypeScript client libraries for the [Seismic blockchain]
 
 ## Build
 
-Requires **Bun >=1.2.5** and **Node >=16**.
-
-### macOS
-
-```bash
-brew install oven-sh/bun/bun   # or: curl -fsSL https://bun.sh/install | bash
-bun install
-bun run all:build               # builds seismic-viem, seismic-react, seismic-viem-tests
-```
-
-### Linux (Ubuntu)
+Requires **Bun >=1.2.5**.
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
 bun install
-bun run all:build
+bun run all:build               # builds seismic-viem, seismic-react, seismic-viem-tests
 ```
 
 ### Verify
@@ -116,9 +106,11 @@ docs/                    Documentation site (VoCs + Tailwind)
 
 ## Code Style
 
-**Prettier** (enforced): 2-space indent, single quotes, no semicolons, 80-char width, trailing commas (ES5). Import sorting via `@trivago/prettier-plugin-sort-imports` with groups: types → external → relative (separated by blank lines).
+**Prettier** (`.prettierrc.json`): 2-space indent, single quotes, no semicolons, 80-char width, trailing commas (ES5). Import sorting via `@trivago/prettier-plugin-sort-imports` with groups: types → external → relative (separated by blank lines).
 
-**ESLint** (enforced): No relative import paths (`no-relative-import-paths` plugin), no unused imports. TypeScript-aware via `@typescript-eslint` with project service.
+**ESLint** (`eslint.config.cjs`): No relative import paths (`no-relative-import-paths` plugin), no unused imports. TypeScript-aware via `@typescript-eslint` with project service.
+
+**TypeScript** (`tsconfig.base.json`, `tsconfig.json`): Shared base config with strict mode, NodeNext module resolution, ES2021 target. Each package extends the base and defines its own path aliases.
 
 **TypeScript path aliases** — each package uses aliases instead of relative imports:
 
@@ -135,7 +127,7 @@ GitHub Actions (`.github/workflows/ci.yml`):
 - **lint**: ESLint + Prettier on ubuntu-24.04 (Bun 1.2.5)
 - **typecheck**: tsc on ubuntu-24.04
 - **test-anvil**: Self-hosted runner, builds sanvil from `SFOUNDRY_ROOT`, runs anvil tests
-- **test-devnet**: Self-hosted runner (after test-anvil), builds seismic-reth, runs reth tests
+- **test-devnet**: Self-hosted runner (after test-anvil), builds seismic-reth from `SRETH_ROOT`, runs reth tests
 
 ## Key Concepts
 
@@ -143,13 +135,14 @@ GitHub Actions (`.github/workflows/ci.yml`):
 - **Shielded clients**: Wrappers around viem clients that handle ECDH key exchange with the node and AES-GCM encryption of calldata
 - **SRC20**: Seismic's shielded ERC20 variant with encrypted transfer logs
 - **Precompiles**: On-chain crypto primitives at addresses `0x64`–`0x69` (RNG, ECDH, HKDF, AES-GCM encrypt/decrypt, secp256k1)
-- **Chain ID**: 5124 (testnets), 31337 (local anvil)
+- **Chain ID**: 5124 (testnet), 31337 (local anvil)
 
 ## Troubleshooting
 
 | Problem                                                     | Fix                                                                                                                                                                                                     |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SFOUNDRY_ROOT env variable must be set to build sanvil`    | Set `SFOUNDRY_ROOT` to your seismic-foundry repo path, or install `sanvil` via `sfoundryup` and modify the test to skip the build step                                                                  |
+| `SRETH_ROOT env variable must be set to build reth`         | Set `SRETH_ROOT` to your seismic-reth repo path (with Rust/Cargo installed)                                                                                                                             |
 | `ENOENT: posix_spawn 'cargo'` when running tests            | `SFOUNDRY_ROOT` is set but Cargo/Rust is not installed. Either install Rust (`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh`) or unset `SFOUNDRY_ROOT` if `sanvil` is already in PATH |
 | `forge` / `sforge` not found for Solidity tests             | Install via `sfoundryup`: `curl -L https://raw.githubusercontent.com/SeismicSystems/seismic-foundry/seismic/sfoundryup/install \| bash && sfoundryup`                                                   |
 | `git submodule` dirs empty (contracts/lib/)                 | Run `git submodule update --init --recursive`                                                                                                                                                           |
