@@ -25,24 +25,27 @@ export type SpawnedNode = {
 
 enum ChainName {
   Anvil = 'anvil',
-  Devnet = 'devnet',
+  Reth = 'reth',
 }
+
+const CHAIN_VALUES = Object.values(ChainName).sort()
+const CHAIN_OPTIONS = `{${CHAIN_VALUES.join('|')}}`
 
 const nameToChain = (name: ChainName): Chain => {
   switch (name) {
     case ChainName.Anvil:
       return sanvil as Chain
-    case ChainName.Devnet:
+    case ChainName.Reth:
       return localSeismicDevnet as Chain
     default:
-      throw new Error(`Unable to map ${name} to Chain`)
+      throw new Error(`CHAIN should be one of ${CHAIN_OPTIONS}`)
   }
 }
 
 export const envChain = (): Chain => {
   const chainName = process.env.CHAIN as ChainName
-  if (!Object.values(ChainName).includes(chainName)) {
-    throw new Error(`CHAIN env variable must be either "anvil" or "reth"`)
+  if (!CHAIN_VALUES.includes(chainName)) {
+    throw new Error(`CHAIN should be one of ${CHAIN_OPTIONS}`)
   }
   return nameToChain(chainName)
 }
@@ -61,23 +64,29 @@ export const setupNode = async (
     case localSeismicDevnet.id:
       return setupRethNode({ port, ...rest })
     default:
-      throw new Error(`Unable to map Chain ${chain.id} to Backend`)
+      throw new Error(`CHAIN should be one of ${CHAIN_OPTIONS}`)
   }
 }
 
 export const buildNode = async (chain: Chain) => {
   switch (chain.id) {
-    case sanvil.id:
+    case sanvil.id: {
       const sfoundryDir = process.env.SFOUNDRY_ROOT
-      if (sfoundryDir) {
-        return buildAnvil(sfoundryDir)
+      if (!sfoundryDir) {
+        throw new Error(
+          'SFOUNDRY_ROOT env variable must be set to build sanvil'
+        )
       }
-    case localSeismicDevnet.id:
+      return buildAnvil(sfoundryDir)
+    }
+    case localSeismicDevnet.id: {
       const srethDir = process.env.SRETH_ROOT
-      if (srethDir) {
-        return buildReth(srethDir)
+      if (!srethDir) {
+        throw new Error('SRETH_ROOT env variable must be set to build reth')
       }
+      return buildReth(srethDir)
+    }
     default:
-      throw new Error(`Unable to map Chain ${chain.id} to Backend`)
+      throw new Error(`CHAIN should be one of ${CHAIN_OPTIONS}`)
   }
 }

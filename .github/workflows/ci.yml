@@ -92,6 +92,6 @@ jobs:
       - name: build seismic-viem
         run: bun viem:build
       - name: Test devnet
-        run: bun viem:test:devnet
+        run: bun viem:test:reth
       - name: Remove reth files
         run: rm -rf "$RETH_DATA_DIR" && rm -rf "$RETH_STATIC_FILES"
